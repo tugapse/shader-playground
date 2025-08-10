@@ -1,0 +1,88 @@
+// Container for the entire page
+:host {
+    display: flex;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif; /* Using a modern font */
+    color: #f0f0f0;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+}
+
+// Left Sidebar styling
+.sidebar {
+    width: 300px;
+    background: #0d1117; /* GitHub Dark theme base */
+    color: #e6edf3;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #30363d;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 40px;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #58a6ff; /* Vibrant blue heading */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.sidebar li:hover {
+    background-color: #161b22;
+    border-color: #30363d;
+    box-shadow: 0 4px 15px rgba(88, 166, 255, 0.2);
+    transform: translateY(-4px);
+}
+
+.sidebar li.active {
+    background: linear-gradient(90deg, #58a6ff, #9955ff); /* Gradient for active item */
+    color: white;
+    font-weight: 600;
+    border: 1px solid #58a6ff;
+    box-shadow: 0 4px 20px rgba(88, 166, 255, 0.3);
+}
+
+.sidebar li:active {
+    transform: translateY(0);
+}
+
+// Right content area for the canvas
+.content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #010409;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+}
