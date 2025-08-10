@@ -1,14 +1,24 @@
 import { Vec2, Vec4 } from "./vec";
 
 export class Shader {
-  constructor(private gl: WebGLRenderingContext) { }
-  public shaderProgram!: WebGLProgram | null;
-  public vertexBuffer!: WebGLBuffer | null;
-  private loaded=false;
 
-  public async load(): Promise<void> {
-    const vsSource = await this.loadShaderSource('assets/shaders/vertex.glsl');
-    const fsSource = await this.loadShaderSource('assets/shaders/fragment.glsl');
+  constructor(
+    private gl: WebGLRenderingContext,
+    private fragUri: string = "assets/shaders/fragment.glsl",
+    private vertexUri: string = "assets/shaders/vertex.glsl") { }
+
+  public shaderProgram!: WebGLProgram;
+  public vertexBuffer!: WebGLBuffer | null;
+  private initialized = false;
+
+  public async initialize(): Promise<void> {
+
+    if (this.initialized) {
+      return;
+    }
+
+    const vsSource = await this.loadShaderSource(this.vertexUri);
+    const fsSource = await this.loadShaderSource(this.fragUri);
 
     const vertexShader = this.compileShader(this.gl, this.gl.VERTEX_SHADER, vsSource);
     const fragmentShader = this.compileShader(this.gl, this.gl.FRAGMENT_SHADER, fsSource);
@@ -16,14 +26,18 @@ export class Shader {
     if (!vertexShader || !fragmentShader) {
       return;
     }
-    this.shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader);
-    this.loaded=true;
+    this.shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader) as WebGLProgram;
+    this.initialized = true;
   }
-
-  public use(){
-      if (!this.shaderProgram || !this.loaded) {
-        return;
-      }
+  public load(){
+      const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+      this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(positionAttributeLocation);
+  }
+  public use() {
+    if (!this.shaderProgram || !this.initialized) {
+      return;
+    }
 
     this.gl.useProgram(this.shaderProgram);
   }
@@ -63,10 +77,15 @@ export class Shader {
     return shaderProgram;
   }
 
-  public setVertexBuffer(vertices:Vec4[]){
-      const arrayBuffer = vertices.reduce((acc:number[],curr:Vec4)=> [...acc,...curr.toArrayBuffer()] ,[])
-      this.vertexBuffer = this.gl.createBuffer();
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
+  public setVertexBuffer(vertices: Vec4[]) {
+    const arrayBuffer = vertices.reduce((acc: number[], curr: Vec4) => [...acc, ...curr.toArrayBuffer()], [])
+    this.vertexBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
+  }
+
+  public destroy() {
+    this.gl.deleteBuffer(this.vertexBuffer);
+    this.gl.deleteProgram(this.shaderProgram);
   }
 }

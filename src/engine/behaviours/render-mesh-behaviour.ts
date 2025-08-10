@@ -6,17 +6,17 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   public mesh!:Mesh;
 
-  constructor( public override parent: GlEntity, private gl: WebGLRenderingContext, ) {
+  constructor( public override parent: GlEntity, private gl: WebGLRenderingContext ) {
     super(parent)
   }
-  public override initialize(): void {
-    throw new Error("Method not implemented.");
-  }
-  public override update(ellapsed: number): void {
-    throw new Error("Method not implemented.");
-  }
+
   public override draw(): void {
-    throw new Error("Method not implemented.");
+    if(!this.mesh){ return }
+
+    this.mesh.shader.initialize()
+    this.mesh.shader.use()
+
+
   }
 
 }
