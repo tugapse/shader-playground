@@ -1,3 +1,5 @@
+import { Vec2, Vec4 } from "./vec";
+
 export class Shader {
   constructor(private gl: WebGLRenderingContext) { }
   public shaderProgram!: WebGLProgram | null;
@@ -59,5 +61,12 @@ export class Shader {
       return null;
     }
     return shaderProgram;
+  }
+
+  public setVertexBuffer(vertices:Vec4[]){
+      const arrayBuffer = vertices.reduce((acc:number[],curr:Vec4)=> [...acc,...curr.toArrayBuffer()] ,[])
+      this.vertexBuffer = this.gl.createBuffer();
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
   }
 }
