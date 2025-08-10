@@ -10,6 +10,5 @@ export class Mesh{
   public meshData!:MeshData;
   public material!: Material;
   public shader!: Shader;
-
 }
 
