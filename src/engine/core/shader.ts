@@ -34,6 +34,7 @@ export class Shader {
       this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(positionAttributeLocation);
   }
+
   public use() {
     if (!this.shaderProgram || !this.initialized) {
       return;
