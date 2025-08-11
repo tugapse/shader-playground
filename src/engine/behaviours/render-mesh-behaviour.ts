@@ -1,6 +1,8 @@
+import { mat4 } from "gl-matrix";
 import { GlEntity } from "../core/entity";
 import { EntityBehaviour } from "../core/entity-behaviour";
 import { Mesh } from "../core/mesh";
+import { Camera } from "../core/camera";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
@@ -21,9 +23,13 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     this.mesh.shader.load();
     this.mesh.shader.use()
+    const camera = Camera.mainCamera;
+    const mvpMatrix = mat4.create();
+    mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
+    mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
 
 
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length );
   }
 
 }

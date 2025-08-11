@@ -1,4 +1,4 @@
-import { Vec2, Vec4 } from "./vec";
+import { vec3 } from "gl-matrix";
 
 export class Shader {
 
@@ -81,8 +81,8 @@ export class Shader {
     return shaderProgram;
   }
 
-  public setVertexBuffer(vertices: Vec4[]) {
-    const arrayBuffer = vertices.reduce((acc: number[], curr: Vec4) => [...acc, ...curr.toArrayBuffer()], [])
+  public setVertexBuffer(vertices: vec3[]) {
+    const arrayBuffer = vertices.reduce((acc: number[], curr: vec3) => [...acc, ...curr], [])
     this.vertexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);

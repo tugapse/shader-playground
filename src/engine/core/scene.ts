@@ -1,6 +1,6 @@
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Vec3 } from "./vec";
+import { Transform } from "./transform";
 
 export class Scene extends GlEntity {
 
@@ -16,8 +16,8 @@ export class Scene extends GlEntity {
   public get objects(): GlEntity[] { return this._objects }
 
   constructor(private gl: WebGLRenderingContext | null = null) {
-    super("Scene", Vec3.ZERO);
-    this._camera = new Camera("Camera", Vec3.ZERO);
+    super("Scene", new Transform());
+    this._camera = new Camera();
     this._objects = []
     !Scene._currentScene && (Scene._currentScene = this);
   }
@@ -42,7 +42,7 @@ export class Scene extends GlEntity {
     if (!this.gl) return;
 
 
-    this.gl.clearColor(0.3, 1.0, 0.0, 1.0);
+    this.gl.clearColor(0.3, 0.6, 0.0, 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
     for (const object of this.objects) {

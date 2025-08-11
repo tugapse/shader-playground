@@ -1,12 +1,12 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Canvas } from "../components/canvas/canvas";
+import { Canvas } from "./components/canvas/canvas";
 import { Scene } from '../engine/core/scene';
 import { Mesh } from '../engine/core/mesh';
 import { Shader } from '../engine/core/shader';
 import { GlEntity } from '../engine/core/entity';
-import { Vec3 } from '../engine/core/vec';
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
 import { QuadPrimitive } from '../engine/primitives/quad';
+import { Transform } from '../engine/core/transform';
 
 @Component({
   selector: 'app-root',
@@ -38,7 +38,7 @@ export class App implements AfterViewInit, OnDestroy {
     if(this.started ) return;
     this.started = true;
 
-    const quad = new GlEntity("Quad",Vec3.ZERO);
+    const quad = new GlEntity("Quad", new Transform());
     const meshRenderer:RenderMeshBehaviour = new RenderMeshBehaviour(quad, this.gl);
 
     const mesh = new Mesh()

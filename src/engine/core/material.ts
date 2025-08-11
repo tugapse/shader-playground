@@ -1,7 +1,7 @@
-import { Vec4 } from "./vec";
+import { vec4 } from "gl-matrix";
 
 export class Material{
 
-  public color:Vec4 = Vec4.ONE;
+  public color:vec4 = [0,0,0,1];
 
 }

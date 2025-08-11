@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Scene } from '../../engine/core/scene';
+import { Scene } from '../../../engine/core/scene';
 
 @Component({
   selector: 'app-canvas',

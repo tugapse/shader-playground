@@ -1,5 +1,5 @@
 import { EntityBehaviour } from './entity-behaviour';
-import { Vec3 } from './vec';
+import { Transform } from './transform';
 
 
 export class GlEntity {
@@ -8,9 +8,7 @@ export class GlEntity {
   public behaviours: EntityBehaviour[] = []
   public active :boolean = true;
 
-  constructor(public name: String, public position: Vec3,
-    public scale: Vec3 = Vec3.ONE,
-    public rotation: Vec3 = Vec3.ONE) {
+  constructor(public name: String, public transform:Transform) {
 
   }
 

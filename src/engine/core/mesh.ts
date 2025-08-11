@@ -1,9 +1,9 @@
+import { vec2, vec3 } from "gl-matrix";
 import { Material } from "./material";
 import { Shader } from "./shader";
-import { Vec2, Vec3 } from "./vec";
 
 export class MeshData{
-    constructor(public vertices:Vec3[],public normals:Vec3[],public uvs:Vec2[]){}
+    constructor(public vertices:vec3[],public normals:vec3[],public uvs:vec2[]){}
 }
 
 export class Mesh{
