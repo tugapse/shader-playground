@@ -106,7 +106,6 @@ export class App implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // (Helper methods loadShaderSource, compileShader, createProgram remain unchanged)
   private async loadShaderSource(url: string): Promise<string> {
     const response = await fetch(url);
     if (!response.ok) {
