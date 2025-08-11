@@ -27,19 +27,22 @@ export class Shader {
       return;
     }
     this.shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader) as WebGLProgram;
+
     this.initialized = true;
   }
-  public load(){
-      const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
-      this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
-      this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+  public load() {
+    if(!this.gl|| !this.shaderProgram) return;
+    const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+    this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(positionAttributeLocation);
+
   }
 
   public use() {
     if (!this.shaderProgram || !this.initialized) {
       return;
     }
-
     this.gl.useProgram(this.shaderProgram);
   }
 

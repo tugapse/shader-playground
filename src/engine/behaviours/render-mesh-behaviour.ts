@@ -10,10 +10,16 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     super(parent)
   }
 
+  public override initialize(): void {
+    this.mesh.shader.initialize()
+    this.mesh.shader.setVertexBuffer(this.mesh.meshData.vertices);
+  }
+
   public override draw(): void {
+
     if(!this.mesh){ return }
 
-    this.mesh.shader.initialize()
+    this.mesh.shader.load();
     this.mesh.shader.use()
 
 
