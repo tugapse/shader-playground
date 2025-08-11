@@ -17,6 +17,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.mesh.shader.use()
 
 
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
   }
 
 }
