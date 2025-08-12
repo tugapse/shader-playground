@@ -7,6 +7,7 @@ import { GlEntity } from '../engine/core/entity';
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
 import { QuadPrimitive } from '../engine/primitives/quad';
 import { Transform } from '../engine/core/transform';
+import { Material } from '../engine/core/material';
 
 @Component({
   selector: 'app-root',
@@ -42,12 +43,16 @@ export class App implements AfterViewInit, OnDestroy {
     const meshRenderer:RenderMeshBehaviour = new RenderMeshBehaviour(quad, this.gl);
 
     const mesh = new Mesh()
-    mesh.shader = new Shader(this.gl);
     mesh.meshData = new QuadPrimitive();
-    meshRenderer.mesh = mesh;
 
+    const material = new Material()
+    material.shader = new Shader(this.gl);
+
+    meshRenderer.mesh = mesh;
+    meshRenderer.material = material;
 
     quad.behaviours.push(meshRenderer);
+
     this.scene.addEntity(quad);
 
     this.scene.initialize();

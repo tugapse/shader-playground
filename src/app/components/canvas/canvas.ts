@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Scene } from '../../../engine/core/scene';
 import { Keybord } from '../../../engine/core/input'
-
+import { Screen } from '../../../engine/core/screen';
 @Component({
   selector: 'app-canvas',
   imports: [],
@@ -20,7 +20,7 @@ export class Canvas implements OnChanges {
 
   private lastTime = 0;
   private readonly fps = 60;
-  private readonly frameInterval = 100 / this.fps;
+  private readonly frameInterval = 1000 / this.fps;
   public isFocused: boolean = false;
 
 
@@ -120,6 +120,8 @@ export class Canvas implements OnChanges {
       this.glCanvas.nativeElement.width = displayWidth;
       this.glCanvas.nativeElement.height = displayHeight;
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
+      Screen.rendererWidth = displayWidth;
+      Screen.rendererHeight = displayHeight;
     }
   }
 

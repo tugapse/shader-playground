@@ -1,7 +1,6 @@
 import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Keybord } from "./input";
 import { Transform } from "./transform";
 
 

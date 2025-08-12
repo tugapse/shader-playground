@@ -18,14 +18,14 @@ export class Camera extends GlEntity {
 
   public get projectionMatrix() { return this._projectionMatrix }
   public get viewMatrix() { return this._viewMatrix }
-  private angle = 0;
+
   constructor() {
     super("Camera", new Transform())
     Camera._mainCamera = this;
     this._projectionMatrix = mat4.create();
     this._viewMatrix = mat4.create()
-    this.transform.translate(0, 0, 10);
-    this.transform.rotate(0, 0, 0);
+    this.transform.setPosition(0, 0, 10);
+    this.transform.setRotation(0, 0, 0);
   }
 
   override initialize(): void {
@@ -34,16 +34,16 @@ export class Camera extends GlEntity {
 
     mat4.perspective(
       this._projectionMatrix,
-      this.fieldOfView, // Field of view (fovy)
-      this.aspectRatio, // Aspect ratio
-      this.nearPlane, // Near clipping plane
-      this.farPlane // Far clipping plane
+      this.fieldOfView,
+      this.aspectRatio,
+      this.nearPlane,
+      this.farPlane
     );
     this.updateModelMatrix();
     super.initialize();
   }
 
-  private updateModelMatrix(){
+  private updateModelMatrix() {
 
     const cameraModelMatrix = mat4.create();
     // Build the camera's model matrix based on its transform.
@@ -52,21 +52,13 @@ export class Camera extends GlEntity {
     mat4.rotateY(cameraModelMatrix, cameraModelMatrix, this.transform.rotation[1]);
     mat4.rotateZ(cameraModelMatrix, cameraModelMatrix, this.transform.rotation[2]);
 
-    // The view matrix is the inverse of the camera's model matrix.
-    // This effectively "moves the world" opposite to the camera's movements.
     mat4.invert(this._viewMatrix, cameraModelMatrix);
   }
 
-override update(ellapsed: number): void {
-
-  // const velocity = 0.5;
-  // this.angle += (velocity * ellapsed);
-  // this.angle %= 360;
-
-  // this.transform.rotate(0, 0, this.angle);
-  this.updateModelMatrix();
-  super.update(ellapsed);
-}
+  override update(ellapsed: number): void {
+    this.updateModelMatrix();
+    super.update(ellapsed);
+  }
 
 
 }
