@@ -1,6 +1,9 @@
+import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
+import { Keybord } from "./input";
 import { Transform } from "./transform";
+
 
 export class Scene extends GlEntity {
 
@@ -10,21 +13,23 @@ export class Scene extends GlEntity {
   private _camera: Camera
   private _objects: GlEntity[];
   private _initialized = false;
-
+  private gl!: WebGLRenderingContext;
+  private canvas!: HTMLCanvasElement
 
   public get camera(): Camera { return this._camera }
   public get objects(): GlEntity[] { return this._objects }
 
-  constructor(private gl: WebGLRenderingContext | null = null) {
+  constructor() {
     super("Scene", new Transform());
     this._camera = new Camera();
+    this.camera.behaviours.push(new CameraFlyBehaviour(this.camera))
     this.camera.initialize()
     this._objects = []
     !Scene._currentScene && (Scene._currentScene = this);
   }
 
   public override initialize(): void {
-    if(this._initialized) return;
+    if (this._initialized) return;
 
     for (const object of this.objects) {
       object.initialize();
@@ -33,6 +38,7 @@ export class Scene extends GlEntity {
   }
 
   public override update(ellapsed: number): void {
+    this.camera.update(ellapsed)
     for (const object of this.objects) {
       object.update(ellapsed);
     }
@@ -51,7 +57,7 @@ export class Scene extends GlEntity {
     }
   }
 
-  public addEntity(entity:GlEntity):void{
+  public addEntity(entity: GlEntity): void {
     this.objects.push(entity);
   }
 
@@ -59,8 +65,13 @@ export class Scene extends GlEntity {
     return this.objects.find(o => o.name === name) || null;
   }
 
-  public setGlRenderingContext(gl: WebGLRenderingContext): void {
+  public setGlRenderingContext(gl: WebGLRenderingContext, canvas: HTMLCanvasElement): void {
     this.gl = gl;
+    this.canvas = canvas;
+    this.addEvents();
+  }
+
+  private addEvents() {
   }
 
   public override destroy(): void {

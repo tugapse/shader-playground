@@ -8,9 +8,7 @@ export class GlEntity {
   public behaviours: EntityBehaviour[] = []
   public active :boolean = true;
 
-  constructor(public name: String, public transform:Transform) {
-
-  }
+  constructor(public name: String, public transform:Transform) { }
 
   public initialize(){
     for(const behaviour of this.behaviours){

@@ -18,7 +18,7 @@ export class Camera extends GlEntity {
 
   public get projectionMatrix() { return this._projectionMatrix }
   public get viewMatrix() { return this._viewMatrix }
-
+  private angle = 0;
   constructor() {
     super("Camera", new Transform())
     Camera._mainCamera = this;
@@ -39,6 +39,11 @@ export class Camera extends GlEntity {
       this.nearPlane, // Near clipping plane
       this.farPlane // Far clipping plane
     );
+    this.updateModelMatrix();
+    super.initialize();
+  }
+
+  private updateModelMatrix(){
 
     const cameraModelMatrix = mat4.create();
     // Build the camera's model matrix based on its transform.
@@ -52,10 +57,16 @@ export class Camera extends GlEntity {
     mat4.invert(this._viewMatrix, cameraModelMatrix);
   }
 
-  override update(ellapsed: number): void {
+override update(ellapsed: number): void {
 
-  }
+  // const velocity = 0.5;
+  // this.angle += (velocity * ellapsed);
+  // this.angle %= 360;
 
+  // this.transform.rotate(0, 0, this.angle);
+  this.updateModelMatrix();
+  super.update(ellapsed);
+}
 
 
 }
