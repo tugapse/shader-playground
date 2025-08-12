@@ -6,5 +6,5 @@ void main() {
     vec2 color = v_uv ;
 
     // Use the coordinates as color values
-    gl_FragColor = vec4(color.x, color.y, 0.0, 1.0);
+    gl_FragColor = vec4(color.x, 0, color.y, 1.0);
 }

@@ -21,15 +21,21 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     if(!this.mesh){ return }
 
-    this.mesh.shader.load();
-    this.mesh.shader.use()
-    const camera = Camera.mainCamera;
-    const mvpMatrix = mat4.create();
-    mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
-    mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
+
+    if(this.mesh.shader.shaderProgram){
+
+      this.mesh.shader.load();
+      this.mesh.shader.use()
+      const camera = Camera.mainCamera;
+      const mvpMatrix = mat4.create();
+      mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
+      mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
+      this.mesh.shader.setMat4("u_mvpMatrix",mvpMatrix);
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length );
+    }
 
 
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length );
+
   }
 
 }

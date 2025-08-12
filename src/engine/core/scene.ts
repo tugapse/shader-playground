@@ -18,6 +18,7 @@ export class Scene extends GlEntity {
   constructor(private gl: WebGLRenderingContext | null = null) {
     super("Scene", new Transform());
     this._camera = new Camera();
+    this.camera.initialize()
     this._objects = []
     !Scene._currentScene && (Scene._currentScene = this);
   }

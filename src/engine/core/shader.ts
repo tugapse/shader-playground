@@ -1,4 +1,4 @@
-import { vec3 } from "gl-matrix";
+import { mat4, vec2, vec3, vec4 } from "gl-matrix";
 
 export class Shader {
 
@@ -32,7 +32,7 @@ export class Shader {
   }
 
   public load() {
-    if(!this.gl|| !this.shaderProgram) return;
+    if (!this.gl || !this.shaderProgram) return;
     const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
@@ -45,6 +45,51 @@ export class Shader {
     }
     this.gl.useProgram(this.shaderProgram);
   }
+
+  public setMat4(name: string, matrix: mat4) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+      this.gl.uniformMatrix4fv(location, false, matrix);
+    } else {
+      console.error(`Variable ${name} not found!`);
+    }
+  }
+  public setVec4(name: string, vec: vec4) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+      this.gl.uniform4fv(location, vec);
+    } else {
+      console.error(`Variable ${name} not found!`);
+    }
+  }
+  public setVec3(name: string, vec: vec3) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+       this.gl.uniform3fv(location, vec);
+    } else {
+      console.error(`Variable ${name} not found!`);
+    }
+  }
+
+  public setVec2(name: string, vec: vec2) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+       this.gl.uniform2fv(location, vec);
+    } else {
+      console.error(`Variable ${name} not found!`);
+    }
+  }
+
+    public setfloat(name: string, num: number) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+       this.gl.uniform1f(location, num);
+    } else {
+      console.error(`Variable ${name} not found!`);
+    }
+  }
+
+
 
   private async loadShaderSource(url: string): Promise<string> {
     const response = await fetch(url);
