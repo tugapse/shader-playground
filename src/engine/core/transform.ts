@@ -38,9 +38,9 @@ export class Transform {
 
   public updateModelMatrix() {
     mat4.identity(this._modelMatrix);
-    // mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[0], [1, 0, 0]);
-    // mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[1], [0, 1, 0]);
-    // mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[2], [0, 0, 1]);
+    mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[0], [1, 0, 0]);
+    mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[1], [0, 1, 0]);
+    mat4.rotate(this._modelMatrix, this._modelMatrix, this._rotation[2], [0, 0, 1]);
     mat4.translate(this._modelMatrix, this._modelMatrix, this._position);
     mat4.scale(this._modelMatrix, this._modelMatrix, this._scale);
   }

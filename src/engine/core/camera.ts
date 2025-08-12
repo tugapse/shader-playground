@@ -12,9 +12,6 @@ export class Camera extends GlEntity {
   public farPlane: number = 100.0;
   public aspectRatio: number = 1;
 
-
-  public static VIEWPORT: { x: number, y: number, width: number, height: number }
-
   private _projectionMatrix!: mat4;
   private _viewMatrix!: mat4;
 
@@ -27,7 +24,8 @@ export class Camera extends GlEntity {
     Camera._mainCamera = this;
     this._projectionMatrix = mat4.create();
     this._viewMatrix = mat4.create()
-    this.transform.translate(0,0,5);
+    this.transform.translate(0, 0, 10);
+    this.transform.rotate(0, 0, 0);
   }
 
   override initialize(): void {
@@ -42,9 +40,16 @@ export class Camera extends GlEntity {
       this.farPlane // Far clipping plane
     );
 
-    const targetPoint = [0, 0, 0];   // Looking at the origin
-    const upDirection = [0, 1, 0];    // Up is positive Y
-    mat4.lookAt(this.viewMatrix, this.transform.position, targetPoint, upDirection);
+    const cameraModelMatrix = mat4.create();
+    // Build the camera's model matrix based on its transform.
+    mat4.translate(cameraModelMatrix, cameraModelMatrix, this.transform.position);
+    mat4.rotateX(cameraModelMatrix, cameraModelMatrix, this.transform.rotation[0]);
+    mat4.rotateY(cameraModelMatrix, cameraModelMatrix, this.transform.rotation[1]);
+    mat4.rotateZ(cameraModelMatrix, cameraModelMatrix, this.transform.rotation[2]);
+
+    // The view matrix is the inverse of the camera's model matrix.
+    // This effectively "moves the world" opposite to the camera's movements.
+    mat4.invert(this._viewMatrix, cameraModelMatrix);
   }
 
   override update(ellapsed: number): void {

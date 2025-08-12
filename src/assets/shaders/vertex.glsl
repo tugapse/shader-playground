@@ -5,7 +5,7 @@ varying vec2 v_uv;
 
 
 void main() {
-    gl_Position =  u_mvpMatrix * vec4(a_position, 0, 1.0) + vec4(1,-1,0,0);
+    gl_Position =  u_mvpMatrix * vec4(a_position, 0, 1.0);
 
     // Pass the position to the fragment shader
     v_position = a_position;
