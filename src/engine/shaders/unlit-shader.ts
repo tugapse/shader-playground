@@ -26,6 +26,7 @@ export class UnlitShader extends Shader {
 
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color);
     this.setVec2(ShaderUniformsEnum.U_UV_SCALE, material.uvScale);
+    this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, material.uvOffset);
 
     if(material.mainTex && material.mainTex.isImageLoaded){
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX,material.mainTex,0);

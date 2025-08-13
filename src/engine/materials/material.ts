@@ -1,5 +1,4 @@
-import { Shader } from "../shaders/shader";
 
-export class Material{
+export class Material {
   public name = "";
 }
