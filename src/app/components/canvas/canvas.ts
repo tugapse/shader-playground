@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Scene } from '../../../engine/core/scene';
-import { Keybord } from '../../../engine/core/input'
+import { Keybord, Mouse } from '../../../engine/core/input'
 import { Screen } from '../../../engine/core/screen';
 @Component({
   selector: 'app-canvas',
@@ -31,26 +31,41 @@ export class Canvas implements OnChanges {
     this.resizeCanvas();
   }
 
-
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-      Keybord.keyState[event.key.toLowerCase()] = true;
+    Keybord.keyDown[event.key.toLowerCase()] = true;
   }
 
   @HostListener('keyup', ['$event'])
   onKeyUp(event: KeyboardEvent) {
-      Keybord.keyState[event.key.toLowerCase()] = false;
-  }
-  // Listen for the component to gain focus
-  @HostListener('focus')
-  onFocus() {
-    this.isFocused = true;
+    if (Keybord.keyDown[event.key.toLowerCase()]) {
+      Keybord.keyUp[event.key.toLowerCase()] = true;
+      Keybord.keyPress[event.key.toLowerCase()] = true;
+    }
+    Keybord.keyDown[event.key.toLowerCase()] = false;
   }
 
-  // Listen for the component to lose focus
-  @HostListener('blur')
-  onBlur() {
-    this.isFocused = false;
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    const canvasRect = this.canvasElement.getBoundingClientRect();
+    Mouse.mousePosition.x = Math.max(event.clientX - canvasRect.x, 0);
+    Mouse.mousePosition.y = Math.max(event.clientY - canvasRect.y, 0);
+    Mouse.mouseMovement.x = event.movementX;
+    Mouse.mouseMovement.y = event.movementY;
+  }
+
+  @HostListener('mousedown', ['$event'])
+  onMouseDown(event: MouseEvent): void {
+
+    Mouse.mouseButtonDown[event.button] = true;
+    console.debug(event, Mouse.mouseButtonDown);
+  }
+
+  @HostListener('mouseup', ['$event'])
+  onMouseUp(event: MouseEvent): void {
+
+    Mouse.mouseButtonDown[event.button] = false;
+    event.preventDefault();
   }
 
   ngOnInit(): void { }
@@ -73,18 +88,11 @@ export class Canvas implements OnChanges {
   }
 
   public render(timestamp: number) {
-    // Calculate the time that has passed since the last frame was rendered.
     const elapsed = timestamp - this.lastTime;
 
-    // Only proceed with rendering if enough time has passed.
     if (elapsed > this.frameInterval) {
-      // Correct the lastTime by the elapsed time. This is better than just
-      // setting it to 'timestamp' to account for small variances and keep
-      // the average FPS consistent.
       this.lastTime = timestamp - (elapsed % this.frameInterval);
 
-      // Your original logic for updating and drawing the scene.
-      // The delta is still needed for physics and animations.
       const delta = elapsed / 1000;
       this.scene.update(delta);
 
@@ -92,11 +100,17 @@ export class Canvas implements OnChanges {
         this.scene.setGlRenderingContext(this.gl, this.canvasElement);
         this.scene.draw();
       }
+      this.cleanInput();
     }
 
-    // Always request the next frame. This ensures the loop continues
-    // regardless of whether a frame was rendered or skipped.
     requestAnimationFrame(this.render.bind(this));
+  }
+
+  private cleanInput(): void {
+    Mouse.mouseMovement.x = 0;
+    Mouse.mouseMovement.y = 0;
+    Keybord.keyUp = {};
+    Keybord.keyPress = {};
   }
 
   private async initWebGL(): Promise<void> {

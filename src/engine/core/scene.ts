@@ -48,7 +48,7 @@ export class Scene extends GlEntity {
     if (!this.gl) return;
 
 
-    this.gl.clearColor(0.3, 0.6, 0.0, 1.0);
+    this.gl.clearColor(0.44, 0.58, 0.85, 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
     for (const object of this.objects) {
