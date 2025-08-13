@@ -31,17 +31,12 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   override draw(): void {
 
     if (!this.mesh) { return }
-
-
     if (this.shader.shaderProgram) {
-
       this.shader.load();
       this.shader.use()
       this.setShaderVariables();
       this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length);
     }
-
-
   }
 
   protected setShaderVariables() {

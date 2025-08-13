@@ -5,14 +5,14 @@ export class Texture {
   private _isLoading: boolean = false;
 
 
-  constructor(private gl: WebGLRenderingContext | null = null, public uri:string="") { }
+  constructor(private gl: WebGLRenderingContext | null = null) { }
 
   /**
    * Loads an image from the given URL.
    * @param url The URL of the image to load.
    * @returns A Promise that resolves when the image is loaded.
    */
-  public async load(url: string=this.uri): Promise<void> {
+  public async load(url: string): Promise<void> {
     if (this._isLoading || this.isImageLoaded) return
     this._isLoading = true;
     return new Promise((resolve, reject) => {

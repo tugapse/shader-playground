@@ -8,8 +8,8 @@ import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour'
 import { QuadPrimitive } from '../engine/primitives/quad';
 import { Transform } from '../engine/core/transform';
 import { ColorMaterial } from '../engine/materials/color-material';
-import { AlbedoShader } from '../engine/shaders/albedo-shader';
-import { AlbedoMaterial } from '../engine/materials/albedo-material';
+import { UnlitShader } from '../engine/shaders/unlit-shader';
+import { UnlitMaterial } from '../engine/materials/unlit-material';
 
 @Component({
   selector: 'app-root',
@@ -47,12 +47,11 @@ export class App implements AfterViewInit, OnDestroy {
     mesh.meshData = new QuadPrimitive();
 
 
-    const material = new AlbedoMaterial()
-    material.color= [0.1,0.5,0.3,0.2]
+    const material = new UnlitMaterial()
 
     meshRenderer.mesh = mesh;
     meshRenderer.material = material;
-    meshRenderer.shader = new AlbedoShader(this.gl, material);;
+    meshRenderer.shader = new UnlitShader(this.gl, material);;
 
     quad.behaviours.push(meshRenderer);
 

@@ -1,17 +1,19 @@
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
 import { Material } from "../materials/material";
+import { Texture } from "../materials/texture";
 
 export class Shader {
-
-  constructor(
-    protected gl: WebGLRenderingContext,
-    protected material:Material,
-    protected fragUri: string = "assets/shaders/frag/color.glsl",
-    protected vertexUri: string = "assets/shaders/vertex/fullscreen.glsl") { }
 
   public shaderProgram!: WebGLProgram;
   public vertexBuffer!: WebGLBuffer | null;
   private initialized = false;
+
+  constructor(
+    protected gl: WebGLRenderingContext,
+    protected material: Material,
+    protected fragUri: string = "assets/shaders/frag/color.glsl",
+    protected vertexUri: string = "assets/shaders/vertex/fullscreen.glsl"
+  ) { }
 
   public async initialize(): Promise<void> {
 
@@ -48,7 +50,9 @@ export class Shader {
     this.gl.useProgram(this.shaderProgram);
   }
 
-  public loadDataIntoShader(){}
+  public loadDataIntoShader() {
+
+  }
 
   public setMat4(name: string, matrix: mat4) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
@@ -56,31 +60,54 @@ export class Shader {
       this.gl.uniformMatrix4fv(location, false, matrix);
     }
   }
+
   public setVec4(name: string, vec: vec4) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
       this.gl.uniform4fv(location, vec);
     }
   }
+
   public setVec3(name: string, vec: vec3) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
-       this.gl.uniform3fv(location, vec);
+      this.gl.uniform3fv(location, vec);
     }
   }
 
   public setVec2(name: string, vec: vec2) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
-       this.gl.uniform2fv(location, vec);
+      this.gl.uniform2fv(location, vec);
     }
   }
 
-    public setfloat(name: string, num: number) {
+  public setfloat(name: string, num: number) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
-       this.gl.uniform1f(location, num);
+      this.gl.uniform1f(location, num);
     }
+  }
+
+  public setTexture(name: string, texture: Texture, textureIndex: number) {
+    const location = this.gl.getUniformLocation(this.shaderProgram, name);
+    if (location) {
+      this.gl.activeTexture(this.gl.TEXTURE0 + textureIndex);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, texture.glTexture);
+      this.gl.uniform1i(location, textureIndex);
+    }
+  }
+
+  public setVertexBuffer(vertices: vec3[]) {
+    const arrayBuffer = vertices.reduce((acc: number[], curr: vec3) => [...acc, ...curr], [])
+    this.vertexBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
+  }
+
+  public destroy() {
+    this.gl.deleteBuffer(this.vertexBuffer);
+    this.gl.deleteProgram(this.shaderProgram);
   }
 
   private async loadShaderSource(url: string): Promise<string> {
@@ -104,6 +131,7 @@ export class Shader {
     }
     return shader;
   }
+
   private createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
     const shaderProgram = gl.createProgram();
     if (!shaderProgram) { return null; }
@@ -116,17 +144,5 @@ export class Shader {
       return null;
     }
     return shaderProgram;
-  }
-
-  public setVertexBuffer(vertices: vec3[]) {
-    const arrayBuffer = vertices.reduce((acc: number[], curr: vec3) => [...acc, ...curr], [])
-    this.vertexBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
-  }
-
-  public destroy() {
-    this.gl.deleteBuffer(this.vertexBuffer);
-    this.gl.deleteProgram(this.shaderProgram);
   }
 }
