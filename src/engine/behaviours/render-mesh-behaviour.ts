@@ -25,9 +25,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   override initialize(): void {
     this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.depthFunc(this.gl.LEQUAL);
-    this.gl.enable(this.gl.CULL_FACE);
-    this.gl.cullFace(this.gl.BACK); // This is the default, culls back-facing polygons
+    // this.gl.enable(this.gl.CULL_FACE);
+    this.gl.depthFunc(this.gl.LESS);
+    this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
 
     this.shader.initialize()
@@ -43,8 +43,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     if (!this.mesh) { return }
     if (this.shader.shaderProgram) {
-
-
 
       this.shader.bindBuffers();
       this.shader.use()

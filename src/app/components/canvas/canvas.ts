@@ -116,7 +116,7 @@ export class Canvas implements OnChanges {
 
   private async initWebGL(): Promise<void> {
     this.canvasElement = this.glCanvas.nativeElement;
-    this.gl = this.canvasElement.getContext('webgl');
+    this.gl = this.canvasElement.getContext('webgl2');
     if (!this.gl) {
       alert('Unable to initialize WebGL. Your browser may not support it.');
       return;
