@@ -4,11 +4,14 @@ import { EntityBehaviour } from "../core/entity-behaviour";
 import { Mesh } from "../core/mesh";
 import { Camera } from "../core/camera";
 import { Screen } from "../core/screen";
-import { Material } from "../core/material";
+import { ColorMaterial } from "../materials/color-material";
+import { Shader } from "../shaders/shader";
+import { ShaderUniformsEnum } from "../enums/shader-uniforms";
 export class RenderMeshBehaviour extends EntityBehaviour {
 
   public mesh!: Mesh;
-  public material!:Material;
+  public material!: ColorMaterial;
+  public shader!: Shader;
 
   private time = 0;
 
@@ -21,8 +24,8 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   }
 
   override initialize(): void {
-    this.material.shader.initialize()
-    this.material.shader.setVertexBuffer(this.mesh.meshData.vertices);
+    this.shader.initialize()
+    this.shader.setVertexBuffer(this.mesh.meshData.vertices);
   }
 
   override draw(): void {
@@ -30,10 +33,10 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     if (!this.mesh) { return }
 
 
-    if (this.material.shader.shaderProgram) {
+    if (this.shader.shaderProgram) {
 
-      this.material.shader.load();
-      this.material.shader.use()
+      this.shader.load();
+      this.shader.use()
       this.setShaderVariables();
       this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length);
     }
@@ -46,17 +49,11 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     const mvpMatrix = mat4.create();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
-    this.material.shader.setMat4("u_mvpMatrix", mvpMatrix);
-    this.material.shader.setfloat("u_time", this.time);
-    this.material.shader.setVec2("u_screenResolution",[ Screen.rendererWidth,Screen.rendererHeight]);
-    this.setMaterial();
+    this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
+    this.shader.setfloat(ShaderUniformsEnum.U_TIME, this.time);
+    this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [Screen.rendererWidth, Screen.rendererHeight]);
+    this.shader.loadDataIntoShader();
   }
 
-  private setMaterial() {
-    if(!this.material) return;
-
-    this.material.shader.setVec4("u_matColor", this.material.color);
-
-  }
 
 }

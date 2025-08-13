@@ -2,12 +2,14 @@ import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, 
 import { Canvas } from "./components/canvas/canvas";
 import { Scene } from '../engine/core/scene';
 import { Mesh } from '../engine/core/mesh';
-import { Shader } from '../engine/core/shader';
+import { Shader } from '../engine/shaders/shader';
 import { GlEntity } from '../engine/core/entity';
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
 import { QuadPrimitive } from '../engine/primitives/quad';
 import { Transform } from '../engine/core/transform';
-import { Material } from '../engine/core/material';
+import { ColorMaterial } from '../engine/materials/color-material';
+import { AlbedoShader } from '../engine/shaders/albedo-shader';
+import { AlbedoMaterial } from '../engine/materials/albedo-material';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +21,7 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGLRenderingContext;
-  public scene!:Scene;
+  public scene!: Scene;
   private started = false;
 
   ngAfterViewInit(): void {
@@ -31,25 +33,26 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene.destroy();
   }
 
-  onGlContextCreated(gl:WebGLRenderingContext) {
+  onGlContextCreated(gl: WebGLRenderingContext) {
     this.gl = gl
   }
 
   addAssets() {
-    if(this.started ) return;
+    if (this.started) return;
     this.started = true;
 
     const quad = new GlEntity("Quad", new Transform());
-    const meshRenderer:RenderMeshBehaviour = new RenderMeshBehaviour(quad, this.gl);
-
+    const meshRenderer: RenderMeshBehaviour = new RenderMeshBehaviour(quad, this.gl);
     const mesh = new Mesh()
     mesh.meshData = new QuadPrimitive();
 
-    const material = new Material()
-    material.shader = new Shader(this.gl);
+
+    const material = new AlbedoMaterial()
+    material.color= [0.1,0.5,0.3,0.2]
 
     meshRenderer.mesh = mesh;
     meshRenderer.material = material;
+    meshRenderer.shader = new AlbedoShader(this.gl, material);;
 
     quad.behaviours.push(meshRenderer);
 

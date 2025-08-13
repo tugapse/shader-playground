@@ -1,11 +1,13 @@
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
+import { Material } from "../materials/material";
 
 export class Shader {
 
   constructor(
-    private gl: WebGLRenderingContext,
-    private fragUri: string = "assets/shaders/frag/fragment.glsl",
-    private vertexUri: string = "assets/shaders/vertex/vertex.glsl") { }
+    protected gl: WebGLRenderingContext,
+    protected material:Material,
+    protected fragUri: string = "assets/shaders/frag/color.glsl",
+    protected vertexUri: string = "assets/shaders/vertex/fullscreen.glsl") { }
 
   public shaderProgram!: WebGLProgram;
   public vertexBuffer!: WebGLBuffer | null;
@@ -45,6 +47,8 @@ export class Shader {
     }
     this.gl.useProgram(this.shaderProgram);
   }
+
+  public loadDataIntoShader(){}
 
   public setMat4(name: string, matrix: mat4) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
