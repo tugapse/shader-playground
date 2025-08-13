@@ -1,6 +1,6 @@
-import { GlEntity } from "./entity";
+import { Transform } from "../core/transform";
 import { mat4 } from 'gl-matrix';
-import { Transform } from "./transform";
+import { GlEntity } from "./entity";
 
 export class Camera extends GlEntity {
 

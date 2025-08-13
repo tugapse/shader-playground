@@ -1,4 +1,4 @@
-import { GlEntity } from "./entity";
+import { GlEntity } from "../entities/entity";
 
 export abstract class EntityBehaviour {
 

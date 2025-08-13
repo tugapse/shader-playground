@@ -1,7 +1,8 @@
 import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
+import { Transform } from "../core/transform";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Transform } from "./transform";
+
 
 
 export class Scene extends GlEntity {

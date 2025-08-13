@@ -1,4 +1,4 @@
-import { EntityBehaviour } from "../core/entity-behaviour";
+import { EntityBehaviour } from "./entity-behaviour";
 import { Keybord, Mouse } from "../core/input";
 import { vec3 } from 'gl-matrix'; // Import vec3 for vector operations
 

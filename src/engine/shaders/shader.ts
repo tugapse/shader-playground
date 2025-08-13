@@ -3,12 +3,26 @@ import { Material } from "../materials/material";
 import { Texture } from "../materials/texture";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms";
 import { ColorMaterial } from "../materials/color-material";
+import { MeshData } from "@engine/core/mesh";
+export interface WebGLBuffers {
+  position: WebGLBuffer | null;
+  normal: WebGLBuffer | null;
+  uv: WebGLBuffer | null;
+  indices: WebGLBuffer | null;
+}
+
 
 export class Shader {
 
   public shaderProgram!: WebGLProgram;
   public vertexBuffer!: WebGLBuffer | null;
   private initialized = false;
+  public buffers: WebGLBuffers = {
+    position: null,
+    normal: null,
+    uv: null,
+    indices: null,
+  };
 
   constructor(
     protected gl: WebGLRenderingContext,
@@ -37,11 +51,76 @@ export class Shader {
     this.initialized = true;
   }
 
-  public load() {
+  initBuffers(gl: WebGLRenderingContext, mesh: MeshData): void {
+  const buffers: WebGLBuffers = {
+    position: null,
+    normal: null,
+    uv: null,
+    indices: null,
+  };
+
+  // --- Position Buffer ---
+  buffers.position = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+  // Explicitly flatten the vec3[] into a single Float32Array
+  const positions: number[] = [];
+  for (const v of mesh.vertices) {
+    positions.push(v[0], v[1], v[2]);
+  }
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+  // --- Normal Buffer ---
+  buffers.normal = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+  // Explicitly flatten the vec3[] into a single Float32Array
+  const normals: number[] = [];
+  for (const n of mesh.normals) {
+    normals.push(n[0], n[1], n[2]);
+  }
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+  // --- UV Buffer ---
+  buffers.uv = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
+  // Explicitly flatten the vec2[] into a single Float32Array
+  const uvs: number[] = [];
+  for (const uv of mesh.uvs) {
+    uvs.push(uv[0], uv[1]);
+  }
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
+
+  // --- Index Buffer ---
+  buffers.indices = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+  // Indices are typically Uint16Array for up to 65,535 vertices.
+  // If your mesh has more vertices, you would use Uint32Array and gl.UNSIGNED_INT.
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
+
+  this.buffers = buffers;
+}
+
+  public bindBuffers() {
     if (!this.gl || !this.shaderProgram) return;
+    // --- Position Attribute ---
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
     const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
     this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+    // --- Normal Attribute ---
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.normal);
+    const normalAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_normal'); // Make sure your shader has 'a_normal'
+    this.gl.vertexAttribPointer(normalAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(normalAttributeLocation);
+
+    // --- UV Attribute ---
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.uv);
+    const uvAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_uv'); // Make sure your shader has 'a_uv'
+    this.gl.vertexAttribPointer(uvAttributeLocation, 2, this.gl.FLOAT, false, 0, 0); // UVs are 2D (vec2)
+    this.gl.enableVertexAttribArray(uvAttributeLocation);
+
+    // --- Bind Index Buffer for Drawing ---
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
 
   }
 
@@ -101,11 +180,15 @@ export class Shader {
     }
   }
 
-  public setVertexBuffer(vertices: vec3[]) {
-    const arrayBuffer = vertices.reduce((acc: number[], curr: vec3) => [...acc, ...curr], [])
-    this.vertexBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
+  public setBuffer(buffer: WebGLBuffer, values: vec3[]) {
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(values.flat() as number[]), this.gl.STATIC_DRAW);
+  }
+
+  public setIndices(values: number[]) {
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
+    const indicesArray = new Uint16Array(values);
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indicesArray, this.gl.STATIC_DRAW);
   }
 
   private async loadShaderSource(url: string): Promise<string> {

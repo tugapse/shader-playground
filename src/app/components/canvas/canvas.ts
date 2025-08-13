@@ -1,7 +1,8 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Scene } from '../../../engine/core/scene';
-import { Keybord, Mouse } from '../../../engine/core/input'
-import { Screen } from '../../../engine/core/screen';
+import { Keybord, Mouse } from '@engine/core/input';
+
+import { Scene } from '@engine/entities/scene';
+import { CanvasViewport } from '@engine/core/canvas-viewport';
 @Component({
   selector: 'app-canvas',
   imports: [],
@@ -134,8 +135,8 @@ export class Canvas implements OnChanges {
       this.glCanvas.nativeElement.width = displayWidth;
       this.glCanvas.nativeElement.height = displayHeight;
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
-      Screen.rendererWidth = displayWidth;
-      Screen.rendererHeight = displayHeight;
+      CanvasViewport.rendererWidth = displayWidth;
+      CanvasViewport.rendererHeight = displayHeight;
     }
   }
 

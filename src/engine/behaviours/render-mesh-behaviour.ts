@@ -1,12 +1,12 @@
 import { mat4, vec2 } from "gl-matrix";
-import { GlEntity } from "../core/entity";
-import { EntityBehaviour } from "../core/entity-behaviour";
+import { EntityBehaviour } from "./entity-behaviour";
 import { Mesh } from "../core/mesh";
-import { Camera } from "../core/camera";
-import { Screen } from "../core/screen";
+import { CanvasViewport } from "../core/canvas-viewport";
 import { ColorMaterial } from "../materials/color-material";
 import { Shader } from "../shaders/shader";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms";
+import { GlEntity } from "../entities/entity";
+import { Camera } from "../entities/camera";
 export class RenderMeshBehaviour extends EntityBehaviour {
 
   public mesh!: Mesh;
@@ -24,18 +24,32 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   }
 
   override initialize(): void {
+    this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.depthFunc(this.gl.LEQUAL);
+    this.gl.enable(this.gl.CULL_FACE);
+    this.gl.cullFace(this.gl.BACK); // This is the default, culls back-facing polygons
+    this.gl.frontFace(this.gl.CCW);
+
     this.shader.initialize()
-    this.shader.setVertexBuffer(this.mesh.meshData.vertices);
+    this.shader.buffers.position = this.gl.createBuffer();
+    this.shader.buffers.normal = this.gl.createBuffer();
+    this.shader.buffers.uv = this.gl.createBuffer();
+    this.shader.buffers.indices = this.gl.createBuffer();
+
+    this.shader.initBuffers(this.gl, this.mesh.meshData);
   }
 
   override draw(): void {
 
     if (!this.mesh) { return }
     if (this.shader.shaderProgram) {
-      this.shader.load();
+
+
+
+      this.shader.bindBuffers();
       this.shader.use()
       this.setShaderVariables();
-      this.gl.drawArrays(this.gl.TRIANGLES, 0, this.mesh.meshData.vertices.length);
+      this.gl.drawElements(this.gl.TRIANGLES, this.mesh.meshData.indices.length, this.gl.UNSIGNED_SHORT, 0);
     }
   }
 
@@ -46,7 +60,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
     this.shader.setfloat(ShaderUniformsEnum.U_TIME, this.time);
-    this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [Screen.rendererWidth, Screen.rendererHeight]);
+    this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [CanvasViewport.rendererWidth, CanvasViewport.rendererHeight]);
+
+
     this.shader.loadDataIntoShader();
   }
 

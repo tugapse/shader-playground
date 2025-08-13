@@ -1,5 +1,6 @@
-import { EntityBehaviour } from './entity-behaviour';
-import { Transform } from './transform';
+import { EntityBehaviour } from "../behaviours/entity-behaviour";
+import { Transform } from "../core/transform";
+
 
 
 export class GlEntity {
