@@ -1,6 +1,8 @@
 // ObjParser.ts
 
+import { MeshData } from "@engine/core/mesh";
 import { ObjFace, ParsedObjData } from "./interfaces";
+import { vec2, vec3 } from "gl-matrix";
 
 export class ObjParser {
   // Temporary arrays to store data as we parse
@@ -10,9 +12,9 @@ export class ObjParser {
   private tempFaces: ObjFace[] = [];
 
   // Final processed data that will be returned
-  private outputVertices: number[] = [];
-  private outputNormals: number[] = [];
-  private outputUVs: number[] = [];
+  private outputVertices: vec3[] = [];
+  private outputNormals: vec3[] = [];
+  private outputUVs: vec2[] = [];
   private outputIndices: number[] = []; // Indices for drawing (e.g., in WebGL)
 
   /**
@@ -20,7 +22,7 @@ export class ObjParser {
    * @param objContent The entire content of the OBJ file as a string.
    * @returns A ParsedObjData object containing the mesh data.
    */
-  public parse(objContent: string): ParsedObjData {
+  public parse(objContent: string): MeshData {
     this.resetParser(); // Clear previous data
 
     const lines = objContent.split('\n');
@@ -151,8 +153,8 @@ export class ObjParser {
         // ...
         this.tempFaces.push({
           positions: [face.positions[0], face.positions[i], face.positions[i + 1]],
-          uvs: face.uvs.includes(-1) ? [-1,-1,-1] : [face.uvs[0], face.uvs[i], face.uvs[i + 1]],
-          normals: face.normals.includes(-1) ? [-1,-1,-1] : [face.normals[0], face.normals[i], face.normals[i + 1]]
+          uvs: face.uvs.includes(-1) ? [-1, -1, -1] : [face.uvs[0], face.uvs[i], face.uvs[i + 1]],
+          normals: face.normals.includes(-1) ? [-1, -1, -1] : [face.normals[0], face.normals[i], face.normals[i + 1]]
         });
       }
     }
@@ -177,32 +179,32 @@ export class ObjParser {
           uniqueVertexMap.set(key, currentOutputIndex);
 
           // Add position data
-          this.outputVertices.push(
+          this.outputVertices.push(vec3.fromValues(
             this.tempVertices[posIdx * 3 + 0],
             this.tempVertices[posIdx * 3 + 1],
-            this.tempVertices[posIdx * 3 + 2]
+            this.tempVertices[posIdx * 3 + 2])
           );
 
           // Add UV data (handle if not present in OBJ)
           if (uvIdx !== -1) {
-            this.outputUVs.push(
+            this.outputUVs.push(vec2.fromValues(
               this.tempUVs[uvIdx * 2 + 0],
-              this.tempUVs[uvIdx * 2 + 1]
+              this.tempUVs[uvIdx * 2 + 1])
             );
           } else {
-            this.outputUVs.push(0.0, 0.0); // Default UV if not provided
+            this.outputUVs.push(vec2.fromValues(0.0, 0.0)); // Default UV if not provided
           }
 
           // Add Normal data (handle if not present in OBJ)
           if (normIdx !== -1) {
-            this.outputNormals.push(
+            this.outputNormals.push(vec3.fromValues(
               this.tempNormals[normIdx * 3 + 0],
               this.tempNormals[normIdx * 3 + 1],
-              this.tempNormals[normIdx * 3 + 2]
+              this.tempNormals[normIdx * 3 + 2])
             );
           } else {
             // If no normal provided, add a default (e.g., [0,0,0] or calculate later)
-            this.outputNormals.push(0.0, 0.0, 0.0);
+            this.outputNormals.push(vec3.fromValues(0.0, 0.0, 0.0));
           }
           currentOutputIndex++;
         }
