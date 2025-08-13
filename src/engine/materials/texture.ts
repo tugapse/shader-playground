@@ -1,11 +1,20 @@
+export enum TextureWrapMode {
+  REPEAT = 10497,
+  MIRRORED_REPEAT = 33648,
+  CLAMP_TO_EDGE = 33071,
+
+}
+
 export class Texture {
+
+
   private _image: HTMLImageElement | null = null;
   private _glTexture: WebGLTexture | null = null;
   private _isLoaded: boolean = false;
   private _isLoading: boolean = false;
 
 
-  constructor(private gl: WebGLRenderingContext | null = null) { }
+  constructor(private gl: WebGLRenderingContext) { }
 
   /**
    * Loads an image from the given URL.
@@ -49,21 +58,26 @@ export class Texture {
     this.gl = gl; // Store the GL context
 
     this._glTexture = gl.createTexture(); // Create a new texture object
+    this.setTextureWrapMode(TextureWrapMode.CLAMP_TO_EDGE );
+
     gl.bindTexture(gl.TEXTURE_2D, this._glTexture); // Bind it to the TEXTURE_2D target
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);
+    gl.bindTexture(gl.TEXTURE_2D, null); // Unbind the texture to avoid accidental modifications
+  }
+
+  public setTextureWrapMode(wrapMode: TextureWrapMode) {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this._glTexture); // Bind it to the TEXTURE_2D target
 
     // Set texture parameters:
     // CLAMP_TO_EDGE prevents texture bleeding at the edges.
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, wrapMode);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, wrapMode);
 
     // LINEAR filtering provides smoother scaling.
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
-    // Upload the image data to the texture
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);
-
-    gl.bindTexture(gl.TEXTURE_2D, null); // Unbind the texture to avoid accidental modifications
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null); // Unbind the texture to avoid accidental modifications
   }
 
   /**

@@ -1,6 +1,8 @@
 import { mat4, vec2, vec3, vec4 } from "gl-matrix";
 import { Material } from "../materials/material";
 import { Texture } from "../materials/texture";
+import { ShaderUniformsEnum } from "../enums/shader-uniforms";
+import { ColorMaterial } from "../materials/color-material";
 
 export class Shader {
 
@@ -12,7 +14,7 @@ export class Shader {
     protected gl: WebGLRenderingContext,
     protected material: Material,
     protected fragUri: string = "assets/shaders/frag/color.glsl",
-    protected vertexUri: string = "assets/shaders/vertex/fullscreen.glsl"
+    protected vertexUri: string = "assets/shaders/vertex/vertex.glsl"
   ) { }
 
   public async initialize(): Promise<void> {
@@ -51,7 +53,8 @@ export class Shader {
   }
 
   public loadDataIntoShader() {
-
+    const material = this.material as ColorMaterial;
+    this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color);
   }
 
   public setMat4(name: string, matrix: mat4) {
@@ -105,11 +108,6 @@ export class Shader {
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(arrayBuffer), this.gl.STATIC_DRAW);
   }
 
-  public destroy() {
-    this.gl.deleteBuffer(this.vertexBuffer);
-    this.gl.deleteProgram(this.shaderProgram);
-  }
-
   private async loadShaderSource(url: string): Promise<string> {
     const response = await fetch(url);
     if (!response.ok) {
@@ -144,5 +142,10 @@ export class Shader {
       return null;
     }
     return shaderProgram;
+  }
+
+  public destroy() {
+    this.gl.deleteBuffer(this.vertexBuffer);
+    this.gl.deleteProgram(this.shaderProgram);
   }
 }

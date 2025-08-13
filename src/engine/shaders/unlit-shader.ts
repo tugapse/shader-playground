@@ -29,7 +29,7 @@ export class UnlitShader extends Shader {
     this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, material.uvOffset);
 
     if(material.mainTex && material.mainTex.isImageLoaded){
-      this.setTexture(ShaderUniformsEnum.U_MAIN_TEX,material.mainTex,0);
+      this.setTexture(ShaderUniformsEnum.U_MAIN_TEX,material.mainTex, 0);
     }
 
   }

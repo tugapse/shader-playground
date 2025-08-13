@@ -51,7 +51,7 @@ export class App implements AfterViewInit, OnDestroy {
 
     meshRenderer.mesh = mesh;
     meshRenderer.material = material;
-    meshRenderer.shader = new UnlitShader(this.gl, material);;
+    meshRenderer.shader = new Shader(this.gl, material);;
 
     quad.behaviours.push(meshRenderer);
 
