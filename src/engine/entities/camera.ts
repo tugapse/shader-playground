@@ -15,6 +15,7 @@ export class Camera extends GlEntity {
   private _projectionMatrix!: mat4;
   private _viewMatrix!: mat4;
 
+  public override tag:string="Camera"
 
   public get projectionMatrix() { return this._projectionMatrix }
   public get viewMatrix() { return this._viewMatrix }
@@ -26,6 +27,7 @@ export class Camera extends GlEntity {
     this._viewMatrix = mat4.create()
     this.transform.setPosition(0, 0, 10);
     this.transform.setRotation(0, 0, 0);
+
   }
 
   override initialize(): void {

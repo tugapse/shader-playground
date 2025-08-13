@@ -24,6 +24,7 @@ export class MeshData {
     this.uvs = uvs;
     this.indices = indices;
   }
+
 }
 
 

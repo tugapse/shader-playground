@@ -10,6 +10,8 @@ export class Scene extends GlEntity {
   private static _currentScene: Scene;
   public static get currentScene() { return this._currentScene }
 
+  public override tag: string = "Scene";
+
   private _camera: Camera
   private _objects: GlEntity[];
   private _initialized = false;
@@ -82,6 +84,20 @@ export class Scene extends GlEntity {
 
   public setCurrent(): void {
 
+  }
+
+  public getEntitiesByTag() {
+
+  }
+
+ /**
+   * Retrieves entities of a specific type from the collection.
+   * T must be a type that extends GLEntity.
+   * @param constructor The constructor function of the type to filter by (e.g., GLErrorEntity).
+   * @returns An array of entities of the specified type.
+   */
+  public getEntities<T extends GlEntity>(constructor: new (...args: any[]) => T): T[] {
+    return this._objects.filter((o): o is T => o instanceof constructor);
   }
 
 }

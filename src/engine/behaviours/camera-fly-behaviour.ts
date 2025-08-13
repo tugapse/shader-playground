@@ -4,7 +4,7 @@ import { vec3 } from 'gl-matrix'; // Import vec3 for vector operations
 
 export class CameraFlyBehaviour extends EntityBehaviour {
 
-  public moveSpeed = 5.0;
+  public moveSpeed = 2.0;
   public rotationSpeed = 0.1;
 
   override update(ellapsed: number): void {
