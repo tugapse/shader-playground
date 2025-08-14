@@ -3,6 +3,7 @@ import { Keybord, Mouse } from '@engine/core/input';
 
 import { Scene } from '@engine/entities/scene';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
+import { Camera } from '@engine/entities/camera';
 @Component({
   selector: 'app-canvas',
   imports: [],
@@ -74,6 +75,8 @@ export class Canvas implements OnChanges {
   ngAfterViewInit(): void {
     this.initWebGL();
     this.render(0);
+    this.resizeCanvas();
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -122,7 +125,6 @@ export class Canvas implements OnChanges {
       return;
     }
 
-    this.resizeCanvas();
     this.onGlContextCreated.emit(this.gl);
 
   }
@@ -137,7 +139,15 @@ export class Canvas implements OnChanges {
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
       CanvasViewport.rendererWidth = displayWidth;
       CanvasViewport.rendererHeight = displayHeight;
+      this.updateCameraAspectRatio(displayWidth,displayHeight);
     }
   }
 
+  private updateCameraAspectRatio(displayWidth:number,displayHeight:number){
+
+    if (Camera.mainCamera) {
+      Camera.mainCamera.aspectRatio = displayWidth / displayHeight;
+      Camera.mainCamera?.updateProjectionMatrix();
+    }
+  }
 }

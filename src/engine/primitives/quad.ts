@@ -30,10 +30,10 @@ export class QuadPrimitive extends MeshData {
 
     // Front face (+Z)
     addFace(
-      [-halfSize, -halfSize, halfSize],
-      [ halfSize, -halfSize, halfSize],
-      [ halfSize,  halfSize, halfSize],
-      [-halfSize,  halfSize, halfSize],
+      [-halfSize, -halfSize, 0],
+      [ halfSize, -halfSize, 0],
+      [ halfSize,  halfSize, 0],
+      [-halfSize,  halfSize, 0],
       [0.0, 0.0, 1.0],
       [0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0],
       0 * 4

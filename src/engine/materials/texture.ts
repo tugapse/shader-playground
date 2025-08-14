@@ -13,8 +13,28 @@ export class Texture {
   private _isLoaded: boolean = false;
   private _isLoading: boolean = false;
 
-
   constructor(private gl: WebGLRenderingContext) { }
+
+  public static createDefaultWhiteTexture(gl: WebGLRenderingContext): Texture {
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Create a 1x1 white pixel
+    const whitePixel = new Uint8Array([255, 255, 255, 255]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, whitePixel);
+
+    // Set texture parameters for default behavior
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.bindTexture(gl.TEXTURE_2D, null); // Unbind
+    const result = new Texture(gl);
+    result._glTexture = texture;
+    result._isLoaded = true;
+    return result;
+  }
 
   /**
    * Loads an image from the given URL.
@@ -58,7 +78,7 @@ export class Texture {
     this.gl = gl; // Store the GL context
 
     this._glTexture = gl.createTexture(); // Create a new texture object
-    this.setTextureWrapMode(TextureWrapMode.CLAMP_TO_EDGE );
+    this.setTextureWrapMode(TextureWrapMode.CLAMP_TO_EDGE);
 
     gl.bindTexture(gl.TEXTURE_2D, this._glTexture); // Bind it to the TEXTURE_2D target
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);

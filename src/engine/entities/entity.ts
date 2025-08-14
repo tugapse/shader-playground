@@ -1,16 +1,17 @@
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
+import { Scene } from "./scene";
 
 
 
 export class GlEntity {
 
-
+  public scene!:Scene;
   public behaviours: EntityBehaviour[] = []
   public active: boolean = true;
   public tag: string = "Entity";
 
-  constructor(public name: String, public transform: Transform) { }
+  constructor(public name: String, public transform: Transform=new Transform()) { }
 
   public initialize() {
     for (const behaviour of this.behaviours) {

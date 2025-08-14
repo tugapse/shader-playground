@@ -9,12 +9,17 @@ import { Canvas } from "./components/canvas/canvas";
 
 import { Scene } from '@engine/entities/scene';
 import { GlEntity } from '@engine/entities/entity';
-import { UnlitShader } from '@engine/shaders/unlit-shader';
 import { CubePrimitive } from '@engine/primitives/cube';
 import { SpherePrimitive } from '@engine/primitives/sphere';
-import { vec3 } from 'gl-matrix';
+import { vec3, vec4 } from 'gl-matrix';
 import { ObjParser } from '@engine/parsers/obj-parser';
 import { TrianglePrimitive } from '@engine/primitives/triangle';
+import { CanvasViewport } from '@engine/core/canvas-viewport';
+import { Camera } from '@engine/entities/camera';
+import { UnlitShader } from '@engine/shaders/unlit-shader';
+import { LitShader } from '@engine/shaders/lit-shader';
+import { LitMaterial } from '@engine/materials/lit-material';
+import { Light } from '@engine/entities/light';
 
 @Component({
   selector: 'app-root',
@@ -28,13 +33,19 @@ export class App implements AfterViewInit, OnDestroy {
   private gl!: WebGLRenderingContext;
   public scene!: Scene;
   private started = false;
-  private objPArser!:ObjParser
+  private objPArser!: ObjParser
 
   ngAfterViewInit(): void {
     this.objPArser = new ObjParser();
     this.scene = new Scene();
     this.scene.name = "Main Scene";
-    this.addAssets().then(()=>this.scene.initialize());
+    this.loadAssets().then(() => {
+
+      Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
+      Camera.mainCamera.updateProjectionMatrix();
+      this.scene.initialize()
+    }
+    );
   }
 
   ngOnDestroy(): void {
@@ -45,39 +56,43 @@ export class App implements AfterViewInit, OnDestroy {
     this.gl = gl
   }
 
-  async addAssets() {
+  async loadAssets() {
     if (this.started) return;
     this.started = true;
 
+    const ambient = new Light("Ambient Light");
+    ambient.color=vec4.fromValues(0.2,0.2,0.2,0.5)
+
     const cube = this.createPrimitive("cube", new CubePrimitive());
     const cubePos = vec3.create();
-    vec3.scaleAndAdd(cubePos,cubePos, cube.transform.left,2.5);
-    cube.transform.setPosition(cubePos[0],cubePos[1],cubePos[2]);
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
+    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
 
     const quad = this.createPrimitive("quad", new QuadPrimitive());
+
     const quadPos = vec3.create();
-    vec3.scaleAndAdd(quadPos,quadPos, quad.transform.left,2.5);
-    vec3.scaleAndAdd(quadPos,quadPos, quad.transform.up,2.5);
-    quad.transform.setPosition(quadPos[0],quadPos[1],quadPos[2]);
+    vec3.scaleAndAdd(quadPos, quadPos, quad.transform.left, 2.5);
+    vec3.scaleAndAdd(quadPos, quadPos, quad.transform.up, 2.5);
+    quad.transform.setPosition(quadPos[0], quadPos[1], quadPos[2]);
 
     const tri = this.createPrimitive("tri", new TrianglePrimitive());
     const triPos = vec3.create();
-    vec3.scaleAndAdd(triPos,triPos, tri.transform.up,2.5);
-    tri.transform.setPosition(triPos[0],triPos[1],triPos[2]);
+    vec3.scaleAndAdd(triPos, triPos, tri.transform.up, 2.5);
+    tri.transform.setPosition(triPos[0], triPos[1], triPos[2]);
 
 
     const sphere = this.createPrimitive("sphere", new SpherePrimitive());
     const spherePos = vec3.create();
-    vec3.scaleAndAdd(spherePos,spherePos, sphere.transform.right,2.5);
-    sphere.transform.setPosition(spherePos[0],spherePos[1],spherePos[2]);
+    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
+    sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
 
     await this.addMonkeyObj();
 
-
+    this.scene.addEntity(ambient);
     this.scene.addEntity(cube);
     this.scene.addEntity(sphere);
-    this.scene.addEntity(quad);
     this.scene.addEntity(tri);
+    this.scene.addEntity(quad);
 
 
   }
@@ -86,8 +101,13 @@ export class App implements AfterViewInit, OnDestroy {
     const obj = await fetch("assets/objs/monkey.obj");
     const text = await obj.text();
     const cubeFromObj = this.objPArser.parse(text);
-    const cubeObj = this.createPrimitive("Cube obj", cubeFromObj);
-    this.scene.addEntity(cubeObj);
+    const cubePrimitive = this.createPrimitive("Cube obj", cubeFromObj);
+    const renderer = cubePrimitive.getBehaviour(RenderMeshBehaviour);
+    if (renderer) {
+      renderer.shader = new LitShader(this.gl, new LitMaterial())
+      renderer.material.color = vec4.fromValues(1,1,1,1);
+    }
+    this.scene.addEntity(cubePrimitive);
   }
 
   private createPrimitive(name: string, meshData: MeshData,
