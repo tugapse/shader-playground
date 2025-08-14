@@ -1,5 +1,4 @@
 import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
-import { Transform } from "../core/transform";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
 import { Light } from "./light";
@@ -16,7 +15,6 @@ export class Scene extends GlEntity {
   private _camera: Camera
   private _objects: GlEntity[];
   private _lights: Light[];
-  private _initialized = false;
   private gl!: WebGLRenderingContext;
   private canvas!: HTMLCanvasElement
 
@@ -43,15 +41,18 @@ export class Scene extends GlEntity {
       object.initialize();
     }
     this._initialized = true;
+    super.initialize();
   }
 
   public override update(ellapsed: number): void {
-    this.camera.update(ellapsed)
-    for (const object of this.objects) {
-      // const t  = object.transform;
-      // t.rotate(1*ellapsed,0,2*ellapsed);
+        this.camera.update(ellapsed)
+    for (const object of this.lights) {
       object.update(ellapsed);
     }
+    for (const object of this.objects) {
+      object.update(ellapsed);
+    }
+    super.update(ellapsed);
   }
 
   public override draw(): void {
@@ -64,6 +65,7 @@ export class Scene extends GlEntity {
     for (const object of this.objects) {
       object.draw();
     }
+    super.draw();
   }
 
   public addEntity(entity: GlEntity) {
@@ -88,6 +90,7 @@ export class Scene extends GlEntity {
     for (const child of this.objects) {
       child.destroy();
     }
+    super.destroy();
   }
 
   public setCurrent(): void {

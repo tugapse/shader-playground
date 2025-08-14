@@ -29,6 +29,6 @@ export class UnlitShader extends Shader {
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
     }
-
+    super.loadDataIntoShader();
   }
 }

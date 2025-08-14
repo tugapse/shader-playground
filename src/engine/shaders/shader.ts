@@ -135,10 +135,12 @@ export class Shader {
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color);
   }
 
-  public setMat4(name: string, matrix: mat4) {
+  public setMat4(name:string, value: mat4): void {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
-      this.gl.uniformMatrix4fv(location, false, matrix);
+      this.gl.uniformMatrix4fv(location, false, value);
+    } else {
+      console.warn(`Uniform location for ${name} not found or is null.`);
     }
   }
 

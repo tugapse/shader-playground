@@ -75,10 +75,6 @@ export class CameraFlyBehaviour extends EntityBehaviour {
 
     // Apply the accumulated movement to the camera's position
     transform.translate(movementVector[0], movementVector[1], movementVector[2]);
-
-    // Ensure the model matrix is updated after any transform changes
-    // This call is redundant if transform.translate() and transform.rotate() already call it.
-    // If not, uncomment:
-    // transform.updateModelMatrix();
+    super.update(ellapsed);
   }
 }

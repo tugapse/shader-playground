@@ -6,17 +6,20 @@ import { Scene } from "./scene";
 
 export class GlEntity {
 
-  public scene!:Scene;
+  public scene!: Scene;
   public behaviours: EntityBehaviour[] = []
   public active: boolean = true;
   public tag: string = "Entity";
+  protected _initialized = false;
 
-  constructor(public name: String, public transform: Transform=new Transform()) { }
+  constructor(public name: String, public transform: Transform = new Transform()) { }
 
   public initialize() {
+    if (this._initialized) return;
     for (const behaviour of this.behaviours) {
       behaviour.initialize();
     }
+    this._initialized = true;
   }
 
   public update(ellapsed: number): void {
@@ -38,6 +41,21 @@ export class GlEntity {
   public destroy() {
     for (const behaviour of this.behaviours) {
       behaviour.destroy();
+    }
+    this._initialized = false;
+  }
+
+  public addBehaviour(behaviour: EntityBehaviour) {
+    if(this._initialized)
+      behaviour.initialize();
+    this.behaviours.push(behaviour);
+  }
+
+  public removeBehaviour(behaviour:EntityBehaviour){
+    const index = this.behaviours.indexOf(behaviour);
+    if(index>=0){
+      const beToremove = this.behaviours.splice(index,1);
+      beToremove[0]?.destroy();
     }
   }
 

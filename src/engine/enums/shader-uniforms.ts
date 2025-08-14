@@ -7,6 +7,8 @@ export enum ShaderUniformsEnum{
   U_MAIN_TEX = "u_mainTex",
   U_UV_OFFSET = "u_uvOffset",
   U_AMBIENT_LIGHT="u_ambientLight",
+  U_MODEL_MATRIX = "u_modelMatrix",
+  U_NORMAL_MATRIX = "u_normalMatrix",
 
 
 }

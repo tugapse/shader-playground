@@ -107,4 +107,5 @@ void main() {
   }
 
   fragColor = vec4(totalLitColorRGB, baseColor.a);
+
 }
