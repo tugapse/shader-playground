@@ -4,35 +4,42 @@ import { vec2, vec3 } from "gl-matrix";
 import { MeshData } from "../core/mesh";
 
 export class QuadPrimitive extends MeshData {
-  constructor(width: number = 2.0, height: number = 2.0) {
-    const hw = width / 2.0;
-    const hh = height / 2.0;
+  constructor(size: number = 2.0) {
+      const halfSize = size / 2.0;
 
-    const vertices: vec3[] = [
-      [-hw, -hh, 0.0],
-      [ hw, -hh, 0.0],
-      [-hw,  hh, 0.0],
+    const vertices: vec3[] = [];
+    const normals: vec3[] = [];
+    const uvs: vec2[] = [];
+    const indices: number[] = [];
 
-      [-hw,  hh, 0.0],
-      [ hw, -hh, 0.0],
-      [ hw,  hh, 0.0]
-    ];
+    const addFace = (
+      v0: vec3, v1: vec3, v2: vec3, v3: vec3,
+      normal: vec3,
+      uv0: vec2, uv1: vec2, uv2: vec2, uv3: vec2,
+      baseIndex: number
+    ) => {
+      vertices.push(v0, v1, v2, v3);
+      normals.push(normal, normal, normal, normal);
+      uvs.push(uv0, uv1, uv2, uv3);
 
-    const normals: vec3[] = [
-      [0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0],
-      [0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]
-    ];
+      indices.push(
+        baseIndex + 0, baseIndex + 1, baseIndex + 2,
+        baseIndex + 0, baseIndex + 2, baseIndex + 3
+      );
+    };
 
-    const uvs: vec2[] = [
-      [0.0, 0.0],
-      [1.0, 0.0],
-      [0.0, 1.0],
+    // Front face (+Z)
+    addFace(
+      [-halfSize, -halfSize, halfSize],
+      [ halfSize, -halfSize, halfSize],
+      [ halfSize,  halfSize, halfSize],
+      [-halfSize,  halfSize, halfSize],
+      [0.0, 0.0, 1.0],
+      [0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0],
+      0 * 4
+    );
 
-      [0.0, 1.0],
-      [1.0, 0.0],
-      [1.0, 1.0]
-    ];
 
-    super(vertices, normals, uvs);
+    super(vertices, normals, uvs, indices);
   }
 }

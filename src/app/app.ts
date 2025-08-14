@@ -14,6 +14,7 @@ import { CubePrimitive } from '@engine/primitives/cube';
 import { SpherePrimitive } from '@engine/primitives/sphere';
 import { vec3 } from 'gl-matrix';
 import { ObjParser } from '@engine/parsers/obj-parser';
+import { TrianglePrimitive } from '@engine/primitives/triangle';
 
 @Component({
   selector: 'app-root',
@@ -33,8 +34,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.objPArser = new ObjParser();
     this.scene = new Scene();
     this.scene.name = "Main Scene";
-    this.addAssets();
-    this.scene.initialize();
+    this.addAssets().then(()=>this.scene.initialize());
   }
 
   ngOnDestroy(): void {
@@ -45,69 +45,49 @@ export class App implements AfterViewInit, OnDestroy {
     this.gl = gl
   }
 
-  addAssets() {
+  async addAssets() {
     if (this.started) return;
     this.started = true;
-    const exampleObjContent = `
-# Blender 4.5.1 LTS
-# www.blender.org
-mtllib Untitled100.mtl
-o Cube
-v 1.000000 1.000000 -1.000000
-v 1.000000 -1.000000 -1.000000
-v 1.000000 1.000000 1.000000
-v 1.000000 -1.000000 1.000000
-v -1.000000 1.000000 -1.000000
-v -1.000000 -1.000000 -1.000000
-v -1.000000 1.000000 1.000000
-v -1.000000 -1.000000 1.000000
-vn -0.0000 1.0000 -0.0000
-vn -0.0000 -0.0000 1.0000
-vn -1.0000 -0.0000 -0.0000
-vn -0.0000 -1.0000 -0.0000
-vn 1.0000 -0.0000 -0.0000
-vn -0.0000 -0.0000 -1.0000
-vt 0.625000 0.500000
-vt 0.875000 0.500000
-vt 0.875000 0.750000
-vt 0.625000 0.750000
-vt 0.375000 0.750000
-vt 0.625000 1.000000
-vt 0.375000 1.000000
-vt 0.375000 0.000000
-vt 0.625000 0.000000
-vt 0.625000 0.250000
-vt 0.375000 0.250000
-vt 0.125000 0.500000
-vt 0.375000 0.500000
-vt 0.125000 0.750000
-s 0
-usemtl Material
-f 1/1/1 5/2/1 7/3/1 3/4/1
-f 4/5/2 3/4/2 7/6/2 8/7/2
-f 8/8/3 7/9/3 5/10/3 6/11/3
-f 6/12/4 2/13/4 4/5/4 8/14/4
-f 2/13/5 1/1/5 3/4/5 4/5/5
-f 6/11/6 5/10/6 1/1/6 2/13/6
-`;
+
     const cube = this.createPrimitive("cube", new CubePrimitive());
-    const cubeLeft = vec3.create();
-    vec3.scaleAndAdd(cubeLeft,cubeLeft, cube.transform.left,2.5);
-    cube.transform.setPosition(cubeLeft[0],cubeLeft[1],cubeLeft[2]);
+    const cubePos = vec3.create();
+    vec3.scaleAndAdd(cubePos,cubePos, cube.transform.left,2.5);
+    cube.transform.setPosition(cubePos[0],cubePos[1],cubePos[2]);
+
+    const quad = this.createPrimitive("quad", new QuadPrimitive());
+    const quadPos = vec3.create();
+    vec3.scaleAndAdd(quadPos,quadPos, quad.transform.left,2.5);
+    vec3.scaleAndAdd(quadPos,quadPos, quad.transform.up,2.5);
+    quad.transform.setPosition(quadPos[0],quadPos[1],quadPos[2]);
+
+    const tri = this.createPrimitive("tri", new TrianglePrimitive());
+    const triPos = vec3.create();
+    vec3.scaleAndAdd(triPos,triPos, tri.transform.up,2.5);
+    tri.transform.setPosition(triPos[0],triPos[1],triPos[2]);
+
 
     const sphere = this.createPrimitive("sphere", new SpherePrimitive());
-    const sphereLeft = vec3.create();
-    vec3.scaleAndAdd(sphereLeft,sphereLeft, cube.transform.right,2.5);
-    sphere.transform.setPosition(sphereLeft[0],sphereLeft[1],sphereLeft[2]);
+    const spherePos = vec3.create();
+    vec3.scaleAndAdd(spherePos,spherePos, sphere.transform.right,2.5);
+    sphere.transform.setPosition(spherePos[0],spherePos[1],spherePos[2]);
 
-    const cubeFromObj = this.objPArser.parse(exampleObjContent);
-    const quad = this.createPrimitive("Cube obj", cubeFromObj)
+    await this.addMonkeyObj();
+
 
     this.scene.addEntity(cube);
     this.scene.addEntity(sphere);
     this.scene.addEntity(quad);
+    this.scene.addEntity(tri);
 
 
+  }
+
+  private async addMonkeyObj() {
+    const obj = await fetch("assets/objs/monkey.obj");
+    const text = await obj.text();
+    const cubeFromObj = this.objPArser.parse(text);
+    const cubeObj = this.createPrimitive("Cube obj", cubeFromObj);
+    this.scene.addEntity(cubeObj);
   }
 
   private createPrimitive(name: string, meshData: MeshData,

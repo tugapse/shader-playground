@@ -42,9 +42,9 @@ export class CubePrimitive extends MeshData {
     // Back face (-Z)
     addFace(
       [-halfSize,  halfSize, -halfSize],
-      [-halfSize, -halfSize, -halfSize],
-      [ halfSize, -halfSize, -halfSize],
       [ halfSize,  halfSize, -halfSize],
+      [ halfSize, -halfSize, -halfSize],
+      [-halfSize, -halfSize, -halfSize],
       [0.0, 0.0, -1.0],
       [0.0, 1.0], [0.0, 0.0], [1.0, 0.0], [1.0, 1.0],
       1 * 4

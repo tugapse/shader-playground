@@ -8,7 +8,7 @@ export class SpherePrimitive extends MeshData {
     const vertices: vec3[] = [];
     const normals: vec3[] = [];
     const uvs: vec2[] = [];
-    const indices: number[] = [];
+    const indices: number[] = []; // for triangles
 
     for (let i = 0; i <= stacks; ++i) {
       const v = i / stacks;
@@ -32,15 +32,24 @@ export class SpherePrimitive extends MeshData {
       }
     }
 
+    // Generate triangle indices with corrected winding order
     for (let i = 0; i < stacks; ++i) {
       for (let j = 0; j < slices; ++j) {
         const first = (i * (slices + 1)) + j;
-        const second = first + slices + 1;
+        const second = first + slices + 1; // Vertex directly below 'first'
 
-        indices.push(first, second, first + 1);
-        indices.push(second, second + 1, first + 1);
+        // Original (problematic) order:
+        // indices.push(first, second, first + 1);
+        // indices.push(second, second + 1, first + 1);
+
+        // Corrected order for CCW winding when viewed from outside
+        // This forms two triangles (first, first+1, second) and (first+1, second+1, second)
+        // that together form a quad from the mesh grid.
+        indices.push(first, first + 1, second);
+        indices.push(first + 1, second + 1, second);
       }
     }
+
 
     super(vertices, normals, uvs, indices);
   }
