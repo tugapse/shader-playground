@@ -1,20 +1,20 @@
-import { vec3, mat4 } from 'gl-matrix';
+import { vec3, mat4, quat } from 'gl-matrix'; // Import quat
 
 export class Transform {
 
   private _position!: vec3;
-  private _rotation!: vec3; // Stored in radians
+  private _rotation!: quat; // Changed: Store rotation as a quaternion
   private _scale!: vec3;
 
   private _modelMatrix!: mat4;
   public get modelMatrix() { return this._modelMatrix; }
   public get position() { return this._position; }
-  public get rotation() { return this._rotation; } // Returns rotation in radians
+  public get rotation() { return this._rotation; } // Returns the quaternion
   public get localScale() { return this._scale; }
 
   constructor() {
     this._position = vec3.create();
-    this._rotation = vec3.create();
+    this._rotation = quat.create(); // Initialize as an identity quaternion
     this._scale = vec3.fromValues(1, 1, 1);
     this._modelMatrix = mat4.create();
     this.updateModelMatrix();
@@ -25,9 +25,16 @@ export class Transform {
     this.updateModelMatrix();
   }
 
-  public setRotation(x: number = 0, y: number = 0, z: number = 0) {
-    // Expects input in radians
-    vec3.set(this._rotation, x, y, z);
+  /**
+   * Sets the absolute rotation using Euler angles (pitch, yaw, roll).
+   * Converts Euler angles to a quaternion.
+   * @param xRadians Pitch (rotation around X-axis).
+   * @param yRadians Yaw (rotation around Y-axis).
+   * @param zRadians Roll (rotation around Z-axis).
+   */
+  public setRotation(xRadians: number = 0, yRadians: number = 0, zRadians: number = 0) {
+    // Convert Euler angles (XYZ order) to a quaternion
+    quat.fromEuler(this._rotation, xRadians * 180 / Math.PI, yRadians * 180 / Math.PI, zRadians * 180 / Math.PI); // gl-matrix fromEuler expects degrees
     this.updateModelMatrix();
   }
 
@@ -41,9 +48,27 @@ export class Transform {
     this.updateModelMatrix();
   }
 
-  public rotate(x: number = 0, y: number = 0, z: number = 0) {
-    // Expects input in radians, adds to current rotation
-    vec3.add(this._rotation, this._rotation, vec3.fromValues(x, y, z));
+  /**
+   * Applies an incremental rotation around the object's local axes.
+   * This accumulates rotation correctly using quaternions.
+   * @param xRadians Radians to rotate around the local X-axis.
+   * @param yRadians Radians to rotate around the local Y-axis.
+   * @param zRadians Radians to rotate around the local Z-axis.
+   */
+  public rotate(xRadians: number = 0, yRadians: number = 0, zRadians: number = 0) {
+    // Create incremental rotation quaternions for each axis
+    const rotX = quat.setAxisAngle(quat.create(), [1, 0, 0], xRadians);
+    const rotY = quat.setAxisAngle(quat.create(), [0, 1, 0], yRadians);
+    const rotZ = quat.setAxisAngle(quat.create(), [0, 0, 1], zRadians);
+
+    // Apply new rotations to the existing rotation.
+    // Order matters: Apply Z, then Y, then X to current rotation (for extrinsic XYZ rotations)
+    // Or multiply in desired order for intrinsic rotations.
+    // For general object rotation, apply to current quaternion:
+    quat.multiply(this._rotation, this._rotation, rotX);
+    quat.multiply(this._rotation, this._rotation, rotY);
+    quat.multiply(this._rotation, this._rotation, rotZ);
+
     this.updateModelMatrix();
   }
 
@@ -53,16 +78,12 @@ export class Transform {
   }
 
   public updateModelMatrix() {
-    mat4.identity(this._modelMatrix);
-    // Correct Order: Scale -> Rotate -> Translate
-    mat4.scale(this._modelMatrix, this._modelMatrix, this._scale); // Scale first
-    mat4.rotateX(this._modelMatrix, this._modelMatrix, this._rotation[0]);
-    mat4.rotateY(this._modelMatrix, this._modelMatrix, this._rotation[1]);
-    mat4.rotateZ(this._modelMatrix, this._modelMatrix, this._rotation[2]);
-    mat4.translate(this._modelMatrix, this._modelMatrix, this._position); // Translate last
+    // Use mat4.fromRotationTranslationScale to build the matrix efficiently
+    // This function automatically handles the correct order: Scale -> Rotate -> Translate
+    mat4.fromRotationTranslationScale(this._modelMatrix, this._rotation, this._position, this._scale);
   }
 
-  // --- Local Unit Vector Getters ---
+  // --- Local Unit Vector Getters (These are correct) ---
 
   /**
    * Returns the object's local Right (positive X) direction in world space.

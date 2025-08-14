@@ -25,7 +25,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   override initialize(): void {
     this.gl.enable(this.gl.DEPTH_TEST);
-    // this.gl.enable(this.gl.CULL_FACE);
+    this.gl.enable(this.gl.CULL_FACE);
     this.gl.depthFunc(this.gl.LESS);
     this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
@@ -54,6 +54,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected setShaderVariables() {
     const camera = Camera.mainCamera;
     const mvpMatrix = mat4.create();
+    this.parent.transform.updateModelMatrix();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);

@@ -42,6 +42,8 @@ export class Scene extends GlEntity {
   public override update(ellapsed: number): void {
     this.camera.update(ellapsed)
     for (const object of this.objects) {
+      // const t  = object.transform;
+      // t.rotate(1*ellapsed,2*ellapsed,0);
       object.update(ellapsed);
     }
   }
