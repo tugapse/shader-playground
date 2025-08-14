@@ -24,13 +24,16 @@ import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 
 
 class moveBehaviour extends EntityBehaviour {
-  offset = 15;
-  speed = 0.08;
+  offset = 5;
+  speed = 0.01;
   distance = 15;
+  override initialize(): void {
+    this.parent.transform.translate(0, -2, 0);
+  }
   public override update(ellapsed: number): void {
-    const x = this.offset * Math.sin(this.distance) * this.speed;
+    const x = this.offset * Math.cos(this.distance) * this.speed;
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
-    this.parent.transform.translate(x, 0, 0);
+    this.parent.transform.translate(x,x*0.2,0);
     this.parent.transform.updateModelMatrix();
     this.distance += this.speed;
   }
@@ -80,22 +83,22 @@ export class App implements AfterViewInit, OnDestroy {
 
     const dlight = new DirectionalLight("Directional light");
     let dir = vec3.create();
-    dlight.direction = vec3.normalize(dir, vec3.fromValues(-100, -180, 0));
-    dlight.color = vec4.fromValues(1, 0, 1, 1)
+    dlight.direction = vec3.normalize(dir, vec3.fromValues(-100, 180, 0));
+    dlight.color = vec4.fromValues(1, 1, 1, 1)
     this.scene.addEntity(dlight);
 
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 2, 2);
     plight.addBehaviour(new moveBehaviour(plight));
-    plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 }
-    plight.color = vec4.fromValues(0.2, 0, 1, 1);
+    plight.attenuation = { constant: 2, linear: 0.1, quadratic: 0.005 }
+    plight.color = vec4.fromValues(0.2, 0, 3, 1);
     this.scene.addEntity(plight);
 
     const cube = this.createPrimitive("cube", new CubePrimitive());
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
-    // cube.addBehaviour(new moveBehaviour(cube));
+    cube.addBehaviour(new moveBehaviour(cube));
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
     this.scene.addEntity(cube);
 
