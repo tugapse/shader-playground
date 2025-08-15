@@ -41,7 +41,6 @@ export class LitShader extends Shader {
     if (!this.material.normalTex && this.material.normalTexUrl) {
       this.material.normalTex = EngineCache.getTexture(this.material.normalTexUrl,this.gl)
     }else if(!this.material.normalTex && !this.material.normalTexUrl){
-      console.debug("Added white normal texture")
       this.material.normalTex = Texture.getDefaultWhiteTexture(this.gl);
     }
   }

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
-import { Mesh, MeshData } from '../engine/core/mesh';
+import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { Transform } from '../engine/core/transform';
 import { QuadPrimitive } from '../engine/primitives/quad';
 import { Canvas } from "./components/canvas/canvas";
@@ -20,16 +20,18 @@ import { CubePrimitive } from '@engine/primitives/cube';
 
 
 class moveBehaviour extends EntityBehaviour {
-  offset = 5;
-  speed = 0.01;
-  distance = 15;
+  offset = 0;
+  speed = 0.005;
+  distance = 1;
   override initialize(): void {
-    this.parent.transform.translate(0, 5, 0);
+    // this.parent.transform.translate(0, 0, 0);
   }
   public override update(ellapsed: number): void {
-    const x = this.offset * Math.sin(this.distance) * this.speed;
+    const x = Math.sin(this.distance) * this.speed;
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
-    this.parent.transform.translate(0,x,0);
+    // this.parent.transform.translate(0, x, 0);
+
+    this.parent.transform.rotate(0,1,1)
     this.parent.transform.updateModelMatrix();
     this.distance += this.speed;
   }
@@ -71,55 +73,29 @@ export class App implements AfterViewInit, OnDestroy {
     if (this.started) return;
     this.started = true;
 
-    const ambient = new Light("Ambient Light");
-    this.scene.addEntity(ambient);
-
-    const dlight = new DirectionalLight("Directional light");
-    let dir = vec3.create();
-    dlight.direction = vec3.normalize(dir, vec3.fromValues(-100, 180, 0));
-    dlight.color = vec4.fromValues(1, 1, 1, 1)
-    this.scene.addEntity(dlight);
-
-
-    const plight = new PointLight("Point light");
-    plight.transform.translate(0, -1, 0);
-    plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 }
-    plight.color = vec4.fromValues(0, 0, 2, 1);
-    this.scene.addEntity(plight);
-
-   const plight1 = new PointLight("Point light");
-    plight1.transform.translate(0, 1, 1);
-    // plight1.addBehaviour(new moveBehaviour());
-    plight1.attenuation = { constant: 1, linear: 0.01, quadratic: 0.005 }
-    plight1.color = vec4.fromValues(1, 0, 0, 1);
-    this.scene.addEntity(plight1);
-
+    this.createLights();
 
     const cubePRimitive = new CubePrimitive();
-    const cube = this.createPrimitive("cube", cubePRimitive );
+    const cube = this.createPrimitive("cube", cubePRimitive);
     const cubePos = vec3.create();
-    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, 2.5);
-    // cube.addBehaviour(new moveBehaviour(cube));
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, -2.5);
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
-    // const renderer = cube.getBehaviour(RenderMeshBehaviour);
-    // if(renderer){
-    //   renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
-    //   renderer.shader.recompile();
-    // }
+
     this.scene.addEntity(cube);
 
 
-    const torusPrimitive = await MeshData.torusPrimitive();
-    const cube1 = this.createPrimitive("cube1", torusPrimitive );
-    const cube1Pos = vec3.create();
-    cube1.addBehaviour(new moveBehaviour());
-    cube1.transform.setPosition(cube1Pos[0], cube1Pos[1], cube1Pos[2]);
-    // const renderer = cube.getBehaviour(RenderMeshBehaviour);
+    const torusPrimitive = await createTorusPrimitive();
+    const torus = this.createPrimitive("torus", torusPrimitive);
+    const torusPos = vec3.create();
+    vec3.scaleAndAdd(torusPos,torusPos,torus.transform.right,2.8);
+    // torus.addBehaviour(new moveBehaviour());
+    torus.transform.setPosition(torusPos[0], torusPos[1], torusPos[2]);
+    // const renderer = torus.getBehaviour(RenderMeshBehaviour);
     // if(renderer){
     //   renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
     //   renderer.shader.recompile();
     // }
-    this.scene.addEntity(cube1);
+    this.scene.addEntity(torus);
 
     const quad = this.createPrimitive("quad", new QuadPrimitive());
     const quadPos = vec3.create();
@@ -130,12 +106,39 @@ export class App implements AfterViewInit, OnDestroy {
 
     const sphere = this.createPrimitive("sphere", new SpherePrimitive());
     const spherePos = vec3.create();
-    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.left  , 2.5);
+    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
+    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.up, 2.5);
     sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
     this.scene.addEntity(sphere);
 
     await this.addMonkeyObj();
 
+  }
+
+  private createLights() {
+    const ambient = new Light("Ambient Light");
+
+    const dlight = new DirectionalLight("Directional light");
+    dlight.addBehaviour(new moveBehaviour());
+    let dir = vec3.create();
+    dlight.direction = vec3.normalize(dir, vec3.fromValues(-0, 180, 30));
+    dlight.color = vec4.fromValues(0.7, 0.7, 0.7, 1);
+
+    const plight = new PointLight("Point light");
+    plight.addBehaviour(new moveBehaviour());
+    plight.transform.translate(0, -1, 0);
+    plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 };
+    plight.color = vec4.fromValues(0, 0, 2, 1);
+
+    const plight1 = new PointLight("Point light 1");
+    plight1.transform.translate(0, 1, 1);
+    plight1.attenuation = { constant: 1, linear: 0.01, quadratic: 0.005 };
+    plight1.color = vec4.fromValues(1, 0, 0, 1);
+
+    this.scene.addEntity(ambient);
+    this.scene.addEntity(dlight);
+    this.scene.addEntity(plight);
+    this.scene.addEntity(plight1);
   }
 
   private async addMonkeyObj() {
