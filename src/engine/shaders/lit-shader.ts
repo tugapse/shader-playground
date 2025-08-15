@@ -2,6 +2,7 @@ import { LitMaterial } from "@engine/materials/lit-material";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms";
 import { Texture } from "../materials/texture";
 import { Shader } from "./shader";
+import { EngineCache } from "@engine/core/storage";
 export class LitShader extends Shader {
 
 
@@ -30,23 +31,18 @@ export class LitShader extends Shader {
   }
 
   private checkAndLoadTextures() {
+
     if (!this.material.mainTex && this.material.mainTexUrl) {
-      this.material.mainTex = new Texture(this.gl);
-      this.material.mainTex.load(this.material.mainTexUrl);
-    } else if (!this.material.mainTex?.isImageLoaded && this.material.mainTexUrl) {
-      this.material.mainTex.load(this.material.mainTexUrl);
+      this.material.mainTex = EngineCache.getTexture(this.material.mainTexUrl,this.gl)
     }else if(!this.material.mainTex && !this.material.mainTexUrl){
-      this.material.mainTex = Texture.createDefaultWhiteTexture(this.gl);
+      this.material.mainTex = Texture.getDefaultWhiteTexture(this.gl);
     }
 
     if (!this.material.normalTex && this.material.normalTexUrl) {
-      this.material.normalTex = new Texture(this.gl);
-      this.material.normalTex.load(this.material.normalTexUrl);
-    } else if (!this.material.normalTex?.isImageLoaded && this.material.normalTexUrl) {
-      this.material.normalTex.load(this.material.normalTexUrl);
+      this.material.normalTex = EngineCache.getTexture(this.material.normalTexUrl,this.gl)
     }else if(!this.material.normalTex && !this.material.normalTexUrl){
       console.debug("Added white normal texture")
-      this.material.normalTex = Texture.createDefaultWhiteTexture(this.gl);
+      this.material.normalTex = Texture.getDefaultWhiteTexture(this.gl);
     }
   }
 }

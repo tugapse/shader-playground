@@ -191,6 +191,7 @@ export class Shader {
     if (!this.shaderProgram || !this.initialized) {
       return;
     }
+
     this.gl.useProgram(this.shaderProgram);
   }
 

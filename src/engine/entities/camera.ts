@@ -30,7 +30,6 @@ export class Camera extends GlEntity {
   }
 
   override initialize(): void {
-    // The projection matrix needs to be updated whenever aspect ratio changes
     this.updateProjectionMatrix();
     this.updateViewMatrix();
     super.initialize();

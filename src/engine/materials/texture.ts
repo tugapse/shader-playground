@@ -15,7 +15,7 @@ export class Texture {
 
   constructor(private gl: WebGLRenderingContext) { }
 
-  public static createDefaultWhiteTexture(gl: WebGLRenderingContext): Texture {
+  public static getDefaultWhiteTexture(gl: WebGLRenderingContext): Texture {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
 

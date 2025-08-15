@@ -2,8 +2,8 @@ import { GlEntity } from "../entities/entity";
 
 export abstract class EntityBehaviour {
 
-
-  constructor(public parent: GlEntity){}
+  public parent!:GlEntity;
+  constructor(){}
 
   public initialize():void{}
   public update(ellapsed:number):void{}

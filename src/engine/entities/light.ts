@@ -19,7 +19,6 @@ export class Light extends GlEntity {
   }
 }
 
-// Example Light Structures
 export class DirectionalLight extends Light {
 
   public direction!: vec3;

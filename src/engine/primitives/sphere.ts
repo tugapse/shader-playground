@@ -1,7 +1,7 @@
 // src/primitives/SpherePrimitive.ts
 
 import { vec2, vec3 } from "gl-matrix";
-import { MeshData } from "../core/mesh";
+import { MeshData } from "@engine/core/mesh";
 
 export class SpherePrimitive extends MeshData {
   constructor(radius: number = 1.0, slices: number = 32, stacks: number = 16) {

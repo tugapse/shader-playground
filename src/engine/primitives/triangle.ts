@@ -1,6 +1,6 @@
 // src/primitives/TrianglePrimitive.ts
 import { vec2, vec3 } from "gl-matrix";
-import { MeshData } from "../core/mesh";
+import { MeshData } from "@engine/core/mesh";
 
 export class TrianglePrimitive extends MeshData {
   constructor() {

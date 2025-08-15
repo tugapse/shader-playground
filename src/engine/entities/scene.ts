@@ -25,7 +25,7 @@ export class Scene extends GlEntity {
   constructor() {
     super("Scene");
     this._camera = new Camera();
-    this.camera.behaviours.push(new CameraFlyBehaviour(this.camera))
+    this.camera.addBehaviour(new CameraFlyBehaviour())
     this.camera.initialize()
 
     this._objects = [];
@@ -45,7 +45,7 @@ export class Scene extends GlEntity {
   }
 
   public override update(ellapsed: number): void {
-        this.camera.update(ellapsed)
+    this.camera.update(ellapsed)
     for (const object of this.lights) {
       object.update(ellapsed);
     }

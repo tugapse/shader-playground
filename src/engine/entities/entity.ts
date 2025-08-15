@@ -7,10 +7,10 @@ import { Scene } from "./scene";
 export class GlEntity {
 
   public scene!: Scene;
-  public behaviours: EntityBehaviour[] = []
   public active: boolean = true;
   public tag: string = "Entity";
   protected _initialized = false;
+  protected behaviours: EntityBehaviour[] = []
 
   constructor(public name: String, public transform: Transform = new Transform()) { }
 
@@ -48,6 +48,7 @@ export class GlEntity {
   public addBehaviour(behaviour: EntityBehaviour) {
     if(this._initialized)
       behaviour.initialize();
+    behaviour.parent = this;
     this.behaviours.push(behaviour);
   }
 

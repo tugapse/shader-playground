@@ -1,16 +1,14 @@
-import { mat4, vec2, vec3, mat3 } from "gl-matrix"; // Added mat3 import
-import { EntityBehaviour } from "./entity-behaviour";
-import { Mesh } from "../core/mesh";
+import { Mesh } from "@engine/core/mesh";
+import { DirectionalLight, Light, LightType, PointLight, SpotLight } from "@engine/entities/light"; // Assuming correct path and types
+import { LitMaterial } from "@engine/materials/lit-material";
+import { LitShader } from "@engine/shaders/lit-shader"; // Assuming correct path
+import { mat3, mat4, vec3 } from "gl-matrix"; // Added mat3 import
 import { CanvasViewport } from "../core/canvas-viewport";
+import { Camera } from "../entities/camera";
+import { ShaderUniformsEnum } from "../enums/shader-uniforms";
 import { ColorMaterial } from "../materials/color-material";
 import { Shader } from "../shaders/shader";
-import { ShaderUniformsEnum } from "../enums/shader-uniforms";
-import { GlEntity } from "../entities/entity";
-import { Camera } from "../entities/camera";
-import { LitShader } from "@engine/shaders/lit-shader"; // Assuming correct path
-import { DirectionalLight, Light, LightType, PointLight, SpotLight } from "@engine/entities/light"; // Assuming correct path and types
-import { Texture } from "@engine/materials/texture"; // Assuming Texture class exists
-import { LitMaterial } from "@engine/materials/lit-material";
+import { EntityBehaviour } from "./entity-behaviour";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
@@ -26,8 +24,8 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected tangentAttributeLocation: GLint = -1;
   protected bitangentAttributeLocation: GLint = -1;
 
-  constructor(public override parent: GlEntity, protected gl: WebGLRenderingContext) {
-    super(parent)
+  constructor( protected gl: WebGLRenderingContext) {
+    super()
   }
 
   override initialize(): void {
@@ -109,21 +107,20 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected setCameraMatrices() {
     const camera = Camera.mainCamera;
     const mvpMatrix = mat4.create();
-    this.parent.transform.updateModelMatrix(); // Ensure modelMatrix is up-to-date
+    this.parent.transform.updateModelMatrix();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
   }
 
   protected setModelMatrices() {
-    // Set the world matrix (equivalent to u_worldMatrix in the shader)
+
     if (this.worldMatrixUniformLocation) {
       this.gl.uniformMatrix4fv(this.worldMatrixUniformLocation, false, this.parent.transform.modelMatrix);
     } else {
         console.warn("u_worldMatrix uniform location not found.");
     }
 
-    // Calculate and set the world inverse transpose matrix (for transforming normals/tangents)
     if (this.worldInverseTransposeMatrixUniformLocation) {
       const worldInverseTransposeMatrix = mat4.create(); // Start with a mat4
       mat4.invert(worldInverseTransposeMatrix, this.parent.transform.modelMatrix);

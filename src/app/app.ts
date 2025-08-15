@@ -7,17 +7,16 @@ import { Canvas } from "./components/canvas/canvas";
 
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
+import { EngineCache } from '@engine/core/storage';
 import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
 import { Scene } from '@engine/entities/scene';
 import { LitMaterial } from '@engine/materials/lit-material';
-import { ObjParser } from '@engine/parsers/obj-parser';
-import { CubePrimitive } from '@engine/primitives/cube';
 import { SpherePrimitive } from '@engine/primitives/sphere';
-import { TrianglePrimitive } from '@engine/primitives/triangle';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { vec3, vec4 } from 'gl-matrix';
+import { CubePrimitive } from '@engine/primitives/cube';
 
 
 class moveBehaviour extends EntityBehaviour {
@@ -30,7 +29,7 @@ class moveBehaviour extends EntityBehaviour {
   public override update(ellapsed: number): void {
     const x = this.offset * Math.sin(this.distance) * this.speed;
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
-    this.parent.transform.translate(-x,0,0);
+    this.parent.transform.translate(0,x,0);
     this.parent.transform.updateModelMatrix();
     this.distance += this.speed;
   }
@@ -47,10 +46,8 @@ export class App implements AfterViewInit, OnDestroy {
   private gl!: WebGLRenderingContext;
   public scene!: Scene;
   private started = false;
-  private objPArser!: ObjParser
 
   ngAfterViewInit(): void {
-    this.objPArser = new ObjParser();
     this.scene = new Scene();
     this.scene.name = "Main Scene";
     this.loadAssets().then(() => {
@@ -85,43 +82,55 @@ export class App implements AfterViewInit, OnDestroy {
 
 
     const plight = new PointLight("Point light");
-    plight.transform.translate(0, 2, 2);
+    plight.transform.translate(0, -1, 0);
     plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 }
     plight.color = vec4.fromValues(0, 0, 2, 1);
     this.scene.addEntity(plight);
 
    const plight1 = new PointLight("Point light");
-    plight1.transform.translate(0, 0, 1);
-    plight1.addBehaviour(new moveBehaviour(plight1));
+    plight1.transform.translate(0, 1, 1);
+    // plight1.addBehaviour(new moveBehaviour());
     plight1.attenuation = { constant: 1, linear: 0.01, quadratic: 0.005 }
     plight1.color = vec4.fromValues(1, 0, 0, 1);
     this.scene.addEntity(plight1);
 
-    const cube = this.createPrimitive("cube", new CubePrimitive());
+
+    const cubePRimitive = new CubePrimitive();
+    const cube = this.createPrimitive("cube", cubePRimitive );
     const cubePos = vec3.create();
-    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, 2.5);
     // cube.addBehaviour(new moveBehaviour(cube));
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
+    // const renderer = cube.getBehaviour(RenderMeshBehaviour);
+    // if(renderer){
+    //   renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
+    //   renderer.shader.recompile();
+    // }
     this.scene.addEntity(cube);
 
-    const quad = this.createPrimitive("quad", new QuadPrimitive());
-    this.scene.addEntity(quad);
 
+    const torusPrimitive = await MeshData.torusPrimitive();
+    const cube1 = this.createPrimitive("cube1", torusPrimitive );
+    const cube1Pos = vec3.create();
+    cube1.addBehaviour(new moveBehaviour());
+    cube1.transform.setPosition(cube1Pos[0], cube1Pos[1], cube1Pos[2]);
+    // const renderer = cube.getBehaviour(RenderMeshBehaviour);
+    // if(renderer){
+    //   renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
+    //   renderer.shader.recompile();
+    // }
+    this.scene.addEntity(cube1);
+
+    const quad = this.createPrimitive("quad", new QuadPrimitive());
     const quadPos = vec3.create();
     vec3.scaleAndAdd(quadPos, quadPos, quad.transform.left, 2.5);
     vec3.scaleAndAdd(quadPos, quadPos, quad.transform.up, 2.5);
     quad.transform.setPosition(quadPos[0], quadPos[1], quadPos[2]);
-
-    const tri = this.createPrimitive("tri", new TrianglePrimitive());
-    const triPos = vec3.create();
-    vec3.scaleAndAdd(triPos, triPos, tri.transform.up, 2.5);
-    tri.transform.setPosition(triPos[0], triPos[1], triPos[2]);
-    this.scene.addEntity(tri);
-
+    this.scene.addEntity(quad);
 
     const sphere = this.createPrimitive("sphere", new SpherePrimitive());
     const spherePos = vec3.create();
-    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
+    vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.left  , 2.5);
     sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
     this.scene.addEntity(sphere);
 
@@ -130,12 +139,10 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private async addMonkeyObj() {
-    const obj = await fetch("assets/objs/monkey.obj");
-    const text = await obj.text();
-    const cubeFromObj = this.objPArser.parse(text);
-    const cubePrimitive = this.createPrimitive("Cube obj", cubeFromObj);
+    const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
+    const monkeyPRimitive = this.createPrimitive("Monkey", monkeyObj);
 
-    this.scene.addEntity(cubePrimitive);
+    this.scene.addEntity(monkeyPRimitive);
   }
 
   private createPrimitive(
@@ -143,8 +150,8 @@ export class App implements AfterViewInit, OnDestroy {
     material = new LitMaterial(),
     shader = new LitShader(this.gl, material)): GlEntity {
 
-    const entity = new GlEntity(name, new Transform());
-    const meshRenderer: RenderMeshBehaviour = new RenderMeshBehaviour(entity, this.gl);
+    const entity = new GlEntity(name);
+    const meshRenderer: RenderMeshBehaviour = new RenderMeshBehaviour(this.gl);
     const mesh = new Mesh()
 
     mesh.meshData = meshData
@@ -153,7 +160,7 @@ export class App implements AfterViewInit, OnDestroy {
     meshRenderer.material = material;
     meshRenderer.shader = shader;
 
-    entity.behaviours.push(meshRenderer);
+    entity.addBehaviour(meshRenderer);
 
     return entity;
   }

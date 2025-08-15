@@ -1,5 +1,6 @@
 
 import { vec2, vec3 } from "gl-matrix";
+import { EngineCache } from "./storage";
 
 /**
  * @class MeshData
@@ -13,6 +14,11 @@ export class MeshData {
   public indices: number[];
   public tangents?: vec3[];
   public bitangents?: vec3[];
+
+
+  public static async torusPrimitive() {
+    return EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
+  }
 
   /**
    * @constructor
@@ -31,6 +37,7 @@ export class MeshData {
     this.normals = normals;
     this.uvs = uvs;
     this.indices = indices;
+    this.calculateTangentsAndBitangents();
   }
 
   /**

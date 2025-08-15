@@ -1,7 +1,7 @@
 // src/primitives/QuadPrimitive.ts
 
 import { vec2, vec3 } from "gl-matrix";
-import { MeshData } from "../core/mesh";
+import { MeshData } from "@engine/core/mesh";
 
 export class QuadPrimitive extends MeshData {
   constructor(size: number = 2.0) {
