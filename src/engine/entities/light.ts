@@ -15,7 +15,7 @@ export class Light extends GlEntity {
   public color: vec4;
   constructor(name: string) {
     super(name);
-    this.color = vec4.fromValues(1, 1, 1, 1);
+    this.color = vec4.fromValues(0.2,0.2,0.2, 0.1);
   }
 }
 

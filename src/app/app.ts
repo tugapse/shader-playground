@@ -2,25 +2,22 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@ang
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
 import { Mesh, MeshData } from '../engine/core/mesh';
 import { Transform } from '../engine/core/transform';
-import { UnlitMaterial } from '../engine/materials/unlit-material';
 import { QuadPrimitive } from '../engine/primitives/quad';
-import { Shader } from '../engine/shaders/shader';
 import { Canvas } from "./components/canvas/canvas";
 
-import { Scene } from '@engine/entities/scene';
-import { GlEntity } from '@engine/entities/entity';
-import { CubePrimitive } from '@engine/primitives/cube';
-import { SpherePrimitive } from '@engine/primitives/sphere';
-import { vec3, vec4 } from 'gl-matrix';
-import { ObjParser } from '@engine/parsers/obj-parser';
-import { TrianglePrimitive } from '@engine/primitives/triangle';
+import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { Camera } from '@engine/entities/camera';
-import { UnlitShader } from '@engine/shaders/unlit-shader';
-import { LitShader } from '@engine/shaders/lit-shader';
-import { LitMaterial } from '@engine/materials/lit-material';
+import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
-import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
+import { Scene } from '@engine/entities/scene';
+import { LitMaterial } from '@engine/materials/lit-material';
+import { ObjParser } from '@engine/parsers/obj-parser';
+import { CubePrimitive } from '@engine/primitives/cube';
+import { SpherePrimitive } from '@engine/primitives/sphere';
+import { TrianglePrimitive } from '@engine/primitives/triangle';
+import { LitShader } from '@engine/shaders/lit-shader';
+import { vec3, vec4 } from 'gl-matrix';
 
 
 class moveBehaviour extends EntityBehaviour {
@@ -28,12 +25,12 @@ class moveBehaviour extends EntityBehaviour {
   speed = 0.01;
   distance = 15;
   override initialize(): void {
-    this.parent.transform.translate(0, -2, 0);
+    this.parent.transform.translate(0, 5, 0);
   }
   public override update(ellapsed: number): void {
-    const x = this.offset * Math.cos(this.distance) * this.speed;
+    const x = this.offset * Math.sin(this.distance) * this.speed;
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
-    this.parent.transform.translate(x,x*0.2,0);
+    this.parent.transform.translate(-x,0,0);
     this.parent.transform.updateModelMatrix();
     this.distance += this.speed;
   }
@@ -78,7 +75,6 @@ export class App implements AfterViewInit, OnDestroy {
     this.started = true;
 
     const ambient = new Light("Ambient Light");
-    ambient.color = vec4.fromValues(0.2, 0.2, 0.2, 1)
     this.scene.addEntity(ambient);
 
     const dlight = new DirectionalLight("Directional light");
@@ -90,15 +86,21 @@ export class App implements AfterViewInit, OnDestroy {
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 2, 2);
-    plight.addBehaviour(new moveBehaviour(plight));
-    plight.attenuation = { constant: 2, linear: 0.1, quadratic: 0.005 }
-    plight.color = vec4.fromValues(0.2, 0, 3, 1);
+    plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 }
+    plight.color = vec4.fromValues(0, 0, 2, 1);
     this.scene.addEntity(plight);
+
+   const plight1 = new PointLight("Point light");
+    plight1.transform.translate(0, 0, 1);
+    plight1.addBehaviour(new moveBehaviour(plight1));
+    plight1.attenuation = { constant: 1, linear: 0.01, quadratic: 0.005 }
+    plight1.color = vec4.fromValues(1, 0, 0, 1);
+    this.scene.addEntity(plight1);
 
     const cube = this.createPrimitive("cube", new CubePrimitive());
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
-    cube.addBehaviour(new moveBehaviour(cube));
+    // cube.addBehaviour(new moveBehaviour(cube));
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
     this.scene.addEntity(cube);
 
@@ -132,11 +134,7 @@ export class App implements AfterViewInit, OnDestroy {
     const text = await obj.text();
     const cubeFromObj = this.objPArser.parse(text);
     const cubePrimitive = this.createPrimitive("Cube obj", cubeFromObj);
-    const renderer = cubePrimitive.getBehaviour(RenderMeshBehaviour);
-    if (renderer) {
-      renderer.shader = new LitShader(this.gl, new LitMaterial())
-      renderer.material.color = vec4.fromValues(1, 1, 1, 1);
-    }
+
     this.scene.addEntity(cubePrimitive);
   }
 

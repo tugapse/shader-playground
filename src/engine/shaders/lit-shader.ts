@@ -44,6 +44,9 @@ export class LitShader extends Shader {
       this.material.normalTex.load(this.material.normalTexUrl);
     } else if (!this.material.normalTex?.isImageLoaded && this.material.normalTexUrl) {
       this.material.normalTex.load(this.material.normalTexUrl);
+    }else if(!this.material.normalTex && !this.material.normalTexUrl){
+      console.debug("Added white normal texture")
+      this.material.normalTex = Texture.createDefaultWhiteTexture(this.gl);
     }
   }
 }

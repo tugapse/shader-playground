@@ -68,12 +68,12 @@ export class ObjParser {
     // After parsing all lines, consolidate data for drawing
     this.consolidateMeshData();
 
-    return {
-      vertices: this.outputVertices,
-      normals: this.outputNormals,
-      uvs: this.outputUVs,
-      indices: this.outputIndices,
-    };
+    return new MeshData(
+      this.outputVertices,
+      this.outputNormals,
+      this.outputUVs,
+      this.outputIndices,
+    );
   }
 
   private resetParser(): void {

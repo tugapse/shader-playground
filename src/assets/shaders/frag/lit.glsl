@@ -9,6 +9,7 @@ uniform vec4 u_matColor;
 uniform vec2 u_uvScale;
 uniform vec2 u_uvOffset;
 uniform sampler2D u_mainTex;
+uniform sampler2D u_normalMap; // New: Uniform for the normal map texture
 
 uniform vec4 u_ambientLight; // Ambient light color
 
@@ -38,8 +39,11 @@ uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 
 
 in vec2 v_uv;
-in vec3 v_normal;
+in vec3 v_normal; // Interpolated normal (from vertex shader)
 in vec3 v_position; // Crucial for point and spot lights: fragment's world position
+// New: Tangent and Bitangent vectors from the vertex shader for TBN matrix
+in vec3 v_tangent;
+in vec3 v_bitangent;
 
 out vec4 fragColor;
 
@@ -49,8 +53,24 @@ void main() {
   vec4 sampledTexColor = texture(u_mainTex, uv);
   vec4 baseColor = sampledTexColor * u_matColor;
 
-  // Re-normalize normal after interpolation, needed for all types of lights
-  vec3 normal = normalize(v_normal);
+  // --- Normal Mapping Logic ---
+  // 1. Sample the normal map and remap from [0, 1] to [-1, 1]
+  // Normal maps store vectors with components in [0, 1] range, centered at 0.5 (representing 0).
+  vec3 normalFromMap = texture(u_normalMap, uv).rgb;
+  normalFromMap = normalFromMap * 2.0 - 1.0; // Remap to [-1, 1] range
+
+  // 2. Construct the TBN matrix (Tangent, Bitangent, Normal)
+  // These vectors (v_tangent, v_bitangent, v_normal) are already in world space from the vertex shader.
+  // The matrix transforms a vector from tangent space (normal map's space) to world space.
+  mat3 tbnMatrix = mat3(
+    normalize(v_tangent),    // Tangent vector (X-axis of tangent space)
+    normalize(v_bitangent),  // Bitangent vector (Y-axis of tangent space)
+    normalize(v_normal)      // Normal vector (Z-axis of tangent space)
+  );
+
+  // 3. Transform the normal from the normal map (tangent space) to world space
+  // This is the perturbed normal that will be used for lighting calculations.
+  vec3 finalNormal = normalize(tbnMatrix * normalFromMap);
 
   // --- Ambient Lighting Contribution ---
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor.rgb;
@@ -58,7 +78,8 @@ void main() {
   // --- Directional Lighting Contributions ---
   for (int i = 0; i < u_numDirectionalLights; ++i) {
     vec3 lightDir = normalize(u_directionalLightDirections[i]);
-    float diffuseIntensity = max(dot(normal, lightDir), 0.0);
+    // Use the finalNormal for the dot product to get the diffuse intensity
+    float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
     totalLitColorRGB += (baseColor.rgb * u_directionalLightColors[i] * diffuseIntensity);
   }
 
@@ -68,7 +89,8 @@ void main() {
     float distancePoint = length(lightVecPoint);
     vec3 pointLightDir = normalize(lightVecPoint);
 
-    float pointDiffuseIntensity = max(dot(normal, pointLightDir), 0.0);
+    // Use the finalNormal for the dot product
+    float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
 
     float attenuationPoint = 1.0 / (
       u_pointLightConstantAtts[i] +
@@ -95,17 +117,16 @@ void main() {
 
     // Compare this direction with the spotlight's actual direction
     // u_spotLightDirections[i] points FROM light source. spotLightDirFromFrag points TO light source.
-    // So, we use dot(spotLightDirFromFrag, -normalize(u_spotLightDirections[i]))
-    // Assuming u_spotLightDirections[i] is already normalized on CPU:
+    // So, we use dot(spotLightDirFromFrag, -u_spotLightDirections[i]) assuming u_spotLightDirections is already normalized.
     float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
 
     float coneFactor = smoothstep(u_spotLightOuterConeCos[i], u_spotLightInnerConeCos[i], angleCos);
 
-    float spotDiffuseIntensity = max(dot(normal, spotLightDirFromFrag), 0.0); // Diffuse calculation
+    // Use the finalNormal for the dot product
+    float spotDiffuseIntensity = max(dot(finalNormal, spotLightDirFromFrag), 0.0); // Diffuse calculation
 
     totalLitColorRGB += (baseColor.rgb * u_spotLightColors[i] * spotDiffuseIntensity * attenuationSpot * coneFactor);
   }
 
   fragColor = vec4(totalLitColorRGB, baseColor.a);
-
 }
