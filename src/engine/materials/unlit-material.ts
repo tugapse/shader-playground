@@ -4,7 +4,7 @@ import { Texture } from "./texture";
 
 export class UnlitMaterial extends Material {
   public color: vec4 = vec4.fromValues(1,1,1,1);
-  public mainTexUrl: string = "assets/images/wood-texture.jpg";
+  public mainTexUrl: string = "";
   public uvScale:vec2 = vec2.fromValues(1,1);
   public uvOffset: vec2 = vec2.create();
   public mainTex!: Texture;

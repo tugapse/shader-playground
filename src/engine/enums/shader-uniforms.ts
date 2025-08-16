@@ -5,10 +5,13 @@ export enum ShaderUniformsEnum{
   U_MAT_COLOR = "u_matColor",
   U_UV_SCALE = "u_uvScale",
   U_MAIN_TEX = "u_mainTex",
+  U_NORMAL_MAP = "u_normalMap",
   U_UV_OFFSET = "u_uvOffset",
   U_AMBIENT_LIGHT="u_ambientLight",
   U_MODEL_MATRIX = "u_modelMatrix",
   U_NORMAL_MATRIX = "u_normalMatrix",
-
-
+  U_WORLD_MATRIX = "u_worldMatrix",
+  U_WORLD_INVERSE_TRANSPOSE_MATRIX = "u_worldInverseTransposeMatrix",
+  A_TANGENT = "a_tangent",
+  A_BITANGENT = "a_tangent"
 }

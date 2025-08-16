@@ -29,7 +29,7 @@ class moveBehaviour extends EntityBehaviour {
   public override update(ellapsed: number): void {
     const x = Math.sin(this.distance) * this.speed;
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
-    // this.parent.transform.translate(0, x, 0);
+    this.parent.transform.translate(0, x, 0);
 
     this.parent.transform.rotate(0,1,1)
     this.parent.transform.updateModelMatrix();
@@ -87,14 +87,14 @@ export class App implements AfterViewInit, OnDestroy {
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive);
     const torusPos = vec3.create();
-    vec3.scaleAndAdd(torusPos,torusPos,torus.transform.right,2.8);
+    vec3.scaleAndAdd(torusPos,torusPos,torus.transform.right, 2.8);
     // torus.addBehaviour(new moveBehaviour());
     torus.transform.setPosition(torusPos[0], torusPos[1], torusPos[2]);
-    // const renderer = torus.getBehaviour(RenderMeshBehaviour);
-    // if(renderer){
-    //   renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
-    //   renderer.shader.recompile();
-    // }
+    const renderer = torus.getBehaviour(RenderMeshBehaviour);
+    if(renderer){
+      renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
+      renderer.shader.recompile();
+    }
     this.scene.addEntity(torus);
 
     const quad = this.createPrimitive("quad", new QuadPrimitive());
@@ -122,7 +122,7 @@ export class App implements AfterViewInit, OnDestroy {
     dlight.addBehaviour(new moveBehaviour());
     let dir = vec3.create();
     dlight.direction = vec3.normalize(dir, vec3.fromValues(-0, 180, 30));
-    dlight.color = vec4.fromValues(0.7, 0.7, 0.7, 1);
+    dlight.color = vec4.fromValues(0.3, 0.7, 0.3, 1);
 
     const plight = new PointLight("Point light");
     plight.addBehaviour(new moveBehaviour());

@@ -58,14 +58,11 @@ export class Canvas implements OnChanges {
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
-
     Mouse.mouseButtonDown[event.button] = true;
-    console.debug(event, Mouse.mouseButtonDown);
   }
 
   @HostListener('mouseup', ['$event'])
   onMouseUp(event: MouseEvent): void {
-
     Mouse.mouseButtonDown[event.button] = false;
     event.preventDefault();
   }

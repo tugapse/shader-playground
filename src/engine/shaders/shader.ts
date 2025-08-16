@@ -209,13 +209,10 @@ export class Shader {
     }
   }
 
-  // New: A helper function for setting mat3 uniforms
   public setMat3(name: string, value: mat3): void {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
       this.gl.uniformMatrix3fv(location, false, value);
-    } else {
-      console.warn(`Uniform location for ${name} not found or is null.`);
     }
   }
 
@@ -253,8 +250,6 @@ export class Shader {
       this.gl.activeTexture(this.gl.TEXTURE0 + textureIndex);
       this.gl.bindTexture(this.gl.TEXTURE_2D, texture.glTexture);
       this.gl.uniform1i(location, textureIndex);
-    } else {
-        console.warn(`Texture uniform location for ${name} not found or is null.`);
     }
   }
 
@@ -319,7 +314,6 @@ export class Shader {
     if (this.buffers.uv)
       this.gl.deleteBuffer(this.buffers.uv);
 
-    // New: Delete tangent and bitangent buffers
     if (this.buffers.tangent)
         this.gl.deleteBuffer(this.buffers.tangent);
 

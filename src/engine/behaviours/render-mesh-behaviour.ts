@@ -24,7 +24,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected tangentAttributeLocation: GLint = -1;
   protected bitangentAttributeLocation: GLint = -1;
 
-  constructor( protected gl: WebGLRenderingContext) {
+  constructor(protected gl: WebGLRenderingContext) {
     super()
   }
 
@@ -74,28 +74,27 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   protected getNormalMapLocations() {
     if (this.shader.shaderProgram) {
-      this.normalMapUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, 'u_normalMap');
-      this.worldMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, 'u_worldMatrix');
-      this.worldInverseTransposeMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, 'u_worldInverseTransposeMatrix');
-      this.tangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, 'a_tangent');
-      this.bitangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, 'a_bitangent');
+      this.normalMapUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_NORMAL_MAP);
+      this.worldMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_MATRIX);
+      this.worldInverseTransposeMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
+      this.tangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_TANGENT);
+      this.bitangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_BITANGENT);
     }
   }
 
   protected setShaderVariables() {
     this.setCameraMatrices();
-    this.setModelMatrices(); // Call setModelMatrices to set world and inverse transpose matrices
+    this.setModelMatrices();
     this.setLightInformation();
-    this.setNormalMapsInformation(); // This method now handles normal map texture and attributes
+    this.setNormalMapsInformation();
     this.shader.setfloat(ShaderUniformsEnum.U_TIME, this.time);
     this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [CanvasViewport.rendererWidth, CanvasViewport.rendererHeight]);
 
-    // This method likely loads standard uniforms like u_matColor and u_mainTex
     this.shader.loadDataIntoShader();
   }
 
   protected setNormalMapsInformation() {
-    const material  = this.material as LitMaterial;
+    const material = this.material as LitMaterial;
     // If a normal map texture is provided, bind and pass it
     if (material.normalTex && material.normalTex.glTexture && this.normalMapUniformLocation) {
       this.gl.activeTexture(this.gl.TEXTURE1); // Use texture unit 1 for normal map
@@ -117,10 +116,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     if (this.worldMatrixUniformLocation) {
       this.gl.uniformMatrix4fv(this.worldMatrixUniformLocation, false, this.parent.transform.modelMatrix);
-    } else {
-        console.warn("u_worldMatrix uniform location not found.");
     }
-
     if (this.worldInverseTransposeMatrixUniformLocation) {
       const worldInverseTransposeMatrix = mat4.create(); // Start with a mat4
       mat4.invert(worldInverseTransposeMatrix, this.parent.transform.modelMatrix);
@@ -131,8 +127,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       mat3.fromMat4(normalMatrixAsMat3, worldInverseTransposeMatrix);
 
       this.gl.uniformMatrix3fv(this.worldInverseTransposeMatrixUniformLocation, false, normalMatrixAsMat3);
-    } else {
-        console.warn("u_worldInverseTransposeMatrix uniform location not found.");
     }
   }
 
@@ -145,7 +139,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       if (ambientLight) {
         this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, ambientLight.color);
       } else {
-        this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, [0.1,0.1,0.1, 1]);
+        this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, [0.1, 0.1, 0.1, 1]);
       }
 
       this.createLightObjectInfo(lights);
