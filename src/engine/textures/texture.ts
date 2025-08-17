@@ -8,12 +8,12 @@ export enum TextureWrapMode {
 export class Texture {
 
 
-  private _image: HTMLImageElement | null = null;
-  private _glTexture: WebGLTexture | null = null;
-  private _isLoaded: boolean = false;
-  private _isLoading: boolean = false;
+  protected _image: HTMLImageElement | null = null;
+  protected _glTexture: WebGLTexture | null = null;
+  protected _isLoaded: boolean = false;
+  protected _isLoading: boolean = false;
 
-  constructor(private gl: WebGLRenderingContext) { }
+  constructor(protected gl: WebGLRenderingContext, protected textureUri?: string) { }
 
   public static getDefaultWhiteTexture(gl: WebGLRenderingContext): Texture {
     const texture = gl.createTexture();
@@ -36,15 +36,22 @@ export class Texture {
     return result;
   }
 
+  public setTextureUri(textureURi: string) {
+    this.textureUri = textureURi;
+  }
+
   /**
    * Loads an image from the given URL.
    * @param url The URL of the image to load.
    * @returns A Promise that resolves when the image is loaded.
    */
-  public async load(url: string): Promise<void> {
+  public async load(): Promise<void> {
     if (this._isLoading || this.isImageLoaded) return
     this._isLoading = true;
     return new Promise((resolve, reject) => {
+      if (!this.textureUri) {
+        reject(new Error(`Failed to load image. Please provide a texture url!`));
+      }
 
       this._image = new Image();
       this._image.onload = () => {
@@ -59,9 +66,9 @@ export class Texture {
         this._isLoading = true;
         this._isLoaded = false;
         this._image = null;
-        reject(new Error(`Failed to load image: ${url}. Error: ${error}`));
+        reject(new Error(`Failed to load image: ${this.textureUri!}. Error: ${error}`));
       };
-      this._image.src = url;
+      this._image.src = this.textureUri!;
     });
   }
 
@@ -70,7 +77,7 @@ export class Texture {
    * This should be called after the image has loaded and the WebGL context is available.
    * @param gl The WebGLRenderingContext.
    */
-  private createGLTexture(gl: WebGLRenderingContext): void {
+  protected createGLTexture(gl: WebGLRenderingContext): void {
     if (!this._isLoaded || !this._image) {
       console.warn("Image not loaded or image data is missing. Cannot create WebGL texture.");
       return;

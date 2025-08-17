@@ -1,11 +1,14 @@
-
 import { vec2, vec3 } from "gl-matrix";
-import { EngineCache } from "./storage";
+import { EngineCache } from "./storage"; // Assuming these imports are necessary for other parts of the class.
 
 
 export const createTorusPrimitive = async () => {
   return EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
 }
+export const createcilinderPrimitive = async () => {
+  return EngineCache.getMeshDataFromObj("assets/primitives/cilinder.obj");
+}
+
 /**
  * @class MeshData
  * @description Base class for geometric mesh data.
@@ -22,14 +25,107 @@ export class MeshData {
 
   constructor(
     vertices: vec3[],
-    normals: vec3[],
-    uvs: vec2[],
+    normals: vec3[] = [], // Make normals optional in constructor, as they can be generated
+    uvs: vec2[] = [],     // Make uvs optional in constructor
     indices: number[] = [],
   ) {
     this.vertices = vertices;
     this.normals = normals;
     this.uvs = uvs;
     this.indices = indices;
+  }
+
+  /**
+   * Calculates smooth normals and generates indices for the mesh based on its vertices. 📐
+   * If `this.indices` is not already set, it generates sequential indices assuming the vertices
+   * are ordered to form triangles (e.g., 3 vertices per triangle).
+   * It computes face normals and then averages them for vertex normals to create a smooth appearance.
+   * The calculated normals and indices are stored directly in `this.normals` and `this.indices`.
+   */
+  public calculateNormals(): void {
+    if (this.vertices.length === 0) {
+      console.warn("Cannot calculate normals/indices: Mesh data has no vertices.");
+      return;
+    }
+
+    const numVertices = this.vertices.length;
+
+    // Initialize normals array with zero vectors
+    this.normals = Array.from({ length: numVertices }, () => vec3.create());
+
+    // Initialize arrays to store the sum of face normals for each vertex
+    // and a counter for how many faces contribute to each vertex's normal.
+    // Using vec3.create() for sums to leverage gl-matrix operations directly.
+    const vertexNormalSums = Array.from({ length: numVertices }, () => vec3.create());
+    const vertexNormalCounts = new Array(numVertices).fill(0);
+
+    // Iterate through triangles using indices
+    // We step by 3 because each triangle uses 3 indices.
+    for (let i = 0; i < this.indices.length; i += 3) {
+        const i1 = this.indices[i];
+        const i2 = this.indices[i + 1];
+        const i3 = this.indices[i + 2];
+
+        // Ensure indices are valid to prevent out-of-bounds access
+        if (i1 >= numVertices || i2 >= numVertices || i3 >= numVertices) {
+            console.warn(`Invalid index found in triangle ${Math.floor(i/3)}: [${i1}, ${i2}, ${i3}]. Skipping triangle.`);
+            continue; // Skip to the next triangle
+        }
+
+        const p1 = this.vertices[i1];
+        const p2 = this.vertices[i2];
+        const p3 = this.vertices[i3];
+
+        // Calculate two edges of the triangle using gl-matrix vec3 functions
+        const edge1 = vec3.sub(vec3.create(), p2, p1);
+        const edge2 = vec3.sub(vec3.create(), p3, p1);
+
+        // Calculate the cross product to get the face normal
+        const faceNormal = vec3.create();
+        vec3.cross(faceNormal, edge1, edge2);
+        vec3.normalize(faceNormal, faceNormal); // Normalize the face normal
+
+        // Add this face normal to the sum for each of the three vertices of the triangle
+        vec3.add(vertexNormalSums[i1], vertexNormalSums[i1], faceNormal);
+        vertexNormalCounts[i1]++;
+
+        vec3.add(vertexNormalSums[i2], vertexNormalSums[i2], faceNormal);
+        vertexNormalCounts[i2]++;
+
+        vec3.add(vertexNormalSums[i3], vertexNormalSums[i3], faceNormal);
+        vertexNormalCounts[i3]++;
+    }
+
+    // Average the accumulated face normals for each vertex to get the smooth vertex normals
+    for (let i = 0; i < numVertices; i++) {
+        const sumNormal = vertexNormalSums[i];
+        const count = vertexNormalCounts[i];
+
+        if (count > 0) {
+            // Divide the sum by the count to get the average, then normalize
+            vec3.scale(this.normals[i], sumNormal, 1 / count);
+            vec3.normalize(this.normals[i], this.normals[i]);
+        } else {
+            // If a vertex is not part of any triangle (e.g., isolated vertex), set its normal to zero vector
+            vec3.set(this.normals[i], 0, 0, 0);
+        }
+    }
+  }
+
+  /**
+   * Inverts the direction of all normal vectors in the mesh. 🔄
+   * This is useful for flipping faces or correcting normal orientations.
+   */
+  public invertNormals(): void {
+    if (this.normals.length === 0) {
+      console.warn("No normals to invert: The normals array is empty.");
+      return;
+    }
+
+    for (let i = 0; i < this.normals.length; i++) {
+      vec3.negate(this.normals[i], this.normals[i]);
+    }
+    console.log("Normals inverted successfully.");
   }
 
   /**
@@ -50,7 +146,7 @@ export class MeshData {
         return;
     }
 
-    // FIX: Initialize arrays with unique vec3 instances
+    // Initialize arrays with unique vec3 instances
     const tangents = Array.from({ length: this.vertices.length }, () => vec3.create());
     const bitangents = Array.from({ length: this.vertices.length }, () => vec3.create());
 
@@ -80,7 +176,6 @@ export class MeshData {
       const denom = (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
 
       // Relax the epsilon for the determinant check
-      // A common value for epsilon in graphics is 1e-6 (0.000001) or 1e-7.
       const EPSILON = 0.000001;
       const f = (Math.abs(denom) < EPSILON) ? 0.0 : 1.0 / denom;
 
@@ -134,7 +229,7 @@ export class MeshData {
     this.bitangents = bitangents;
   }
 }
+
 export class Mesh {
   public meshData!: MeshData;
 }
-

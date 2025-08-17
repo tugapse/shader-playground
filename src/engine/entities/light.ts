@@ -1,14 +1,8 @@
-import { Transform } from "@engine/core/transform";
-import { GlEntity } from "./entity";
 import { vec3, vec4 } from "gl-matrix";
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { GlEntity } from "./entity";
+import { LightType } from "@engine/enums/light-type.enum";
 
-export enum LightType {
-  AMBIENT = 0,
-  DIRECTIONAL = 1,
-  POINT = 2,
-  SPOT = 3,
-}
+
 
 export class Light extends GlEntity {
   public lightType: LightType = LightType.AMBIENT;

@@ -1,7 +1,7 @@
 import { mat4, vec2, vec3, vec4, mat3 } from "gl-matrix"; // Added mat3 import
 import { Material } from "../materials/material";
-import { Texture } from "../materials/texture";
-import { ShaderUniformsEnum } from "../enums/shader-uniforms";
+import { Texture } from "../textures/texture";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { ColorMaterial } from "../materials/color-material";
 import { MeshData } from "@engine/core/mesh";
 

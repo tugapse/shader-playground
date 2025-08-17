@@ -1,7 +1,7 @@
-import { ShaderUniformsEnum } from "../enums/shader-uniforms";
-import { Texture } from "../materials/texture";
+import { Texture } from "../textures/texture";
 import { UnlitMaterial } from "../materials/unlit-material";
 import { Shader } from "./shader";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 export class UnlitShader extends Shader {
 
 
@@ -16,10 +16,10 @@ export class UnlitShader extends Shader {
 
 
     if (!this.material.mainTex && this.material.mainTexUrl) {
-      this.material.mainTex = new Texture(this.gl);
-      this.material.mainTex.load(this.material.mainTexUrl);
+      this.material.mainTex = new Texture(this.gl,this.material.mainTexUrl);
+      this.material.mainTex.load();
     } else if (!this.material.mainTex?.isImageLoaded && this.material.mainTexUrl) {
-      this.material.mainTex.load(this.material.mainTexUrl);
+      this.material.mainTex.load();
     }
 
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color);

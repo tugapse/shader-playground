@@ -1,35 +1,37 @@
 import { Mesh } from "@engine/core/mesh";
-import { DirectionalLight, Light, LightType, PointLight, SpotLight } from "@engine/entities/light"; // Assuming correct path and types
+import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light"; // Assuming correct path and types
 import { LitMaterial } from "@engine/materials/lit-material";
 import { LitShader } from "@engine/shaders/lit-shader"; // Assuming correct path
 import { mat3, mat4, vec3 } from "gl-matrix"; // Added mat3 import
 import { CanvasViewport } from "../core/canvas-viewport";
 import { Camera } from "../entities/camera";
-import { ShaderUniformsEnum } from "../enums/shader-uniforms";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { ColorMaterial } from "../materials/color-material";
 import { Shader } from "../shaders/shader";
 import { EntityBehaviour } from "./entity-behaviour";
+import { LightType } from "@engine/enums/light-type.enum";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
   public mesh!: Mesh;
-  public material!: ColorMaterial; // Assuming this also handles mainTex
+  public material!: ColorMaterial;
   public shader!: Shader;
 
   protected time = 0;
-  // New: Store uniform and attribute locations for efficiency
   protected normalMapUniformLocation: WebGLUniformLocation | null = null;
   protected worldMatrixUniformLocation: WebGLUniformLocation | null = null;
   protected worldInverseTransposeMatrixUniformLocation: WebGLUniformLocation | null = null;
   protected tangentAttributeLocation: GLint = -1;
   protected bitangentAttributeLocation: GLint = -1;
+  public enableLights = true;
+  public enableNormalmaps = true;
 
   constructor(protected gl: WebGLRenderingContext) {
     super()
   }
 
   override initialize(): void {
-    this.initializeGlSettings();
+    this.setGlSettings();
     this.initializeShader();
   }
 
@@ -46,7 +48,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.gl.drawElements(this.gl.TRIANGLES, this.mesh.meshData.indices.length, this.gl.UNSIGNED_SHORT, 0);
   }
 
-  protected initializeGlSettings() {
+  protected setGlSettings() {
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.depthFunc(this.gl.LESS);
 
@@ -55,6 +57,8 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
+    console.log("renderer")
+
   }
 
   protected initializeShader() {
@@ -73,7 +77,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
 
   protected getNormalMapLocations() {
-    if (this.shader.shaderProgram) {
+    if (this.shader.shaderProgram && this.enableNormalmaps) {
       this.normalMapUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_NORMAL_MAP);
       this.worldMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_MATRIX);
       this.worldInverseTransposeMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
@@ -83,8 +87,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   }
 
   protected setShaderVariables() {
+    this.setGlSettings();
     this.setCameraMatrices();
-    this.setModelMatrices();
+    this.setModelWorldMatrices();
     this.setLightInformation();
     this.setNormalMapsInformation();
     this.shader.setfloat(ShaderUniformsEnum.U_TIME, this.time);
@@ -112,7 +117,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
   }
 
-  protected setModelMatrices() {
+  protected setModelWorldMatrices() {
 
     if (this.worldMatrixUniformLocation) {
       this.gl.uniformMatrix4fv(this.worldMatrixUniformLocation, false, this.parent.transform.modelMatrix);
@@ -132,7 +137,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
 
   protected setLightInformation() {
-    if (this.shader instanceof LitShader) {
+    if (this.shader instanceof LitShader && this.enableLights) {
       const lights = this.parent.scene.lights;
 
       const ambientLight = lights.find(l => l.lightType === LightType.AMBIENT);
@@ -147,6 +152,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   }
 
   protected createLightObjectInfo(sceneLights: Light[]) {
+    if (this.enableLights == false) return;
     const directionalLights: DirectionalLight[] = sceneLights.filter(e => e.lightType === LightType.DIRECTIONAL) as DirectionalLight[];
     const pointLights: PointLight[] = sceneLights.filter(e => e.lightType === LightType.POINT) as PointLight[];
     const spotLights: SpotLight[] = sceneLights.filter(e => e.lightType === LightType.SPOT) as SpotLight[];

@@ -9,7 +9,7 @@ uniform vec4 u_matColor;
 uniform vec2 u_uvScale;
 uniform vec2 u_uvOffset;
 uniform sampler2D u_mainTex;
-uniform sampler2D u_normalMap; // New: Uniform for the normal map texture
+uniform sampler2D u_normalMap; //  Uniform for the normal map texture
 
 uniform vec4 u_ambientLight; // Ambient light color
 
@@ -18,7 +18,7 @@ uniform int u_numDirectionalLights;
 uniform vec3 u_directionalLightDirections[MAX_DIRECTIONAL_LIGHTS];
 uniform vec3 u_directionalLightColors[MAX_DIRECTIONAL_LIGHTS];
 
-// New Uniforms for multiple Point Lights:
+// Uniforms for multiple Point Lights:
 uniform int u_numPointLights;
 uniform vec3 u_pointLightPositions[MAX_POINT_LIGHTS];
 uniform vec3 u_pointLightColors[MAX_POINT_LIGHTS];
@@ -26,7 +26,7 @@ uniform float u_pointLightConstantAtts[MAX_POINT_LIGHTS];
 uniform float u_pointLightLinearAtts[MAX_POINT_LIGHTS];
 uniform float u_pointLightQuadraticAtts[MAX_POINT_LIGHTS];
 
-// New Uniforms for multiple Spot Lights:
+// Uniforms for multiple Spot Lights:
 uniform int u_numSpotLights;
 uniform vec3 u_spotLightPositions[MAX_SPOT_LIGHTS];
 uniform vec3 u_spotLightDirections[MAX_SPOT_LIGHTS];
@@ -41,7 +41,7 @@ uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 in vec2 v_uv;
 in vec3 v_normal; // Interpolated normal (from vertex shader)
 in vec3 v_position; // Crucial for point and spot lights: fragment's world position
-// New: Tangent and Bitangent vectors from the vertex shader for TBN matrix
+//  Tangent and Bitangent vectors from the vertex shader for TBN matrix
 in vec3 v_tangent;
 in vec3 v_bitangent;
 
@@ -56,8 +56,8 @@ void main() {
   // --- Normal Mapping Logic ---
   // 1. Sample the normal map and remap from [0, 1] to [-1, 1]
   // Normal maps store vectors with components in [0, 1] range, centered at 0.5 (representing 0).
-  vec3 normalFromMap = texture(u_normalMap, uv).rgb;
-  normalFromMap = normalFromMap * 2.0 - 1.0; // Remap to [-1, 1] range
+  vec3 normalFromMap = texture(u_normalMap, uv).rgb ;
+  normalFromMap = normalFromMap  * 2.0 - 1.0; // Remap to [-1, 1] range
 
   // 2. Construct the TBN matrix (Tangent, Bitangent, Normal)
   // These vectors (v_tangent, v_bitangent, v_normal) are already in world space from the vertex shader.
@@ -69,8 +69,17 @@ void main() {
   );
 
   // 3. Transform the normal from the normal map (tangent space) to world space
-  // This is the perturbed normal that will be used for lighting calculations.
-  vec3 finalNormal = normalize(tbnMatrix * normalFromMap);
+  vec3 perturbedNormal = tbnMatrix * normalFromMap;
+
+  // 4. Blend between the perturbed normal and the original normal using the bump intensity
+  // This allows you to control the strength of the normal map effect.
+  // When u_bumpIntensity is 1.0, the perturbed normal is used completely.
+  // When u_bumpIntensity is 0.0, the original v_normal is used.
+  vec3 blendedNormal = mix(normalize(v_normal), normalize(perturbedNormal), 0.8);
+
+  // 5. Use the blended normal for lighting calculations
+  vec3 finalNormal = normalize(blendedNormal);
+
 
   // --- Ambient Lighting Contribution ---
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor.rgb;

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
-import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
+import { createcilinderPrimitive, createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { Transform } from '../engine/core/transform';
 import { QuadPrimitive } from '../engine/primitives/quad';
 import { Canvas } from "./components/canvas/canvas";
@@ -17,6 +17,13 @@ import { SpherePrimitive } from '@engine/primitives/sphere';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { vec3, vec4 } from 'gl-matrix';
 import { CubePrimitive } from '@engine/primitives/cube';
+import { SkyboxRenderer } from '@engine/behaviours/skybox-renderer';
+import { UnlitMaterial } from '@engine/materials/unlit-material';
+import { UnlitShader } from '@engine/shaders/unlit-shader';
+import { Shader } from '@engine/shaders/shader';
+import { Material } from '@engine/materials/material';
+import { ColorMaterial } from '@engine/materials/color-material';
+import { SkyboxPrimitive } from '@engine/primitives/skybox';
 
 
 class moveBehaviour extends EntityBehaviour {
@@ -31,7 +38,6 @@ class moveBehaviour extends EntityBehaviour {
     // console.log(x, "parent", this.parent.name, this.parent.transform.position)
     this.parent.transform.translate(0, x, 0);
 
-    this.parent.transform.rotate(0,1,1)
     this.parent.transform.updateModelMatrix();
     this.distance += this.speed;
   }
@@ -57,8 +63,7 @@ export class App implements AfterViewInit, OnDestroy {
       Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
       Camera.mainCamera.updateProjectionMatrix();
       this.scene.initialize()
-    }
-    );
+    });
   }
 
   ngOnDestroy(): void {
@@ -74,45 +79,41 @@ export class App implements AfterViewInit, OnDestroy {
     this.started = true;
 
     this.createLights();
+    this.createSkybox();
+    this.addOtherObjetcs();
 
-    const cubePRimitive = new CubePrimitive();
-    const cube = this.createPrimitive("cube", cubePRimitive);
-    const cubePos = vec3.create();
-    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, -2.5);
-    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
 
-    this.scene.addEntity(cube);
+    await this.addMonkeyObj();
 
+  }
+  async addOtherObjetcs() {
 
     const torusPrimitive = await createTorusPrimitive();
-    const torus = this.createPrimitive("torus", torusPrimitive);
+    const torus = this.createPrimitive("torus", torusPrimitive,new RenderMeshBehaviour(this.gl));
     const torusPos = vec3.create();
-    vec3.scaleAndAdd(torusPos,torusPos,torus.transform.right, 2.8);
+    vec3.scaleAndAdd(torusPos, torusPos, torus.transform.right, 2.8);
     // torus.addBehaviour(new moveBehaviour());
     torus.transform.setPosition(torusPos[0], torusPos[1], torusPos[2]);
     const renderer = torus.getBehaviour(RenderMeshBehaviour);
-    if(renderer){
+    if (renderer) {
       renderer.shader.fragUri = "assets/shaders/frag/debug.glsl";
       renderer.shader.recompile();
     }
     this.scene.addEntity(torus);
 
-    const quad = this.createPrimitive("quad", new QuadPrimitive());
+    const quad = this.createPrimitive("quad", new QuadPrimitive(),new RenderMeshBehaviour(this.gl));
     const quadPos = vec3.create();
     vec3.scaleAndAdd(quadPos, quadPos, quad.transform.left, 2.5);
     vec3.scaleAndAdd(quadPos, quadPos, quad.transform.up, 2.5);
     quad.transform.setPosition(quadPos[0], quadPos[1], quadPos[2]);
     this.scene.addEntity(quad);
 
-    const sphere = this.createPrimitive("sphere", new SpherePrimitive());
+    const sphere = this.createPrimitive("sphere", new SpherePrimitive(),new RenderMeshBehaviour(this.gl));
     const spherePos = vec3.create();
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.up, 2.5);
     sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
     this.scene.addEntity(sphere);
-
-    await this.addMonkeyObj();
-
   }
 
   private createLights() {
@@ -122,11 +123,11 @@ export class App implements AfterViewInit, OnDestroy {
     dlight.addBehaviour(new moveBehaviour());
     let dir = vec3.create();
     dlight.direction = vec3.normalize(dir, vec3.fromValues(-0, 180, 30));
-    dlight.color = vec4.fromValues(0.3, 0.7, 0.3, 1);
+    dlight.color = vec4.fromValues(0.8, 0.8, 0.8, 1);
 
     const plight = new PointLight("Point light");
     plight.addBehaviour(new moveBehaviour());
-    plight.transform.translate(0, -1, 0);
+    plight.transform.translate(0, -1, 1);
     plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 };
     plight.color = vec4.fromValues(0, 0, 2, 1);
 
@@ -143,28 +144,60 @@ export class App implements AfterViewInit, OnDestroy {
 
   private async addMonkeyObj() {
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
-    const monkeyPRimitive = this.createPrimitive("Monkey", monkeyObj);
-
+    const monkeyPRimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+    monkeyPRimitive.addBehaviour(new moveBehaviour())
     this.scene.addEntity(monkeyPRimitive);
+
+    const monkeyPRimitive1 = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+    const renderer = monkeyPRimitive1.getBehaviour(RenderMeshBehaviour);
+    if (renderer) {
+      const material = renderer.material as LitMaterial;
+      material.normalTexUrl = "";
+    }
+    this.scene.addEntity(monkeyPRimitive1);
   }
 
   private createPrimitive(
     name: string, meshData: MeshData,
-    material = new LitMaterial(),
-    shader = new LitShader(this.gl, material)): GlEntity {
+    meshRenderer: RenderMeshBehaviour,
+    shader?: Shader,
+    material?: LitMaterial
+  ): GlEntity {
 
     const entity = new GlEntity(name);
-    const meshRenderer: RenderMeshBehaviour = new RenderMeshBehaviour(this.gl);
     const mesh = new Mesh()
 
     mesh.meshData = meshData
+    if (!shader && !material)
+      material = new LitMaterial();
+    else if(shader?.material)
+      material = shader.material as LitMaterial;
 
     meshRenderer.mesh = mesh;
-    meshRenderer.material = material;
-    meshRenderer.shader = shader;
-
+    if (material) {
+      meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
+      meshRenderer.material = material;
+    }
     entity.addBehaviour(meshRenderer);
 
     return entity;
+  }
+
+
+  async createSkybox() {
+
+    const cubePrimitive = new CubePrimitive();
+    const material = new UnlitMaterial();
+    const shader = new UnlitShader(this.gl, material);
+    const cube = this.createPrimitive("cube", cubePrimitive, new SkyboxRenderer(this.gl), shader);
+    const oldrenderer = cube.getBehaviour(RenderMeshBehaviour);
+    oldrenderer?.destroy();
+
+    const cubePos = vec3.create();
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, -2.5);
+    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
+
+
+    this.scene.addEntity(cube);
   }
 }

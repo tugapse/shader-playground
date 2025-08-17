@@ -1,12 +1,17 @@
+import { Transform } from "@engine/core/transform";
 import { GlEntity } from "../entities/entity";
 
 export abstract class EntityBehaviour {
 
-  public parent!:GlEntity;
-  constructor(){}
+  public active: boolean = true;
+  public parent!: GlEntity;
 
-  public initialize():void{}
-  public update(ellapsed:number):void{}
-  public draw():void{}
-  public destroy():void{}
+  public get transform(): Transform {  return this.parent.transform; }
+
+  constructor() { }
+
+  public initialize(): void { }
+  public update(ellapsed: number): void { }
+  public draw(): void { }
+  public destroy(): void { }
 }

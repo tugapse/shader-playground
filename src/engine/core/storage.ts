@@ -1,4 +1,4 @@
-import { Texture } from "@engine/materials/texture";
+import { Texture } from "@engine/textures/texture";
 import { MeshData } from "./mesh";
 import { ObjParser } from "@engine/parsers/obj-parser";
 
@@ -15,15 +15,25 @@ export abstract class EngineCache {
   }
   private static objPArser: ObjParser = new ObjParser;
 
-  public static getTexture(uri: string, gl: WebGL2RenderingContext|WebGLRenderingContext): Texture {
+  public static getTexture2D(uri: string, gl: WebGL2RenderingContext|WebGLRenderingContext): Texture {
     let result = EngineCache.__cache.textures[uri]
     if (!result) {
-      result = new Texture(gl);
-      result.load(uri);
+      result = new Texture(gl,uri);
+      result.load();
       EngineCache.__cache.textures[uri] = result;
     }
     return result;
   }
+
+  //   public static getCubeMapTexture(uris: string[], gl: WebGL2RenderingContext|WebGLRenderingContext): Texture {
+  //   let result = EngineCache.__cache.textures[uri]
+  //   if (!result) {
+  //     result = new Texture(gl,uri);
+  //     result.load();
+  //     EngineCache.__cache.textures[uri] = result;
+  //   }
+  //   return result;
+  // }
 
   public static async getMeshDataFromObj(uri: string): Promise<MeshData> {
     let result = EngineCache.__cache.meshs[uri];

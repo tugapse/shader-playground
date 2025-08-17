@@ -10,7 +10,7 @@ export class Camera extends GlEntity {
 
   public fieldOfView: number = (45 * Math.PI) / 180;
   public nearPlane: number = 0.1;
-  public farPlane: number = 100.0;
+  public farPlane: number = 2000.0;
   public aspectRatio: number = 1; // This needs to be updated
 
   private _projectionMatrix!: mat4;
@@ -40,7 +40,7 @@ export class Camera extends GlEntity {
    * This should be called whenever the canvas/viewport dimensions change.
    */
   public updateProjectionMatrix(): void {
-    mat4.perspective(
+       mat4.perspective(
       this._projectionMatrix,
       this.fieldOfView,
       this.aspectRatio,

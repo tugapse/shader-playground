@@ -54,8 +54,10 @@ void main() {
   vec4 baseColor = sampledTexColor * u_matColor;
 
 
-  fragColor = vec4(v_bitangent,1);
-  fragColor = vec4(v_tangent * 0.5 + 0.5, 1.0);
-  fragColor = vec4(v_bitangent * 0.5 + 0.5, 1.0);
+  fragColor = vec4(uv,0,1);
+  // fragColor = vec4(v_normal,1);
+  // fragColor = vec4(v_bitangent,1);
+  // fragColor = vec4(v_tangent * 0.5 + 0.5, 1.0);
+  // fragColor = vec4(v_bitangent * 0.5 + 0.5, 1.0);
 
 }
