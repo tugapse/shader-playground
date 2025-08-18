@@ -30,7 +30,7 @@ export class Shader {
   };
 
   constructor(
-    protected gl: WebGLRenderingContext,
+    protected gl: WebGL2RenderingContext,
     public material: Material,
     public fragUri: string = "assets/shaders/frag/color.glsl",
     public vertexUri: string = "assets/shaders/vertex/vertex.glsl"
@@ -56,7 +56,7 @@ export class Shader {
     this.initialized = true;
   }
 
-  initBuffers(gl: WebGLRenderingContext, mesh: MeshData): void {
+  initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
     mesh.calculateTangentsAndBitangents();
     // New: The buffers interface now includes tangent and bitangent
     const buffers: WebGLBuffers = {
@@ -196,7 +196,7 @@ export class Shader {
   }
 
   public loadDataIntoShader() {
-    const material = this.material as ColorMaterial; // Assuming ColorMaterial is base or compatible
+    const material = this.material as ColorMaterial;
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color);
   }
 
@@ -272,7 +272,7 @@ export class Shader {
     return response.text();
   }
 
-  private compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
+  private compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) { return null; }
     gl.shaderSource(shader, source);
@@ -286,7 +286,7 @@ export class Shader {
     return shader;
   }
 
-  private createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+  private createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
     const shaderProgram = gl.createProgram();
     if (!shaderProgram) { return null; }
     gl.attachShader(shaderProgram, vertexShader);

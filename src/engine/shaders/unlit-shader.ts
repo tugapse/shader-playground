@@ -5,7 +5,7 @@ import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 export class UnlitShader extends Shader {
 
 
-  constructor(override gl: WebGLRenderingContext, override material: UnlitMaterial) {
+  constructor(override gl: WebGL2RenderingContext, override material: UnlitMaterial) {
     super(gl, material,
       "assets/shaders/frag/unlit.glsl",
       "assets/shaders/vertex/vertex.glsl")

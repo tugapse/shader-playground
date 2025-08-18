@@ -15,7 +15,7 @@ export class Scene extends GlEntity {
   private _camera: Camera
   private _objects: GlEntity[];
   private _lights: Light[];
-  private gl!: WebGLRenderingContext;
+  private gl!: WebGL2RenderingContext;
   private canvas!: HTMLCanvasElement
 
   public get camera(): Camera { return this._camera }
@@ -80,7 +80,7 @@ export class Scene extends GlEntity {
     }
   }
 
-  public setGlRenderingContext(gl: WebGLRenderingContext, canvas: HTMLCanvasElement): void {
+  public setGlRenderingContext(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void {
     this.gl = gl;
     this.canvas = canvas;
   }

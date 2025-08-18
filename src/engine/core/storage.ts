@@ -15,7 +15,7 @@ export abstract class EngineCache {
   }
   private static objPArser: ObjParser = new ObjParser;
 
-  public static getTexture2D(uri: string, gl: WebGL2RenderingContext|WebGLRenderingContext): Texture {
+  public static getTexture2D(uri: string, gl: WebGL2RenderingContext|WebGL2RenderingContext): Texture {
     let result = EngineCache.__cache.textures[uri]
     if (!result) {
       result = new Texture(gl,uri);
@@ -25,7 +25,7 @@ export abstract class EngineCache {
     return result;
   }
 
-  //   public static getCubeMapTexture(uris: string[], gl: WebGL2RenderingContext|WebGLRenderingContext): Texture {
+  //   public static getCubeMapTexture(uris: string[], gl: WebGL2RenderingContext|WebGL2RenderingContext): Texture {
   //   let result = EngineCache.__cache.textures[uri]
   //   if (!result) {
   //     result = new Texture(gl,uri);

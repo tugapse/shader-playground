@@ -14,7 +14,7 @@ export class Canvas implements OnChanges {
 
   @Input() scene!: Scene;
 
-  @Output() onGlContextCreated: EventEmitter<WebGLRenderingContext> = new EventEmitter();
+  @Output() onGlContextCreated: EventEmitter<WebGL2RenderingContext> = new EventEmitter();
 
   @ViewChild('glCanvas')
   private glCanvas!: ElementRef<HTMLCanvasElement>;
@@ -26,7 +26,7 @@ export class Canvas implements OnChanges {
   public isFocused: boolean = false;
 
 
-  public gl!: WebGLRenderingContext | null;
+  public gl!: WebGL2RenderingContext | null;
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {

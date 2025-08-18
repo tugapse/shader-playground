@@ -1,30 +1,27 @@
 import { Camera } from "@engine/entities/camera";
-import { EntityBehaviour } from "./entity-behaviour";
-import { RenderMeshBehaviour } from "./render-mesh-behaviour";
-import { UnlitMaterial } from "@engine/materials/unlit-material";
-import { mat4 } from "gl-matrix";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
+import { mat4 } from "gl-matrix";
+import { RenderMeshBehaviour } from "./render-mesh-behaviour";
 
 export class SkyboxRenderer extends RenderMeshBehaviour {
 
   override initialize(): void {
-
-    // TODO usar projeçao ortho para o skybox
-    this.shader.fragUri = "assets/shaders/frag/skybox.glsl";
-    this.shader.vertexUri = "assets/shaders/vertex/vertex.glsl";
-    const material = this.material as UnlitMaterial;
-    material.mainTexUrl = "assets/images/skybox/test.jpg"
     super.initialize()
     this.transform.setPosition(0, 0, 0);
     this.transform.setScale(1000, 1000, 1000);
   }
+
   protected override setGlSettings(): void {
     this.gl.cullFace(this.gl.FRONT);
-    this.gl.depthFunc(this.gl.LESS);
+    this.gl.depthFunc(this.gl.LEQUAL);
   }
 
-  override draw(): void {
-    super.draw();
+   override draw(): void {
+    if (!this.mesh || !this.shader.shaderProgram) { return }
+    this.shader.bindBuffers();
+    this.shader.use();
+    this.setShaderVariables();
+    this.gl.drawElements(this.gl.TRIANGLES, this.mesh.meshData.indices.length, this.gl.UNSIGNED_SHORT, 0);
   }
 
   override setCameraMatrices() {

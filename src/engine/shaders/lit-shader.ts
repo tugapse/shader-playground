@@ -6,7 +6,7 @@ import { EngineCache } from "@engine/core/storage";
 export class LitShader extends Shader {
 
 
-  constructor(override gl: WebGLRenderingContext, override material: LitMaterial) {
+  constructor(override gl: WebGL2RenderingContext, override material: LitMaterial) {
     super(
       gl, material,
       "assets/shaders/frag/lit.glsl",

@@ -13,9 +13,9 @@ export class Texture {
   protected _isLoaded: boolean = false;
   protected _isLoading: boolean = false;
 
-  constructor(protected gl: WebGLRenderingContext, protected textureUri?: string) { }
+  constructor(protected gl: WebGL2RenderingContext, protected textureUri?: string) { }
 
-  public static getDefaultWhiteTexture(gl: WebGLRenderingContext): Texture {
+  public static getDefaultWhiteTexture(gl: WebGL2RenderingContext): Texture {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -75,25 +75,25 @@ export class Texture {
   /**
    * Creates the WebGLTexture object from the loaded image data.
    * This should be called after the image has loaded and the WebGL context is available.
-   * @param gl The WebGLRenderingContext.
+   * @param gl The WebGL2RenderingContext.
    */
-  protected createGLTexture(gl: WebGLRenderingContext): void {
+  protected createGLTexture(gl: WebGL2RenderingContext): void {
     if (!this._isLoaded || !this._image) {
       console.warn("Image not loaded or image data is missing. Cannot create WebGL texture.");
       return;
     }
-    this.gl = gl; // Store the GL context
 
     this._glTexture = gl.createTexture(); // Create a new texture object
     this.setTextureWrapMode(TextureWrapMode.CLAMP_TO_EDGE);
 
-    gl.bindTexture(gl.TEXTURE_2D, this._glTexture); // Bind it to the TEXTURE_2D target
+    this.bind()
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);
-    gl.bindTexture(gl.TEXTURE_2D, null); // Unbind the texture to avoid accidental modifications
+    gl.generateMipmap(gl.TEXTURE_2D);
+    this.unBind();
   }
 
   public setTextureWrapMode(wrapMode: TextureWrapMode) {
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this._glTexture); // Bind it to the TEXTURE_2D target
+    this.bind(); // Bind it to the TEXTURE_2D target
 
     // Set texture parameters:
     // CLAMP_TO_EDGE prevents texture bleeding at the edges.
@@ -104,7 +104,15 @@ export class Texture {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
-    this.gl.bindTexture(this.gl.TEXTURE_2D, null); // Unbind the texture to avoid accidental modifications
+    this.unBind();
+  }
+
+  public bind() {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this._glTexture);
+  }
+
+  public unBind() {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
 
   /**
@@ -133,4 +141,5 @@ export class Texture {
     this._image = null; // Also clear the image reference
     this._isLoaded = false;
   }
+
 }

@@ -1,29 +1,25 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { RenderMeshBehaviour } from '../engine/behaviours/render-mesh-behaviour';
-import { createcilinderPrimitive, createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
-import { Transform } from '../engine/core/transform';
-import { QuadPrimitive } from '../engine/primitives/quad';
+import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
+import { QuadPrimitive } from '../engine/primitives/quad-primitive';
 import { Canvas } from "./components/canvas/canvas";
 
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
+import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { EngineCache } from '@engine/core/storage';
 import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
 import { Scene } from '@engine/entities/scene';
+import { CubemapMaterial } from '@engine/materials/cubemap-material';
 import { LitMaterial } from '@engine/materials/lit-material';
-import { SpherePrimitive } from '@engine/primitives/sphere';
+import { CubePrimitive } from '@engine/primitives/cube-primitive';
+import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
-import { vec3, vec4 } from 'gl-matrix';
-import { CubePrimitive } from '@engine/primitives/cube';
-import { SkyboxRenderer } from '@engine/behaviours/skybox-renderer';
-import { UnlitMaterial } from '@engine/materials/unlit-material';
-import { UnlitShader } from '@engine/shaders/unlit-shader';
 import { Shader } from '@engine/shaders/shader';
-import { Material } from '@engine/materials/material';
-import { ColorMaterial } from '@engine/materials/color-material';
-import { SkyboxPrimitive } from '@engine/primitives/skybox';
+import { SkyboxShader } from '@engine/shaders/skybox-shader';
+import { vec3, vec4 } from 'gl-matrix';
+import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 
 
 class moveBehaviour extends EntityBehaviour {
@@ -51,7 +47,7 @@ class moveBehaviour extends EntityBehaviour {
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
-  private gl!: WebGLRenderingContext;
+  private gl!: WebGL2RenderingContext;
   public scene!: Scene;
   private started = false;
 
@@ -70,7 +66,7 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene.destroy();
   }
 
-  onGlContextCreated(gl: WebGLRenderingContext) {
+  onGlContextCreated(gl: WebGL2RenderingContext) {
     this.gl = gl
   }
 
@@ -145,6 +141,7 @@ export class App implements AfterViewInit, OnDestroy {
   private async addMonkeyObj() {
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyPRimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+
     monkeyPRimitive.addBehaviour(new moveBehaviour())
     this.scene.addEntity(monkeyPRimitive);
 
@@ -187,16 +184,9 @@ export class App implements AfterViewInit, OnDestroy {
   async createSkybox() {
 
     const cubePrimitive = new CubePrimitive();
-    const material = new UnlitMaterial();
-    const shader = new UnlitShader(this.gl, material);
+    const material = new CubemapMaterial();
+    const shader = new SkyboxShader(this.gl, material);
     const cube = this.createPrimitive("cube", cubePrimitive, new SkyboxRenderer(this.gl), shader);
-    const oldrenderer = cube.getBehaviour(RenderMeshBehaviour);
-    oldrenderer?.destroy();
-
-    const cubePos = vec3.create();
-    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.right, -2.5);
-    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
-
 
     this.scene.addEntity(cube);
   }

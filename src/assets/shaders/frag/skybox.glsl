@@ -1,17 +1,18 @@
 #version 300 es
 
 precision mediump float;
-uniform vec4 u_matColor;
-uniform vec2 u_uvScale;
-uniform vec2 u_uvOffset;
-uniform sampler2D u_mainTex;
 
-in vec2 v_uv;
-in vec3 v_position;
+// New uniform for the cubemap sampler
+uniform samplerCube u_mainTex;
+
+// The view direction from the camera to the vertex, typically passed from the vertex shader.
+// This is crucial for sampling the cubemap correctly.
+in vec3 v_viewDirection; // Changed from v_position, as view direction is better for sampling cubemaps
 
 out vec4 fragColor;
 
 void main() {
-  vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
-  fragColor = texture(u_mainTex, uv) * u_matColor;
+  // Sample the cubemap using the normalized view direction.
+  // The texture() function for samplerCube takes a vec3.
+  fragColor = texture(u_mainTex, normalize(v_viewDirection));
 }

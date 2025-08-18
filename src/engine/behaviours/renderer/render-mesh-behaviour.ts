@@ -1,15 +1,15 @@
 import { Mesh } from "@engine/core/mesh";
-import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light"; // Assuming correct path and types
+import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
 import { LitMaterial } from "@engine/materials/lit-material";
-import { LitShader } from "@engine/shaders/lit-shader"; // Assuming correct path
-import { mat3, mat4, vec3 } from "gl-matrix"; // Added mat3 import
-import { CanvasViewport } from "../core/canvas-viewport";
-import { Camera } from "../entities/camera";
-import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
-import { ColorMaterial } from "../materials/color-material";
-import { Shader } from "../shaders/shader";
-import { EntityBehaviour } from "./entity-behaviour";
+import { LitShader } from "@engine/shaders/lit-shader";
+import { mat3, mat4, vec3 } from "gl-matrix";
 import { LightType } from "@engine/enums/light-type.enum";
+import { CanvasViewport } from "@engine/core/canvas-viewport";
+import { Camera } from "@engine/entities/camera";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
+import { ColorMaterial } from "@engine/materials/color-material";
+import { Shader } from "@engine/shaders/shader";
+import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
@@ -26,7 +26,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   public enableLights = true;
   public enableNormalmaps = true;
 
-  constructor(protected gl: WebGLRenderingContext) {
+  constructor(protected gl: WebGL2RenderingContext) {
     super()
   }
 
@@ -57,8 +57,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
-    console.log("renderer")
-
   }
 
   protected initializeShader() {
@@ -75,17 +73,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   }
 
-
-  protected getNormalMapLocations() {
-    if (this.shader.shaderProgram && this.enableNormalmaps) {
-      this.normalMapUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_NORMAL_MAP);
-      this.worldMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_MATRIX);
-      this.worldInverseTransposeMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
-      this.tangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_TANGENT);
-      this.bitangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_BITANGENT);
-    }
-  }
-
   protected setShaderVariables() {
     this.setGlSettings();
     this.setCameraMatrices();
@@ -96,6 +83,16 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [CanvasViewport.rendererWidth, CanvasViewport.rendererHeight]);
 
     this.shader.loadDataIntoShader();
+  }
+
+  protected getNormalMapLocations() {
+    if (this.shader.shaderProgram && this.enableNormalmaps) {
+      this.normalMapUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_NORMAL_MAP);
+      this.worldMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_MATRIX);
+      this.worldInverseTransposeMatrixUniformLocation = this.gl.getUniformLocation(this.shader.shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
+      this.tangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_TANGENT);
+      this.bitangentAttributeLocation = this.gl.getAttribLocation(this.shader.shaderProgram, ShaderUniformsEnum.A_BITANGENT);
+    }
   }
 
   protected setNormalMapsInformation() {
@@ -134,7 +131,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       this.gl.uniformMatrix3fv(this.worldInverseTransposeMatrixUniformLocation, false, normalMatrixAsMat3);
     }
   }
-
 
   protected setLightInformation() {
     if (this.shader instanceof LitShader && this.enableLights) {
