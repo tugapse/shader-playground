@@ -237,7 +237,7 @@ export class Shader {
     }
   }
 
-  public setfloat(name: string, num: number) {
+  public setFloat(name: string, num: number) {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
       this.gl.uniform1f(location, num);

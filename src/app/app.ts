@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { QuadPrimitive } from '../engine/primitives/quad-primitive';
-import { Canvas } from "./components/canvas/canvas";
+import { Canvas } from "./editor/components/canvas/canvas";
 
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
@@ -125,21 +125,20 @@ export class App implements AfterViewInit, OnDestroy {
     const ambient = new Light("Ambient Light");
 
     const dlight = new DirectionalLight("Directional light");
-    dlight.addBehaviour(new moveBehaviour());
     let dir = vec3.create();
     dlight.direction = vec3.normalize(dir, vec3.fromValues(-0, 180, 30));
-    dlight.color = vec4.fromValues(0.8, 0.8, 0.8, 1);
+    dlight.color = vec4.fromValues(0.6, 0.6, 0.6, 1);
 
     const plight = new PointLight("Point light");
-    plight.addBehaviour(new moveBehaviour());
-    plight.transform.translate(0, -1, 1);
-    plight.attenuation = { constant: 2, linear: 0.01, quadratic: 0.005 };
-    plight.color = vec4.fromValues(0, 0, 2, 1);
+    // plight.addBehaviour(new moveBehaviour());
+    plight.transform.translate(0, -10, 1);
+    plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
+    plight.color = vec4.fromValues(0.5, 0, 1, 1);
 
     const plight1 = new PointLight("Point light 1");
     plight1.transform.translate(0, 1, 1);
-    plight1.attenuation = { constant: 1, linear: 0.01, quadratic: 0.005 };
-    plight1.color = vec4.fromValues(1, 0, 0, 1);
+    plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
+    plight1.color = vec4.fromValues(1, 0.5, 1, 0.1);
 
     this.scene.addEntity(ambient);
     this.scene.addEntity(dlight);

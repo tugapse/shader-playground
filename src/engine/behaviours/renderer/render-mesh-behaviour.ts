@@ -79,7 +79,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.setModelWorldMatrices();
     this.setLightInformation();
     this.setNormalMapsInformation();
-    this.shader.setfloat(ShaderUniformsEnum.U_TIME, this.time);
+    this.shader.setFloat(ShaderUniformsEnum.U_TIME, this.time);
     this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [CanvasViewport.rendererWidth, CanvasViewport.rendererHeight]);
 
     this.shader.loadDataIntoShader();
