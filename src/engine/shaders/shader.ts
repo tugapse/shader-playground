@@ -57,6 +57,7 @@ export class Shader {
   }
 
   initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
+    mesh.calculateNormals();
     mesh.calculateTangentsAndBitangents();
     // New: The buffers interface now includes tangent and bitangent
     const buffers: WebGLBuffers = {

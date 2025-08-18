@@ -21,7 +21,7 @@ export class SkyboxShader extends Shader {
       this.material.mainTex = new CubeMapTexture(this.gl, [
         rightSideUri, leftSideUri,
         topSideUri, bottomSideUri,
-        backSideUri, frontSideUri
+         frontSideUri, backSideUri
       ]);
       this.material.mainTex.load();
     } else if (!this.material.mainTex.isImageLoaded) {

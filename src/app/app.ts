@@ -20,6 +20,7 @@ import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { mat4, vec3, vec4 } from 'gl-matrix';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
+import { SceneTree } from "./editor/components/scene-tree/scene-tree";
 
 class LookAtBehaviour extends EntityBehaviour {
   public target!: GlEntity;
@@ -56,7 +57,7 @@ class moveBehaviour extends EntityBehaviour {
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Canvas]
+  imports: [Canvas, SceneTree]
 })
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
@@ -126,19 +127,19 @@ export class App implements AfterViewInit, OnDestroy {
 
     const dlight = new DirectionalLight("Directional light");
     let dir = vec3.create();
-    dlight.direction = vec3.normalize(dir, vec3.fromValues(-0, 180, 30));
-    dlight.color = vec4.fromValues(0.6, 0.6, 0.6, 1);
+    dlight.direction = vec3.normalize(dir, vec3.fromValues(15, 180, 30));
+    dlight.color = vec4.fromValues(1, 1, 1, 0.7);
 
     const plight = new PointLight("Point light");
-    // plight.addBehaviour(new moveBehaviour());
-    plight.transform.translate(0, -10, 1);
+    plight.addBehaviour(new moveBehaviour());
+    // plight.transform.translate(0, 0, 1);
     plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
-    plight.color = vec4.fromValues(0.5, 0, 1, 1);
+    plight.color = vec4.fromValues(0, 0, 1, 0.9);
 
     const plight1 = new PointLight("Point light 1");
     plight1.transform.translate(0, 1, 1);
     plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
-    plight1.color = vec4.fromValues(1, 0.5, 1, 0.1);
+    plight1.color = vec4.fromValues(1, 0,0, 0.7);
 
     this.scene.addEntity(ambient);
     this.scene.addEntity(dlight);

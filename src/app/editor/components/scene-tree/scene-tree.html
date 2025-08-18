@@ -1,1 +1,16 @@
-<p>scene-tree works!</p>
+<h4>Lights</h4>
+<section>
+  @for (item of targetScene?.lights; track $index) {
+  <div>{{item.name}}</div>
+  }@empty {
+  <div>No Objects added to the scene</div>
+  }
+</section>
+<h4>Objects</h4>
+<section>
+  @for (item of targetScene?.objects; track $index) {
+  <div>{{item.name}}</div>
+  }@empty {
+  <div>No Objects added to the scene</div>
+  }
+</section>

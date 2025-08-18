@@ -75,7 +75,6 @@ void main() {
 
   vec3 perturbedNormal = tbnMatrix * normalFromMap;
 
-
   vec3 finalNormal = normalize(mix(normalize(v_normal), normalize(perturbedNormal), u_normalMapStrength));
 
   vec3 viewDir = normalize(u_cameraPosition - v_position);
@@ -153,5 +152,7 @@ void main() {
     totalLitColorRGB += (baseColor.rgb * u_spotLightColors[i] * (spotDiffuseIntensity + spotSpecularIntensity) * attenuationSpot * coneFactor);
   }
 
-  fragColor = vec4(totalLitColorRGB, baseColor.a);
+  // --- Final Color Output ---
+  // Clamp the final lit color to the [0.0, 1.0] range before outputting.
+  fragColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
 }
