@@ -83,7 +83,7 @@ export class Transform {
     mat4.fromRotationTranslationScale(this._modelMatrix, this._rotation, this._position, this._scale);
   }
 
-  // --- Local Unit Vector Getters (These are correct) ---
+  // --- Local Unit Vector Getters (MODIFIED FOR +Z FORWARD) ---
 
   /**
    * Returns the object's local Right (positive X) direction in world space.
@@ -114,18 +114,63 @@ export class Transform {
   }
 
   /**
-   * Returns the object's local Forward (negative Z) direction in world space.
+   * Returns the object's local Forward (positive Z) direction in world space.
+   * This is now aligned with the model's +Z axis.
    */
   public get forward(): vec3 {
-    // In WebGL/OpenGL, the default camera faces down the negative Z-axis,
-    // so 'forward' for an object is often the negative of its local Z-axis.
-    return vec3.fromValues(-this._modelMatrix[8], -this._modelMatrix[9], -this._modelMatrix[10]);
+    // Now, 'forward' is directly the Z-axis of the model matrix
+    return vec3.fromValues(this._modelMatrix[8], this._modelMatrix[9], this._modelMatrix[10]);
   }
 
   /**
-   * Returns the object's local Backward (positive Z) direction in world space.
+   * Returns the object's local Backward (negative Z) direction in world space.
+   * This is now aligned with the model's -Z axis.
    */
   public get back(): vec3 {
-    return vec3.fromValues(this._modelMatrix[8], this._modelMatrix[9], this._modelMatrix[10]);
+    return vec3.negate(vec3.create(), this.forward);
+  }
+
+  /**
+   * Makes the object look at a specified target point.
+   * This modifies the object's rotation quaternion.
+   * This version is adjusted for a +Z forward model convention.
+   * @param target The world-space point to look at.
+   * @param worldUp An optional world-space up vector. Defaults to the global Y-axis (positive up).
+   */
+  public lookAt(target: vec3, worldUp?: vec3): void {
+    const defaultWorldUp = vec3.fromValues(0, 1, 0); // Default to global Y-up
+    const effectiveUp = worldUp || defaultWorldUp;
+
+    // Calculate the direction vector from the current position to the target
+    const direction = vec3.subtract(vec3.create(), target, this._position);
+    vec3.normalize(direction, direction);
+
+    // To align the object's +Z forward with the target:
+    // We need to calculate a rotation that maps the positive Z-axis to the `direction` vector.
+    // An alternative is to use the `mat4.lookAt` to get a *view* matrix, and then
+    // derive the object's rotation from its inverse.
+    //
+    // However, since `mat4.lookAt` computes a view matrix that looks *down the negative Z-axis*,
+    // if we want our *object's positive Z-axis* to point towards the target, we can
+    // simply tell `mat4.lookAt` to point its eye *from the target back to us*,
+    // then invert the result. This will naturally orient the +Z of the resulting
+    // model matrix (after inversion) to face our target.
+
+    const tempViewMatrix = mat4.create();
+    // Compute a view matrix as if a camera were at 'target' looking back at 'this.position'
+    mat4.lookAt(tempViewMatrix, target, this._position, effectiveUp);
+
+    const tempModelMatrix = mat4.create();
+    // Invert it to get the model matrix for an object that is at 'this.position'
+    // and correctly oriented so its +Z points towards 'target'.
+    mat4.invert(tempModelMatrix, tempViewMatrix);
+
+    // Extract the rotation quaternion directly from this model matrix
+    mat4.getRotation(this._rotation, tempModelMatrix);
+
+    // No need for quat.rotateY(..., Math.PI) anymore because we've aligned
+    // the calculation with the desired +Z forward convention.
+
+    this.updateModelMatrix();
   }
 }

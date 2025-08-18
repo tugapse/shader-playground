@@ -38,7 +38,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     // --- Camera Rotation Logic (Mouse Input) ---
     if (Mouse.mouseButtonDown[0]) {
       const mouseXDelta = -Mouse.mouseMovement.x * this.rotationSpeed * ellapsed;
-      const mouseYDelta = -Mouse.mouseMovement.y * this.rotationSpeed * ellapsed;
+      const mouseYDelta = Mouse.mouseMovement.y * this.rotationSpeed * ellapsed;
 
       // Apply Pitch (Up/Down Look): Rotate around the CAMERA'S LOCAL X-axis
       // This is done by post-multiplying the current rotation with a new X-axis rotation.
@@ -64,7 +64,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
 
     // Strafe Left/Right movement along camera's current right vector
     if (deltaStrafe !== 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.right, deltaStrafe * effectiveMoveSpeed);
+      vec3.scaleAndAdd(movementVector, movementVector, transform.left, deltaStrafe * effectiveMoveSpeed);
     }
 
     // Vertical movement along world's Up vector (e.g., for flying straight up/down)

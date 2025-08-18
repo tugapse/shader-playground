@@ -40,7 +40,7 @@ export class SkyboxShader extends Shader {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
       this.gl.activeTexture(this.gl.TEXTURE0 + textureIndex);
-      this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, texture.glTexture);
+      texture.bind();
       this.gl.uniform1i(location, textureIndex);
     }
   }
