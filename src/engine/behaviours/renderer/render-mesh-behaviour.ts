@@ -134,7 +134,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   protected setLightInformation() {
     if (this.shader instanceof LitShader && this.enableLights) {
-      const lights = this.parent.scene.lights;
+      const lights = this.parent.scene.lights.filter(light=> light.active);
 
       const ambientLight = lights.find(l => l.lightType === LightType.AMBIENT);
       if (ambientLight) {

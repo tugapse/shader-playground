@@ -1,0 +1,12 @@
+:host {
+  width: 250px;
+  background: #19212e;
+  /* GitHub Dark theme base */
+  color: #e6edf3;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #30363d;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+}

@@ -21,6 +21,7 @@ import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { mat4, vec3, vec4 } from 'gl-matrix';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SceneTree } from "./editor/components/scene-tree/scene-tree";
+import { Sidebar } from "./editor/components/sidebar/sidebar";
 
 class LookAtBehaviour extends EntityBehaviour {
   public target!: GlEntity;
@@ -57,7 +58,7 @@ class moveBehaviour extends EntityBehaviour {
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Canvas, SceneTree]
+  imports: [Canvas, SceneTree, Sidebar]
 })
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;

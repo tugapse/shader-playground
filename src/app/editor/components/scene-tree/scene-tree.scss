@@ -1,0 +1,24 @@
+:host {
+
+  .tree-header {
+    background-image: linear-gradient(to right, #19212e, #1b2636, #0c1d3a);
+    width: 100%;
+    padding: 4px;
+  }
+
+  section .item-container {
+    display: flex;
+  }
+
+  section .item-value {
+    flex-grow: 1;
+  }
+
+  section .view-icon {
+    cursor: pointer;
+    transition: all 0.5s;
+    &:hover{
+      background-color: #0c1d3a;
+    }
+  }
+}
