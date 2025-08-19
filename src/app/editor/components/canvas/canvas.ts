@@ -64,8 +64,17 @@ export class Canvas implements OnChanges {
   @HostListener('mouseup', ['$event'])
   onMouseUp(event: MouseEvent): void {
     Mouse.mouseButtonDown[event.button] = false;
-    event.preventDefault();
   }
+
+  @HostListener('mouseleave', [])
+  onMouseLeave(): void {
+    for (const buttonIndex in Mouse.mouseButtonDown){
+      if(Mouse.mouseButtonDown[buttonIndex]){
+        Mouse.mouseButtonDown[buttonIndex] = false;
+      }
+    }
+  }
+
 
   ngOnInit(): void { }
 
@@ -136,11 +145,11 @@ export class Canvas implements OnChanges {
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
       CanvasViewport.rendererWidth = displayWidth;
       CanvasViewport.rendererHeight = displayHeight;
-      this.updateCameraAspectRatio(displayWidth,displayHeight);
+      this.updateCameraAspectRatio(displayWidth, displayHeight);
     }
   }
 
-  private updateCameraAspectRatio(displayWidth:number,displayHeight:number){
+  private updateCameraAspectRatio(displayWidth: number, displayHeight: number) {
 
     if (Camera.mainCamera) {
       Camera.mainCamera.aspectRatio = displayWidth / displayHeight;
