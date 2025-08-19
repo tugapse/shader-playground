@@ -1,6 +1,7 @@
+import { JsonSerializable } from '@engine/interfaces/json-serializable';
 import { vec3, mat4, quat } from 'gl-matrix'; // Import quat
 
-export class Transform {
+export class Transform implements JsonSerializable {
 
   private _position!: vec3;
   private _rotation!: quat; // Changed: Store rotation as a quaternion
@@ -19,6 +20,8 @@ export class Transform {
     this._modelMatrix = mat4.create();
     this.updateModelMatrix();
   }
+
+
 
   public setPosition(x: number = 0, y: number = 0, z: number = 0) {
     vec3.set(this._position, x, y, z);
@@ -171,6 +174,21 @@ export class Transform {
     // No need for quat.rotateY(..., Math.PI) anymore because we've aligned
     // the calculation with the desired +Z forward convention.
 
+    this.updateModelMatrix();
+  }
+
+  public toJsonObject(): { position: number[], rotation: number[], scale: number[] } {
+    return {
+      position: [this._position[0], this._position[1], this._position[2]],
+      rotation: [this._rotation[0], this._rotation[1], this._rotation[2]],
+      scale: [this._scale[0], this._scale[1], this._scale[2]],
+    }
+  }
+
+  public fromJson(jsonObject: { [key: string]: any; }): void {
+    this._position = vec3.fromValues(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
+    this._rotation = vec3.fromValues(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
+    this._scale = vec3.fromValues(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);
     this.updateModelMatrix();
   }
 }

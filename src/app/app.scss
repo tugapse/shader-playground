@@ -10,13 +10,19 @@
 }
 
 .top-bar {
-  display: block;
   width: 100vw;
   height: 32px;
   background: #0d1117;
   /* GitHub Dark theme base */
   color: #e6edf3;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
 
+}
+.top-bar .play-icon.play{
+  color: green;
 }
 
 

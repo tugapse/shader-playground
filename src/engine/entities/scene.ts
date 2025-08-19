@@ -1,3 +1,4 @@
+import { RenderMeshBehaviour } from "@engine/behaviours/renderer/render-mesh-behaviour";
 import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
@@ -10,9 +11,10 @@ export class Scene extends GlEntity {
   private static _currentScene: Scene;
   public static get currentScene() { return this._currentScene }
 
+  public isEditorMode: boolean = false;
   public override tag: string = "Scene";
 
-  private _camera: Camera
+  private _camera!: Camera
   private _objects: GlEntity[];
   private _lights: Light[];
   private gl!: WebGL2RenderingContext;
@@ -24,10 +26,6 @@ export class Scene extends GlEntity {
 
   constructor() {
     super("Scene");
-    this._camera = new Camera();
-    this.camera.addBehaviour(new CameraFlyBehaviour())
-    this.camera.initialize()
-
     this._objects = [];
     this._lights = [];
 
@@ -42,6 +40,7 @@ export class Scene extends GlEntity {
     }
     this._initialized = true;
     super.initialize();
+    this.checkMainCamera();
   }
 
   public override update(ellapsed: number): void {
@@ -52,7 +51,16 @@ export class Scene extends GlEntity {
     for (const object of this.objects) {
       object.update(ellapsed);
     }
+
     super.update(ellapsed);
+  }
+
+  private checkMainCamera() {
+    if (!this._camera) {
+      const camera = this.objects.find(e => e instanceof Camera);
+      this._camera = camera || new Camera();
+      this._camera.scene = this;
+    }
   }
 
   public override draw(): void {
@@ -71,7 +79,6 @@ export class Scene extends GlEntity {
   public addEntity(entity: GlEntity) {
 
     if (this._initialized) entity.initialize()
-
     entity.scene = this;
     if (entity instanceof Light) {
       this._lights.push(entity);
@@ -91,6 +98,14 @@ export class Scene extends GlEntity {
       child.destroy();
     }
     super.destroy();
+  }
+
+  public override toJsonObject(): { [key: string]: any; } {
+    return {
+      ...super.toJsonObject(),
+      lights: this.lights.map(o => o.toJsonObject()),
+      objects: this.objects.map(o => o.toJsonObject())
+    }
   }
 
   public setCurrent(): void {

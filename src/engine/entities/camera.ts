@@ -16,7 +16,7 @@ export class Camera extends GlEntity {
   private _projectionMatrix!: mat4;
   private _viewMatrix!: mat4;
 
-  public override tag:string="Camera"
+  public override tag: string = "Camera"
 
   public get projectionMatrix() { return this._projectionMatrix }
   public get viewMatrix() { return this._viewMatrix }
@@ -42,7 +42,7 @@ export class Camera extends GlEntity {
    * This should be called whenever the canvas/viewport dimensions change.
    */
   public updateProjectionMatrix(): void {
-       mat4.perspective(
+    mat4.perspective(
       this._projectionMatrix,
       this.fieldOfView,
       this.aspectRatio,
@@ -79,5 +79,15 @@ export class Camera extends GlEntity {
     // this.updateProjectionMatrix(); // Consider calling this here if aspect ratio is dynamic
     this.updateViewMatrix(); // Always update view matrix as camera moves
     super.update(ellapsed);
+  }
+
+  override toJsonObject(): { [key: string]: any; } {
+    return {
+      ...super.toJsonObject(),
+      fieldOfView: this.fieldOfView,
+      nearPlane: this.nearPlane,
+      farPlane: this.farPlane,
+      aspectRatio: this.aspectRatio,
+    }
   }
 }

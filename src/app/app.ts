@@ -3,11 +3,12 @@ import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { QuadPrimitive } from '../engine/primitives/quad-primitive';
 import { Canvas } from "./editor/components/canvas/canvas";
 
+import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
+import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { EngineCache } from '@engine/core/storage';
-import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
 import { Scene } from '@engine/entities/scene';
@@ -18,10 +19,11 @@ import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
-import { mat4, vec3, vec4 } from 'gl-matrix';
-import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
-import { SceneTree } from "./editor/components/scene-tree/scene-tree";
+import { vec3, vec4 } from 'gl-matrix';
+import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
+import { CommonModule } from '@angular/common';
+import { Transform } from '@engine/core/transform';
 
 class LookAtBehaviour extends EntityBehaviour {
   public target!: GlEntity;
@@ -34,9 +36,9 @@ class LookAtBehaviour extends EntityBehaviour {
 }
 
 class RotateBehaviour extends EntityBehaviour {
-  speed=0.05;
+  speed = 0.05;
   public override update(ellapsed: number): void {
-      this.transform.rotate(1*this.speed,1*this.speed,1*this.speed);
+    this.transform.rotate(1 * this.speed, 1 * this.speed, 1 * this.speed);
   }
 }
 
@@ -58,7 +60,7 @@ class moveBehaviour extends EntityBehaviour {
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Canvas, SceneTree, Sidebar]
+  imports: [Canvas, Icon, Sidebar, CommonModule]
 })
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
@@ -69,14 +71,25 @@ export class App implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.scene = new Scene();
+    this.scene.isEditorMode = true;
     this.scene.name = "Main Scene";
-    this.loadAssets().then(() => {
+    this.scene.initialize();
+    this.setupCamera();
+    this.loadAssets().then(()=>{
+      const data = this.scene.toJsonObject();
+      console.debug("scene trans", this.scene.transform);
+      console.debug("scene string", data);
+      console.debug("scene obj", (JSON.stringify(data)));
 
-      Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-      Camera.mainCamera.transform.lookAt(vec3.create());
-      Camera.mainCamera.updateProjectionMatrix();
-      this.scene.initialize()
     });
+  }
+
+  private setupCamera() {
+    this.scene.camera.updateInEditor = true;
+    this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
+    this.scene.camera.transform.lookAt(vec3.create());
+    this.scene.camera.updateProjectionMatrix();
+    this.scene.camera.addBehaviour(new CameraFlyBehaviour());
   }
 
   ngOnDestroy(): void {
@@ -94,8 +107,6 @@ export class App implements AfterViewInit, OnDestroy {
     this.createLights();
     this.createSkybox();
     this.addOtherObjetcs();
-
-
     await this.addMonkeyObj();
 
   }
@@ -104,7 +115,7 @@ export class App implements AfterViewInit, OnDestroy {
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
-    torus.transform.scale(2,2,2);
+    torus.transform.scale(2, 2, 2);
     torus.addBehaviour(new RotateBehaviour());
     this.scene.addEntity(torus);
 
@@ -140,7 +151,7 @@ export class App implements AfterViewInit, OnDestroy {
     const plight1 = new PointLight("Point light 1");
     plight1.transform.translate(0, 1, 1);
     plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
-    plight1.color = vec4.fromValues(1, 0,0, 0.7);
+    plight1.color = vec4.fromValues(1, 0, 0, 0.7);
 
     this.scene.addEntity(ambient);
     this.scene.addEntity(dlight);
@@ -204,7 +215,7 @@ export class App implements AfterViewInit, OnDestroy {
     const cubePrimitive = new CubePrimitive();
     const material = new CubemapMaterial();
     const shader = new SkyboxShader(this.gl, material);
-    const cube = this.createPrimitive("cube", cubePrimitive, new SkyboxRenderer(this.gl), shader);
+    const cube = this.createPrimitive("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
 
     this.scene.addEntity(cube);
   }

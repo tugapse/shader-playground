@@ -47,4 +47,5 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
     this.shader.loadDataIntoShader();
   }
 
+
 }

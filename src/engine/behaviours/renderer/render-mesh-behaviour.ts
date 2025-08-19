@@ -37,6 +37,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   override update(ellapsed: number): void {
     this.time += ellapsed;
+    super.update(ellapsed);
   }
 
   override draw(): void {
@@ -134,7 +135,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   protected setLightInformation() {
     if (this.shader instanceof LitShader && this.enableLights) {
-      const lights = this.parent.scene.lights.filter(light=> light.active);
+      const lights = this.parent.scene.lights.filter(light => light.active);
 
       const ambientLight = lights.find(l => l.lightType === LightType.AMBIENT);
       if (ambientLight) {
@@ -260,5 +261,8 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       if (uPointLinearAttsLoc) this.gl.uniform1fv(uPointLinearAttsLoc, pointLinearAttsFlat);
       if (uPointQuadraticAttsLoc) this.gl.uniform1fv(uPointQuadraticAttsLoc, pointQuadraticAttsFlat);
     }
+  }
+
+  override updateEditor(ellapsed: number): void {
   }
 }

@@ -1,8 +1,10 @@
+
 <div class="top-bar">
-  <h2>...</h2>
+  <app-icon class="play-icon" iconName="fa-play" [ngClass]="{playing:scene && scene.isEditorMode}" (click)="scene.isEditorMode = !scene.isEditorMode"></app-icon>
 </div>
 <div class="container">
   <app-sidebar [scene]="scene"></app-sidebar>
   <app-canvas tabindex="0" class="canvas" [scene]="scene"
     (onGlContextCreated)="onGlContextCreated($event)"></app-canvas>
 </div>
+

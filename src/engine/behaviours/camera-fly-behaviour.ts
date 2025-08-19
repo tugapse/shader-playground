@@ -14,7 +14,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
 
     let deltaForward = 0;
     let deltaStrafe = 0;
-    let deltaUpWorld = 0; // For vertical movement in world space
+    let deltaUpWorld = 0;
 
     // Movement Input
     if (Keybord.keyDown['w']) {
@@ -76,5 +76,13 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     // Apply the accumulated movement to the camera's position
     transform.translate(movementVector[0], movementVector[1], movementVector[2]);
     super.update(ellapsed);
+  }
+
+  override toJsonObject(): { [key: string]: any; } {
+    return {
+      ...super.toJsonObject(),
+      moveSpeed: this.moveSpeed,
+      rotationSpeed:this.rotationSpeed
+    };
   }
 }

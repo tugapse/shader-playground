@@ -1,18 +1,22 @@
+import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
 
 
 
-export class GlEntity {
+export class GlEntity implements JsonSerializable {
 
   public scene!: Scene;
   public active: boolean = true;
   public tag: string = "Entity";
+  public updateInEditor = false;
   protected _initialized = false;
   protected behaviours: EntityBehaviour[] = []
 
   constructor(public name: String, public transform: Transform = new Transform()) { }
+
+
 
   public initialize() {
     if (this._initialized) return;
@@ -23,12 +27,16 @@ export class GlEntity {
   }
 
   public update(ellapsed: number): void {
-    if (!this.active) return;
+    if (!this.active || !this.scene) return;
 
     for (const behaviour of this.behaviours) {
-      behaviour.update(ellapsed);
+      if (this.scene.isEditorMode && !this.updateInEditor)
+        behaviour.updateEditor(ellapsed);
+      else
+        behaviour.update(ellapsed);
     }
   }
+
 
   public draw(): void {
     if (!this.active) return;
@@ -46,16 +54,16 @@ export class GlEntity {
   }
 
   public addBehaviour(behaviour: EntityBehaviour) {
-    if(this._initialized)
+    if (this._initialized)
       behaviour.initialize();
     behaviour.parent = this;
     this.behaviours.push(behaviour);
   }
 
-  public removeBehaviour(behaviour:EntityBehaviour){
+  public removeBehaviour(behaviour: EntityBehaviour) {
     const index = this.behaviours.indexOf(behaviour);
-    if(index>=0){
-      const beToremove = this.behaviours.splice(index,1);
+    if (index >= 0) {
+      const beToremove = this.behaviours.splice(index, 1);
       beToremove[0]?.destroy();
     }
   }
@@ -78,5 +86,27 @@ export class GlEntity {
 */
   public getBehaviour<T extends EntityBehaviour>(constructor: new (...args: any[]) => T): T | undefined {
     return this.behaviours.find((o): o is T => o instanceof constructor);
+  }
+
+  public fromJson(jsonObject: { [key: string]: any; }): void {
+    if (jsonObject['type'] != this.constructor.name) return;
+    this.active = jsonObject['active'];
+    this.name = jsonObject['name'];
+    this.tag = jsonObject['tag'];
+    this.updateInEditor = jsonObject['updateInEditor'];
+    this.transform.fromJson(jsonObject['transform']);
+  }
+
+  public toJsonObject(): { [key: string]: any; } {
+    const result = {
+      type: this.constructor.name,
+      active: this.active,
+      name: this.name,
+      tag: this.tag,
+      transform: this.transform.toJsonObject(),
+      updateInEditor: this.updateInEditor,
+      behaviours: this.behaviours.map(e => e.toJsonObject())
+    };
+    return result;
   }
 }
