@@ -1,4 +1,5 @@
 :host {
+  --trans-time: 0.4s;
 
   .tree-header {
     background-image: linear-gradient(to right, #19212e, #1b2636, #0c1d3a);
@@ -7,18 +8,30 @@
   }
 
   section .item-container {
+    transition: all var(--trans-time);
+
     display: flex;
+    padding: 8px 8;
+    border-radius: 8px;
+
+    &:hover {
+      color: rgb(159, 187, 219);
+      background-image: linear-gradient(to right, #0c1d3a, #0095eb);
+      cursor: default;
+    }
   }
 
   section .item-value {
     flex-grow: 1;
+    margin-left: 4px;
   }
 
   section .view-icon {
     cursor: pointer;
-    transition: all 0.5s;
-    &:hover{
-      background-color: #0c1d3a;
+    transition: all var(--trans-time);
+
+    &:hover {
+      color: #202020
     }
   }
 }
