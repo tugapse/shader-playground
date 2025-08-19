@@ -1,5 +1,7 @@
 import { vec2, vec3 } from "gl-matrix";
 import { EngineCache } from "./storage"; // Assuming these imports are necessary for other parts of the class.
+import { JsonSerializable } from "@engine/interfaces/json-serializable";
+import { v4 as uuidv4 } from 'uuid'
 
 
 export const createTorusPrimitive = async () => {
@@ -14,7 +16,7 @@ export const createcilinderPrimitive = async () => {
  * @description Base class for geometric mesh data.
  * It stores vertex positions, normals, and UV coordinates, along with optional tangent and bitangent vectors for normal mapping.
  */
-export class MeshData {
+export class MeshData implements JsonSerializable {
   public vertices: vec3[];
   public normals: vec3[];
   public uvs: vec2[];
@@ -22,6 +24,9 @@ export class MeshData {
 
   public tangents?: vec3[];
   public bitangents?: vec3[];
+  private _uuid: string;
+  public get uuid(): string { return this._uuid }
+
 
   constructor(
     vertices: vec3[],
@@ -33,6 +38,7 @@ export class MeshData {
     this.normals = normals;
     this.uvs = uvs;
     this.indices = indices;
+    this._uuid = uuidv4();
   }
 
   /**
@@ -62,53 +68,53 @@ export class MeshData {
     // Iterate through triangles using indices
     // We step by 3 because each triangle uses 3 indices.
     for (let i = 0; i < this.indices.length; i += 3) {
-        const i1 = this.indices[i];
-        const i2 = this.indices[i + 1];
-        const i3 = this.indices[i + 2];
+      const i1 = this.indices[i];
+      const i2 = this.indices[i + 1];
+      const i3 = this.indices[i + 2];
 
-        // Ensure indices are valid to prevent out-of-bounds access
-        if (i1 >= numVertices || i2 >= numVertices || i3 >= numVertices) {
-            console.warn(`Invalid index found in triangle ${Math.floor(i/3)}: [${i1}, ${i2}, ${i3}]. Skipping triangle.`);
-            continue; // Skip to the next triangle
-        }
+      // Ensure indices are valid to prevent out-of-bounds access
+      if (i1 >= numVertices || i2 >= numVertices || i3 >= numVertices) {
+        console.warn(`Invalid index found in triangle ${Math.floor(i / 3)}: [${i1}, ${i2}, ${i3}]. Skipping triangle.`);
+        continue; // Skip to the next triangle
+      }
 
-        const p1 = this.vertices[i1];
-        const p2 = this.vertices[i2];
-        const p3 = this.vertices[i3];
+      const p1 = this.vertices[i1];
+      const p2 = this.vertices[i2];
+      const p3 = this.vertices[i3];
 
-        // Calculate two edges of the triangle using gl-matrix vec3 functions
-        const edge1 = vec3.sub(vec3.create(), p2, p1);
-        const edge2 = vec3.sub(vec3.create(), p3, p1);
+      // Calculate two edges of the triangle using gl-matrix vec3 functions
+      const edge1 = vec3.sub(vec3.create(), p2, p1);
+      const edge2 = vec3.sub(vec3.create(), p3, p1);
 
-        // Calculate the cross product to get the face normal
-        const faceNormal = vec3.create();
-        vec3.cross(faceNormal, edge1, edge2);
-        vec3.normalize(faceNormal, faceNormal); // Normalize the face normal
+      // Calculate the cross product to get the face normal
+      const faceNormal = vec3.create();
+      vec3.cross(faceNormal, edge1, edge2);
+      vec3.normalize(faceNormal, faceNormal); // Normalize the face normal
 
-        // Add this face normal to the sum for each of the three vertices of the triangle
-        vec3.add(vertexNormalSums[i1], vertexNormalSums[i1], faceNormal);
-        vertexNormalCounts[i1]++;
+      // Add this face normal to the sum for each of the three vertices of the triangle
+      vec3.add(vertexNormalSums[i1], vertexNormalSums[i1], faceNormal);
+      vertexNormalCounts[i1]++;
 
-        vec3.add(vertexNormalSums[i2], vertexNormalSums[i2], faceNormal);
-        vertexNormalCounts[i2]++;
+      vec3.add(vertexNormalSums[i2], vertexNormalSums[i2], faceNormal);
+      vertexNormalCounts[i2]++;
 
-        vec3.add(vertexNormalSums[i3], vertexNormalSums[i3], faceNormal);
-        vertexNormalCounts[i3]++;
+      vec3.add(vertexNormalSums[i3], vertexNormalSums[i3], faceNormal);
+      vertexNormalCounts[i3]++;
     }
 
     // Average the accumulated face normals for each vertex to get the smooth vertex normals
     for (let i = 0; i < numVertices; i++) {
-        const sumNormal = vertexNormalSums[i];
-        const count = vertexNormalCounts[i];
+      const sumNormal = vertexNormalSums[i];
+      const count = vertexNormalCounts[i];
 
-        if (count > 0) {
-            // Divide the sum by the count to get the average, then normalize
-            vec3.scale(this.normals[i], sumNormal, 1 / count);
-            vec3.normalize(this.normals[i], this.normals[i]);
-        } else {
-            // If a vertex is not part of any triangle (e.g., isolated vertex), set its normal to zero vector
-            vec3.set(this.normals[i], 0, 0, 0);
-        }
+      if (count > 0) {
+        // Divide the sum by the count to get the average, then normalize
+        vec3.scale(this.normals[i], sumNormal, 1 / count);
+        vec3.normalize(this.normals[i], this.normals[i]);
+      } else {
+        // If a vertex is not part of any triangle (e.g., isolated vertex), set its normal to zero vector
+        vec3.set(this.normals[i], 0, 0, 0);
+      }
     }
   }
 
@@ -138,12 +144,12 @@ export class MeshData {
       return;
     }
     if (!this.uvs || this.uvs.length === 0) {
-        console.warn("Cannot calculate tangents/bitangents: Mesh data has no UVs.");
-        return;
+      console.warn("Cannot calculate tangents/bitangents: Mesh data has no UVs.");
+      return;
     }
     if (!this.normals || this.normals.length === 0) {
-        console.warn("Cannot calculate tangents/bitangents: Mesh data has no normals.");
-        return;
+      console.warn("Cannot calculate tangents/bitangents: Mesh data has no normals.");
+      return;
     }
 
     // Initialize arrays with unique vec3 instances
@@ -228,8 +234,38 @@ export class MeshData {
     this.tangents = tangents;
     this.bitangents = bitangents;
   }
+
+  toJsonObject(): { [key: string]: any; } {
+    return {
+      type: this.constructor.name,
+      uuid:this.uuid,
+      vertices: this.vertices.flat(1),
+      normals: this.normals.flat(1),
+      uvs: this.uvs.flat(1),
+      indices: this.indices || [],
+      tangents: this.tangents?.flat(1) || [],
+      bitangents: this.bitangents?.flat(1) || [],
+    }
+  }
+
+  fromJson(jsonObject: { [key: string]: any; }): void {
+    throw new Error("Method not implemented.");
+  }
 }
 
-export class Mesh {
+export class Mesh implements JsonSerializable {
+
   public meshData!: MeshData;
+
+  toJsonObject(): { [key: string]: any; } {
+    return {
+      type: this.constructor.name,
+      meshDataId: this.meshData.uuid,
+    }
+  }
+
+  fromJson(jsonObject: { [key: string]: any; }): void {
+    if (!this.meshData) this.meshData = new MeshData([]);
+    this.meshData.fromJson(jsonObject);
+  }
 }

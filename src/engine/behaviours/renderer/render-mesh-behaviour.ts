@@ -1,20 +1,18 @@
+import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { CanvasViewport } from "@engine/core/canvas-viewport";
 import { Mesh } from "@engine/core/mesh";
+import { Camera } from "@engine/entities/camera";
 import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
+import { LightType } from "@engine/enums/light-type.enum";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { LitMaterial } from "@engine/materials/lit-material";
 import { LitShader } from "@engine/shaders/lit-shader";
-import { mat3, mat4, vec3 } from "gl-matrix";
-import { LightType } from "@engine/enums/light-type.enum";
-import { CanvasViewport } from "@engine/core/canvas-viewport";
-import { Camera } from "@engine/entities/camera";
-import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
-import { ColorMaterial } from "@engine/materials/color-material";
 import { Shader } from "@engine/shaders/shader";
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { mat3, mat4, vec3 } from "gl-matrix";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
   public mesh!: Mesh;
-  public material!: ColorMaterial;
   public shader!: Shader;
 
   protected time = 0;
@@ -97,7 +95,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   }
 
   protected setNormalMapsInformation() {
-    const material = this.material as LitMaterial;
+    const material = this.shader.material as LitMaterial;
     // If a normal map texture is provided, bind and pass it
     if (material.normalTex && material.normalTex.glTexture && this.normalMapUniformLocation) {
       this.gl.activeTexture(this.gl.TEXTURE1); // Use texture unit 1 for normal map
@@ -263,6 +261,11 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     }
   }
 
-  override updateEditor(ellapsed: number): void {
+  override toJsonObject(): { [key: string]: any; } {
+    return {
+      ...super.toJsonObject(),
+      shader: this.shader,
+      mesh: this.mesh.toJsonObject()
+    }
   }
 }

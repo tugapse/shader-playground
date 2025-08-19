@@ -77,7 +77,6 @@ export class App implements AfterViewInit, OnDestroy {
     this.setupCamera();
     this.loadAssets().then(()=>{
       const data = this.scene.toJsonObject();
-      console.debug("scene trans", this.scene.transform);
       console.debug("scene string", data);
       console.debug("scene obj", (JSON.stringify(data)));
 
@@ -140,7 +139,7 @@ export class App implements AfterViewInit, OnDestroy {
     const dlight = new DirectionalLight("Directional light");
     let dir = vec3.create();
     dlight.direction = vec3.normalize(dir, vec3.fromValues(15, 180, 30));
-    dlight.color = vec4.fromValues(1, 1, 1, 0.7);
+    dlight.color = vec4.fromValues(0.15, 0.15, 0.15, 1);
 
     const plight = new PointLight("Point light");
     plight.addBehaviour(new moveBehaviour());
@@ -172,7 +171,7 @@ export class App implements AfterViewInit, OnDestroy {
 
     const renderer = movingMokeyPrimitive.getBehaviour(RenderMeshBehaviour);
     if (renderer) {
-      const material = renderer.material as LitMaterial;
+      const material = renderer.shader.material as LitMaterial;
       material.normalTexUrl = "";
     }
 
@@ -202,7 +201,6 @@ export class App implements AfterViewInit, OnDestroy {
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
-      meshRenderer.material = material;
     }
     entity.addBehaviour(meshRenderer);
 

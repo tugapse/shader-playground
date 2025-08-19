@@ -101,10 +101,16 @@ export class Scene extends GlEntity {
   }
 
   public override toJsonObject(): { [key: string]: any; } {
+    const meshMaps: { [key: string]: any } = {}
+    const renderers = this.objects.filter(e => e.getBehaviour(RenderMeshBehaviour)).map(o => o.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour);
+    for (const renderer of renderers) {
+      meshMaps[renderer.mesh.meshData.uuid] = renderer.mesh.meshData.toJsonObject();
+    }
     return {
       ...super.toJsonObject(),
       lights: this.lights.map(o => o.toJsonObject()),
-      objects: this.objects.map(o => o.toJsonObject())
+      objects: this.objects.map(o => o.toJsonObject()),
+      meshMaps:meshMaps,
     }
   }
 

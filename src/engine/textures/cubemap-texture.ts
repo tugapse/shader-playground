@@ -25,7 +25,6 @@ export class CubeMapTexture extends Texture {
         const _image = new Image();
         _image.onload = () => {
           this.setLoadedImage(i, true);
-          console.log("loaded image", i, this.textureUris![i]);
         };
         _image.onerror = (error) => {
           this._isLoading = true;

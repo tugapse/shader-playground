@@ -11,6 +11,6 @@ export abstract class Material implements JsonSerializable {
     }
   }
   fromJson(jsonObject: { [key: string]: any; }): void {
-    throw new Error("Method not implemented.");
+   this.name = jsonObject['name'];
   }
 }

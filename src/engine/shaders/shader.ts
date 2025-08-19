@@ -4,6 +4,8 @@ import { Texture } from "../textures/texture";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { ColorMaterial } from "../materials/color-material";
 import { MeshData } from "@engine/core/mesh";
+import { JsonSerializable } from "@engine/interfaces/json-serializable";
+import { v4 as uuidv4 } from 'uuid';
 
 // New: Extend WebGLBuffers to include tangent and bitangent buffers
 export interface WebGLBuffers {
@@ -15,10 +17,12 @@ export interface WebGLBuffers {
   indices: WebGLBuffer | null;
 }
 
-export class Shader {
+export class Shader implements JsonSerializable {
 
+  public get uuid() { return this._uuid; }
   public shaderProgram!: WebGLProgram;
   private initialized = false;
+  protected _uuid: string;
   // Initialize with the new buffers
   public buffers: WebGLBuffers = {
     position: null,
@@ -34,7 +38,7 @@ export class Shader {
     public material: Material,
     public fragUri: string = "assets/shaders/frag/color.glsl",
     public vertexUri: string = "assets/shaders/vertex/vertex.glsl"
-  ) { }
+  ) { this._uuid = uuidv4() }
 
   public async initialize(): Promise<void> {
 
@@ -98,24 +102,24 @@ export class Shader {
 
     // --- New: Tangent Buffer ---
     if (mesh.tangents && mesh.tangents.length > 0) { // Check if tangents exist and are not empty
-        buffers.tangent = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
-        const tangents: number[] = [];
-        for (const t of mesh.tangents) {
-            tangents.push(t[0], t[1], t[2]);
-        }
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangents), gl.STATIC_DRAW);
+      buffers.tangent = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
+      const tangents: number[] = [];
+      for (const t of mesh.tangents) {
+        tangents.push(t[0], t[1], t[2]);
+      }
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangents), gl.STATIC_DRAW);
     }
 
     // --- New: Bitangent Buffer ---
     if (mesh.bitangents && mesh.bitangents.length > 0) { // Check if bitangents exist and are not empty
-        buffers.bitangent = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffers.bitangent);
-        const bitangents: number[] = [];
-        for (const b of mesh.bitangents) {
-            bitangents.push(b[0], b[1], b[2]);
-        }
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bitangents), gl.STATIC_DRAW);
+      buffers.bitangent = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.bitangent);
+      const bitangents: number[] = [];
+      for (const b of mesh.bitangents) {
+        bitangents.push(b[0], b[1], b[2]);
+      }
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bitangents), gl.STATIC_DRAW);
     }
 
     // --- Index Buffer ---
@@ -131,60 +135,60 @@ export class Shader {
     // Position Attribute
     const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
     if (this.buffers.position && positionAttributeLocation !== -1) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
-        this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(positionAttributeLocation);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
+      this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(positionAttributeLocation);
     } else if (positionAttributeLocation !== -1) {
-        // If buffer is null but location is valid, disable it to prevent errors
-        this.gl.disableVertexAttribArray(positionAttributeLocation);
+      // If buffer is null but location is valid, disable it to prevent errors
+      this.gl.disableVertexAttribArray(positionAttributeLocation);
     }
 
 
     // Normal Attribute
     const normalAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_normal');
     if (this.buffers.normal && normalAttributeLocation !== -1) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.normal);
-        this.gl.vertexAttribPointer(normalAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(normalAttributeLocation);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.normal);
+      this.gl.vertexAttribPointer(normalAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(normalAttributeLocation);
     } else if (normalAttributeLocation !== -1) {
-        this.gl.disableVertexAttribArray(normalAttributeLocation);
+      this.gl.disableVertexAttribArray(normalAttributeLocation);
     }
 
     // UV Attribute
     const uvAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_uv');
     if (this.buffers.uv && uvAttributeLocation !== -1) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.uv);
-        this.gl.vertexAttribPointer(uvAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(uvAttributeLocation);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.uv);
+      this.gl.vertexAttribPointer(uvAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(uvAttributeLocation);
     } else if (uvAttributeLocation !== -1) {
-        this.gl.disableVertexAttribArray(uvAttributeLocation);
+      this.gl.disableVertexAttribArray(uvAttributeLocation);
     }
 
     // New: Tangent Attribute
     const tangentAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_tangent');
     if (this.buffers.tangent && tangentAttributeLocation !== -1) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.tangent);
-        this.gl.vertexAttribPointer(tangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(tangentAttributeLocation);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.tangent);
+      this.gl.vertexAttribPointer(tangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(tangentAttributeLocation);
     } else if (tangentAttributeLocation !== -1) { // Only disable if the attribute exists in the shader
-       console.debug("Tagent arrtibute location not found")
-        this.gl.disableVertexAttribArray(tangentAttributeLocation);
+      console.debug("Tagent arrtibute location not found")
+      this.gl.disableVertexAttribArray(tangentAttributeLocation);
     }
 
     // New: Bitangent Attribute
     const bitangentAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_bitangent');
     if (this.buffers.bitangent && bitangentAttributeLocation !== -1) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.bitangent);
-        this.gl.vertexAttribPointer(bitangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(bitangentAttributeLocation);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.bitangent);
+      this.gl.vertexAttribPointer(bitangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.enableVertexAttribArray(bitangentAttributeLocation);
     } else if (bitangentAttributeLocation !== -1) { // Only disable if the attribute exists in the shader
-        console.debug("BiTagent arrtibute location not found")
-        this.gl.disableVertexAttribArray(bitangentAttributeLocation);
+      console.debug("BiTagent arrtibute location not found")
+      this.gl.disableVertexAttribArray(bitangentAttributeLocation);
     }
 
     // Bind Index Buffer for Drawing
     if (this.buffers.indices) {
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
+      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
     }
   }
 
@@ -201,7 +205,7 @@ export class Shader {
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color);
   }
 
-  public setMat4(name:string, value: mat4): void {
+  public setMat4(name: string, value: mat4): void {
     const location = this.gl.getUniformLocation(this.shaderProgram, name);
     if (location) {
       this.gl.uniformMatrix4fv(location, false, value);
@@ -316,10 +320,10 @@ export class Shader {
       this.gl.deleteBuffer(this.buffers.uv);
 
     if (this.buffers.tangent)
-        this.gl.deleteBuffer(this.buffers.tangent);
+      this.gl.deleteBuffer(this.buffers.tangent);
 
     if (this.buffers.bitangent)
-        this.gl.deleteBuffer(this.buffers.bitangent);
+      this.gl.deleteBuffer(this.buffers.bitangent);
 
     if (this.buffers.indices)
       this.gl.deleteBuffer(this.buffers.indices);
@@ -328,4 +332,21 @@ export class Shader {
       this.gl.deleteProgram(this.shaderProgram);
     this.initialized = false;
   }
+
+  public toJsonObject(): { [key: string]: any; } {
+    return {
+      uuid: this.uuid,
+      type: this.constructor.name,
+      fragUri: this.fragUri,
+      vertexUri: this.vertexUri,
+      material: this.material.toJsonObject()
+    }
+  }
+  public fromJson(jsonObject: { [key: string]: any; }): void {
+    this.fragUri = jsonObject['fragUri'];
+    this.vertexUri = jsonObject['vertexUri'];
+    this.material = new ColorMaterial();
+    this.material.fromJson(jsonObject['material']);
+  }
+
 }

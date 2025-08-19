@@ -2,6 +2,7 @@ import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -13,8 +14,15 @@ export class GlEntity implements JsonSerializable {
   public updateInEditor = false;
   protected _initialized = false;
   protected behaviours: EntityBehaviour[] = []
+  protected _uuid!: string;
+  public get uuid(): string {
+    return this._uuid;
+  };
 
-  constructor(public name: String, public transform: Transform = new Transform()) { }
+
+  constructor(public name: String, public transform: Transform = new Transform()) {
+    this._uuid = uuidv4()
+  }
 
 
 
@@ -90,6 +98,7 @@ export class GlEntity implements JsonSerializable {
 
   public fromJson(jsonObject: { [key: string]: any; }): void {
     if (jsonObject['type'] != this.constructor.name) return;
+    this._uuid = jsonObject['uuid'] || uuidv4();
     this.active = jsonObject['active'];
     this.name = jsonObject['name'];
     this.tag = jsonObject['tag'];
@@ -99,6 +108,7 @@ export class GlEntity implements JsonSerializable {
 
   public toJsonObject(): { [key: string]: any; } {
     const result = {
+      uuid: this.uuid,
       type: this.constructor.name,
       active: this.active,
       name: this.name,
