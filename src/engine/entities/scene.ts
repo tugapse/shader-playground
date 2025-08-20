@@ -1,8 +1,11 @@
 import { RenderMeshBehaviour } from "@engine/behaviours/renderer/render-mesh-behaviour";
-import { CameraFlyBehaviour } from "../behaviours/camera-fly-behaviour";
+import { MeshData } from "@engine/core/mesh";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
 import { Light } from "./light";
+import { SceneManager } from "./scene-manager";
+import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
 
@@ -30,6 +33,7 @@ export class Scene extends GlEntity {
     this._lights = [];
 
     !Scene._currentScene && (Scene._currentScene = this);
+
   }
 
   public override initialize(): void {
@@ -94,13 +98,63 @@ export class Scene extends GlEntity {
 
 
   public override destroy(): void {
+    for (const child of this.lights) {
+      child.destroy();
+    }
     for (const child of this.objects) {
       child.destroy();
     }
+    this._objects = [];
+    this._lights = [];
     super.destroy();
   }
 
-  public override toJsonObject(): { [key: string]: any; } {
+  override fromJson(jsonObject: JsonSerializedData): void {
+    SceneManager.registerDependencies();
+    this.destroy();
+    super.fromJson(jsonObject);
+
+    const { meshMaps, lights, objects } = jsonObject;
+    const meshes: { [key: string]: MeshData } = {};
+
+    for (const data of Object.values(meshMaps) as any[]) {
+      const mData = new MeshData([]);
+      mData.fromJson(data);
+      meshes[data['uuid']] = mData;
+    }
+
+    this._objects = objects.map((e: any) => {
+      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      e.behaviours.forEach((behaviourJsonData: any) => {
+        // get the actual mesh from id
+        if (behaviourJsonData.mesh) {
+          behaviourJsonData['meshData'] = meshMaps[behaviourJsonData.mesh.meshDataId];
+        }
+
+        const newBehaviour = SceneManager.instanciateObjectFromJsonData(behaviourJsonData.type, [this.gl]);
+        if (newBehaviour) {
+          newBehaviour.fromJson(behaviourJsonData);
+          entity.addBehaviour(newBehaviour);
+        } else {
+          console.warn("Implement behaviour instance");
+        }
+      });
+      entity.fromJson(e);
+      entity.scene = this;
+      return entity;
+    });
+
+    this._lights = lights.map((e: any) => {
+      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      entity.fromJson(e);
+      entity.scene = this;
+      return entity;
+    });
+
+    this.initialize();
+  }
+
+  public override toJsonObject(): JsonSerializedData {
     const meshMaps: { [key: string]: any } = {}
     const renderers = this.objects.filter(e => e.getBehaviour(RenderMeshBehaviour)).map(o => o.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour);
     for (const renderer of renderers) {
@@ -110,7 +164,7 @@ export class Scene extends GlEntity {
       ...super.toJsonObject(),
       lights: this.lights.map(o => o.toJsonObject()),
       objects: this.objects.map(o => o.toJsonObject()),
-      meshMaps:meshMaps,
+      meshMaps: meshMaps,
     }
   }
 
@@ -122,9 +176,6 @@ export class Scene extends GlEntity {
     return this.objects.filter(o => o.tag == tag);
   }
 
-  public getEntityByName(name: string): GlEntity | null {
-    return this.objects.find(o => o.name === name) || null;
-  }
   /**
     * Retrieves entities of a specific type from the collection.
     * T must be a type that extends GLEntity.

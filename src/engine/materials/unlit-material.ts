@@ -1,8 +1,8 @@
-import { vec2, vec4 } from "gl-matrix";
-import { Material } from "./material";
-import { Texture } from "../textures/texture";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
+import { vec2 } from "gl-matrix";
+import { Texture } from "../textures/texture";
 import { ColorMaterial } from "./color-material";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class UnlitMaterial extends ColorMaterial implements JsonSerializable {
   public mainTexUrl: string = "";
@@ -10,7 +10,7 @@ export class UnlitMaterial extends ColorMaterial implements JsonSerializable {
   public uvOffset: vec2 = vec2.create();
   public mainTex!: Texture;
 
-  override toJsonObject(): { [key: string]: any; } {
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       color: this.color,
@@ -19,11 +19,14 @@ export class UnlitMaterial extends ColorMaterial implements JsonSerializable {
       uvOffset: this.uvOffset
     }
   }
-  override fromJson(jsonObject: { [key: string]: any; }): void {
+  override fromJson(jsonObject: JsonSerializedData): void {
     this.name = jsonObject['name'];
     this.color = jsonObject['color'];
     this.mainTexUrl = jsonObject['mainTexUrl'];
     this.uvScale = jsonObject['uvScale'];
     this.uvOffset = jsonObject['uvOffset'];
+  }
+  static override instanciate(): UnlitMaterial {
+      return new UnlitMaterial();
   }
 }

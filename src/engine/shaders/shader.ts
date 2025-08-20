@@ -1,41 +1,45 @@
-import { mat4, vec2, vec3, vec4, mat3 } from "gl-matrix"; // Added mat3 import
-import { Material } from "../materials/material";
+import { mat4, vec2, vec3, vec4, mat3 } from "gl-matrix";
 import { Texture } from "../textures/texture";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { ColorMaterial } from "../materials/color-material";
 import { MeshData } from "@engine/core/mesh";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { v4 as uuidv4 } from 'uuid';
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
-// New: Extend WebGLBuffers to include tangent and bitangent buffers
 export interface WebGLBuffers {
   position: WebGLBuffer | null;
   normal: WebGLBuffer | null;
   uv: WebGLBuffer | null;
-  tangent: WebGLBuffer | null; // <--- New
-  bitangent: WebGLBuffer | null; // <--- New
+  tangent: WebGLBuffer | null;
+  bitangent: WebGLBuffer | null;
   indices: WebGLBuffer | null;
 }
 
 export class Shader implements JsonSerializable {
 
+
+  public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial) {
+    return new Shader(gl, material);
+  }
+
+
   public get uuid() { return this._uuid; }
   public shaderProgram!: WebGLProgram;
   private initialized = false;
   protected _uuid: string;
-  // Initialize with the new buffers
   public buffers: WebGLBuffers = {
     position: null,
     normal: null,
     uv: null,
-    tangent: null, // <--- New
-    bitangent: null, // <--- New
+    tangent: null,
+    bitangent: null,
     indices: null,
   };
 
   constructor(
     protected gl: WebGL2RenderingContext,
-    public material: Material,
+    public material: ColorMaterial,
     public fragUri: string = "assets/shaders/frag/color.glsl",
     public vertexUri: string = "assets/shaders/vertex/vertex.glsl"
   ) { this._uuid = uuidv4() }
@@ -63,17 +67,15 @@ export class Shader implements JsonSerializable {
   initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
     mesh.calculateNormals();
     mesh.calculateTangentsAndBitangents();
-    // New: The buffers interface now includes tangent and bitangent
     const buffers: WebGLBuffers = {
       position: null,
       normal: null,
       uv: null,
-      tangent: null, // Initialize as null
-      bitangent: null, // Initialize as null
+      tangent: null,
+      bitangent: null,
       indices: null,
     };
 
-    // --- Position Buffer ---
     buffers.position = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
     const positions: number[] = [];
@@ -82,7 +84,6 @@ export class Shader implements JsonSerializable {
     }
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // --- Normal Buffer ---
     buffers.normal = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
     const normals: number[] = [];
@@ -91,7 +92,6 @@ export class Shader implements JsonSerializable {
     }
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 
-    // --- UV Buffer ---
     buffers.uv = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.uv);
     const uvs: number[] = [];
@@ -100,8 +100,7 @@ export class Shader implements JsonSerializable {
     }
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
 
-    // --- New: Tangent Buffer ---
-    if (mesh.tangents && mesh.tangents.length > 0) { // Check if tangents exist and are not empty
+    if (mesh.tangents && mesh.tangents.length > 0) {
       buffers.tangent = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffers.tangent);
       const tangents: number[] = [];
@@ -111,8 +110,7 @@ export class Shader implements JsonSerializable {
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangents), gl.STATIC_DRAW);
     }
 
-    // --- New: Bitangent Buffer ---
-    if (mesh.bitangents && mesh.bitangents.length > 0) { // Check if bitangents exist and are not empty
+    if (mesh.bitangents && mesh.bitangents.length > 0) {
       buffers.bitangent = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buffers.bitangent);
       const bitangents: number[] = [];
@@ -122,29 +120,25 @@ export class Shader implements JsonSerializable {
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bitangents), gl.STATIC_DRAW);
     }
 
-    // --- Index Buffer ---
     buffers.indices = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
 
-    this.buffers = buffers; // Assign the newly created buffers to the class property
+    this.buffers = buffers;
   }
 
   public bindBuffers() {
     if (!this.gl || !this.shaderProgram) return;
-    // Position Attribute
     const positionAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
     if (this.buffers.position && positionAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
       this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(positionAttributeLocation);
     } else if (positionAttributeLocation !== -1) {
-      // If buffer is null but location is valid, disable it to prevent errors
       this.gl.disableVertexAttribArray(positionAttributeLocation);
     }
 
 
-    // Normal Attribute
     const normalAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_normal');
     if (this.buffers.normal && normalAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.normal);
@@ -154,7 +148,6 @@ export class Shader implements JsonSerializable {
       this.gl.disableVertexAttribArray(normalAttributeLocation);
     }
 
-    // UV Attribute
     const uvAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_uv');
     if (this.buffers.uv && uvAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.uv);
@@ -164,7 +157,6 @@ export class Shader implements JsonSerializable {
       this.gl.disableVertexAttribArray(uvAttributeLocation);
     }
 
-    // New: Tangent Attribute
     const tangentAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_tangent');
     if (this.buffers.tangent && tangentAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.tangent);
@@ -175,7 +167,6 @@ export class Shader implements JsonSerializable {
       this.gl.disableVertexAttribArray(tangentAttributeLocation);
     }
 
-    // New: Bitangent Attribute
     const bitangentAttributeLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_bitangent');
     if (this.buffers.bitangent && bitangentAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.bitangent);
@@ -186,7 +177,6 @@ export class Shader implements JsonSerializable {
       this.gl.disableVertexAttribArray(bitangentAttributeLocation);
     }
 
-    // Bind Index Buffer for Drawing
     if (this.buffers.indices) {
       this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
     }
@@ -258,7 +248,7 @@ export class Shader implements JsonSerializable {
     }
   }
 
-  public setBuffer(buffer: WebGLBuffer, values: vec3[]) { // This method seems to be generic; ensure it handles flat arrays for `bufferData`
+  public setBuffer(buffer: WebGLBuffer, values: vec3[]) {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(values.flat() as number[]), this.gl.STATIC_DRAW);
   }
@@ -333,7 +323,7 @@ export class Shader implements JsonSerializable {
     this.initialized = false;
   }
 
-  public toJsonObject(): { [key: string]: any; } {
+  public toJsonObject(): JsonSerializedData {
     return {
       uuid: this.uuid,
       type: this.constructor.name,
@@ -342,7 +332,7 @@ export class Shader implements JsonSerializable {
       material: this.material.toJsonObject()
     }
   }
-  public fromJson(jsonObject: { [key: string]: any; }): void {
+  public fromJson(jsonObject: JsonSerializedData): void {
     this.fragUri = jsonObject['fragUri'];
     this.vertexUri = jsonObject['vertexUri'];
     this.material = new ColorMaterial();

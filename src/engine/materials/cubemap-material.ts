@@ -1,6 +1,7 @@
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { CubeMapTexture } from "@engine/textures/cubemap-texture";
 import { ColorMaterial } from "./color-material";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class CubemapMaterial extends ColorMaterial implements JsonSerializable {
 
@@ -12,10 +13,11 @@ export class CubemapMaterial extends ColorMaterial implements JsonSerializable {
   public frontSideUri: string = "assets/images/skybox/blue/front.jpeg";
   public mainTex!: CubeMapTexture;
 
-  override fromJson(jsonObject: { [key: string]: any; }): void {
+  override fromJson(jsonObject: JsonSerializedData): void {
 
   }
-  override toJsonObject(): { [key: string]: any; } {
+
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       rightSideUri: this.rightSideUri,
@@ -25,5 +27,9 @@ export class CubemapMaterial extends ColorMaterial implements JsonSerializable {
       backSideUri: this.backSideUri,
       frontSideUri: this.frontSideUri
     }
+  }
+
+  static override instanciate(): CubemapMaterial {
+    return new CubemapMaterial();
   }
 }

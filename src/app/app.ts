@@ -1,8 +1,10 @@
+
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { QuadPrimitive } from '../engine/primitives/quad-primitive';
 import { Canvas } from "./editor/components/canvas/canvas";
 
+import { CommonModule } from '@angular/common';
 import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
@@ -22,8 +24,6 @@ import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
-import { CommonModule } from '@angular/common';
-import { Transform } from '@engine/core/transform';
 
 class LookAtBehaviour extends EntityBehaviour {
   public target!: GlEntity;
@@ -75,10 +75,13 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene.name = "Main Scene";
     this.scene.initialize();
     this.setupCamera();
-    this.loadAssets().then(()=>{
+    this.loadAssets().then(() => {
       const data = this.scene.toJsonObject();
-      console.debug("scene string", data);
-      console.debug("scene obj", (JSON.stringify(data)));
+      const jstring = JSON.stringify(data);
+      this.scene.fromJson(JSON.parse(jstring));
+      console.debug("scene old data", data);
+      console.debug("scene  new data", this.scene.toJsonObject());
+      console.debug("scene string", jstring);
 
     });
   }

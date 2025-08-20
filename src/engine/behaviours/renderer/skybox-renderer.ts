@@ -5,6 +5,10 @@ import { RenderMeshBehaviour } from "./render-mesh-behaviour";
 
 export class SkyboxRenderer extends RenderMeshBehaviour {
 
+  public static override instanciate(name: string, gl: WebGL2RenderingContext): SkyboxRenderer {
+      return new SkyboxRenderer(gl)
+  }
+
   override initialize(): void {
     super.initialize()
     this.transform.setPosition(0, 0, 0);
@@ -46,6 +50,7 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
     this.setCameraMatrices();
     this.shader.loadDataIntoShader();
   }
+
 
 
 }

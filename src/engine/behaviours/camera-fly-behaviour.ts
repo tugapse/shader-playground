@@ -1,6 +1,7 @@
 import { EntityBehaviour } from "./entity-behaviour";
 import { Keybord, Mouse } from "../core/input";
 import { vec3, quat } from 'gl-matrix'; // Import quat for quaternion operations
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class CameraFlyBehaviour extends EntityBehaviour {
 
@@ -78,7 +79,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     super.update(ellapsed);
   }
 
-  override toJsonObject(): { [key: string]: any; } {
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       moveSpeed: this.moveSpeed,

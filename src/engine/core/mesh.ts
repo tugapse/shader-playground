@@ -2,6 +2,7 @@ import { vec2, vec3 } from "gl-matrix";
 import { EngineCache } from "./storage"; // Assuming these imports are necessary for other parts of the class.
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { v4 as uuidv4 } from 'uuid'
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
 export const createTorusPrimitive = async () => {
@@ -235,10 +236,10 @@ export class MeshData implements JsonSerializable {
     this.bitangents = bitangents;
   }
 
-  toJsonObject(): { [key: string]: any; } {
+  toJsonObject(): JsonSerializedData {
     return {
       type: this.constructor.name,
-      uuid:this.uuid,
+      uuid: this.uuid,
       vertices: this.vertices.flat(1),
       normals: this.normals.flat(1),
       uvs: this.uvs.flat(1),
@@ -248,8 +249,14 @@ export class MeshData implements JsonSerializable {
     }
   }
 
-  fromJson(jsonObject: { [key: string]: any; }): void {
-    throw new Error("Method not implemented.");
+  fromJson(jsonObject: any): void {
+    this._uuid = this.uuid;
+    this.vertices = jsonObject.vertices;
+    this.normals = jsonObject.normals;
+    this.uvs = jsonObject.uvs;
+    this.indices = jsonObject.indices;
+    this.tangents = jsonObject.tangents;
+    this.bitangents = jsonObject.bitangents;
   }
 }
 
@@ -257,14 +264,14 @@ export class Mesh implements JsonSerializable {
 
   public meshData!: MeshData;
 
-  toJsonObject(): { [key: string]: any; } {
+  toJsonObject(): JsonSerializedData {
     return {
       type: this.constructor.name,
       meshDataId: this.meshData.uuid,
     }
   }
 
-  fromJson(jsonObject: { [key: string]: any; }): void {
+  fromJson(jsonObject: JsonSerializedData): void {
     if (!this.meshData) this.meshData = new MeshData([]);
     this.meshData.fromJson(jsonObject);
   }

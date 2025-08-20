@@ -5,12 +5,16 @@ import { Camera } from "@engine/entities/camera";
 import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
 import { LightType } from "@engine/enums/light-type.enum";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { LitMaterial } from "@engine/materials/lit-material";
 import { LitShader } from "@engine/shaders/lit-shader";
 import { Shader } from "@engine/shaders/shader";
 import { mat3, mat4, vec3 } from "gl-matrix";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
+  static instanciate(name: string, gl: WebGL2RenderingContext) {
+    return new RenderMeshBehaviour(gl);
+  }
 
   public mesh!: Mesh;
   public shader!: Shader;
@@ -261,11 +265,15 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     }
   }
 
-  override toJsonObject(): { [key: string]: any; } {
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       shader: this.shader,
       mesh: this.mesh.toJsonObject()
     }
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    debugger
   }
 }

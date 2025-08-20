@@ -3,10 +3,16 @@ import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
 import { v4 as uuidv4 } from 'uuid';
+import { SceneManager } from "./scene-manager";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
 
 export class GlEntity implements JsonSerializable {
+
+  public static instanciate(name = "Entity", transform?: Transform) {
+    return new GlEntity(name, transform);
+  }
 
   public scene!: Scene;
   public active: boolean = true;
@@ -21,7 +27,7 @@ export class GlEntity implements JsonSerializable {
 
 
   constructor(public name: String, public transform: Transform = new Transform()) {
-    this._uuid = uuidv4()
+    this._uuid = uuidv4();
   }
 
 
@@ -58,7 +64,7 @@ export class GlEntity implements JsonSerializable {
     for (const behaviour of this.behaviours) {
       behaviour.destroy();
     }
-    this._initialized = false;
+
   }
 
   public addBehaviour(behaviour: EntityBehaviour) {
@@ -96,7 +102,7 @@ export class GlEntity implements JsonSerializable {
     return this.behaviours.find((o): o is T => o instanceof constructor);
   }
 
-  public fromJson(jsonObject: { [key: string]: any; }): void {
+  public fromJson(jsonObject: JsonSerializedData): void {
     if (jsonObject['type'] != this.constructor.name) return;
     this._uuid = jsonObject['uuid'] || uuidv4();
     this.active = jsonObject['active'];
@@ -106,7 +112,8 @@ export class GlEntity implements JsonSerializable {
     this.transform.fromJson(jsonObject['transform']);
   }
 
-  public toJsonObject(): { [key: string]: any; } {
+
+  public toJsonObject(): JsonSerializedData {
     const result = {
       uuid: this.uuid,
       type: this.constructor.name,

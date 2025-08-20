@@ -1,17 +1,20 @@
-import { vec4 } from "gl-matrix";
-import { Material } from "./material";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
+import { vec4 } from "gl-matrix";
 
-export class ColorMaterial extends Material implements JsonSerializable {
+export class ColorMaterial implements JsonSerializable {
+
+  public static instanciate(){ return new ColorMaterial(); }
+  public name:string="Color Material";
   public color: vec4 = vec4.fromValues(1, 1, 1, 1);
-  override toJsonObject(): { [key: string]: any; } {
+
+   toJsonObject(): JsonSerializedData {
     return {
-      ...super.toJsonObject(),
       color: this.color,
 
     }
   }
-  override fromJson(jsonObject: { [key: string]: any; }): void {
+   fromJson(jsonObject: JsonSerializedData): void {
     this.name = jsonObject['name'];
     this.color = jsonObject['color'];
 

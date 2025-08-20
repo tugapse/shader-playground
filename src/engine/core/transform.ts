@@ -1,4 +1,5 @@
 import { JsonSerializable } from '@engine/interfaces/json-serializable';
+import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { vec3, mat4, quat } from 'gl-matrix'; // Import quat
 
 export class Transform implements JsonSerializable {
@@ -185,7 +186,7 @@ export class Transform implements JsonSerializable {
     }
   }
 
-  public fromJson(jsonObject: { [key: string]: any; }): void {
+  public fromJson(jsonObject: JsonSerializedData): void {
     this._position = vec3.fromValues(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
     this._rotation = vec3.fromValues(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
     this._scale = vec3.fromValues(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);

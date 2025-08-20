@@ -1,6 +1,9 @@
 import { vec3, vec4 } from "gl-matrix";
 import { GlEntity } from "./entity";
 import { LightType } from "@engine/enums/light-type.enum";
+import { Transform } from "@engine/core/transform";
+import { SceneManager } from "./scene-manager";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
 
@@ -12,12 +15,16 @@ export class Light extends GlEntity {
     this.color = vec4.fromValues(0.2, 0.2, 0.2, 0.1);
   }
 
-  public override toJsonObject(): { [key: string]: any; } {
+  public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       lightType: this.lightType,
       color: this.color
     }
+  }
+
+  static override instanciate(name?: string, transform?: Transform): Light {
+    return new Light(name || "Light");
   }
 }
 
@@ -26,22 +33,28 @@ export class DirectionalLight extends Light {
   public direction!: vec3;
   override lightType: LightType = LightType.DIRECTIONAL;
 
-  public override toJsonObject(): { [key: string]: any; } {
+  public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       direction: this.direction
     }
+  }
+  static override instanciate(name?: string, transform?: Transform): DirectionalLight {
+    return new DirectionalLight(name || "Directional Light");
   }
 }
 
 export class PointLight extends Light {
   override lightType: LightType = LightType.POINT;
   public attenuation!: { constant: number; linear: number; quadratic: number };
-  public override toJsonObject(): { [key: string]: any; } {
+  public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       attenuation: this.attenuation
     }
+  }
+  static override instanciate(name?: string, transform?: Transform): PointLight {
+    return new PointLight(name || "Light");
   }
 }
 
@@ -51,7 +64,7 @@ export class SpotLight extends Light {
   public coneAngles!: { inner: number; outer: number; };
   public attenuation!: { constant: number; linear: number; quadratic: number };
 
-  public override toJsonObject(): { [key: string]: any; } {
+  public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       coneAngles: this.coneAngles,
@@ -59,4 +72,9 @@ export class SpotLight extends Light {
       direction: this.direction
     }
   }
+
+  static override instanciate(name?: string, transform?: Transform): SpotLight {
+    return new SpotLight(name || "Light");
+  }
 }
+

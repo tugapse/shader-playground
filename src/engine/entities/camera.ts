@@ -2,6 +2,8 @@ import { Transform } from "../core/transform";
 import { mat4, vec3 } from 'gl-matrix'; // Import vec3 for lookAt calculations
 import { GlEntity } from "./entity";
 import { CanvasViewport } from "@engine/core/canvas-viewport"; // Assuming this is used for aspect ratio
+import { SceneManager } from "./scene-manager";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class Camera extends GlEntity {
 
@@ -81,7 +83,7 @@ export class Camera extends GlEntity {
     super.update(ellapsed);
   }
 
-  override toJsonObject(): { [key: string]: any; } {
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       fieldOfView: this.fieldOfView,
@@ -90,4 +92,13 @@ export class Camera extends GlEntity {
       aspectRatio: this.aspectRatio,
     }
   }
+
+  static override instanciate(name?: string, transform?: Transform): Camera {
+    const camera = new Camera();
+    camera.name = name || camera.name;
+    camera.transform = transform || camera.transform;
+    return camera;
+  }
 }
+
+

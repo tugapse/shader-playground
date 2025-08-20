@@ -1,5 +1,4 @@
-import { vec2, vec4 } from "gl-matrix";
-import { Material } from "./material";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { Texture } from "../textures/texture";
 import { UnlitMaterial } from "./unlit-material";
 
@@ -12,7 +11,7 @@ export class LitMaterial extends UnlitMaterial {
 
   public normalTex!: Texture;
 
-  override toJsonObject(): { [key: string]: any; } {
+  override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
       normalTexUrl: this.normalTexUrl,
@@ -20,5 +19,9 @@ export class LitMaterial extends UnlitMaterial {
       roughness: this.roughness,
       normalMapStrength: this.normalMapStrength
     }
+  }
+
+  static override instanciate(): LitMaterial {
+    return new LitMaterial();
   }
 }
