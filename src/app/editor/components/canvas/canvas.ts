@@ -90,8 +90,9 @@ export class Canvas implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['scene'].currentValue != this.scene) {
       const newScene: Scene = changes['scene'].currentValue;
-      // if (changes['scene'].previousValue) changes['scene'].previousValue.destroy()
-      if (this.gl && this.canvasElement) newScene.setGlRenderingContext(this.gl, this.canvasElement);
+      if (changes['scene'].previousValue) changes['scene'].previousValue.destroy()
+      if (this.gl && this.canvasElement) newScene.setGlRenderingContext(this.gl);
+      this.resizeCanvas(true);
     }
   }
 
@@ -100,6 +101,10 @@ export class Canvas implements OnChanges {
   }
 
   public render(timestamp: number) {
+    if (!this.scene) {
+      requestAnimationFrame(this.render.bind(this));
+      return;
+    }
     const elapsed = timestamp - this.lastTime;
 
     if (elapsed > this.frameInterval) {
@@ -109,7 +114,7 @@ export class Canvas implements OnChanges {
       this.scene.update(delta);
 
       if (this.gl && this.canvasElement) {
-        this.scene.setGlRenderingContext(this.gl, this.canvasElement);
+        this.scene.setGlRenderingContext(this.gl);
         this.scene.draw();
       }
       this.cleanInput();
@@ -137,11 +142,11 @@ export class Canvas implements OnChanges {
 
   }
 
-  private resizeCanvas(): void {
+  private resizeCanvas(force = false): void {
     const displayWidth = this.glCanvas.nativeElement.clientWidth;
     const displayHeight = this.glCanvas.nativeElement.clientHeight;
 
-    if (this.glCanvas.nativeElement.width !== displayWidth || this.glCanvas.nativeElement.height !== displayHeight) {
+    if (force || (this.glCanvas.nativeElement.width !== displayWidth || this.glCanvas.nativeElement.height !== displayHeight)) {
       this.glCanvas.nativeElement.width = displayWidth;
       this.glCanvas.nativeElement.height = displayHeight;
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
@@ -155,7 +160,7 @@ export class Canvas implements OnChanges {
 
     if (Camera.mainCamera) {
       Camera.mainCamera.aspectRatio = displayWidth / displayHeight;
-      Camera.mainCamera?.updateProjectionMatrix();
+      Camera.mainCamera.updateProjectionMatrix();
     }
   }
 }

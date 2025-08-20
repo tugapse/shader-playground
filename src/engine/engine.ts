@@ -1,3 +1,4 @@
+import { CameraFlyBehaviour } from "./behaviours/camera-fly-behaviour";
 import { RenderMeshBehaviour } from "./behaviours/renderer/render-mesh-behaviour";
 import { SkyboxRenderer } from "./behaviours/renderer/skybox-renderer";
 import { MeshData } from "./core/mesh";
@@ -45,12 +46,14 @@ export function registerDependencies() {
 
   SceneManager.addDependency(RenderMeshBehaviour.name, RenderMeshBehaviour.instanciate)
   SceneManager.addDependency(SkyboxRenderer.name, SkyboxRenderer.instanciate)
-  // SceneManager.addDependency(Shader.name, Shader.instanciate)
-  // SceneManager.addDependency(Shader.name, Shader.instanciate)
 
   SceneManager.addDependency(ColorMaterial.name, ColorMaterial.instanciate)
   SceneManager.addDependency(UnlitMaterial.name, UnlitMaterial.instanciate)
   SceneManager.addDependency(LitMaterial.name, LitMaterial.instanciate)
   SceneManager.addDependency(CubemapMaterial.name, CubemapMaterial.instanciate)
+
+  //Behaviours
+  SceneManager.addDependency(CameraFlyBehaviour.name, CameraFlyBehaviour.instanciate)
+
 
 }

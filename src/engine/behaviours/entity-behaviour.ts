@@ -7,12 +7,13 @@ export abstract class EntityBehaviour implements JsonSerializable {
 
   public active: boolean = true;
   public parent!: GlEntity;
+  protected _initialized = false;
 
   public get transform(): Transform { return this.parent.transform; }
 
   constructor() { }
 
-  public initialize(): void { }
+  public initialize(): boolean { return this._initialized = true; }
   public update(ellapsed: number): void { }
   public updateEditor(ellapsed: number): void { }
   public draw(): void { }

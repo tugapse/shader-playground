@@ -23,8 +23,8 @@ export class SceneManager {
     return null;
   }
 
-  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene:Scene): Scene {
-
+  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData): Scene {
+    const scene = new Scene();
     const { meshMaps, lights, objects } = jsonData;
     const meshes: { [key: string]: MeshData } = {};
 
@@ -39,34 +39,31 @@ export class SceneManager {
       e.behaviours.forEach((behaviourJsonData: any) => {
         // get the actual mesh from id
         if (behaviourJsonData.mesh) {
-          behaviourJsonData['meshData'] = meshMaps[behaviourJsonData.mesh.meshDataId];
+          behaviourJsonData['meshData'] = meshes[behaviourJsonData.mesh.meshDataId];
         }
-
         const newBehaviour = SceneManager.instanciateObjectFromJsonData(behaviourJsonData.type, [gl]);
         if (newBehaviour) {
           newBehaviour.fromJson(behaviourJsonData);
+          newBehaviour.parent = entity;
           entity.addBehaviour(newBehaviour);
-          entity.initialize();
         } else {
           console.warn("Implement behaviour instance");
         }
       });
       entity.fromJson(e);
-      entity.scene = this;
       return entity;
     });
 
     const newLights = lights.map((e: any) => {
       const entity = SceneManager.instanciateObjectFromJsonData(e.type);
       entity.fromJson(e);
-      entity.scene = this;
       return entity;
     });
 
     jsonData['lights'] = newLights;
     jsonData['objects'] = newObjects;
     scene.fromJson(jsonData);
-    scene.name="FromManager"
+    scene.name = "FromManager"
     return scene;
   }
 

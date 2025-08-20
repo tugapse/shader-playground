@@ -25,6 +25,7 @@ import { vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
 import { SceneManager } from '@engine/entities/scene-manager';
+import { ColorMaterial } from '@engine/materials/color-material';
 
 // class LookAtBehaviour extends EntityBehaviour {
 //   public target!: GlEntity;
@@ -67,30 +68,16 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
-  public scene!: Scene ;
+  public scene!: Scene;
   private started = false;
 
   ngAfterViewInit(): void {
-    this.scene = new Scene();
-    this.scene.isEditorMode = true;
-    this.scene.name = "Main Scene";
-    this.scene.initialize();
-    this.setupCamera();
-    this.loadAssets().then(() => {
-      // if (!this.scene) return;
-      // const sceneJsonData = this.scene.toJsonObject();
-      // this.scene.destroy();
-      // SceneManager.loadScene(this.gl, sceneJsonData, this.scene);
-      // this.scene.initialize();
-      // this.setupCamera();
-      // this.createSkybox();
-      // debugger
-    });
+
+
   }
 
-  private setupCamera() {
+  private setupCamera(scene: Scene) {
     if (!this.scene) return;
-
     this.scene.camera.updateInEditor = true;
     this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
     this.scene.camera.transform.lookAt(vec3.create());
@@ -102,44 +89,69 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene?.destroy();
   }
 
+  initScene(scene: Scene) {
+    this.createSkybox(scene);
+    this.createLights(scene);
+    this.addOtherObjetcs(scene);
+  }
+
   onGlContextCreated(gl: WebGL2RenderingContext) {
     this.gl = gl
+    this.scene = new Scene();
+    this.scene.isEditorMode = true;
+    this.scene.name = "Main Scene";
+    this.scene.initialize();
+    this.setupCamera(this.scene);
+    this.loadAssets(this.scene).then(() => {
+      setTimeout(() => {
+        const sceneJsonData = this.scene.toJsonObject();
+        const thescene = SceneManager.loadScene(this.gl, sceneJsonData);
+        this.scene = thescene;
+        // this.createSkybox(thescene);
+        // this.addOtherObjetcs(thescene);
+        thescene.initialize();
+        this.setupCamera(this.scene);
+
+      }, 3000);
+
+      // this.scene = oldScene;
+    });
   }
 
-  async loadAssets() {
-      this.started = true;
+  async loadAssets(scene: Scene) {
+    this.started = true;
 
-    this.createSkybox();
-    this.createLights();
-    this.addOtherObjetcs();
-    await this.addMonkeyObj();
+    this.createSkybox(scene);
+    this.createLights(scene);
+    this.addOtherObjetcs(scene);
+    await this.addMonkeyObj(scene);
 
   }
 
-  async addOtherObjetcs() {
+  async addOtherObjetcs(scene: Scene) {
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     // torus.addBehaviour(new RotateBehaviour());
-    this.scene.addEntity(torus);
+    scene.addEntity(torus);
 
-    const quad = this.createPrimitive("quad", new QuadPrimitive(), new RenderMeshBehaviour(this.gl));
-    const quadPos = vec3.create();
-    vec3.scaleAndAdd(quadPos, quadPos, quad.transform.left, 2.5);
-    vec3.scaleAndAdd(quadPos, quadPos, quad.transform.up, 2.5);
-    quad.transform.setPosition(quadPos[0], quadPos[1], quadPos[2]);
-    this.scene.addEntity(quad);
+    const cube = this.createPrimitive("cube", new CubePrimitive(), new RenderMeshBehaviour(this.gl));
+    const cubePos = vec3.create();
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
+    vec3.scaleAndAdd(cubePos, cubePos, cube.transform.up, 2.5);
+    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
+    scene.addEntity(cube);
 
     const sphere = this.createPrimitive("sphere", new SpherePrimitive(), new RenderMeshBehaviour(this.gl));
     const spherePos = vec3.create();
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.up, 2.5);
     sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
-    this.scene.addEntity(sphere);
+    scene.addEntity(sphere);
   }
 
-  private createLights() {
+  private createLights(scene: Scene) {
 
     const ambient = new Light("Ambient Light");
 
@@ -159,22 +171,22 @@ export class App implements AfterViewInit, OnDestroy {
     plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
     plight1.color = vec4.fromValues(1, 0, 0, 0.7);
 
-    this.scene.addEntity(ambient);
-    this.scene.addEntity(dlight);
-    this.scene.addEntity(plight);
-    this.scene.addEntity(plight1);
+    scene.addEntity(ambient);
+    scene.addEntity(dlight);
+    // scene.addEntity(plight);
+    // scene.addEntity(plight1);
   }
 
-  private async addMonkeyObj() {
+  private async addMonkeyObj(scene: Scene) {
 
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyPrimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
-    this.scene.addEntity(monkeyPrimitive);
+    scene.addEntity(monkeyPrimitive);
 
     const movingMokeyPrimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
     // movingMokeyPrimitive.addBehaviour(new moveBehaviour())
-    this.scene.addEntity(movingMokeyPrimitive);
+    scene.addEntity(movingMokeyPrimitive);
 
 
     const renderer = movingMokeyPrimitive.getBehaviour(RenderMeshBehaviour);
@@ -216,7 +228,7 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
 
-  async createSkybox() {
+  async createSkybox(scene: Scene) {
 
 
     const cubePrimitive = new CubePrimitive();
@@ -224,6 +236,6 @@ export class App implements AfterViewInit, OnDestroy {
     const shader = new SkyboxShader(this.gl, material);
     const cube = this.createPrimitive("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
 
-    this.scene.addEntity(cube);
+    scene.addEntity(cube);
   }
 }

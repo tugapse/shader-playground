@@ -3,6 +3,7 @@ import { Shader } from "./shader";
 import { CubeMapTexture } from "@engine/textures/cubemap-texture";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { ColorMaterial } from "@engine/materials/color-material";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class SkyboxShader extends Shader {
 
@@ -36,6 +37,7 @@ export class SkyboxShader extends Shader {
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color);
 
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
+      console.debug("Set texture")
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
     }
     super.loadDataIntoShader();
@@ -48,5 +50,10 @@ export class SkyboxShader extends Shader {
       texture.bind();
       this.gl.uniform1i(location, textureIndex);
     }
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.material = jsonObject['material'] as CubemapMaterial;
   }
 }

@@ -34,9 +34,12 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     super();
   }
 
-  override initialize(): void {
+  override initialize(): boolean {
+    if (this._initialized) return false;
     this.setGlSettings();
     this.initializeShader();
+    return super.initialize();
+
   }
 
   override update(ellapsed: number): void {
@@ -73,7 +76,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.shader.buffers.indices = this.gl.createBuffer();
     this.shader.buffers.tangent = this.gl.createBuffer();
     this.shader.buffers.bitangent = this.gl.createBuffer();
-
     this.shader.initBuffers(this.gl, this.mesh.meshData);
 
   }
@@ -277,12 +279,10 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     const materialData = jsonObject['shader']['material'];
-    const meshData = jsonObject['meshData'];
     const material = SceneManager.instanciateObjectFromJsonData(materialData.type);
     material.fromJson(materialData);
     this.shader = SceneManager.instanciateObjectFromJsonData(jsonObject['shader']['type'], [this.gl, material]);
     this.mesh = new Mesh();
-    this.mesh.meshData = SceneManager.instanciateObjectFromJsonData(meshData['type'], [[]]);
-    this.mesh.meshData.fromJson(meshData);
+    this.mesh.meshData = jsonObject['meshData'];
   }
 }

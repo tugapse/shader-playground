@@ -244,12 +244,12 @@ export class MeshData implements JsonSerializable {
     return {
       type: this.constructor.name,
       uuid: this.uuid,
-      vertices: this.vertices.flat(1),
-      normals: this.normals.flat(1),
-      uvs: this.uvs.flat(1),
+      vertices: this.vertices,
+      normals: this.normals,
+      uvs: this.uvs,
       indices: this.indices || [],
-      tangents: this.tangents?.flat(1) || [],
-      bitangents: this.bitangents?.flat(1) || [],
+      tangents: this.tangents || [],
+      bitangents: this.bitangents || [],
     }
   }
 

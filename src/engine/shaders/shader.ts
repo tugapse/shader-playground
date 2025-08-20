@@ -299,7 +299,7 @@ export class Shader implements JsonSerializable {
   }
 
   public destroy() {
-    return;
+
     if (this.buffers.position)
       this.gl.deleteBuffer(this.buffers.position);
 

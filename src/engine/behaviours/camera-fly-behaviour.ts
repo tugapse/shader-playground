@@ -5,6 +5,7 @@ import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class CameraFlyBehaviour extends EntityBehaviour {
 
+  static instanciate() { return new CameraFlyBehaviour(); }
   public moveSpeed = 2.0;
   public rotationSpeed = 0.1;
 
@@ -83,7 +84,11 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     return {
       ...super.toJsonObject(),
       moveSpeed: this.moveSpeed,
-      rotationSpeed:this.rotationSpeed
+      rotationSpeed: this.rotationSpeed
     };
+  }
+  override fromJson(jsonObject: JsonSerializedData): void {
+    this.moveSpeed = jsonObject['moveSpeed'],
+      this.moveSpeed = jsonObject['moveSpeed']
   }
 }

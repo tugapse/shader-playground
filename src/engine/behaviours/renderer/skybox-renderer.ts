@@ -2,6 +2,7 @@ import { Camera } from "@engine/entities/camera";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { mat4 } from "gl-matrix";
 import { RenderMeshBehaviour } from "./render-mesh-behaviour";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class SkyboxRenderer extends RenderMeshBehaviour {
 
@@ -9,10 +10,13 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
     return new SkyboxRenderer(gl);
   }
 
-  override initialize(): void {
-    super.initialize()
-    this.transform.setPosition(0, 0, 0);
-    this.transform.setScale(1000, 1000, 1000);
+  override initialize(): boolean {
+    if (super.initialize()) {
+      this.transform.setPosition(0, 0, 0);
+      this.transform.setScale(1000, 1000, 1000);
+      return true;
+    }
+    return false;
   }
 
   protected override setGlSettings(): void {
@@ -53,5 +57,7 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
   }
 
 
-
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+  }
 }

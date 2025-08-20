@@ -1,9 +1,12 @@
-// src/primitives/CubePrimitive.ts
 
 import { vec2, vec3 } from "gl-matrix";
 import { MeshData } from "../core/mesh";
 
 export class CubePrimitive extends MeshData {
+  static override instanciate(vertices?: vec3[], normals?: vec3[], uvs?: vec2[], indices?: number[]): CubePrimitive {
+    return new CubePrimitive();
+  }
+
   constructor(size: number = 2.0) {
     const halfSize = size / 2.0;
 
