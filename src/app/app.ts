@@ -77,13 +77,14 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene.initialize();
     this.setupCamera();
     this.loadAssets().then(() => {
-      if (!this.scene) return;
-      const sceneJsonData = this.scene.toJsonObject();
-      this.scene.destroy();
-      SceneManager.loadScene(this.gl, sceneJsonData, this.scene);
-      this.scene.initialize();
-      this.setupCamera();
-      debugger
+      // if (!this.scene) return;
+      // const sceneJsonData = this.scene.toJsonObject();
+      // this.scene.destroy();
+      // SceneManager.loadScene(this.gl, sceneJsonData, this.scene);
+      // this.scene.initialize();
+      // this.setupCamera();
+      // this.createSkybox();
+      // debugger
     });
   }
 
@@ -106,18 +107,16 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   async loadAssets() {
-    if (this.started) return;
-    this.started = true;
+      this.started = true;
 
-    this.createLights();
     this.createSkybox();
+    this.createLights();
     this.addOtherObjetcs();
     await this.addMonkeyObj();
 
   }
 
   async addOtherObjetcs() {
-    if (!this.scene) return;
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
@@ -141,7 +140,6 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private createLights() {
-    if (!this.scene) return;
 
     const ambient = new Light("Ambient Light");
 
@@ -168,7 +166,6 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private async addMonkeyObj() {
-    if (!this.scene) return;
 
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyPrimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
@@ -220,7 +217,6 @@ export class App implements AfterViewInit, OnDestroy {
 
 
   async createSkybox() {
-    if (!this.scene) return;
 
 
     const cubePrimitive = new CubePrimitive();

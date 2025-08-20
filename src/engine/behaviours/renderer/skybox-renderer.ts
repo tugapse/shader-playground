@@ -5,7 +5,7 @@ import { RenderMeshBehaviour } from "./render-mesh-behaviour";
 
 export class SkyboxRenderer extends RenderMeshBehaviour {
 
-  static override instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
+  static override instanciate(gl: WebGL2RenderingContext): SkyboxRenderer {
     return new SkyboxRenderer(gl);
   }
 

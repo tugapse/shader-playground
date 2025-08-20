@@ -81,7 +81,6 @@ export class Camera extends GlEntity {
     // this.updateProjectionMatrix(); // Consider calling this here if aspect ratio is dynamic
     this.updateViewMatrix(); // Always update view matrix as camera moves
     super.update(ellapsed);
-    console.debug("update called", this);
 
   }
 

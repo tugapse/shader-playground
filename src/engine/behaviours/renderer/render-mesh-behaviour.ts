@@ -31,7 +31,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   public enableNormalmaps = true;
 
   constructor(protected gl: WebGL2RenderingContext) {
-    super()
+    super();
   }
 
   override initialize(): void {

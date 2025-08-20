@@ -64,8 +64,8 @@ export class GlEntity implements JsonSerializable {
   }
 
   public addBehaviour(behaviour: EntityBehaviour) {
-      behaviour.initialize();
     behaviour.parent = this;
+    behaviour.initialize();
     this.behaviours.push(behaviour);
   }
 
