@@ -23,6 +23,12 @@ export class Light extends GlEntity {
     }
   }
 
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.lightType = jsonObject['lightType'] as LightType;
+    this.color = jsonObject['color']
+  }
+
   static override instanciate(name?: string, transform?: Transform): Light {
     return new Light(name || "Light");
   }
@@ -39,6 +45,12 @@ export class DirectionalLight extends Light {
       direction: this.direction
     }
   }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.direction = jsonObject['direction'];
+  }
+
   static override instanciate(name?: string, transform?: Transform): DirectionalLight {
     return new DirectionalLight(name || "Directional Light");
   }
@@ -53,6 +65,12 @@ export class PointLight extends Light {
       attenuation: this.attenuation
     }
   }
+
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.attenuation = jsonObject['attenuation'];
+  }
+
   static override instanciate(name?: string, transform?: Transform): PointLight {
     return new PointLight(name || "Light");
   }
@@ -71,6 +89,13 @@ export class SpotLight extends Light {
       attenuation: this.attenuation,
       direction: this.direction
     }
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.direction = jsonObject['direction'];
+    this.coneAngles = jsonObject['coneAngles'];
+    this.attenuation = jsonObject['attenuation'];
   }
 
   static override instanciate(name?: string, transform?: Transform): SpotLight {

@@ -37,12 +37,10 @@ export class Scene extends GlEntity {
   }
 
   public override initialize(): void {
-    if (this._initialized) return;
 
     for (const object of this.objects) {
       object.initialize();
     }
-    this._initialized = true;
     super.initialize();
     this.checkMainCamera();
   }
@@ -82,8 +80,8 @@ export class Scene extends GlEntity {
 
   public addEntity(entity: GlEntity) {
 
-    if (this._initialized) entity.initialize()
     entity.scene = this;
+    entity.initialize()
     if (entity instanceof Light) {
       this._lights.push(entity);
     } else {
@@ -110,47 +108,13 @@ export class Scene extends GlEntity {
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
-    this.destroy();
     super.fromJson(jsonObject);
-
-    const { meshMaps, lights, objects } = jsonObject;
-    const meshes: { [key: string]: MeshData } = {};
-
-    for (const data of Object.values(meshMaps) as any[]) {
-      const mData = new MeshData([]);
-      mData.fromJson(data);
-      meshes[data['uuid']] = mData;
+    for (const light of jsonObject['lights']) {
+      this.addEntity(light);
     }
-
-    this._objects = objects.map((e: any) => {
-      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
-      e.behaviours.forEach((behaviourJsonData: any) => {
-        // get the actual mesh from id
-        if (behaviourJsonData.mesh) {
-          behaviourJsonData['meshData'] = meshMaps[behaviourJsonData.mesh.meshDataId];
-        }
-
-        const newBehaviour = SceneManager.instanciateObjectFromJsonData(behaviourJsonData.type, [this.gl]);
-        if (newBehaviour) {
-          newBehaviour.fromJson(behaviourJsonData);
-          entity.addBehaviour(newBehaviour);
-        } else {
-          console.warn("Implement behaviour instance");
-        }
-      });
-      entity.fromJson(e);
-      entity.scene = this;
-      return entity;
-    });
-
-    this._lights = lights.map((e: any) => {
-      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
-      entity.fromJson(e);
-      entity.scene = this;
-      return entity;
-    });
-
-    this.initialize();
+    for (const entity of jsonObject['objects']) {
+      this.addEntity(entity);
+    }
   }
 
   public override toJsonObject(): JsonSerializedData {
@@ -159,7 +123,7 @@ export class Scene extends GlEntity {
     for (const renderer of renderers) {
       if (renderer.mesh)
         meshMaps[renderer.mesh.meshData.uuid] = renderer.mesh.meshData.toJsonObject();
-      else{
+      else {
         console.debug("No mesh for renderer", renderer)
       }
     }

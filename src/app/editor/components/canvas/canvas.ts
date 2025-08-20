@@ -13,7 +13,7 @@ import { registerDependencies } from '@engine/engine';
 })
 export class Canvas implements OnChanges {
 
-  @Input() scene?: Scene;
+  @Input() scene!: Scene;
 
   @Output() onGlContextCreated: EventEmitter<WebGL2RenderingContext> = new EventEmitter();
 
@@ -89,9 +89,8 @@ export class Canvas implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['scene'].currentValue != this.scene) {
-      debugger
       const newScene: Scene = changes['scene'].currentValue;
-      if (changes['scene'].previousValue) changes['scene'].previousValue.destroy()
+      // if (changes['scene'].previousValue) changes['scene'].previousValue.destroy()
       if (this.gl && this.canvasElement) newScene.setGlRenderingContext(this.gl, this.canvasElement);
     }
   }
@@ -101,7 +100,6 @@ export class Canvas implements OnChanges {
   }
 
   public render(timestamp: number) {
-    if(!this.scene) return;
     const elapsed = timestamp - this.lastTime;
 
     if (elapsed > this.frameInterval) {

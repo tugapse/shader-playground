@@ -1,5 +1,6 @@
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { Scene } from "./scene";
+import { MeshData } from "@engine/core/mesh";
 
 export class SceneManager {
 
@@ -12,7 +13,7 @@ export class SceneManager {
 
 
   public static instanciateObjectFromJsonData(className: string, args?: any[]): any {
-      if (this.dependecies[className]) {
+    if (this.dependecies[className]) {
       if (args && args.length > 0) {
         return this.dependecies[className](...args);
       } else {
@@ -22,10 +23,50 @@ export class SceneManager {
     return null;
   }
 
-  public static loadScene(jsonData: JsonSerializedData): Scene {
-    const scene = new Scene();
-    debugger
+  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene:Scene): Scene {
+
+    const { meshMaps, lights, objects } = jsonData;
+    const meshes: { [key: string]: MeshData } = {};
+
+    for (const data of Object.values(meshMaps) as any[]) {
+      const mData = new MeshData([]);
+      mData.fromJson(data);
+      meshes[data['uuid']] = mData;
+    }
+
+    const newObjects = objects.map((e: any) => {
+      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      e.behaviours.forEach((behaviourJsonData: any) => {
+        // get the actual mesh from id
+        if (behaviourJsonData.mesh) {
+          behaviourJsonData['meshData'] = meshMaps[behaviourJsonData.mesh.meshDataId];
+        }
+
+        const newBehaviour = SceneManager.instanciateObjectFromJsonData(behaviourJsonData.type, [gl]);
+        if (newBehaviour) {
+          newBehaviour.fromJson(behaviourJsonData);
+          entity.addBehaviour(newBehaviour);
+          entity.initialize();
+        } else {
+          console.warn("Implement behaviour instance");
+        }
+      });
+      entity.fromJson(e);
+      entity.scene = this;
+      return entity;
+    });
+
+    const newLights = lights.map((e: any) => {
+      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      entity.fromJson(e);
+      entity.scene = this;
+      return entity;
+    });
+
+    jsonData['lights'] = newLights;
+    jsonData['objects'] = newObjects;
     scene.fromJson(jsonData);
+    scene.name="FromManager"
     return scene;
   }
 

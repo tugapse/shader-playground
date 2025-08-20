@@ -1,6 +1,6 @@
 
 <div class="top-bar">
-  <app-icon class="play-icon" iconName="fa-play" [ngClass]="{playing:scene && scene.isEditorMode}" (click)="scene.isEditorMode = !scene.isEditorMode"></app-icon>
+  <app-icon class="play-icon" iconName="fa-play" [ngClass]="{playing:scene && scene.isEditorMode}" (click)="scene && scene.isEditorMode = !scene.isEditorMode"></app-icon>
 </div>
 <div class="container">
   <app-sidebar [scene]="scene"></app-sidebar>

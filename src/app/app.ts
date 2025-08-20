@@ -26,37 +26,37 @@ import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
 import { SceneManager } from '@engine/entities/scene-manager';
 
-class LookAtBehaviour extends EntityBehaviour {
-  public target!: GlEntity;
+// class LookAtBehaviour extends EntityBehaviour {
+//   public target!: GlEntity;
 
-  public override update(ellapsed: number): void {
-    if (this.target) {
-      this.transform.lookAt(this.target.transform.position);
-    }
-  }
-}
+//   public override update(ellapsed: number): void {
+//     if (this.target) {
+//       this.transform.lookAt(this.target.transform.position);
+//     }
+//   }
+// }
 
-class RotateBehaviour extends EntityBehaviour {
-  speed = 0.05;
-  public override update(ellapsed: number): void {
-    this.transform.rotate(1 * this.speed, 1 * this.speed, 1 * this.speed);
-  }
-}
+// class RotateBehaviour extends EntityBehaviour {
+//   speed = 0.05;
+//   public override update(ellapsed: number): void {
+//     this.transform.rotate(1 * this.speed, 1 * this.speed, 1 * this.speed);
+//   }
+// }
 
-class moveBehaviour extends EntityBehaviour {
-  distance = 200;
-  speed = 0.02;
-  t = 1;
+// class moveBehaviour extends EntityBehaviour {
+//   distance = 200;
+//   speed = 0.02;
+//   t = 1;
 
-  public override update(ellapsed: number): void {
-    const x = Math.sin(this.t) * this.speed;
-    const z = Math.cos(this.t) * this.speed;
+//   public override update(ellapsed: number): void {
+//     const x = Math.sin(this.t) * this.speed;
+//     const z = Math.cos(this.t) * this.speed;
 
-    this.transform.setPosition(this.distance * x, x + z / 2 * this.distance, this.distance * z);
-    this.parent.transform.updateModelMatrix();
-    this.t += this.speed;
-  }
-}
+//     this.transform.setPosition(this.distance * x, x + z / 2 * this.distance, this.distance * z);
+//     this.parent.transform.updateModelMatrix();
+//     this.t += this.speed;
+//   }
+// }
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
@@ -67,7 +67,7 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
-  public scene!: Scene | null;
+  public scene!: Scene ;
   private started = false;
 
   ngAfterViewInit(): void {
@@ -80,18 +80,10 @@ export class App implements AfterViewInit, OnDestroy {
       if (!this.scene) return;
       const sceneJsonData = this.scene.toJsonObject();
       this.scene.destroy();
-      this.scene = null;
-      this.scene = SceneManager.loadScene(sceneJsonData);
-      console.debug(this.scene);
-
-
-
-      const jstring = JSON.stringify(sceneJsonData);
-      this.scene.fromJson(JSON.parse(jstring));
-      console.debug("scene old data", sceneJsonData);
-      console.debug("scene  new data", this.scene.toJsonObject());
-      console.debug("scene string", jstring);
-
+      SceneManager.loadScene(this.gl, sceneJsonData, this.scene);
+      this.scene.initialize();
+      this.setupCamera();
+      debugger
     });
   }
 
@@ -130,7 +122,7 @@ export class App implements AfterViewInit, OnDestroy {
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
-    torus.addBehaviour(new RotateBehaviour());
+    // torus.addBehaviour(new RotateBehaviour());
     this.scene.addEntity(torus);
 
     const quad = this.createPrimitive("quad", new QuadPrimitive(), new RenderMeshBehaviour(this.gl));
@@ -159,7 +151,7 @@ export class App implements AfterViewInit, OnDestroy {
     dlight.color = vec4.fromValues(0.15, 0.15, 0.15, 1);
 
     const plight = new PointLight("Point light");
-    plight.addBehaviour(new moveBehaviour());
+    // plight.addBehaviour(new moveBehaviour());
     // plight.transform.translate(0, 0, 1);
     plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
     plight.color = vec4.fromValues(0, 0, 1, 0.9);
@@ -184,7 +176,7 @@ export class App implements AfterViewInit, OnDestroy {
 
     const movingMokeyPrimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
-    movingMokeyPrimitive.addBehaviour(new moveBehaviour())
+    // movingMokeyPrimitive.addBehaviour(new moveBehaviour())
     this.scene.addEntity(movingMokeyPrimitive);
 
 
@@ -195,9 +187,9 @@ export class App implements AfterViewInit, OnDestroy {
     }
 
 
-    const lookAtBehaviour = new LookAtBehaviour();
-    lookAtBehaviour.target = movingMokeyPrimitive;
-    monkeyPrimitive.addBehaviour(lookAtBehaviour);
+    // const lookAtBehaviour = new LookAtBehaviour();
+    // lookAtBehaviour.target = movingMokeyPrimitive;
+    // monkeyPrimitive.addBehaviour(lookAtBehaviour);
 
   }
 

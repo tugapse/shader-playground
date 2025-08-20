@@ -22,6 +22,7 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
 
   override draw(): void {
     if (!this.mesh || !this.shader.shaderProgram) { return }
+
     this.shader.bindBuffers();
     this.shader.use();
     this.setShaderVariables();

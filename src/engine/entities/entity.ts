@@ -18,7 +18,6 @@ export class GlEntity implements JsonSerializable {
   public active: boolean = true;
   public tag: string = "Entity";
   public updateInEditor = false;
-  protected _initialized = false;
   protected behaviours: EntityBehaviour[] = []
   protected _uuid!: string;
   public get uuid(): string {
@@ -33,11 +32,9 @@ export class GlEntity implements JsonSerializable {
 
 
   public initialize() {
-    if (this._initialized) return;
     for (const behaviour of this.behaviours) {
       behaviour.initialize();
     }
-    this._initialized = true;
   }
 
   public update(ellapsed: number): void {
@@ -64,11 +61,9 @@ export class GlEntity implements JsonSerializable {
     for (const behaviour of this.behaviours) {
       behaviour.destroy();
     }
-
   }
 
   public addBehaviour(behaviour: EntityBehaviour) {
-    if (this._initialized)
       behaviour.initialize();
     behaviour.parent = this;
     this.behaviours.push(behaviour);
