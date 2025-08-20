@@ -19,7 +19,7 @@ export interface WebGLBuffers {
 export class Shader implements JsonSerializable {
 
 
-  public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial) {
+  public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial): Shader {
     return new Shader(gl, material);
   }
 
@@ -60,7 +60,6 @@ export class Shader implements JsonSerializable {
       return;
     }
     this.shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader) as WebGLProgram;
-
     this.initialized = true;
   }
 
@@ -162,7 +161,7 @@ export class Shader implements JsonSerializable {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.tangent);
       this.gl.vertexAttribPointer(tangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(tangentAttributeLocation);
-    } else if (tangentAttributeLocation !== -1) { // Only disable if the attribute exists in the shader
+    } else if (tangentAttributeLocation !== -1) {
       console.debug("Tagent arrtibute location not found")
       this.gl.disableVertexAttribArray(tangentAttributeLocation);
     }
@@ -172,7 +171,7 @@ export class Shader implements JsonSerializable {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.bitangent);
       this.gl.vertexAttribPointer(bitangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.enableVertexAttribArray(bitangentAttributeLocation);
-    } else if (bitangentAttributeLocation !== -1) { // Only disable if the attribute exists in the shader
+    } else if (bitangentAttributeLocation !== -1) {
       console.debug("BiTagent arrtibute location not found")
       this.gl.disableVertexAttribArray(bitangentAttributeLocation);
     }

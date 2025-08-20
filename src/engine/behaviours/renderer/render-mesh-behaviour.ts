@@ -1,8 +1,9 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
 import { CanvasViewport } from "@engine/core/canvas-viewport";
-import { Mesh } from "@engine/core/mesh";
+import { Mesh, MeshData } from "@engine/core/mesh";
 import { Camera } from "@engine/entities/camera";
 import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
+import { SceneManager } from "@engine/entities/scene-manager";
 import { LightType } from "@engine/enums/light-type.enum";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
@@ -12,7 +13,8 @@ import { Shader } from "@engine/shaders/shader";
 import { mat3, mat4, vec3 } from "gl-matrix";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
-  static instanciate(name: string, gl: WebGL2RenderingContext) {
+
+  static instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
     return new RenderMeshBehaviour(gl);
   }
 
@@ -268,12 +270,19 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      shader: this.shader,
+      shader: this.shader.toJsonObject(),
       mesh: this.mesh.toJsonObject()
     }
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
-    debugger
+    const materialData = jsonObject['shader']['material'];
+    const meshData = jsonObject['meshData'];
+    const material = SceneManager.instanciateObjectFromJsonData(materialData.type);
+    material.fromJson(materialData);
+    this.shader = SceneManager.instanciateObjectFromJsonData(jsonObject['shader']['type'], [this.gl, material]);
+    this.mesh = new Mesh();
+    this.mesh.meshData = SceneManager.instanciateObjectFromJsonData(meshData['type'], [[]]);
+    this.mesh.meshData.fromJson(meshData);
   }
 }

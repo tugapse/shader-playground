@@ -10,6 +10,7 @@ export class ColorMaterial implements JsonSerializable {
 
    toJsonObject(): JsonSerializedData {
     return {
+      type:this.constructor.name,
       color: this.color,
 
     }

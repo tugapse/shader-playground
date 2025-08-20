@@ -4,8 +4,11 @@ import { Texture } from "../textures/texture";
 import { Shader } from "./shader";
 import { EngineCache } from "@engine/core/storage";
 import { Camera } from "@engine/entities/camera";
+import { ColorMaterial } from "@engine/materials/color-material";
 export class LitShader extends Shader {
-
+  static override instanciate(gl: WebGL2RenderingContext, material: LitMaterial): LitShader {
+    return new LitShader(gl, material);
+  }
 
   constructor(override gl: WebGL2RenderingContext, override material: LitMaterial) {
     super(
@@ -40,14 +43,14 @@ export class LitShader extends Shader {
   private checkAndLoadTextures() {
 
     if (!this.material.mainTex && this.material.mainTexUrl) {
-      this.material.mainTex = EngineCache.getTexture2D(this.material.mainTexUrl,this.gl)
-    }else if(!this.material.mainTex && !this.material.mainTexUrl){
+      this.material.mainTex = EngineCache.getTexture2D(this.material.mainTexUrl, this.gl)
+    } else if (!this.material.mainTex && !this.material.mainTexUrl) {
       this.material.mainTex = Texture.getDefaultWhiteTexture(this.gl);
     }
 
     if (!this.material.normalTex && this.material.normalTexUrl) {
-      this.material.normalTex = EngineCache.getTexture2D(this.material.normalTexUrl,this.gl)
-    }else if(!this.material.normalTex && !this.material.normalTexUrl){
+      this.material.normalTex = EngineCache.getTexture2D(this.material.normalTexUrl, this.gl)
+    } else if (!this.material.normalTex && !this.material.normalTexUrl) {
       this.material.normalTex = Texture.getDefaultWhiteTexture(this.gl);
     }
   }

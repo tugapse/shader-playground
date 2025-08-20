@@ -24,6 +24,7 @@ import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
+import { SceneManager } from '@engine/entities/scene-manager';
 
 class LookAtBehaviour extends EntityBehaviour {
   public target!: GlEntity;
@@ -66,7 +67,7 @@ export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
-  public scene!: Scene;
+  public scene!: Scene | null;
   private started = false;
 
   ngAfterViewInit(): void {
@@ -76,10 +77,18 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene.initialize();
     this.setupCamera();
     this.loadAssets().then(() => {
-      const data = this.scene.toJsonObject();
-      const jstring = JSON.stringify(data);
+      if (!this.scene) return;
+      const sceneJsonData = this.scene.toJsonObject();
+      this.scene.destroy();
+      this.scene = null;
+      this.scene = SceneManager.loadScene(sceneJsonData);
+      console.debug(this.scene);
+
+
+
+      const jstring = JSON.stringify(sceneJsonData);
       this.scene.fromJson(JSON.parse(jstring));
-      console.debug("scene old data", data);
+      console.debug("scene old data", sceneJsonData);
       console.debug("scene  new data", this.scene.toJsonObject());
       console.debug("scene string", jstring);
 
@@ -87,6 +96,8 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private setupCamera() {
+    if (!this.scene) return;
+
     this.scene.camera.updateInEditor = true;
     this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
     this.scene.camera.transform.lookAt(vec3.create());
@@ -95,7 +106,7 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.scene.destroy();
+    this.scene?.destroy();
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext) {
@@ -114,6 +125,7 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   async addOtherObjetcs() {
+    if (!this.scene) return;
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createPrimitive("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
@@ -137,6 +149,8 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private createLights() {
+    if (!this.scene) return;
+
     const ambient = new Light("Ambient Light");
 
     const dlight = new DirectionalLight("Directional light");
@@ -162,6 +176,8 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   private async addMonkeyObj() {
+    if (!this.scene) return;
+
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyPrimitive = this.createPrimitive("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     this.scene.addEntity(monkeyPrimitive);
@@ -212,6 +228,8 @@ export class App implements AfterViewInit, OnDestroy {
 
 
   async createSkybox() {
+    if (!this.scene) return;
+
 
     const cubePrimitive = new CubePrimitive();
     const material = new CubemapMaterial();

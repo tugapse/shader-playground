@@ -18,6 +18,10 @@ export const createcilinderPrimitive = async () => {
  * It stores vertex positions, normals, and UV coordinates, along with optional tangent and bitangent vectors for normal mapping.
  */
 export class MeshData implements JsonSerializable {
+  public static instanciate(vertices?: vec3[], normals: vec3[] = [], uvs: vec2[] = [], indices: number[] = []) {
+    if (!vertices) vertices = [];
+    return new MeshData(vertices, normals, uvs, indices)
+  }
   public vertices: vec3[];
   public normals: vec3[];
   public uvs: vec2[];

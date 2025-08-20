@@ -5,8 +5,8 @@ import { RenderMeshBehaviour } from "./render-mesh-behaviour";
 
 export class SkyboxRenderer extends RenderMeshBehaviour {
 
-  public static override instanciate(name: string, gl: WebGL2RenderingContext): SkyboxRenderer {
-      return new SkyboxRenderer(gl)
+  static override instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
+    return new SkyboxRenderer(gl);
   }
 
   override initialize(): void {
@@ -20,7 +20,7 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
     this.gl.depthFunc(this.gl.LEQUAL);
   }
 
-   override draw(): void {
+  override draw(): void {
     if (!this.mesh || !this.shader.shaderProgram) { return }
     this.shader.bindBuffers();
     this.shader.use();

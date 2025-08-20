@@ -110,7 +110,6 @@ export class Scene extends GlEntity {
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
-    SceneManager.registerDependencies();
     this.destroy();
     super.fromJson(jsonObject);
 
@@ -158,7 +157,11 @@ export class Scene extends GlEntity {
     const meshMaps: { [key: string]: any } = {}
     const renderers = this.objects.filter(e => e.getBehaviour(RenderMeshBehaviour)).map(o => o.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour);
     for (const renderer of renderers) {
-      meshMaps[renderer.mesh.meshData.uuid] = renderer.mesh.meshData.toJsonObject();
+      if (renderer.mesh)
+        meshMaps[renderer.mesh.meshData.uuid] = renderer.mesh.meshData.toJsonObject();
+      else{
+        console.debug("No mesh for renderer", renderer)
+      }
     }
     return {
       ...super.toJsonObject(),

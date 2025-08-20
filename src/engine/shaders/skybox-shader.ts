@@ -2,8 +2,13 @@ import { CubemapMaterial } from "@engine/materials/cubemap-material";
 import { Shader } from "./shader";
 import { CubeMapTexture } from "@engine/textures/cubemap-texture";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
+import { ColorMaterial } from "@engine/materials/color-material";
 
 export class SkyboxShader extends Shader {
+
+  static override instanciate(gl: WebGL2RenderingContext, material: CubemapMaterial): SkyboxShader {
+    return new SkyboxShader(gl, material);
+  }
 
   declare material: CubemapMaterial;
 
@@ -21,7 +26,7 @@ export class SkyboxShader extends Shader {
       this.material.mainTex = new CubeMapTexture(this.gl, [
         rightSideUri, leftSideUri,
         topSideUri, bottomSideUri,
-         frontSideUri, backSideUri
+        frontSideUri, backSideUri
       ]);
       this.material.mainTex.load();
     } else if (!this.material.mainTex.isImageLoaded) {
