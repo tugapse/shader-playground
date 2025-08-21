@@ -1,32 +1,30 @@
 #version 300 es
 precision mediump float;
 
-#define MAX_DIRECTIONAL_LIGHTS 5 // Max number of directional lights
-#define MAX_POINT_LIGHTS 20       // Max number of point lights
-#define MAX_SPOT_LIGHTS 20        // Max number of spot lights
+#define MAX_DIRECTIONAL_LIGHTS 5
+#define MAX_POINT_LIGHTS 20
+#define MAX_SPOT_LIGHTS 20
 
 uniform vec4 u_matColor;
 uniform vec2 u_uvScale;
 uniform vec2 u_uvOffset;
 uniform sampler2D u_mainTex;
-uniform sampler2D u_normalMap; //  Uniform for the normal map texture
+uniform sampler2D u_normalMap;
 
-uniform vec4 u_ambientLight; // Ambient light color
+uniform vec4 u_ambientLight;
 
-// Uniforms for multiple Directional Lights:
 uniform int u_numDirectionalLights;
 uniform vec3 u_directionalLightDirections[MAX_DIRECTIONAL_LIGHTS];
 uniform vec3 u_directionalLightColors[MAX_DIRECTIONAL_LIGHTS];
 
-// Uniforms for multiple Point Lights:
 uniform int u_numPointLights;
 uniform vec3 u_pointLightPositions[MAX_POINT_LIGHTS];
 uniform vec3 u_pointLightColors[MAX_POINT_LIGHTS];
 uniform float u_pointLightConstantAtts[MAX_POINT_LIGHTS];
 uniform float u_pointLightLinearAtts[MAX_POINT_LIGHTS];
 uniform float u_pointLightQuadraticAtts[MAX_POINT_LIGHTS];
+uniform float u_pointLightRadii[MAX_POINT_LIGHTS];
 
-// Uniforms for multiple Spot Lights:
 uniform int u_numSpotLights;
 uniform vec3 u_spotLightPositions[MAX_SPOT_LIGHTS];
 uniform vec3 u_spotLightDirections[MAX_SPOT_LIGHTS];
@@ -39,9 +37,8 @@ uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 
 
 in vec2 v_uv;
-in vec3 v_normal; // Interpolated normal (from vertex shader)
-in vec3 v_position; // Crucial for point and spot lights: fragment's world position
-//  Tangent and Bitangent vectors from the vertex shader for TBN matrix
+in vec3 v_normal;
+in vec3 v_position;
 in vec3 v_tangent;
 in vec3 v_bitangent;
 
@@ -53,52 +50,45 @@ void main() {
   vec4 sampledTexColor = texture(u_mainTex, uv);
   vec4 baseColor = sampledTexColor * u_matColor;
 
-  // --- Normal Mapping Logic ---
-  // 1. Sample the normal map and remap from [0, 1] to [-1, 1]
-  // Normal maps store vectors with components in [0, 1] range, centered at 0.5 (representing 0).
-  vec3 normalFromMap = texture(u_normalMap, uv).rgb ;
-  normalFromMap = normalFromMap  * 2.0 - 1.0; // Remap to [-1, 1] range
+  vec3 normalFromMap = texture(u_normalMap, uv).rgb;
+  normalFromMap = normalFromMap * 2.0 - 1.0;
 
-  // 2. Construct the TBN matrix (Tangent, Bitangent, Normal)
-  // These vectors (v_tangent, v_bitangent, v_normal) are already in world space from the vertex shader.
-  // The matrix transforms a vector from tangent space (normal map's space) to world space.
   mat3 tbnMatrix = mat3(
-    normalize(v_tangent),    // Tangent vector (X-axis of tangent space)
-    normalize(v_bitangent),  // Bitangent vector (Y-axis of tangent space)
-    normalize(v_normal)      // Normal vector (Z-axis of tangent space)
+    normalize(v_tangent),
+    normalize(v_bitangent),
+    normalize(v_normal)
   );
 
-  // 3. Transform the normal from the normal map (tangent space) to world space
   vec3 perturbedNormal = tbnMatrix * normalFromMap;
 
-  // 4. Blend between the perturbed normal and the original normal using the bump intensity
-  // This allows you to control the strength of the normal map effect.
-  // When u_bumpIntensity is 1.0, the perturbed normal is used completely.
-  // When u_bumpIntensity is 0.0, the original v_normal is used.
   vec3 blendedNormal = mix(normalize(v_normal), normalize(perturbedNormal), 0.8);
 
-  // 5. Use the blended normal for lighting calculations
   vec3 finalNormal = normalize(blendedNormal);
 
 
-  // --- Ambient Lighting Contribution ---
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor.rgb;
 
-  // --- Directional Lighting Contributions ---
   for (int i = 0; i < u_numDirectionalLights; ++i) {
     vec3 lightDir = normalize(u_directionalLightDirections[i]);
-    // Use the finalNormal for the dot product to get the diffuse intensity
     float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
     totalLitColorRGB += (baseColor.rgb * u_directionalLightColors[i] * diffuseIntensity);
   }
 
-  // --- Point Light Contributions ---
   for (int i = 0; i < u_numPointLights; ++i) {
     vec3 lightVecPoint = u_pointLightPositions[i] - v_position;
     float distancePoint = length(lightVecPoint);
     vec3 pointLightDir = normalize(lightVecPoint);
 
-    // Use the finalNormal for the dot product
+    float rangeFactor = 1.0 - smoothstep(
+      0.8 * u_pointLightRadii[i],
+      u_pointLightRadii[i],
+      distancePoint
+    );
+
+    if (rangeFactor == 0.0) {
+      continue;
+    }
+
     float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
 
     float attenuationPoint = 1.0 / (
@@ -106,12 +96,11 @@ void main() {
       u_pointLightLinearAtts[i] * distancePoint +
       u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint)
     );
-    attenuationPoint = clamp(attenuationPoint, 0.0, 1.0); // Clamp to prevent brightening very close
+    attenuationPoint = clamp(attenuationPoint, 0.0, 1.0);
 
-    totalLitColorRGB += (baseColor.rgb * u_pointLightColors[i] * pointDiffuseIntensity * attenuationPoint);
+    totalLitColorRGB += (baseColor.rgb * u_pointLightColors[i] * pointDiffuseIntensity * attenuationPoint * rangeFactor);
   }
 
-  // --- Spot Light Contributions ---
   for (int i = 0; i < u_numSpotLights; ++i) {
     vec3 lightVecSpot = u_spotLightPositions[i] - v_position;
     float distanceSpot = length(lightVecSpot);
@@ -122,17 +111,12 @@ void main() {
     );
     attenuationSpot = clamp(attenuationSpot, 0.0, 1.0);
 
-    vec3 spotLightDirFromFrag = normalize(lightVecSpot); // Direction FROM fragment TO spot light
-
-    // Compare this direction with the spotlight's actual direction
-    // u_spotLightDirections[i] points FROM light source. spotLightDirFromFrag points TO light source.
-    // So, we use dot(spotLightDirFromFrag, -u_spotLightDirections[i]) assuming u_spotLightDirections is already normalized.
+    vec3 spotLightDirFromFrag = normalize(lightVecSpot);
     float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
 
     float coneFactor = smoothstep(u_spotLightOuterConeCos[i], u_spotLightInnerConeCos[i], angleCos);
 
-    // Use the finalNormal for the dot product
-    float spotDiffuseIntensity = max(dot(finalNormal, spotLightDirFromFrag), 0.0); // Diffuse calculation
+    float spotDiffuseIntensity = max(dot(finalNormal, spotLightDirFromFrag), 0.0);
 
     totalLitColorRGB += (baseColor.rgb * u_spotLightColors[i] * spotDiffuseIntensity * attenuationSpot * coneFactor);
   }

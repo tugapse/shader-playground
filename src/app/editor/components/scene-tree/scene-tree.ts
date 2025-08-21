@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Scene } from '@engine/entities/scene';
 import { Icon } from "../icon/icon";
 import { LightType } from '@engine/enums/light-type.enum';
 import { Light } from '@engine/entities/light';
 import { GlEntity } from '@engine/entities/entity';
+import { SceneTreeService } from './scene-tree.service';
 
 @Component({
   selector: 'app-scene-tree',
@@ -13,6 +14,8 @@ import { GlEntity } from '@engine/entities/entity';
   styleUrl: './scene-tree.scss'
 })
 export class SceneTree {
+
+  constructor(public sceneTreeService: SceneTreeService) { }
 
 
   @Input() public targetScene?: Scene;

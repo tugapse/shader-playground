@@ -1,10 +1,9 @@
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
+import { v4 as uuidv4 } from 'uuid';
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
-import { v4 as uuidv4 } from 'uuid';
-import { SceneManager } from "./scene-manager";
-import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
 

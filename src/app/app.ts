@@ -22,11 +22,13 @@ import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
-import { vec3, vec4 } from 'gl-matrix';
+import { vec2, vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
 import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { Inpector } from "./editor/inspectors/inpector/inpector";
+import { SceneTreeService } from './editor/components/scene-tree/scene-tree.service';
+import { QuadPrimitive } from '@engine/primitives/quad-primitive';
 
 class LookAtBehaviour extends EntityBehaviour {
   static override instanciate(): LookAtBehaviour {
@@ -79,7 +81,7 @@ class MoveBehaviour extends EntityBehaviour {
     return new MoveBehaviour()
   }
 
-  distance = 5;
+  distance = 10 + Math.random() * 10;
   speed = 0.9;
   t = 1;
 
@@ -98,7 +100,7 @@ class MoveBehaviour extends EntityBehaviour {
   styleUrls: ['./app.scss'],
   imports: [Canvas, Icon, Sidebar, CommonModule, Inpector]
 })
-export class App implements AfterViewInit, OnDestroy {
+export class App implements OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
@@ -106,17 +108,14 @@ export class App implements AfterViewInit, OnDestroy {
   scene!: Scene;
   selectedEntity!: GlEntity;
 
-  constructor() {
+  constructor(
+    private sceneTreeService: SceneTreeService
+  ) {
     SceneManager.addDependency(LookAtBehaviour.name, LookAtBehaviour.instanciate);
     SceneManager.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);
     SceneManager.addDependency(MoveBehaviour.name, MoveBehaviour.instanciate);
 
   }
-  ngAfterViewInit(): void {
-
-
-  }
-
   private setupCamera(scene: Scene) {
     if (!this.scene) return;
     if (!this.scene.camera) this.scene.setMainCamera(new Camera());
@@ -131,46 +130,28 @@ export class App implements AfterViewInit, OnDestroy {
     this.scene?.destroy();
   }
 
-  initScene(scene: Scene) {
-    this.createSkybox(scene);
-    this.createLights(scene);
-    this.addOtherObjetcs(scene);
-  }
-
   onGlContextCreated(gl: WebGL2RenderingContext) {
     this.gl = gl
     const scene = new Scene();
     scene.isEditorMode = true;
     scene.name = "Main Scene";
-    scene.initialize();
-    this.setupCamera(scene);
-    this.scene = scene;
     this.loadAssets(scene).then(() => {
-      setTimeout(() => {
-        const sceneJsonData = JSON.parse(JSON.stringify(scene.toJsonObject()));
-        // scene.destroy();
-        const thescene = new Scene();
-        this.scene = thescene;
-        SceneManager.loadScene(this.gl, sceneJsonData, thescene);
-        thescene.initialize();
-        this.setupCamera(this.scene);
-
-      }, 3000);
-
-      // this.scene = oldScene;
+      this.scene = scene;
+      this.scene.initialize();
+      this.setupCamera(this.scene);
     });
   }
 
   async loadAssets(scene: Scene) {
-
+    this.createQuad(scene);
+    this.otherObjetcs(scene);
     this.createSkybox(scene);
     this.createLights(scene);
-    this.addOtherObjetcs(scene);
     await this.addMonkeyObj(scene);
 
   }
   torus!: GlEntity;
-  async addOtherObjetcs(scene: Scene) {
+  async otherObjetcs(scene: Scene) {
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
@@ -181,6 +162,7 @@ export class App implements AfterViewInit, OnDestroy {
     torus.addBehaviour(new MoveBehaviour());
     scene.addEntity(torus);
     this.torus = torus;
+
     const cube = this.createEntity("cube", new CubePrimitive(), new RenderMeshBehaviour(this.gl));
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
@@ -196,6 +178,22 @@ export class App implements AfterViewInit, OnDestroy {
     scene.addEntity(sphere);
   }
 
+  private createQuad(scene: Scene) {
+    const plane = this.createEntity("plane", new QuadPrimitive(), new RenderMeshBehaviour(this.gl));
+    const renderer = plane.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour;
+    if (renderer) {
+      const material = renderer.shader.material as LitMaterial;
+      material.uvScale = vec2.fromValues(10, 10)
+      material.roughness = 1;
+      material.specularStrength = 2;
+
+    }
+    plane.transform.translate(0, -2, 0);
+    plane.transform.rotate(270 * Math.PI / 180, 0, 0);
+    plane.transform.scale(500, 500, 500);
+    scene.addEntity(plane);
+  }
+
   private createLights(scene: Scene) {
 
     const ambient = new Light("Ambient Light");
@@ -206,21 +204,21 @@ export class App implements AfterViewInit, OnDestroy {
     dlight.color = vec4.fromValues(0.15, 0.15, 0.15, 1);
 
     const plight = new PointLight("Point light");
-    plight.addBehaviour(new MoveBehaviour());
     plight.transform.translate(0, 0, 1);
-    plight.attenuation = { constant: 0.5, linear: 0.1, quadratic: 0.005 };
-    plight.color = vec4.fromValues(0, 0, 1, 0.9);
+    plight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.002 };
+    plight.color = vec4.fromValues(1, 0.8, 0.6, 1);
 
     const plight1 = new PointLight("Point light 1");
     plight1.transform.translate(0, 1, 1);
-    plight1.attenuation = { constant: 1, linear: 1.2, quadratic: 0.005 };
-    plight1.color = vec4.fromValues(1, 0, 0, 0.7);
+    plight1.attenuation = { constant: 1.2, linear: 0.2, quadratic: 0.009 };
+    plight1.color = vec4.fromValues(1, 0.5, 0.1, 1);
+    plight1.addBehaviour(new MoveBehaviour());
+
 
     scene.addEntity(ambient);
     scene.addEntity(dlight);
     scene.addEntity(plight);
     scene.addEntity(plight1);
-    plight1.addBehaviour(new MoveBehaviour())
   }
 
   private async addMonkeyObj(scene: Scene) {
@@ -233,14 +231,13 @@ export class App implements AfterViewInit, OnDestroy {
     movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
     movingMokeyPrimitive.addBehaviour(new MoveBehaviour())
     scene.addEntity(movingMokeyPrimitive);
-    this.torus.transform.setParent(movingMokeyPrimitive.transform);
 
 
 
 
-    const lookAtBehaviour = new LookAtBehaviour();
-    lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
-    monkeyPrimitive.addBehaviour(lookAtBehaviour);
+    // const lookAtBehaviour = new LookAtBehaviour();
+    // lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
+    // monkeyPrimitive.addBehaviour(lookAtBehaviour);
 
   }
 
@@ -261,9 +258,9 @@ export class App implements AfterViewInit, OnDestroy {
       material = shader.material as LitMaterial;
     material!.mainTexUrl = "assets/images/wood-texture.jpg";
     material!.normalTexUrl = "assets/images/wood-texture-normal.jpg";
-    material!.normalMapStrength = 0.1;
-    material!.specularStrength = 0;
-    material!.roughness = 0.1;
+    material!.normalMapStrength = 0;
+    material!.specularStrength = 1;
+    material!.roughness = 0;
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);

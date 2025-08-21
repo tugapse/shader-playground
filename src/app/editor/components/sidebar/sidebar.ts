@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { SceneTree } from "../scene-tree/scene-tree";
 import { Scene } from '@engine/entities/scene';
+import { GlEntity } from '@engine/entities/entity';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,6 +10,7 @@ import { Scene } from '@engine/entities/scene';
   styleUrl: './sidebar.scss'
 })
 export class Sidebar {
+
   @Input() scene!: Scene;
 
 }
