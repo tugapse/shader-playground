@@ -1,6 +1,8 @@
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { Scene } from "./scene";
 import { MeshData } from "@engine/core/mesh";
+import { GlEntity } from "./entity";
+import { Transform } from "@engine/core/transform";
 
 export class SceneManager {
 
@@ -30,7 +32,7 @@ export class SceneManager {
     const { meshMaps, lights, objects } = jsonData;
     const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
 
-    jsonData['lights'] = SceneManager.instanciateSceneLights(scene,lights);
+    jsonData['lights'] = SceneManager.instanciateSceneLights(scene, lights);
     jsonData['objects'] = SceneManager.instaciateSceneObjects(scene, objects, meshes, gl);
     scene.fromJson(jsonData);
 
@@ -58,9 +60,21 @@ export class SceneManager {
   }
 
   private static instaciateSceneObjects(scene: Scene, objects: any, meshes: { [key: string]: MeshData; }, gl: WebGL2RenderingContext) {
-    return objects.map((e: any) => {
-      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
-      entity.scene = scene;
+    const transforms: { [key: string]: Transform } = {};
+
+    const entities: any[] = objects.map((e: any) => {
+      e['entity'] = SceneManager.instanciateObjectFromJsonData(e.type);
+      const enTransform = e['entity'].transform as Transform;
+      enTransform.fromJson(e['transform']);
+      transforms[enTransform.uuid] = enTransform;
+      return e;
+    });
+
+    this.prepareTransforms(transforms, entities);
+    objects.forEach((e: any) => {
+
+      e.entity.scene = scene;
+
       e.behaviours.forEach((behaviourJsonData: any) => {
         if (behaviourJsonData.mesh) {
           behaviourJsonData['meshData'] = meshes[behaviourJsonData.mesh.meshDataId];
@@ -68,13 +82,20 @@ export class SceneManager {
         const newBehaviour = SceneManager.instanciateObjectFromJsonData(behaviourJsonData.type, [gl]);
         if (newBehaviour) {
           newBehaviour.fromJson(behaviourJsonData);
-          newBehaviour.parent = entity;
-          entity.addBehaviour(newBehaviour);
+          newBehaviour.parent = e.entity;
+          e.entity.addBehaviour(newBehaviour);
         }
       });
-      entity.fromJson(e);
-      return entity;
+      e.entity.fromJson(e);
     });
+    return objects.map((e: any) => e.entity);
+  }
+  static prepareTransforms(transforms: any, entities: any) {
+    for (const ent of entities) {
+      if (ent.transform.parent) {
+        ent.entity.transform.setParent(transforms[ent.transform.parent]);
+      }
+    }
   }
 
   public static creatSceneSnapshot(scene: Scene) {

@@ -43,7 +43,7 @@ export class Scene extends GlEntity {
   }
   ellapsedTime = 0;
   public override update(ellapsed: number): void {
-    this.ellapsedTime += ellapsed;
+    this.ellapsedTime += ellapsed
     this.camera?.update(ellapsed)
     for (const object of this.lights) {
       object.update(ellapsed);

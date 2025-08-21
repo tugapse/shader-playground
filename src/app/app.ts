@@ -57,7 +57,6 @@ class LookAtBehaviour extends EntityBehaviour {
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
-    debugger
     this.targetId = jsonObject['targetId'];
   }
 
@@ -80,8 +79,8 @@ class MoveBehaviour extends EntityBehaviour {
     return new MoveBehaviour()
   }
 
-  distance = 200;
-  speed = 0.02;
+  distance = 5;
+  speed = 0.9;
   t = 1;
 
   public override update(ellapsed: number): void {
@@ -89,8 +88,8 @@ class MoveBehaviour extends EntityBehaviour {
     const z = Math.cos(this.t) * this.speed;
 
     this.transform.setPosition(this.distance * x, x + z / 2 * this.distance, this.distance * z);
-    this.parent.transform.updateModelMatrix();
-    this.t += this.speed;
+    // this.parent.transform.updateModelMatrix();
+    this.t += this.speed * ellapsed;
   }
 }
 @Component({
@@ -145,6 +144,7 @@ export class App implements AfterViewInit, OnDestroy {
     scene.name = "Main Scene";
     scene.initialize();
     this.setupCamera(scene);
+    this.scene = scene;
     this.loadAssets(scene).then(() => {
       setTimeout(() => {
         const sceneJsonData = JSON.parse(JSON.stringify(scene.toJsonObject()));
@@ -169,15 +169,18 @@ export class App implements AfterViewInit, OnDestroy {
     await this.addMonkeyObj(scene);
 
   }
-
+  torus!: GlEntity;
   async addOtherObjetcs(scene: Scene) {
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
-    torus.addBehaviour(new RotateBehaviour());
-    scene.addEntity(torus);
+    torus.transform.translate(0, 2, 0);
 
+    torus.addBehaviour(new RotateBehaviour());
+    torus.addBehaviour(new MoveBehaviour());
+    scene.addEntity(torus);
+    this.torus = torus;
     const cube = this.createEntity("cube", new CubePrimitive(), new RenderMeshBehaviour(this.gl));
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
@@ -205,18 +208,19 @@ export class App implements AfterViewInit, OnDestroy {
     const plight = new PointLight("Point light");
     plight.addBehaviour(new MoveBehaviour());
     plight.transform.translate(0, 0, 1);
-    plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
+    plight.attenuation = { constant: 0.5, linear: 0.1, quadratic: 0.005 };
     plight.color = vec4.fromValues(0, 0, 1, 0.9);
 
     const plight1 = new PointLight("Point light 1");
     plight1.transform.translate(0, 1, 1);
-    plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.005 };
+    plight1.attenuation = { constant: 1, linear: 1.2, quadratic: 0.005 };
     plight1.color = vec4.fromValues(1, 0, 0, 0.7);
 
     scene.addEntity(ambient);
     scene.addEntity(dlight);
     scene.addEntity(plight);
     scene.addEntity(plight1);
+    plight1.addBehaviour(new MoveBehaviour())
   }
 
   private async addMonkeyObj(scene: Scene) {
@@ -229,6 +233,7 @@ export class App implements AfterViewInit, OnDestroy {
     movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
     movingMokeyPrimitive.addBehaviour(new MoveBehaviour())
     scene.addEntity(movingMokeyPrimitive);
+    this.torus.transform.setParent(movingMokeyPrimitive.transform);
 
 
 
@@ -254,7 +259,11 @@ export class App implements AfterViewInit, OnDestroy {
       material = new LitMaterial();
     else if (shader?.material)
       material = shader.material as LitMaterial;
-
+    material!.mainTexUrl = "assets/images/wood-texture.jpg";
+    material!.normalTexUrl = "assets/images/wood-texture-normal.jpg";
+    material!.normalMapStrength = 0.1;
+    material!.specularStrength = 0;
+    material!.roughness = 0.1;
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);

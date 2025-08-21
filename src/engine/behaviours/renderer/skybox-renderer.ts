@@ -44,7 +44,7 @@ export class SkyboxRenderer extends RenderMeshBehaviour {
     viewMatrixNoTranslation[14] = 0;
 
     const mvpMatrix = mat4.create();
-    this.transform.updateModelMatrix();
+    this.transform.updateMatrices();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);

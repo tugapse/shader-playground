@@ -116,7 +116,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected setCameraMatrices() {
     const camera = Camera.mainCamera;
     const mvpMatrix = mat4.create();
-    this.parent.transform.updateModelMatrix();
+    this.parent.transform.updateMatrices  ();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
