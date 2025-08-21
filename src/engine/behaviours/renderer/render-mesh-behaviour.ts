@@ -30,8 +30,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   public enableLights = true;
   public enableNormalmaps = true;
 
-  constructor(protected gl: WebGL2RenderingContext) {
+  constructor(public gl: WebGL2RenderingContext) {
     super();
+    this.mesh = new Mesh();
   }
 
   override initialize(): boolean {
@@ -282,7 +283,6 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     const material = SceneManager.instanciateObjectFromJsonData(materialData.type);
     material.fromJson(materialData);
     this.shader = SceneManager.instanciateObjectFromJsonData(jsonObject['shader']['type'], [this.gl, material]);
-    this.mesh = new Mesh();
     this.mesh.meshData = jsonObject['meshData'];
   }
 }
