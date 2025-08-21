@@ -99,9 +99,9 @@ export class GlEntity implements JsonSerializable {
 
   public fromJson(jsonObject: JsonSerializedData): void {
     if (jsonObject['type'] != this.constructor.name) return;
+    this.name = jsonObject['name'];
     this._uuid = jsonObject['uuid'] || uuidv4();
     this.active = jsonObject['active'];
-    this.name = jsonObject['name'];
     this.tag = jsonObject['tag'];
     this.updateInEditor = jsonObject['updateInEditor'];
     this.transform.fromJson(jsonObject['transform']);

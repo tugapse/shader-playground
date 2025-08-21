@@ -4,6 +4,7 @@ import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export abstract class EntityBehaviour implements JsonSerializable {
+  static instanciate(args?:any): any { }
 
   public active: boolean = true;
   public parent!: GlEntity;

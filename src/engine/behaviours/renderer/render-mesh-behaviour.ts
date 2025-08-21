@@ -14,7 +14,7 @@ import { mat3, mat4, vec3 } from "gl-matrix";
 
 export class RenderMeshBehaviour extends EntityBehaviour {
 
-  static instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
+  static override instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
     return new RenderMeshBehaviour(gl);
   }
 

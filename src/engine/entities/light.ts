@@ -19,7 +19,7 @@ export class Light extends GlEntity {
     return {
       ...super.toJsonObject(),
       lightType: this.lightType,
-      color: this.color
+      color: [...this.color]
     }
   }
 
@@ -42,7 +42,7 @@ export class DirectionalLight extends Light {
   public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      direction: this.direction
+      direction: [...this.direction]
     }
   }
 
@@ -87,13 +87,13 @@ export class SpotLight extends Light {
       ...super.toJsonObject(),
       coneAngles: this.coneAngles,
       attenuation: this.attenuation,
-      direction: this.direction
+      direction: [...this.direction]
     }
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.direction = jsonObject['direction'];
+    this.direction = jsonObject['direction'] as vec4;
     this.coneAngles = jsonObject['coneAngles'];
     this.attenuation = jsonObject['attenuation'];
   }

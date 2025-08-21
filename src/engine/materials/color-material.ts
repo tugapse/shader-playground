@@ -11,13 +11,20 @@ export class ColorMaterial implements JsonSerializable {
    toJsonObject(): JsonSerializedData {
     return {
       type:this.constructor.name,
-      color: this.color,
+      color: [...this.color],
 
     }
   }
    fromJson(jsonObject: JsonSerializedData): void {
+    debugger
     this.name = jsonObject['name'];
-    this.color = jsonObject['color'];
+    this.color = vec4.fromValues(
+      jsonObject['color'][0],
+      jsonObject['color'][1],
+      jsonObject['color'][2],
+      jsonObject['color'][3]);
 
   }
+
+  public parseJsonColor(){}
 }

@@ -19,25 +19,49 @@ export class SceneManager {
       } else {
         return this.dependecies[className]();
       }
+    } else {
+      console.warn("[WANR] Class Object not found! Implement Class instancing for: ", className);
     }
     return null;
   }
 
-  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData): Scene {
-    const scene = new Scene();
+  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene: Scene): Scene {
+    scene = scene || new Scene();
     const { meshMaps, lights, objects } = jsonData;
-    const meshes: { [key: string]: MeshData } = {};
+    const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
+
+    jsonData['lights'] = SceneManager.instanciateSceneLights(scene,lights);
+    jsonData['objects'] = SceneManager.instaciateSceneObjects(scene, objects, meshes, gl);
+    scene.fromJson(jsonData);
+
+    return scene;
+  }
+
+  private static instaciateSceneMeshes(meshMaps: any) {
+    const meshes: { [key: string]: MeshData; } = {};
 
     for (const data of Object.values(meshMaps) as any[]) {
       const mData = new MeshData([]);
       mData.fromJson(data);
       meshes[data['uuid']] = mData;
     }
+    return meshes;
+  }
 
-    const newObjects = objects.map((e: any) => {
+  private static instanciateSceneLights(scene: Scene, lights: any) {
+    return lights.map((e: any) => {
       const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      entity.scene = scene;
+      entity.fromJson(e);
+      return entity;
+    });
+  }
+
+  private static instaciateSceneObjects(scene: Scene, objects: any, meshes: { [key: string]: MeshData; }, gl: WebGL2RenderingContext) {
+    return objects.map((e: any) => {
+      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
+      entity.scene = scene;
       e.behaviours.forEach((behaviourJsonData: any) => {
-        // get the actual mesh from id
         if (behaviourJsonData.mesh) {
           behaviourJsonData['meshData'] = meshes[behaviourJsonData.mesh.meshDataId];
         }
@@ -46,28 +70,17 @@ export class SceneManager {
           newBehaviour.fromJson(behaviourJsonData);
           newBehaviour.parent = entity;
           entity.addBehaviour(newBehaviour);
-        } else {
-          console.warn("Implement behaviour instance");
         }
       });
       entity.fromJson(e);
       return entity;
     });
-
-    const newLights = lights.map((e: any) => {
-      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
-      entity.fromJson(e);
-      return entity;
-    });
-
-    jsonData['lights'] = newLights;
-    jsonData['objects'] = newObjects;
-    scene.fromJson(jsonData);
-    scene.name = "FromManager"
-    return scene;
   }
 
   public static creatSceneSnapshot(scene: Scene) {
     return scene.toJsonObject();
   }
+
+
+  //add instanciate light , entity and behaviour
 }

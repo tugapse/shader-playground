@@ -13,10 +13,10 @@ export class UnlitMaterial extends ColorMaterial implements JsonSerializable {
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      color: this.color,
+      color: [...this.color],
       mainTexUrl: this.mainTexUrl,
-      uvScale: this.uvScale,
-      uvOffset: this.uvOffset
+      uvScale: [...this.uvScale],
+      uvOffset: [...this.uvOffset]
     }
   }
   override fromJson(jsonObject: JsonSerializedData): void {

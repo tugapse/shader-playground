@@ -5,7 +5,7 @@ import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class CameraFlyBehaviour extends EntityBehaviour {
 
-  static instanciate() { return new CameraFlyBehaviour(); }
+  static override instanciate():CameraFlyBehaviour { return new CameraFlyBehaviour(); }
   public moveSpeed = 2.0;
   public rotationSpeed = 0.1;
 

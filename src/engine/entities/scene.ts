@@ -44,7 +44,7 @@ export class Scene extends GlEntity {
   ellapsedTime = 0;
   public override update(ellapsed: number): void {
     this.ellapsedTime += ellapsed;
-    this.camera.update(ellapsed)
+    this.camera?.update(ellapsed)
     for (const object of this.lights) {
       object.update(ellapsed);
     }
@@ -56,21 +56,30 @@ export class Scene extends GlEntity {
 
   private checkMainCamera() {
     if (!this._camera) {
-      const camera = this.objects.find(e => e instanceof Camera);
-      this._camera = camera || new Camera();
-      this._camera.scene = this;
+      let camera = this.objects.find(e => (e instanceof Camera));
+      if (!camera && this.isEditorMode) camera = new Camera();
+
+      if (camera) {
+        this.setMainCamera(camera);
+      }
     }
+  }
+
+  public setMainCamera(camera: Camera) {
+    this._camera = camera;
+    this._camera.scene = this;
+    this._camera.tag = "MainCamera";
   }
 
   public override draw(): void {
 
-    if (!this.gl) return;
+    if (!this.gl || !this._camera) return;
 
     this.gl.clearColor(this.color[0], Math.sin(this.ellapsedTime) * this.color[1], this.color[2], 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
     for (const object of this.objects) {
-        object.draw();
+      object.draw();
     }
     super.draw();
   }
@@ -88,6 +97,12 @@ export class Scene extends GlEntity {
 
   public setGlRenderingContext(gl: WebGL2RenderingContext): void {
     this.gl = gl;
+    this.behaviours.forEach(b => {
+      if (b instanceof RenderMeshBehaviour) {
+        const beh = b as RenderMeshBehaviour;
+        beh.gl = gl;
+      }
+    })
   }
 
 
@@ -133,6 +148,14 @@ export class Scene extends GlEntity {
 
   public setCurrent(): void {
     Scene._currentScene = this;
+  }
+
+  public getEntitieByName(name: string): GlEntity | undefined {
+    return this.objects.find(o => o.name == name);
+  }
+
+  public getEntitieByUuid(uuid: string): GlEntity | undefined {
+    return this.objects.find(o => o.uuid == uuid);
   }
 
   public getEntitiesByTag(tag: string): GlEntity[] {

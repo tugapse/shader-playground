@@ -20,6 +20,12 @@ export class LitMaterial extends UnlitMaterial {
       normalMapStrength: this.normalMapStrength
     }
   }
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.normalTexUrl = jsonObject['normalTexUrl'];
+    this.roughness = jsonObject['roughness'];
+    this.normalMapStrength = jsonObject['normalMapStrength'];
+  }
 
   static override instanciate(): LitMaterial {
     return new LitMaterial();

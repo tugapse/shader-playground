@@ -37,7 +37,6 @@ export class SkyboxShader extends Shader {
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color);
 
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
-      console.debug("Set texture")
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
     }
     super.loadDataIntoShader();
