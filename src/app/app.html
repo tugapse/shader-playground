@@ -6,5 +6,6 @@
   <app-sidebar [scene]="scene"></app-sidebar>
   <app-canvas tabindex="0" class="canvas" [scene]="scene"
     (onGlContextCreated)="onGlContextCreated($event)"></app-canvas>
+  <editor-inpector [targetEntity]="selectedEntity"></editor-inpector>
 </div>
 

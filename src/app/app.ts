@@ -26,13 +26,14 @@ import { vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
 import { Sidebar } from "./editor/components/sidebar/sidebar";
 import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
+import { Inpector } from "./editor/inspectors/inpector/inpector";
 
 class LookAtBehaviour extends EntityBehaviour {
   static override instanciate(): LookAtBehaviour {
     return new LookAtBehaviour();
   }
 
-  private  target!: GlEntity | undefined;
+  private target!: GlEntity | undefined;
   public targetId!: string;
 
   override initialize(): boolean {
@@ -96,14 +97,15 @@ class MoveBehaviour extends EntityBehaviour {
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Canvas, Icon, Sidebar, CommonModule]
+  imports: [Canvas, Icon, Sidebar, CommonModule, Inpector]
 })
 export class App implements AfterViewInit, OnDestroy {
   @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
-  public scene!: Scene;
-  private started = false;
+
+  scene!: Scene;
+  selectedEntity!: GlEntity;
 
   constructor() {
     SceneManager.addDependency(LookAtBehaviour.name, LookAtBehaviour.instanciate);
@@ -160,7 +162,6 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   async loadAssets(scene: Scene) {
-    this.started = true;
 
     this.createSkybox(scene);
     this.createLights(scene);
