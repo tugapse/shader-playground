@@ -187,9 +187,8 @@ export class Transform implements JsonSerializable {
   }
 
   public fromJson(jsonObject: JsonSerializedData): void {
-    this._position = vec3.fromValues(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
-    this._rotation = vec3.fromValues(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
-    this._scale = vec3.fromValues(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);
-    this.updateModelMatrix();
+    this.setPosition(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
+    this.setRotation(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
+    this.setScale(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);
   }
 }
