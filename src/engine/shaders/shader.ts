@@ -20,7 +20,8 @@ export interface WebGLBuffers {
 export class Shader implements JsonSerializable {
 
   public static SHADER_FUNCTIONS :{[key:string]:string}= {
-    "INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.glsl"
+    "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.glsl",
+    "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.glsl",
   }
 
   public static preFetchFunctionsGlsl(){
