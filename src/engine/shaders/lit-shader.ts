@@ -2,7 +2,7 @@ import { LitMaterial } from "@engine/materials/lit-material";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { Texture } from "../textures/texture";
 import { Shader } from "./shader";
-import { EngineCache } from "@engine/core/storage";
+import { EngineCache } from "@engine/core/engineCache";
 import { Camera } from "@engine/entities/camera";
 import { ColorMaterial } from "@engine/materials/color-material";
 export class LitShader extends Shader {

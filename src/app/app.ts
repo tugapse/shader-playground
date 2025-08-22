@@ -9,7 +9,7 @@ import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
-import { EngineCache } from '@engine/core/storage';
+import { EngineCache } from '@engine/core/engineCache';
 import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
@@ -135,6 +135,7 @@ export class App implements OnDestroy {
     const scene = new Scene();
     scene.isEditorMode = true;
     scene.name = "Main Scene";
+
     this.loadAssets(scene).then(() => {
       this.scene = scene;
       this.scene.initialize();

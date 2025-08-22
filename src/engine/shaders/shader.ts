@@ -6,6 +6,7 @@ import { MeshData } from "@engine/core/mesh";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { v4 as uuidv4 } from 'uuid';
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
+import { EngineCache } from "@engine/core/engineCache";
 
 export interface WebGLBuffers {
   position: WebGLBuffer | null;
@@ -18,6 +19,16 @@ export interface WebGLBuffers {
 
 export class Shader implements JsonSerializable {
 
+  public static SHADER_FUNCTIONS :{[key:string]:string}= {
+    "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.glsl",
+    "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.glsl",
+  }
+
+  public static preFetchFunctionsGlsl(){
+    for(const a of Object.values(Shader.SHADER_FUNCTIONS)){
+      EngineCache.loadShaderSource(a);
+    }
+  }
 
   public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial): Shader {
     return new Shader(gl, material);
@@ -49,9 +60,19 @@ export class Shader implements JsonSerializable {
     if (this.initialized) {
       return;
     }
+    const keys: string[] = Object.keys(Shader.SHADER_FUNCTIONS);
 
-    const vsSource = await this.loadShaderSource(this.vertexUri);
-    const fsSource = await this.loadShaderSource(this.fragUri);
+    let vsSource = await EngineCache.loadShaderSource(this.vertexUri);
+    let fsSource = await EngineCache.loadShaderSource(this.fragUri);
+
+    for (const obkey of keys) {
+      if (fsSource.includes(obkey)) {
+        const url:string = Shader.SHADER_FUNCTIONS[obkey] as string;
+        const text = await EngineCache.loadShaderSource(url);
+        fsSource = fsSource.replace(obkey, text)
+        debugger
+      }
+    }
 
     const vertexShader = this.compileShader(this.gl, this.gl.VERTEX_SHADER, vsSource);
     const fragmentShader = this.compileShader(this.gl, this.gl.FRAGMENT_SHADER, fsSource);
@@ -61,6 +82,10 @@ export class Shader implements JsonSerializable {
     }
     this.shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader) as WebGLProgram;
     this.initialized = true;
+  }
+
+  private async addShaderImports(vsSource: string, fsSource: string) {
+
   }
 
   initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
@@ -256,14 +281,6 @@ export class Shader implements JsonSerializable {
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
     const indicesArray = new Uint16Array(values);
     this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indicesArray, this.gl.STATIC_DRAW);
-  }
-
-  private async loadShaderSource(url: string): Promise<string> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to load shader: ${url}`);
-    }
-    return response.text();
   }
 
   private compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {

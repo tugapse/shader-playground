@@ -1,5 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
-import { EngineCache } from "./storage"; // Assuming these imports are necessary for other parts of the class.
+import { EngineCache } from "./engineCache"; // Assuming these imports are necessary for other parts of the class.
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { v4 as uuidv4 } from 'uuid'
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
