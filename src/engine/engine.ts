@@ -55,5 +55,6 @@ export function registerDependencies() {
   //Behaviours
   SceneManager.addDependency(CameraFlyBehaviour.name, CameraFlyBehaviour.instanciate)
 
+  Shader.preFetchFunctionsGlsl();
 
 }
