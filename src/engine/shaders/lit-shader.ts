@@ -1,10 +1,9 @@
-import { LitMaterial } from "@engine/materials/lit-material";
-import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
-import { Texture } from "../textures/texture";
-import { Shader } from "./shader";
 import { EngineCache } from "@engine/core/engineCache";
 import { Camera } from "@engine/entities/camera";
-import { ColorMaterial } from "@engine/materials/color-material";
+import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
+import { LitMaterial } from "@engine/materials/lit-material";
+import { Texture } from "../textures/texture";
+import { Shader } from "./shader";
 export class LitShader extends Shader {
   static override instanciate(gl: WebGL2RenderingContext, material: LitMaterial): LitShader {
     return new LitShader(gl, material);
@@ -13,8 +12,8 @@ export class LitShader extends Shader {
   constructor(override gl: WebGL2RenderingContext, override material: LitMaterial) {
     super(
       gl, material,
-      "assets/shaders/frag/phong.glsl",
-      "assets/shaders/vertex/vertex.glsl")
+      "assets/shaders/frag/phong.frag",
+      "assets/shaders/vertex/vertex.vert")
   }
 
 
@@ -28,7 +27,7 @@ export class LitShader extends Shader {
     this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, this.material.uvOffset);
 
     this.setFloat(ShaderUniformsEnum.U_SPECULAR_STRENGTH, this.material.specularStrength);
-    this.setFloat(ShaderUniformsEnum.U_ROUGHNESS, this.material.roughness);
+    this.setFloat(ShaderUniformsEnum.U_ROUGHNESS, Math.max(this.material.roughness, 0.01));
     this.setFloat(ShaderUniformsEnum.U_NORMAL_MAP_STRENGTH, this.material.normalMapStrength);
 
     this.setVec3(ShaderUniformsEnum.U_CAMERA_POSITION, Camera.mainCamera.transform.position);

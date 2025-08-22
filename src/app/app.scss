@@ -1,36 +1,3 @@
 // Container for the entire page
-:host {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: 'Poppins', sans-serif;
-  /* Using a modern font */
-  color: #f0f0f0;
-  margin: 0;
-}
-
-.top-bar {
-  width: 100vw;
-  height: 32px;
-  background: #0d1117;
-  /* GitHub Dark theme base */
-  color: #e6edf3;
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  align-items: center;
-
-}
-.top-bar .play-icon.play{
-  color: green;
-}
 
 
-
-.container {
-  display: flex;
-  width: 100%;
-  height: calc(100% - 32px);
-}
-
-// Left Sidebar styling

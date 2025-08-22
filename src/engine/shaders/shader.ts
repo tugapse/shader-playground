@@ -20,8 +20,8 @@ export interface WebGLBuffers {
 export class Shader implements JsonSerializable {
 
   public static SHADER_FUNCTIONS :{[key:string]:string}= {
-    "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.glsl",
-    "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.glsl",
+    "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
+    "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
   }
 
   public static preFetchFunctionsGlsl(){
@@ -51,8 +51,8 @@ export class Shader implements JsonSerializable {
   constructor(
     protected gl: WebGL2RenderingContext,
     public material: ColorMaterial,
-    public fragUri: string = "assets/shaders/frag/color.glsl",
-    public vertexUri: string = "assets/shaders/vertex/vertex.glsl"
+    public fragUri: string = "assets/shaders/frag/color.frag",
+    public vertexUri: string = "assets/shaders/vertex/vertex.vert"
   ) { this._uuid = uuidv4() }
 
   public async initialize(): Promise<void> {
@@ -70,7 +70,6 @@ export class Shader implements JsonSerializable {
         const url:string = Shader.SHADER_FUNCTIONS[obkey] as string;
         const text = await EngineCache.loadShaderSource(url);
         fsSource = fsSource.replace(obkey, text)
-        debugger
       }
     }
 

@@ -34,4 +34,8 @@ export class SceneTree {
     obj.active = !obj.active;
   }
 
+  entitySelected(entity:GlEntity){
+    this.sceneTreeService.onEntitySelected.emit(entity);
+  }
+
 }

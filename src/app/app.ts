@@ -1,11 +1,10 @@
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 import { Canvas } from "./editor/components/canvas/canvas";
 
 import { CommonModule } from '@angular/common';
 import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
-import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
@@ -14,145 +13,51 @@ import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
 import { DirectionalLight, Light, PointLight } from '@engine/entities/light';
 import { Scene } from '@engine/entities/scene';
-import { SceneManager } from '@engine/entities/scene-manager';
 import { CubemapMaterial } from '@engine/materials/cubemap-material';
 import { LitMaterial } from '@engine/materials/lit-material';
 import { CubePrimitive } from '@engine/primitives/cube-primitive';
+import { QuadPrimitive } from '@engine/primitives/quad-primitive';
 import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec2, vec3, vec4 } from 'gl-matrix';
 import { Icon } from './editor/components/icon/icon';
-import { Sidebar } from "./editor/components/sidebar/sidebar";
-import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
-import { Inpector } from "./editor/inspectors/inpector/inpector";
 import { SceneTreeService } from './editor/components/scene-tree/scene-tree.service';
-import { QuadPrimitive } from '@engine/primitives/quad-primitive';
+import { Sidebar } from "./editor/components/sidebar/sidebar";
+import { Inpector } from "./editor/inspectors/inpector/inpector";
+import { LightMoveBehaviour } from './example/behaviours/light-move';
+import { LookAtBehaviour } from './example/behaviours/look-at';
+import { MoveBehaviour } from './example/behaviours/move';
+import { RotateBehaviour } from './example/behaviours/rotate';
+import { Editor } from './editor/editor';
+import { SceneTree } from "./editor/components/scene-tree/scene-tree";
+import { EditorService } from './editor/editor.service';
 
-class LookAtBehaviour extends EntityBehaviour {
-  static override instanciate(): LookAtBehaviour {
-    return new LookAtBehaviour();
-  }
-
-  private target!: GlEntity | undefined;
-  public targetId!: string;
-
-  override initialize(): boolean {
-    if (this.target) return true;
-    this.target = this.parent.scene.getEntitieByUuid(this.targetId);
-    return !!this.target;
-  }
-
-  override update(ellapsed: number): void {
-    if (!this.target) this.initialize();
-    if (this.target) {
-      this.transform.lookAt(this.target.transform.position);
-    }
-  }
-
-  override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      targetId: this.target?.uuid
-    }
-  }
-
-  override fromJson(jsonObject: JsonSerializedData): void {
-    this.targetId = jsonObject['targetId'];
-  }
-
-}
-
-class RotateBehaviour extends EntityBehaviour {
-
-  static override instanciate(): RotateBehaviour {
-    return new RotateBehaviour();
-  }
-
-  speed = 0.05;
-  public override update(ellapsed: number): void {
-    this.transform.rotate(1 * this.speed, 1 * this.speed, 1 * this.speed);
-  }
-}
-
-class MoveBehaviour extends EntityBehaviour {
-  static override instanciate(): MoveBehaviour {
-    return new MoveBehaviour()
-  }
-
-  distance = 10 + Math.random() * 10;
-  speed = 0.9;
-  t = 1;
-
-  public override update(ellapsed: number): void {
-    const x = Math.sin(this.t) * this.speed;
-    const z = Math.cos(this.t) * this.speed;
-
-    this.transform.setPosition(this.distance * x, x + z / 2 * this.distance, this.distance * z);
-    // this.parent.transform.updateModelMatrix();
-    this.t += this.speed * ellapsed;
-  }
-}
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Canvas, Icon, Sidebar, CommonModule, Inpector]
+  imports: [Editor]
 })
 export class App implements OnDestroy {
-  @ViewChild('glCanvas') glCanvas!: ElementRef<HTMLCanvasElement>;
 
   private gl!: WebGL2RenderingContext;
+  private scene!: Scene;
+  dLight!: DirectionalLight;
+  torus!: GlEntity;
 
-  scene!: Scene;
-  selectedEntity!: GlEntity;
-
-  constructor(
-    private sceneTreeService: SceneTreeService
-  ) {
-    SceneManager.addDependency(LookAtBehaviour.name, LookAtBehaviour.instanciate);
-    SceneManager.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);
-    SceneManager.addDependency(MoveBehaviour.name, MoveBehaviour.instanciate);
-
-  }
-  private setupCamera(scene: Scene) {
-    if (!this.scene) return;
-    if (!this.scene.camera) this.scene.setMainCamera(new Camera());
-    this.scene.camera.updateInEditor = true;
-    this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-    this.scene.camera.transform.lookAt(vec3.create());
-    this.scene.camera.updateProjectionMatrix();
-    this.scene.camera.addBehaviour(new CameraFlyBehaviour());
+  constructor(private editorService: EditorService) {
+    this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
+    this.editorService.onSceneLoaded.subscribe(this.initialiScene.bind(this));
   }
 
   ngOnDestroy(): void {
     this.scene?.destroy();
   }
 
-  onGlContextCreated(gl: WebGL2RenderingContext) {
-    this.gl = gl
-    const scene = new Scene();
-    scene.isEditorMode = true;
-    scene.name = "Main Scene";
 
-    this.loadAssets(scene).then(() => {
-      this.scene = scene;
-      this.scene.initialize();
-      this.setupCamera(this.scene);
-    });
-  }
-
-  async loadAssets(scene: Scene) {
-    this.createQuad(scene);
-    this.otherObjetcs(scene);
-    this.createSkybox(scene);
-    this.createLights(scene);
-    await this.addMonkeyObj(scene);
-
-  }
-  torus!: GlEntity;
-  async otherObjetcs(scene: Scene) {
+  private async otherObjetcs(scene: Scene) {
 
     const torusPrimitive = await createTorusPrimitive();
     const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
@@ -160,7 +65,7 @@ export class App implements OnDestroy {
     torus.transform.translate(0, 2, 0);
 
     torus.addBehaviour(new RotateBehaviour());
-    torus.addBehaviour(new MoveBehaviour());
+    torus.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(torus);
     this.torus = torus;
 
@@ -184,9 +89,8 @@ export class App implements OnDestroy {
     const renderer = plane.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour;
     if (renderer) {
       const material = renderer.shader.material as LitMaterial;
-      material.uvScale = vec2.fromValues(10, 10)
-      material.roughness = 1;
-      material.specularStrength = 2;
+      material.uvScale = vec2.fromValues(500, 500)
+
 
     }
     plane.transform.translate(0, -2, 0);
@@ -200,23 +104,25 @@ export class App implements OnDestroy {
     const ambient = new Light("Ambient Light");
 
     const dlight = new DirectionalLight("Directional light");
-    let dir = vec3.create();
-    dlight.direction = vec3.normalize(dir, vec3.fromValues(15, 180, 30));
-    dlight.color = vec4.fromValues(0.15, 0.15, 0.15, 1);
+    dlight.transform.translate(0, 20, 0);
+    dlight.direction = vec3.create();
+    dlight.color = vec4.fromValues(0.7, 0.7, 0.7, 1);
+    dlight.addBehaviour(new LightMoveBehaviour())
+    this.dLight = dlight;
 
     const plight = new PointLight("Point light");
-    plight.transform.translate(0, 0, 1);
+    plight.transform.translate(0, 0, 0);
     plight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.002 };
     plight.color = vec4.fromValues(1, 0.8, 0.6, 1);
 
     const plight1 = new PointLight("Point light 1");
-    plight1.transform.translate(0, 1, 1);
-    plight1.attenuation = { constant: 1.2, linear: 0.2, quadratic: 0.009 };
-    plight1.color = vec4.fromValues(1, 0.5, 0.1, 1);
+    // plight1.transform.translate(0, 1, 1);
+    plight1.attenuation = { constant: 1, linear: 0.7, quadratic: 0.009 };
+    plight1.color = vec4.fromValues(1, 1, 1, 1);
     plight1.addBehaviour(new MoveBehaviour());
 
 
-    scene.addEntity(ambient);
+    // scene.addEntity(ambient);
     scene.addEntity(dlight);
     scene.addEntity(plight);
     scene.addEntity(plight1);
@@ -230,7 +136,7 @@ export class App implements OnDestroy {
 
     const movingMokeyPrimitive = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
-    movingMokeyPrimitive.addBehaviour(new MoveBehaviour())
+    movingMokeyPrimitive.addBehaviour(new LightMoveBehaviour())
     scene.addEntity(movingMokeyPrimitive);
 
 
@@ -238,6 +144,7 @@ export class App implements OnDestroy {
 
     // const lookAtBehaviour = new LookAtBehaviour();
     // lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
+    // lookAtBehaviour.follow = true;
     // monkeyPrimitive.addBehaviour(lookAtBehaviour);
 
   }
@@ -258,9 +165,9 @@ export class App implements OnDestroy {
     else if (shader?.material)
       material = shader.material as LitMaterial;
     material!.mainTexUrl = "assets/images/wood-texture.jpg";
-    material!.normalTexUrl = "assets/images/wood-texture-normal.jpg";
-    material!.normalMapStrength = 0;
-    material!.specularStrength = 1;
+    material!.normalTexUrl = "assets/images/wood-texture-normal-map.jpg";
+    material!.normalMapStrength = 0.1;
+    material!.specularStrength = 0.4
     material!.roughness = 0;
     meshRenderer.mesh = mesh;
     if (material) {
@@ -271,9 +178,7 @@ export class App implements OnDestroy {
     return entity;
   }
 
-
-  async createSkybox(scene: Scene) {
-
+  private async createSkybox(scene: Scene) {
 
     const cubePrimitive = new CubePrimitive();
     const material = new CubemapMaterial();
@@ -281,5 +186,38 @@ export class App implements OnDestroy {
     const cube = this.createEntity("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
 
     scene.addEntity(cube);
+  }
+
+  private async onGlContextCreated(gl: WebGL2RenderingContext) {
+    this.gl = gl
+    const scene = new Scene();
+    scene.name = "Main Scene";
+    await this.loadAssets(scene);
+    this.editorService.loadScene(scene);
+  }
+
+  private async loadAssets(scene: Scene) {
+    this.createQuad(scene);
+    this.otherObjetcs(scene);
+    this.createSkybox(scene);
+    this.createLights(scene);
+    await this.addMonkeyObj(scene);
+
+  }
+
+  private initialiScene(scene: Scene): any {
+    this.scene = scene
+    this.scene.initialize();
+    this.setupCamera(this.scene);
+  }
+
+  private setupCamera(scene: Scene) {
+    if (!this.scene) return;
+    if (!this.scene.camera) this.scene.setMainCamera(new Camera());
+    this.scene.camera.updateInEditor = true;
+    this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
+    this.scene.camera.transform.lookAt(vec3.create());
+    this.scene.camera.updateProjectionMatrix();
+    this.scene.camera.addBehaviour(new CameraFlyBehaviour());
   }
 }

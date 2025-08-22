@@ -10,8 +10,8 @@ export class UnlitShader extends Shader {
 
   constructor(override gl: WebGL2RenderingContext, override material: UnlitMaterial) {
     super(gl, material,
-      "assets/shaders/frag/unlit.glsl",
-      "assets/shaders/vertex/vertex.glsl")
+      "assets/shaders/frag/unlit.frag",
+      "assets/shaders/vertex/vertex.vert")
   }
 
   override loadDataIntoShader(): void {
