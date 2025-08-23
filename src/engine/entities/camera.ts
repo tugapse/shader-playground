@@ -29,8 +29,7 @@ export class Camera extends GlEntity {
     this.entityType = EntityType.CAMERA;
     this._projectionMatrix = mat4.create();
     this._viewMatrix = mat4.create()
-    this.transform.setPosition(0, 0, 10);
-  }
+    }
 
    static setMainCamera(camera: Camera) {
     this._mainCamera = camera;

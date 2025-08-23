@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { GlEntity } from '@engine/entities/entity';
 import { Icon } from "../../../app/components/icon/icon";
 import { TransformInspector } from "../transform-inspector/transform-inspector";
+import { EditorService } from '@editor/editor.service';
 
 @Component({
   selector: 'editor-inpector',
@@ -11,10 +12,21 @@ import { TransformInspector } from "../transform-inspector/transform-inspector";
   styleUrl: './inpector.scss'
 })
 export class Inpector {
+  prepareProperties(entity:GlEntity) {
+    if(entity){
+      const onw = Object.keys(entity).filter(key => entity.hasOwnProperty(key));
+      debugger;
+    }
+  }
 
+  @Input() set targetEntity(entity: GlEntity) {
+    this.prepareProperties(entity);
+    this.entity = entity;
+  };
 
-  @Input() targetEntity!: GlEntity | null;
+  entity!: GlEntity|null;
 
+  constructor(private editorService: EditorService) { }
 
   onNameChanged($event: any): void {
     this.targetEntity!.name = $event.target.value;
@@ -22,5 +34,9 @@ export class Inpector {
 
   onTagChanged($event: any): void {
     this.targetEntity!.name = $event.target.value;
+  }
+  onClose() {
+    this.entity = null;
+    setTimeout(() => this.editorService.requestCanvasResize(), 30);
   }
 }

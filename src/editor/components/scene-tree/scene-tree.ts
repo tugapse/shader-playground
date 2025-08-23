@@ -9,6 +9,7 @@ import { EntityType } from '@engine/enums/entity-type';
 import { every } from 'rxjs';
 import { EditorService } from '../../editor.service';
 
+
 @Component({
   selector: 'app-scene-tree',
   imports: [CommonModule, Icon],
@@ -17,11 +18,21 @@ import { EditorService } from '../../editor.service';
 })
 export class SceneTree {
 
-  constructor(public sceneTreeService: SceneTreeService,private editorService:EditorService) { }
+
+  constructor(public sceneTreeService: SceneTreeService, private editorService: EditorService) {
+    this.editorService.onSceneLoaded.subscribe(scene => {
+      this.targetScene = scene;
+      this.sceneTreeService.onEntitySelected.emit(undefined);
+    })
+  }
 
 
-  @Input() public targetScene?: Scene;
-
+  @Input() public set targetScene(scene: Scene) {
+    this.scene = scene;
+    this.prepareObjects();
+  };
+  objectsToDraw: GlEntity[] = []
+  scene!: Scene;
   readonly iconNames: { [key: string]: string } = {
     [EntityType.STATIC]: "fa-object-group",
     [EntityType.CAMERA]: "fa-camera",
@@ -37,10 +48,16 @@ export class SceneTree {
   }
 
   entitySelected(entity: GlEntity, event: MouseEvent) {
-    if (entity.uuid == (event.target! as any).id){
+    if (entity.uuid == (event.target! as any).id) {
       this.sceneTreeService.onEntitySelected.emit(entity);
-      this.editorService.requestCanvasResize();
+      setTimeout(()=>this.editorService.requestCanvasResize(),30);
     }
   }
 
+  prepareObjects() {
+    if (!this.scene) return;
+    const objectsDict = this.scene.objects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
+    const rootObjects = this.scene.objects;
+    this.objectsToDraw = rootObjects;
+  }
 }

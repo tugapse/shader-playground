@@ -87,8 +87,9 @@ export class CameraFlyBehaviour extends EntityBehaviour {
       rotationSpeed: this.rotationSpeed
     };
   }
+
   override fromJson(jsonObject: JsonSerializedData): void {
     this.moveSpeed = jsonObject['moveSpeed'],
-      this.moveSpeed = jsonObject['moveSpeed']
+      this.rotationSpeed = jsonObject['rotationSpeed']
   }
 }

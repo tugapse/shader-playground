@@ -9,9 +9,13 @@ export class RotateBehaviour extends EntityBehaviour {
     return new RotateBehaviour();
   }
 
-  speed = 0.05;
+  speed = 0.005;
   public override update(ellapsed: number): void {
-    this.transform.rotate(1 * this.speed, 1 * this.speed, 1 * this.speed);
+    this.transform.rotate(
+      0 * this.speed, // 1 * this.speed,
+      0, //1 * this.speed,
+      1 * this.speed
+    );
   }
 }
 SceneManager.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);

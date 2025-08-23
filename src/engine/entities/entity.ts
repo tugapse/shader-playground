@@ -1,10 +1,10 @@
+import { EntityType } from "@engine/enums/entity-type";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { v4 as uuidv4 } from 'uuid';
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
-import { EntityType } from "@engine/enums/entity-type";
 
 
 
@@ -27,10 +27,10 @@ export class GlEntity implements JsonSerializable {
     return this._uuid;
   };
 
-  public entityType:EntityType|number = EntityType.STATIC;
+  public entityType: EntityType | number = EntityType.STATIC;
 
 
-  constructor(public name: String, public transform: Transform = new Transform()) {
+  constructor(public name: string, public transform: Transform = new Transform()) {
     this._uuid = uuidv4();
   }
 
@@ -47,7 +47,7 @@ export class GlEntity implements JsonSerializable {
     if (!this.active) return;
 
     for (const behaviour of this.behaviours) {
-        behaviour.update(ellapsed);
+      behaviour.update(ellapsed);
     }
   }
 
@@ -128,5 +128,11 @@ export class GlEntity implements JsonSerializable {
       behaviours: this.behaviours.map(e => e.toJsonObject())
     };
     return result;
+  }
+
+  public clone(): GlEntity {
+    const newEntity = GlEntity.instanciate(this.name, this.transform);
+    newEntity.fromJson(this.toJsonObject());
+    return newEntity;
   }
 }

@@ -23,7 +23,7 @@ import { vec2, vec3, vec4 } from 'gl-matrix';
 import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { LightMoveBehaviour } from './example/behaviours/light-move';
-import { LookAtBehaviour } from './example/behaviours/look-at';
+import { LookAtFollowBehaviour } from './example/behaviours/look-at-follow';
 import { MoveBehaviour } from './example/behaviours/move';
 import { RotateBehaviour } from './example/behaviours/rotate';
 import { loadTorusPrimitive, MeshData, Mesh } from '@engine/core/mesh';
@@ -59,9 +59,7 @@ export class App implements OnDestroy {
     torus.transform.translate(0, 2, 0);
 
     torus.addBehaviour(new RotateBehaviour());
-    torus.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(torus);
-    this.torus = torus;
 
     const cube = this.createEntity("cube", new CubePrimitive(), new RenderMeshBehaviour(this.gl));
     const cubePos = vec3.create();
@@ -75,10 +73,11 @@ export class App implements OnDestroy {
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.right, 2.5);
     vec3.scaleAndAdd(spherePos, spherePos, sphere.transform.up, 2.5);
     sphere.transform.setPosition(spherePos[0], spherePos[1], spherePos[2]);
+    sphere.transform.setParent(torus.transform);
     scene.addEntity(sphere);
   }
 
-  private createQuad(scene: Scene) {
+  private createFloor(scene: Scene) {
     const plane = this.createEntity("plane", new QuadPrimitive(), new RenderMeshBehaviour(this.gl));
     const renderer = plane.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour;
     if (renderer) {
@@ -98,9 +97,11 @@ export class App implements OnDestroy {
     const ambient = new Light("Ambient Light");
 
     const dlight = new DirectionalLight("Directional light");
-    dlight.transform.translate(0, 20, 0);
+    dlight.transform.translate(100, 150, 100);
+    dlight.transform.lookAt(vec3.create(), vec3.fromValues(0,1,0));
     dlight.direction = vec3.create();
-    dlight.color = vec4.fromValues(0.7, 0.7, 0.7, 1);
+    vec3.normalize(dlight.direction, dlight.transform.back);
+    dlight.color = vec4.fromValues(0.5,0.5,0.5, 1);
     dlight.addBehaviour(new LightMoveBehaviour())
     this.dLight = dlight;
 
@@ -125,18 +126,17 @@ export class App implements OnDestroy {
   private async addMonkeyObj(scene: Scene) {
 
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
-    const monkeyPrimitive = this.createEntity("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
-    scene.addEntity(monkeyPrimitive);
+    const monkeyEntity = this.createEntity("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+    monkeyEntity.transform.translate(-3.5, 0, 0);
+    scene.addEntity(monkeyEntity);
 
-    const movingMokeyPrimitive = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
-    movingMokeyPrimitive.transform.translate(-3.5, 0, 0);
-    movingMokeyPrimitive.addBehaviour(new LightMoveBehaviour())
-    scene.addEntity(movingMokeyPrimitive);
+    const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+    movingMokeyEntity.addBehaviour(new LightMoveBehaviour())
+    scene.addEntity(movingMokeyEntity);
 
-    const lookAtBehaviour = new LookAtBehaviour();
+    const lookAtBehaviour = new LookAtFollowBehaviour();
     lookAtBehaviour.targetId = this.dLight.uuid;
-    lookAtBehaviour.follow = true;
-    monkeyPrimitive.addBehaviour(lookAtBehaviour);
+    monkeyEntity.addBehaviour(lookAtBehaviour);
 
   }
 
@@ -156,10 +156,10 @@ export class App implements OnDestroy {
     else if (shader?.material)
       material = shader.material as LitMaterial;
     material!.mainTexUrl = "assets/images/wood-texture.jpg";
-    material!.normalTexUrl = "assets/images/wood-texture-normal-map.jpg";
-    material!.normalMapStrength = 0.1;
-    material!.specularStrength = 0.4
-    material!.roughness = 0;
+    // material!.normalTexUrl = "assets/images/wood-texture-normal-map.jpg";
+    // material!.normalMapStrength = 0.1;
+    // material!.specularStrength = 0.4
+    // material!.roughness = 0;
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
@@ -188,7 +188,7 @@ export class App implements OnDestroy {
   }
 
   private async loadAssets(scene: Scene) {
-    this.createQuad(scene);
+    this.createFloor(scene);
     this.otherObjetcs(scene);
     this.createSkybox(scene);
     this.createLights(scene);
@@ -206,8 +206,6 @@ export class App implements OnDestroy {
     if (!Camera.mainCamera) return;
     Camera.mainCamera.updateInEditor = true;
     Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-    Camera.mainCamera.transform.lookAt(vec3.create());
     Camera.mainCamera.updateProjectionMatrix();
-    Camera.mainCamera.addBehaviour(new CameraFlyBehaviour());
   }
 }

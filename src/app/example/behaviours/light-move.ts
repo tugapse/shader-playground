@@ -9,24 +9,20 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  distancey = 20;
-  distance = 500;
-  speed = 0.3;
+  distancey = 500;
+  distance = 10000;
+  speed = 0.03;
   t = 0;
-  override initialize(): boolean {
-    super.initialize();
-    this.transform.setPosition(0,1,0);
-    return true;
-  }
+
 
   public override update(ellapsed: number): void {
-    const x = -Math.sin(this.t) * this.speed ;
-    const z = -Math.cos(this.t) * this.speed;
+    const x = Math.sin(this.t) * this.speed;
+    const z = Math.cos(this.t) * this.speed;
 
     this.transform.setPosition(this.distance * x, this.distancey, this.distance * z);
-    this.transform.lookAt(vec3.create(),vec3.fromValues(0,1,0));
+    this.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
     const parentLight = (this.parent as DirectionalLight);
-    if(parentLight.direction){
+    if (parentLight.direction) {
       parentLight.direction = this.transform.back;
     }
     this.t += this.speed * ellapsed;

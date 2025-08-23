@@ -50,7 +50,7 @@ export class Editor implements OnDestroy {
   }
 
   private onScenePlay(scene: Scene) {
-    if (!this.sceneState) this.sceneState = scene.toJsonObject();
+    if (!this.sceneState) this.sceneState = JSON.parse(JSON.stringify(scene.toJsonObject()));
     this.scene.isRunning = true;
     this.isPaused = false;
   }

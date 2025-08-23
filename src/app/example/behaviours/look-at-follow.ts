@@ -3,15 +3,15 @@ import { GlEntity } from "@engine/entities/entity";
 import { SceneManager } from "@engine/entities/scene-manager";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
-export class LookAtBehaviour extends EntityBehaviour {
+export class LookAtFollowBehaviour extends EntityBehaviour {
 
-  static override instanciate(): LookAtBehaviour {
-    return new LookAtBehaviour();
+  static override instanciate(): LookAtFollowBehaviour {
+    return new LookAtFollowBehaviour();
   }
 
   private target!: GlEntity | undefined;
   public targetId!: string;
-  public follow = false;
+  public followTarget = false;
   public followVelocity = 0.35;
 
   override initialize(): boolean {
@@ -25,7 +25,7 @@ export class LookAtBehaviour extends EntityBehaviour {
     if (this.target) {
       this.transform.lookAt(this.target.transform.position);
       this.transform.updateMatrices();
-      if (this.follow) {
+      if (this.followTarget) {
         const dir = this.transform.forward;
         this.transform.translate(dir[0] * this.followVelocity, dir[1] * this.followVelocity,
           dir[2] * this.followVelocity);
@@ -33,21 +33,24 @@ export class LookAtBehaviour extends EntityBehaviour {
     }
 
   }
+
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
     this.targetId = jsonObject['targetId'];
-    this.follow = jsonObject['follow'];
+    this.followTarget = jsonObject['followTarget'];
     this.followVelocity = jsonObject['followVelocity'];
 
   }
+
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      follow: this.follow,
+      followTarget: this.followTarget,
       targetId: this.targetId,
       followVelocity: this.followVelocity
 
     }
   }
 }
-SceneManager.addDependency(LookAtBehaviour.name, LookAtBehaviour.instanciate);
+
+SceneManager.addDependency(LookAtFollowBehaviour.name, LookAtFollowBehaviour.instanciate);

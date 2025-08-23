@@ -146,7 +146,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
       const ambientLight = lights.find(l => l.entityType === EntityType.LIGHT_AMBIENT);
       if (ambientLight) {
-        this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, ambientLight.color);
+        this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, ambientLight.color.toVec4());
       } else {
         this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, [0.1, 0.1, 0.1, 1]);
       }
@@ -191,7 +191,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       spotPositionsFlat.push(...light.transform.position);
       const normalizedDir = vec3.normalize(vec3.create(), light.direction);
       spotDirectionsFlat.push(...normalizedDir);
-      spotColorsFlat.push(light.color[0], light.color[1], light.color[2]);
+      spotColorsFlat.push(light.color.r, light.color.g, light.color.b);
       spotInnerConeCosFlat.push(Math.cos(light.coneAngles.inner));
       spotOuterConeCosFlat.push(Math.cos(light.coneAngles.outer));
       spotConstAttsFlat.push(light.attenuation.constant);
@@ -225,7 +225,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     directionalLights.forEach(light => {
       const normalizedDir = vec3.normalize(vec3.create(), light.direction);
       dirDirectionsFlat.push(...normalizedDir);
-      dirColorsFlat.push(light.color[0], light.color[1], light.color[2]);
+      dirColorsFlat.push(light.color.r, light.color.g, light.color.b);
     });
 
     // Only send uniforms if the location is valid
@@ -253,7 +253,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     pointLights.forEach(light => {
       pointPositionsFlat.push(...light.transform.position);
-      pointColorsFlat.push(light.color[0], light.color[1], light.color[2]);
+      pointColorsFlat.push(light.color.r, light.color.g, light.color.b);
       pointConstAttsFlat.push(light.attenuation.constant);
       pointLinearAttsFlat.push(light.attenuation.linear);
       pointQuadraticAttsFlat.push(light.attenuation.quadratic);

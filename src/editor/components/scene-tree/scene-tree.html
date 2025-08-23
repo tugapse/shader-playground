@@ -1,7 +1,13 @@
-<h4 class="tree-header">Scene Tree</h4>
+<div class="tree-header">
+  <h4>Scene Tree</h4>
+  <div>
+    <app-icon class="icon" iconName="fa-add"></app-icon>
+    <app-icon class="icon" iconName="fa-filter"></app-icon>
+  </div>
+</div>
 <section>
 
-  @for (obj of targetScene?.objects; track $index) {
+  @for (obj of objectsToDraw; track $index) {
 
   <div class="item-container" (click)="entitySelected(obj,$event)">
     <app-icon [iconName]="iconNames[obj.entityType]"></app-icon>
