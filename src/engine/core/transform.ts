@@ -1,7 +1,7 @@
 import { JsonSerializable } from '@engine/interfaces/json-serializable';
 import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { vec3, mat4, quat } from 'gl-matrix';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export class Transform implements JsonSerializable {
 
@@ -10,9 +10,9 @@ export class Transform implements JsonSerializable {
   private _scale!: vec3;
 
   private _modelMatrix!: mat4;
-  private _localMatrix!: mat4; // New: Store the local matrix
-  private _parent: Transform | null = null; // New: Parent property
-  private _children: Transform[] = []; // New: Children array
+  private _localMatrix!: mat4;
+  private _parent: Transform | null = null;
+  private _children: Transform[] = [];
   private _uuid: string;
 
   // Getters
@@ -28,7 +28,7 @@ export class Transform implements JsonSerializable {
     this._rotation = quat.create();
     this._scale = vec3.fromValues(1, 1, 1);
     this._modelMatrix = mat4.create();
-    this._localMatrix = mat4.create(); // Initialize local matrix
+    this._localMatrix = mat4.create();
     this.updateMatrices();
     this._uuid = uuidv4();
   }
@@ -110,7 +110,6 @@ export class Transform implements JsonSerializable {
     }
   }
 
-  // --- Local Unit Vector Getters (NO CHANGE) ---
   public get right(): vec3 {
     return vec3.fromValues(this._modelMatrix[0], this._modelMatrix[1], this._modelMatrix[2]);
   }
@@ -135,7 +134,6 @@ export class Transform implements JsonSerializable {
     return vec3.negate(vec3.create(), this.forward);
   }
 
-  // --- LookAt method (NO CHANGE) ---
   public lookAt(target: vec3, worldUp?: vec3): void {
     const defaultWorldUp = vec3.fromValues(0, 1, 0);
     const effectiveUp = worldUp || defaultWorldUp;
@@ -148,28 +146,26 @@ export class Transform implements JsonSerializable {
 
     mat4.getRotation(this._rotation, tempModelMatrix);
 
-    this.updateMatrices(); // Call the new update method
+    this.updateMatrices();
   }
 
-  // --- Serialization (NO CHANGE) ---
   public toJsonObject(): JsonSerializedData {
     return {
-      type:this.constructor.name,
-      uuid:this.uuid,
-      parent:this.parent?.uuid,
+      type: this.constructor.name,
+      uuid: this.uuid,
+      parent: this.parent?.uuid,
       position: [this._position[0], this._position[1], this._position[2]],
-      rotation: [this._rotation[0], this._rotation[1], this._rotation[2]],
+      rotation: [this._rotation[0], this._rotation[1], this._rotation[2], this._rotation[3]],
       scale: [this._scale[0], this._scale[1], this._scale[2]],
     }
   }
 
   public fromJson(jsonObject: JsonSerializedData): void {
-
     this._uuid = jsonObject['uuid'];
     this.setPosition(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
-    this.setRotation(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
+    quat.set(this._rotation, jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2], jsonObject['rotation'][3]);
     this.setScale(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);
-
+    this.updateMatrices();
   }
 
 

@@ -27,12 +27,11 @@ export class SceneManager {
     return null;
   }
 
-  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene: Scene): Scene {
+  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Scene {
     scene = scene || new Scene();
     const { meshMaps, lights, objects } = jsonData;
     const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
 
-    jsonData['lights'] = SceneManager.instanciateSceneLights(scene, lights);
     jsonData['objects'] = SceneManager.instaciateSceneObjects(scene, objects, meshes, gl);
     scene.fromJson(jsonData);
 
@@ -50,14 +49,6 @@ export class SceneManager {
     return meshes;
   }
 
-  private static instanciateSceneLights(scene: Scene, lights: any) {
-    return lights.map((e: any) => {
-      const entity = SceneManager.instanciateObjectFromJsonData(e.type);
-      entity.scene = scene;
-      entity.fromJson(e);
-      return entity;
-    });
-  }
 
   private static instaciateSceneObjects(scene: Scene, objects: any, meshes: { [key: string]: MeshData; }, gl: WebGL2RenderingContext) {
     const transforms: { [key: string]: Transform } = {};

@@ -21,7 +21,6 @@ export class Scene extends GlEntity {
   private _objects: GlEntity[];
   private gl!: WebGL2RenderingContext;
   private ellapsedTime = 0;
-
   public get objects(): GlEntity[] { return this._objects }
   public get lights(): Light[] { return this._objects.filter(o => o instanceof Light) }
 
@@ -34,7 +33,6 @@ export class Scene extends GlEntity {
   }
 
   public override initialize(): void {
-
     for (const object of this.objects) {
       object.initialize();
     }
@@ -42,7 +40,9 @@ export class Scene extends GlEntity {
   }
 
   public override update(ellapsed: number): void {
-    Camera.mainCamera?.update(ellapsed);
+    if (this.destroyed) return;
+
+    Camera.mainCamera.update(ellapsed);
     if (!this.isRunning) return;
     this.ellapsedTime += ellapsed
     super.update(ellapsed);
@@ -53,6 +53,7 @@ export class Scene extends GlEntity {
   }
 
   public override draw(): void {
+    if (this.destroyed) return;
 
     if (!this.gl || !Camera.mainCamera) return;
 
@@ -66,6 +67,7 @@ export class Scene extends GlEntity {
   }
 
   public addEntity(entity: GlEntity) {
+    if (this.destroyed) return;
 
     entity.scene = this;
     this._objects.push(entity);
@@ -96,9 +98,7 @@ export class Scene extends GlEntity {
 
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    for (const light of jsonObject['lights']) {
-      this.addEntity(light);
-    }
+
     for (const entity of jsonObject['objects']) {
       this.addEntity(entity);
     }
@@ -116,7 +116,6 @@ export class Scene extends GlEntity {
     }
     return {
       ...super.toJsonObject(),
-      lights: this.lights.map(o => o.toJsonObject()),
       objects: this.objects.map(o => o.toJsonObject()),
       meshMaps: meshMaps,
     }
@@ -146,10 +145,6 @@ export class Scene extends GlEntity {
     */
   public getEntities<T extends GlEntity>(constructor: new (...args: any[]) => T): T[] {
     return this._objects.filter((o): o is T => o instanceof constructor);
-  }
-
-  clear() {
-    this._objects = [];
   }
 
 }

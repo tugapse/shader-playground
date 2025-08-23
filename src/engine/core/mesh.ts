@@ -1,5 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
-import { EngineCache } from "./engineCache"; // Assuming these imports are necessary for other parts of the class.
+import { EngineCache } from "./engineCache";
 import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { v4 as uuidv4 } from 'uuid'
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
@@ -227,12 +227,6 @@ export class MeshData implements JsonSerializable {
       const b = bitangents[i]; // Accumulated bitangent (used as starting point for direction)
       vec3.cross(b, n, t); // B = N x T
       vec3.normalize(b, b); // Normalize the bitangent
-
-      // If you find that your normal maps are inverted for specific models (e.g., Blender default tangent space),
-      // you might need to re-introduce a conditional negation here based on the model source:
-      // if (modelRequiresBitangentFlip) {
-      //    vec3.scale(b, b, -1.0);
-      // }
     }
 
     // Assign the calculated arrays to the MeshData instance

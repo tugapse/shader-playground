@@ -17,9 +17,11 @@ export class EditorService {
   private camera!: Camera;
   constructor() {
     this.camera = new Camera();
-    this.camera.addBehaviour(new CameraFlyBehaviour())
+    this.camera.name = "Editor Camera"
     this.camera.updateInEditor = true;
+    this.camera.initialize();
     Camera.setMainCamera(this.camera);
+
   }
 
   loadScene(scene: Scene) {

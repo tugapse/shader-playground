@@ -13,6 +13,7 @@ export class GlEntity implements JsonSerializable {
   public static instanciate(name = "Entity", transform?: Transform) {
     return new GlEntity(name, transform);
   }
+  protected destroyed: boolean = false;
 
   public scene!: Scene;
   public active: boolean = true;
@@ -39,15 +40,13 @@ export class GlEntity implements JsonSerializable {
     for (const behaviour of this.behaviours) {
       behaviour.initialize();
     }
+    this.destroyed = false;
   }
 
   public update(ellapsed: number): void {
-    if (!this.active || !this.scene) return;
+    if (!this.active) return;
 
     for (const behaviour of this.behaviours) {
-      if (!this.scene.isRunning && this.updateInEditor)
-        behaviour.updateEditor(ellapsed);
-      else
         behaviour.update(ellapsed);
     }
   }
@@ -65,6 +64,7 @@ export class GlEntity implements JsonSerializable {
     for (const behaviour of this.behaviours) {
       behaviour.destroy();
     }
+    this.destroyed = true;
   }
 
   public addBehaviour(behaviour: EntityBehaviour) {
