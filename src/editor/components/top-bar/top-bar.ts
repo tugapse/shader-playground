@@ -12,6 +12,7 @@ import { Icon } from 'src/app/components/icon/icon';
 export class TopBar {
 
   @Input() scene!: Scene;
+  @Input() isEditorPaused!:boolean;
 
   constructor(private editorService: EditorService) {
 

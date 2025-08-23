@@ -133,11 +133,8 @@ export class App implements OnDestroy {
     movingMokeyPrimitive.addBehaviour(new LightMoveBehaviour())
     scene.addEntity(movingMokeyPrimitive);
 
-
-
-
     const lookAtBehaviour = new LookAtBehaviour();
-    lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
+    lookAtBehaviour.targetId = this.dLight.uuid;
     lookAtBehaviour.follow = true;
     monkeyPrimitive.addBehaviour(lookAtBehaviour);
 

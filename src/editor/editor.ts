@@ -10,6 +10,7 @@ import { TopBar } from "./components/top-bar/top-bar";
 import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
 import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
+import { SceneManager } from '@engine/entities/scene-manager';
 
 @Component({
   selector: 'app-editor',
@@ -22,6 +23,8 @@ export class Editor implements OnDestroy {
   scene!: Scene;
   selectedEntity!: GlEntity;
   inspectorSelectedEntity!: GlEntity;
+  isPaused = false;
+
   private gl!: WebGL2RenderingContext;
   private subs$: Subscription[] = [];
 
@@ -47,20 +50,28 @@ export class Editor implements OnDestroy {
   }
 
   private onScenePlay(scene: Scene) {
-    this.sceneState = scene.toJsonObject();
+    if (!this.sceneState) this.sceneState = scene.toJsonObject();
     this.scene.isRunning = true;
+    this.isPaused = false;
   }
 
   private onScenePause(scene: Scene) {
+    if (scene.isRunning == false) return;
     scene.isRunning = false;
+    this.isPaused = true;
   }
 
   private onSceneStop(scene: Scene) {
-    this.scene = scene;
-    this.scene.destroy();
-    this.scene.fromJson(this.sceneState!);
-    this.scene.initialize();
+    if (scene.isRunning == false && this.isPaused == false) return;
+    this.isPaused = false;
+    scene.isRunning = false;
+    scene.destroy();
+    const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
     this.sceneState = null;
+    this.editorService.loadScene(newScene);
+    newScene.initialize();
+
+
   }
 
   private onSceneTreeEntitySelected(entity: GlEntity): void {
