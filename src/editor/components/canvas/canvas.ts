@@ -7,7 +7,7 @@ import { Camera } from '@engine/entities/camera';
 import { Scene } from '@engine/entities/scene';
 import { EditorService } from '../../editor.service';
 @Component({
-  selector: 'app-canvas',
+  selector: 'editor-canvas',
   imports: [],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss'

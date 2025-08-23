@@ -1,12 +1,8 @@
-<div class="top-bar">
-  <app-icon class="play-icon" iconName="fa-play" [ngClass]="{playing:scene && scene.isEditorMode}" (click)="scene && scene.isEditorMode = !scene.isEditorMode"></app-icon>
-</div>
-
+<editor-top-bar [scene]="scene"></editor-top-bar>
 <div class="container">
-
-  <app-sidebar [scene]="scene"></app-sidebar>
+  <editor-sidebar [scene]="scene"></editor-sidebar>
   <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
-  <app-canvas tabindex="0" class="canvas" [scene]="scene"
-    (onGlContextCreated)="onGlContextCreated($event)"></app-canvas>
+  <editor-canvas tabindex="0" class="canvas" [scene]="scene"
+    (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>
 
-  </div>
+</div>

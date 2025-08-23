@@ -45,7 +45,7 @@ export class GlEntity implements JsonSerializable {
     if (!this.active || !this.scene) return;
 
     for (const behaviour of this.behaviours) {
-      if (this.scene.isEditorMode && !this.updateInEditor)
+      if (!this.scene.isRunning && this.updateInEditor)
         behaviour.updateEditor(ellapsed);
       else
         behaviour.update(ellapsed);

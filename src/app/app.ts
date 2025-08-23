@@ -1,6 +1,5 @@
 
 import { Component, OnDestroy } from '@angular/core';
-import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
 
 import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
@@ -20,11 +19,14 @@ import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec2, vec3, vec4 } from 'gl-matrix';
-import { Editor } from '../editor/editor';
-import { EditorService } from '../editor/editor.service';
+
+import { Editor } from '@editor/editor';
+import { EditorService } from '@editor/editor.service';
 import { LightMoveBehaviour } from './example/behaviours/light-move';
+import { LookAtBehaviour } from './example/behaviours/look-at';
 import { MoveBehaviour } from './example/behaviours/move';
 import { RotateBehaviour } from './example/behaviours/rotate';
+import { loadTorusPrimitive, MeshData, Mesh } from '@engine/core/mesh';
 
 @Component({
   selector: 'app-root',
@@ -51,7 +53,7 @@ export class App implements OnDestroy {
 
   private async otherObjetcs(scene: Scene) {
 
-    const torusPrimitive = await createTorusPrimitive();
+    const torusPrimitive = await loadTorusPrimitive();
     const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);
@@ -134,10 +136,10 @@ export class App implements OnDestroy {
 
 
 
-    // const lookAtBehaviour = new LookAtBehaviour();
-    // lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
-    // lookAtBehaviour.follow = true;
-    // monkeyPrimitive.addBehaviour(lookAtBehaviour);
+    const lookAtBehaviour = new LookAtBehaviour();
+    lookAtBehaviour.targetId = movingMokeyPrimitive.uuid;
+    lookAtBehaviour.follow = true;
+    monkeyPrimitive.addBehaviour(lookAtBehaviour);
 
   }
 
@@ -204,12 +206,11 @@ export class App implements OnDestroy {
   }
 
   private setupCamera(scene: Scene) {
-    if (!this.scene) return;
-    if (!this.scene.camera) this.scene.setMainCamera(new Camera());
-    this.scene.camera.updateInEditor = true;
-    this.scene.camera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-    this.scene.camera.transform.lookAt(vec3.create());
-    this.scene.camera.updateProjectionMatrix();
-    this.scene.camera.addBehaviour(new CameraFlyBehaviour());
+    if (!Camera.mainCamera) return;
+    Camera.mainCamera.updateInEditor = true;
+    Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
+    Camera.mainCamera.transform.lookAt(vec3.create());
+    Camera.mainCamera.updateProjectionMatrix();
+    Camera.mainCamera.addBehaviour(new CameraFlyBehaviour());
   }
 }

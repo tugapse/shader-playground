@@ -4,7 +4,7 @@ import { Scene } from '@engine/entities/scene';
 import { GlEntity } from '@engine/entities/entity';
 
 @Component({
-  selector: 'app-sidebar',
+  selector: 'editor-sidebar',
   imports: [SceneTree],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss'

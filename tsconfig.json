@@ -18,6 +18,9 @@
     "paths": {
       "@engine/*": [
         "src/engine/*"
+      ],
+      "@editor/*": [
+        "src/editor/*"
       ]
     }
   },

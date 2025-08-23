@@ -8,7 +8,7 @@ import { EntityType } from "@engine/enums/entity-type";
 
 export class Camera extends GlEntity {
 
-  public static _mainCamera: Camera;
+  private static _mainCamera: Camera;
   public static get mainCamera(): Camera { return this._mainCamera }
 
   public fieldOfView: number = (45 * Math.PI) / 180;
@@ -27,11 +27,15 @@ export class Camera extends GlEntity {
   constructor() {
     super("Camera")
     this.entityType = EntityType.CAMERA;
-    Camera._mainCamera = this;
     this._projectionMatrix = mat4.create();
     this._viewMatrix = mat4.create()
     this.transform.setPosition(0, 0, 10);
   }
+
+   static setMainCamera(camera: Camera) {
+    this._mainCamera = camera;
+  }
+
 
   override initialize(): void {
     // It's good practice to set initial aspect ratio here if CanvasViewport is available

@@ -5,10 +5,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 
-export const createTorusPrimitive = async () => {
+export const loadTorusPrimitive = async () => {
   return EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
 }
-export const createcilinderPrimitive = async () => {
+export const loadCilinderPrimitive = async () => {
   return EngineCache.getMeshDataFromObj("assets/primitives/cilinder.obj");
 }
 

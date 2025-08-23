@@ -1,0 +1,7 @@
+<div class="top-bar">
+  <app-icon class="play-icon" iconName="fa-play" (click)="onPlay()" [isButton]="true"
+    [isSelected]="scene && scene.isRunning"></app-icon>
+  <app-icon class="play-icon" iconName="fa-pause" (click)="onPause()" [isButton]="true"></app-icon>
+  <app-icon class="play-icon" iconName="fa-stop" (click)="onStop()" [isButton]="true"
+    [isSelected]="scene && !scene.isRunning"></app-icon>
+</div>

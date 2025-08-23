@@ -1,3 +1,19 @@
-:host{
-  padding: 4px;
+:host {
+
+  .button {
+    cursor: pointer;
+    padding: 4px;
+    background-color: var(--editor-icon-button-background);
+    color: var(--editor-icon-button-color);
+
+    &:hover {
+      background-color: var(--editor-icon-button-hover-background);
+      color: var(--editor-icon-button-hover-color);
+    }
+
+    &.selected {
+      background-color: var(--editor-icon-button-selected-background);
+      color: var(--editor-icon-button-selected-color);
+    }
+  }
 }

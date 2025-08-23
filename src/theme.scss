@@ -6,8 +6,18 @@
   --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
 
   // inputs
-   --editor-panel-text-input-background: #383d44;
-   --editor-panel-text-input-color: #ffffff;
-   --editor-panel-text-input-border: none;
+  --editor-panel-text-input-background: #383d44;
+  --editor-panel-text-input-color: #ffffff;
+  --editor-panel-text-input-border: none;
+
+  // icons
+  --editor-icon-button-background: #383d44;
+  --editor-icon-button-color: #496183;
+
+  --editor-icon-button-hover-background: #323841;
+  --editor-icon-button-hover-color: #2c70cf;
+
+  --editor-icon-button-selected-background: #2c70cf;
+  --editor-icon-button-selected-color: #323841;
 
 }

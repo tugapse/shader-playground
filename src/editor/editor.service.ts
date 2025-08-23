@@ -1,4 +1,6 @@
 import { EventEmitter, Injectable } from "@angular/core";
+import { CameraFlyBehaviour } from "@engine/behaviours/camera-fly-behaviour";
+import { Camera } from "@engine/entities/camera";
 import { Scene } from "@engine/entities/scene";
 
 @Injectable({ providedIn: 'root' })
@@ -12,25 +14,31 @@ export class EditorService {
   onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
   onCanvasRequestResize = new EventEmitter();
 
-
+  private camera!: Camera;
+  constructor() {
+    this.camera = new Camera();
+    this.camera.addBehaviour(new CameraFlyBehaviour())
+    this.camera.updateInEditor = true;
+    Camera.setMainCamera(this.camera);
+  }
 
   loadScene(scene: Scene) {
     this.onSceneLoaded.emit(scene);
   }
 
-  requestCanvasResize(){
+  requestCanvasResize() {
     this.onCanvasRequestResize.emit();
   }
 
-  requestScenePlay(scene?: Scene){
+  requestScenePlay(scene?: Scene) {
     this.onScenePlay.emit(scene);
   }
 
-  requestScenePause(scene?: Scene){
+  requestScenePause(scene?: Scene) {
     this.onScenePause.emit(scene);
   }
 
-  requestSceneStop(scene?: Scene){
+  requestSceneStop(scene?: Scene) {
     this.onSceneStop.emit(scene);
   }
 
