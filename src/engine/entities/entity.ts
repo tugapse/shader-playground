@@ -8,7 +8,7 @@ import { Scene } from "./scene";
 
 
 
-export class GlEntity implements JsonSerializable {
+export class GlEntity extends JsonSerializable {
 
   public static instanciate(name = "Entity", transform?: Transform) {
     return new GlEntity(name, transform);
@@ -31,6 +31,7 @@ export class GlEntity implements JsonSerializable {
 
 
   constructor(public name: string, public transform: Transform = new Transform()) {
+    super();
     this._uuid = uuidv4();
   }
 
@@ -101,7 +102,7 @@ export class GlEntity implements JsonSerializable {
     return this.behaviours.find((o): o is T => o instanceof constructor);
   }
 
-  public fromJson(jsonObject: JsonSerializedData): void {
+  public override fromJson(jsonObject: JsonSerializedData): void {
     if (jsonObject['type'] != this.constructor.name) return;
     this.name = jsonObject['name'];
     this.entityType = jsonObject['entityType'] as EntityType;
@@ -114,8 +115,9 @@ export class GlEntity implements JsonSerializable {
   }
 
 
-  public toJsonObject(): JsonSerializedData {
+  public override toJsonObject(): JsonSerializedData {
     const result = {
+      ...super.toJsonObject(),
       uuid: this.uuid,
       entityType: this.entityType,
       type: this.constructor.name,

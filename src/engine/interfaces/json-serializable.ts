@@ -1,4 +1,11 @@
-export interface JsonSerializable {
-  toJsonObject(): { [key: string]: any };
-  fromJson(jsonObject: { [key: string]: any }): void;
+import { JsonSerializedData } from "./json-serialized-data";
+
+export class JsonSerializable {
+  toJsonObject(): JsonSerializedData {
+    return {
+      type: this.constructor.name
+    }
+  }
+
+  fromJson(jsonObject: JsonSerializedData): void { }
 }

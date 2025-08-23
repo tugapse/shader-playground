@@ -4,25 +4,24 @@ import { JsonSerializable } from "@engine/interfaces/json-serializable";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { vec4 } from "gl-matrix";
 
-export class ColorMaterial implements JsonSerializable {
+export class ColorMaterial extends JsonSerializable {
 
   public static instanciate() { return new ColorMaterial(); }
 
   public name: string = "Color Material";
-  public color: Color = Colors.white;
+  public color: Color = new Color();
 
-  toJsonObject(): JsonSerializedData {
+  override toJsonObject(): JsonSerializedData {
     return {
-      type: this.constructor.name,
+      ...super.toJsonObject(),
       color: this.color,
 
     }
   }
 
-  fromJson(jsonObject: JsonSerializedData): void {
+  override fromJson(jsonObject: JsonSerializedData): void {
     this.name = jsonObject['name'];
-    this.color = new Color();
-    this.color.fromJson(jsonObject['color']);
+    this.color = Color.createFromJsonData(jsonObject['color']);
 
   }
 }

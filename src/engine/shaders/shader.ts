@@ -17,15 +17,15 @@ export interface WebGLBuffers {
   indices: WebGLBuffer | null;
 }
 
-export class Shader implements JsonSerializable {
+export class Shader extends JsonSerializable {
 
-  public static SHADER_FUNCTIONS :{[key:string]:string}= {
+  public static SHADER_FUNCTIONS: { [key: string]: string } = {
     "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
     "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
   }
 
-  public static preFetchFunctionsGlsl(){
-    for(const a of Object.values(Shader.SHADER_FUNCTIONS)){
+  public static preFetchFunctionsGlsl() {
+    for (const a of Object.values(Shader.SHADER_FUNCTIONS)) {
       EngineCache.loadShaderSource(a);
     }
   }
@@ -53,7 +53,10 @@ export class Shader implements JsonSerializable {
     public material: ColorMaterial,
     public fragUri: string = "assets/shaders/frag/color.frag",
     public vertexUri: string = "assets/shaders/vertex/vertex.vert"
-  ) { this._uuid = uuidv4() }
+  ) {
+    super();
+    this._uuid = uuidv4()
+  }
 
   public async initialize(): Promise<void> {
 
@@ -67,7 +70,7 @@ export class Shader implements JsonSerializable {
 
     for (const obkey of keys) {
       if (fsSource.includes(obkey)) {
-        const url:string = Shader.SHADER_FUNCTIONS[obkey] as string;
+        const url: string = Shader.SHADER_FUNCTIONS[obkey] as string;
         const text = await EngineCache.loadShaderSource(url);
         fsSource = fsSource.replace(obkey, text)
       }
@@ -339,8 +342,9 @@ export class Shader implements JsonSerializable {
     this.initialized = false;
   }
 
-  public toJsonObject(): JsonSerializedData {
+  public override toJsonObject(): JsonSerializedData {
     return {
+      ...super.toJsonObject(),
       uuid: this.uuid,
       type: this.constructor.name,
       fragUri: this.fragUri,
@@ -348,7 +352,7 @@ export class Shader implements JsonSerializable {
       material: this.material.toJsonObject()
     }
   }
-  public fromJson(jsonObject: JsonSerializedData): void {
+  public override fromJson(jsonObject: JsonSerializedData): void {
     this.fragUri = jsonObject['fragUri'];
     this.vertexUri = jsonObject['vertexUri'];
     this.material = new ColorMaterial();

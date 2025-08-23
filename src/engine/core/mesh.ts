@@ -17,7 +17,7 @@ export const loadCilinderPrimitive = async () => {
  * @description Base class for geometric mesh data.
  * It stores vertex positions, normals, and UV coordinates, along with optional tangent and bitangent vectors for normal mapping.
  */
-export class MeshData implements JsonSerializable {
+export class MeshData extends JsonSerializable {
   public static instanciate(vertices?: vec3[], normals: vec3[] = [], uvs: vec2[] = [], indices: number[] = []) {
     if (!vertices) vertices = [];
     return new MeshData(vertices, normals, uvs, indices)
@@ -39,6 +39,7 @@ export class MeshData implements JsonSerializable {
     uvs: vec2[] = [],     // Make uvs optional in constructor
     indices: number[] = [],
   ) {
+    super();
     this.vertices = vertices;
     this.normals = normals;
     this.uvs = uvs;
@@ -234,9 +235,9 @@ export class MeshData implements JsonSerializable {
     this.bitangents = bitangents;
   }
 
-  toJsonObject(): JsonSerializedData {
+  override toJsonObject(): JsonSerializedData {
     return {
-      type: this.constructor.name,
+      ...super.toJsonObject(),
       uuid: this.uuid,
       vertices: this.vertices,
       normals: this.normals,
@@ -247,7 +248,7 @@ export class MeshData implements JsonSerializable {
     }
   }
 
-  fromJson(jsonObject: any): void {
+  override fromJson(jsonObject: any): void {
     this._uuid = this.uuid;
     this.vertices = jsonObject.vertices;
     this.normals = jsonObject.normals;
@@ -258,18 +259,18 @@ export class MeshData implements JsonSerializable {
   }
 }
 
-export class Mesh implements JsonSerializable {
+export class Mesh extends JsonSerializable {
 
   public meshData!: MeshData;
 
-  toJsonObject(): JsonSerializedData {
+  override toJsonObject(): JsonSerializedData {
     return {
-      type: this.constructor.name,
+      ...super.toJsonObject(),
       meshDataId: this.meshData.uuid,
     }
   }
 
-  fromJson(jsonObject: JsonSerializedData): void {
+  override fromJson(jsonObject: JsonSerializedData): void {
     if (!this.meshData) this.meshData = new MeshData([]);
     this.meshData.fromJson(jsonObject);
   }

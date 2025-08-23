@@ -4,7 +4,7 @@ import { Texture } from "../textures/texture";
 import { ColorMaterial } from "./color-material";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
-export class UnlitMaterial extends ColorMaterial implements JsonSerializable {
+export class UnlitMaterial extends ColorMaterial {
   public mainTexUrl: string = "";
   public uvScale: vec2 = vec2.fromValues(1, 1);
   public uvOffset: vec2 = vec2.create();

@@ -3,7 +3,7 @@ import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { vec3, mat4, quat } from 'gl-matrix';
 import { v4 as uuidv4 } from 'uuid';
 
-export class Transform implements JsonSerializable {
+export class Transform extends JsonSerializable {
 
   private _position!: vec3;
   private _rotation!: quat;
@@ -24,6 +24,7 @@ export class Transform implements JsonSerializable {
   public get uuid() { return this._uuid; }
 
   constructor() {
+    super();
     this._position = vec3.create();
     this._rotation = quat.create();
     this._scale = vec3.fromValues(1, 1, 1);
@@ -149,9 +150,9 @@ export class Transform implements JsonSerializable {
     this.updateMatrices();
   }
 
-  public toJsonObject(): JsonSerializedData {
+  public override toJsonObject(): JsonSerializedData {
     return {
-      type: this.constructor.name,
+      ...super.toJsonObject(),
       uuid: this.uuid,
       parent: this.parent?.uuid,
       position: [this._position[0], this._position[1], this._position[2]],
@@ -160,7 +161,7 @@ export class Transform implements JsonSerializable {
     }
   }
 
-  public fromJson(jsonObject: JsonSerializedData): void {
+  public override fromJson(jsonObject: JsonSerializedData): void {
     this._uuid = jsonObject['uuid'];
     this.setPosition(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
     quat.set(this._rotation, jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2], jsonObject['rotation'][3]);

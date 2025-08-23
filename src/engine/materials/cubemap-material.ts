@@ -3,7 +3,7 @@ import { CubeMapTexture } from "@engine/textures/cubemap-texture";
 import { ColorMaterial } from "./color-material";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
-export class CubemapMaterial extends ColorMaterial implements JsonSerializable {
+export class CubemapMaterial extends ColorMaterial {
 
   public rightSideUri: string = "assets/images/skybox/blue/right.jpeg";
   public leftSideUri: string = "assets/images/skybox/blue/left.jpeg";
