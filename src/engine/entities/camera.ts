@@ -4,6 +4,7 @@ import { GlEntity } from "./entity";
 import { CanvasViewport } from "@engine/core/canvas-viewport"; // Assuming this is used for aspect ratio
 import { SceneManager } from "./scene-manager";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
+import { EntityType } from "@engine/enums/entity-type";
 
 export class Camera extends GlEntity {
 
@@ -25,6 +26,7 @@ export class Camera extends GlEntity {
 
   constructor() {
     super("Camera")
+    this.entityType = EntityType.CAMERA;
     Camera._mainCamera = this;
     this._projectionMatrix = mat4.create();
     this._viewMatrix = mat4.create()

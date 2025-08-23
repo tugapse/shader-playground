@@ -1,0 +1,20 @@
+:host {
+  section {
+    border-bottom: var(--editor-panel-border);
+    padding-bottom: 8px;
+  }
+
+  .line-item {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .line-item input {
+    max-width: 60px;
+  }
+
+
+
+
+}

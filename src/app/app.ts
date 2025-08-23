@@ -1,9 +1,7 @@
 
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { createTorusPrimitive, Mesh, MeshData } from '../engine/core/mesh';
-import { Canvas } from "./editor/components/canvas/canvas";
 
-import { CommonModule } from '@angular/common';
 import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
@@ -22,17 +20,11 @@ import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec2, vec3, vec4 } from 'gl-matrix';
-import { Icon } from './editor/components/icon/icon';
-import { SceneTreeService } from './editor/components/scene-tree/scene-tree.service';
-import { Sidebar } from "./editor/components/sidebar/sidebar";
-import { Inpector } from "./editor/inspectors/inpector/inpector";
+import { Editor } from '../editor/editor';
+import { EditorService } from '../editor/editor.service';
 import { LightMoveBehaviour } from './example/behaviours/light-move';
-import { LookAtBehaviour } from './example/behaviours/look-at';
 import { MoveBehaviour } from './example/behaviours/move';
 import { RotateBehaviour } from './example/behaviours/rotate';
-import { Editor } from './editor/editor';
-import { SceneTree } from "./editor/components/scene-tree/scene-tree";
-import { EditorService } from './editor/editor.service';
 
 @Component({
   selector: 'app-root',

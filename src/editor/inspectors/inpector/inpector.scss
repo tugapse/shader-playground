@@ -1,0 +1,52 @@
+:host {
+
+  .inspector {
+    min-width: 300px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: var(--editor-panel-outer-padding);
+    background: var(--editor-panel-background);
+    color: var(--editor-panel-color);
+    border: var(--editor-panel-border);
+    box-shadow: var(--editor-panel-box-shadow);
+  }
+
+  .inspector .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--editor-panel-border);
+    margin-bottom: 6px;
+  }
+
+  .inspector .header .buttons {
+    display: flex;
+  }
+
+  .inspector .header .icon {
+    cursor: pointer;
+  }
+
+  .inspector section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .inspector section span {
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+
+  .inspector section .text-input {
+    background: var(--editor-panel-text-input-background);
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border);
+    padding: 4px;
+    width: 100%;
+    max-width: 60%;
+  }
+}

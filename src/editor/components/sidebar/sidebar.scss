@@ -1,8 +1,8 @@
 :host {
-  width: 250px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-width: 250px;
   padding: var(--editor-panel-outer-padding);
   background: var(--editor-panel-background);
   color: var(--editor-panel-color);

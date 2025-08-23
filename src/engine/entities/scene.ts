@@ -4,6 +4,7 @@ import { vec3 } from "gl-matrix";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
 import { Light } from "./light";
+import { EntityType } from "@engine/enums/entity-type";
 
 
 
@@ -14,20 +15,20 @@ export class Scene extends GlEntity {
   public color: vec3 = vec3.fromValues(0.2, 1, 0.2);
   public isEditorMode: boolean = false;
   public override tag: string = "Scene";
+  override entityType: number = EntityType.SCENE;
 
   private _camera!: Camera
   private _objects: GlEntity[];
-  private _lights: Light[];
   private gl!: WebGL2RenderingContext;
+  private ellapsedTime = 0;
 
   public get camera(): Camera { return this._camera }
   public get objects(): GlEntity[] { return this._objects }
-  public get lights(): Light[] { return this._lights }
+  public get lights(): Light[] { return this._objects.filter(o => o instanceof Light) }
 
   constructor() {
     super("Scene");
     this._objects = [];
-    this._lights = [];
 
     !Scene._currentScene && (Scene._currentScene = this);
 
@@ -41,17 +42,15 @@ export class Scene extends GlEntity {
     super.initialize();
     this.checkMainCamera();
   }
-  ellapsedTime = 0;
+
   public override update(ellapsed: number): void {
     this.ellapsedTime += ellapsed
     this.camera?.update(ellapsed)
-    for (const object of this.lights) {
-      object.update(ellapsed);
-    }
-    for (const object of this.objects) {
-      object.update(ellapsed);
-    }
     super.update(ellapsed);
+
+    for (const object of this.objects.filter(e => e.active)) {
+      object.update(ellapsed);
+    }
   }
 
   private checkMainCamera() {
@@ -69,6 +68,8 @@ export class Scene extends GlEntity {
     this._camera = camera;
     this._camera.scene = this;
     this._camera.tag = "MainCamera";
+    if (!this.objects.some(e => e == camera))
+      this.addEntity(camera);
   }
 
   public override draw(): void {
@@ -78,7 +79,7 @@ export class Scene extends GlEntity {
     this.gl.clearColor(this.color[0], Math.sin(this.ellapsedTime) * this.color[1], this.color[2], 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-    for (const object of this.objects) {
+    for (const object of this.objects.filter(e => e.active && e.show)) {
       object.draw();
     }
     super.draw();
@@ -87,11 +88,7 @@ export class Scene extends GlEntity {
   public addEntity(entity: GlEntity) {
 
     entity.scene = this;
-    if (entity instanceof Light) {
-      this._lights.push(entity);
-    } else {
-      this._objects.push(entity);
-    }
+    this._objects.push(entity);
     entity.initialize()
   }
 
@@ -114,7 +111,6 @@ export class Scene extends GlEntity {
       child.destroy();
     }
     this._objects = [];
-    this._lights = [];
     super.destroy();
   }
 
@@ -173,7 +169,6 @@ export class Scene extends GlEntity {
   }
 
   clear() {
-    this._lights = [];
     this._objects = [];
     this._camera = new Camera();
   }

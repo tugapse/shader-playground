@@ -1,5 +1,7 @@
 :host {
   --trans-time: 0.4s;
+  width: 300px;
+  min-width: 300px;
 
   .tree-header {
     background-image: linear-gradient(to right, #19212e, #1b2636, #0c1d3a);
@@ -9,15 +11,14 @@
 
   section .item-container {
     transition: all var(--trans-time);
-
+    align-items: center;
     display: flex;
-    padding: 8px 8;
     border-radius: 8px;
 
     &:hover {
       color: rgb(159, 187, 219);
       background-image: linear-gradient(to right, #0c1d3a, #0095eb);
-      cursor: default;
+      cursor: pointer;
     }
   }
 

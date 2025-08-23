@@ -5,7 +5,7 @@
 <div class="container">
 
   <app-sidebar [scene]="scene"></app-sidebar>
-  <editor-inpector [targetEntity]="selectedEntity" *ngIf="selectedEntity"></editor-inpector>
+  <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
   <app-canvas tabindex="0" class="canvas" [scene]="scene"
     (onGlContextCreated)="onGlContextCreated($event)"></app-canvas>
 

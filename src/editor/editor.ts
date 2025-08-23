@@ -7,6 +7,7 @@ import { Scene } from '@engine/entities/scene';
 import { GlEntity } from '@engine/entities/entity';
 import { EditorService } from './editor.service';
 import { Subscription } from 'rxjs';
+import { SceneTreeService } from './components/scene-tree/scene-tree.service';
 
 @Component({
   selector: 'app-editor',
@@ -18,10 +19,13 @@ export class Editor implements OnDestroy {
 
   scene!: Scene;
   selectedEntity!: GlEntity;
+  inspectorSelectedEntity!: GlEntity;
   private gl!: WebGL2RenderingContext;
   private subs$: Subscription[] = [];
 
-  constructor(private editorService: EditorService) {
+  constructor(
+    private editorService: EditorService,
+    private sceneTreeService: SceneTreeService) {
     this.subscribeEvents();
   }
 
@@ -34,8 +38,18 @@ export class Editor implements OnDestroy {
     this.editorService.onRenderingContextCreated.emit(this.gl);
   }
 
- private subscribeEvents(): void {
-    this.subs$.push(this.editorService.onSceneLoaded.subscribe(scene => this.scene = scene));
+  private onSceneLoaded(scene: Scene) {
+    this.scene = scene;
+    this.scene.isEditorMode = true;
+  }
+
+  private onSceneTreeEntitySelected(entity: GlEntity): void {
+    this.inspectorSelectedEntity = entity;
+  }
+
+  private subscribeEvents(): void {
+    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));
+    this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
   }
 
 }

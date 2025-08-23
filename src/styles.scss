@@ -1,3 +1,5 @@
+@use './theme.scss';
+
 /* You can add global styles to this file, and also import other style files */
 html,body{
   margin: 0;
@@ -7,4 +9,3 @@ html,body{
 h5,h4,h3,h2,h1{
   margin: 8px 2px;
 }
-@import './theme.scss'

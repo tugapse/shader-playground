@@ -1,10 +1,11 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Keybord, Mouse } from '@engine/core/input';
 
-import { Scene } from '@engine/entities/scene';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
+import { Engine } from '@engine/engine';
 import { Camera } from '@engine/entities/camera';
-import { registerDependencies } from '@engine/engine';
+import { Scene } from '@engine/entities/scene';
+import { EditorService } from '../../editor.service';
 @Component({
   selector: 'app-canvas',
   imports: [],
@@ -76,7 +77,10 @@ export class Canvas implements OnChanges {
     }
   }
 
-  constructor() { registerDependencies(); }
+  constructor(private editorService: EditorService) {
+    Engine.initialize();
+    this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas());
+  }
 
   ngOnInit(): void { }
 
@@ -101,6 +105,7 @@ export class Canvas implements OnChanges {
   }
 
   public render(timestamp: number) {
+
     if (!this.scene) {
       requestAnimationFrame(this.render.bind(this));
       return;
@@ -119,7 +124,6 @@ export class Canvas implements OnChanges {
       }
       this.cleanInput();
     }
-
     requestAnimationFrame(this.render.bind(this));
   }
 

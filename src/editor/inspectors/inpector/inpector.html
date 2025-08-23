@@ -1,0 +1,20 @@
+<div class="inspector" *ngIf="targetEntity">
+  <div class="header">
+    <app-icon class="view-icon" [iconName]="targetEntity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
+      (click)="targetEntity.active = !targetEntity.active"></app-icon>
+    <span>Inspector</span>
+    <div class="buttons">
+      <app-icon class="icon" iconName="fa-close" (click)="targetEntity=null"></app-icon>
+      <app-icon class="view-icon" [iconName]="targetEntity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
+        (click)="targetEntity.active = !targetEntity.active"></app-icon>
+      <app-icon tooltip="Close inspector" class="icon" iconName="fa-close" (click)="targetEntity=null"></app-icon>
+    </div>
+  </div>
+  <section>
+    <span>Name</span><input class="text-input" [(value)]="targetEntity!.name" (change)="onNameChanged($event)">
+  </section>
+  <section>
+    <span>Tag</span><input class="text-input" [(value)]="targetEntity!.tag" (change)="onTagChanged($event)">
+  </section>
+  <editor-transform-inspector [targetEntity]="targetEntity"></editor-transform-inspector>
+</div>

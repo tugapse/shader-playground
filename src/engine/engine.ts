@@ -19,42 +19,48 @@ import { LitShader } from "./shaders/lit-shader";
 import { Shader } from "./shaders/shader";
 import { SkyboxShader } from "./shaders/skybox-shader";
 import { UnlitShader } from "./shaders/unlit-shader";
+export class Engine{
 
-export function registerDependencies() {
+  public static  initialize():void {
+    this.registerDependencies();
+  }
 
-  // Entities
-  SceneManager.addDependency(GlEntity.name, GlEntity.instanciate)
-  SceneManager.addDependency(Camera.name, Camera.instanciate);
-  SceneManager.addDependency(Light.name, Light.instanciate);
-  SceneManager.addDependency(PointLight.name, PointLight.instanciate);
-  SceneManager.addDependency(SpotLight.name, SpotLight.instanciate);
-  SceneManager.addDependency(DirectionalLight.name, DirectionalLight.instanciate);
+  private static  registerDependencies():void {
 
-  // Geometry
-  SceneManager.addDependency(MeshData.name, MeshData.instanciate);
-  SceneManager.addDependency(CubePrimitive.name, CubePrimitive.instanciate);
-  SceneManager.addDependency(QuadPrimitive.name, QuadPrimitive.instanciate);
-  SceneManager.addDependency(SpherePrimitive.name, SpherePrimitive.instanciate);
-  SceneManager.addDependency(SkyboxPrimitive.name, SkyboxPrimitive.instanciate);
-  SceneManager.addDependency(TrianglePrimitive.name, TrianglePrimitive.instanciate);
+    // Entities
+    SceneManager.addDependency(GlEntity.name, GlEntity.instanciate)
+    SceneManager.addDependency(Camera.name, Camera.instanciate);
+    SceneManager.addDependency(Light.name, Light.instanciate);
+    SceneManager.addDependency(PointLight.name, PointLight.instanciate);
+    SceneManager.addDependency(SpotLight.name, SpotLight.instanciate);
+    SceneManager.addDependency(DirectionalLight.name, DirectionalLight.instanciate);
 
-  // shaders
-  SceneManager.addDependency(Shader.name, Shader.instanciate)
-  SceneManager.addDependency(SkyboxShader.name, SkyboxShader.instanciate)
-  SceneManager.addDependency(UnlitShader.name, UnlitShader.instanciate)
-  SceneManager.addDependency(LitShader.name, LitShader.instanciate)
+    // Geometry
+    SceneManager.addDependency(MeshData.name, MeshData.instanciate);
+    SceneManager.addDependency(CubePrimitive.name, CubePrimitive.instanciate);
+    SceneManager.addDependency(QuadPrimitive.name, QuadPrimitive.instanciate);
+    SceneManager.addDependency(SpherePrimitive.name, SpherePrimitive.instanciate);
+    SceneManager.addDependency(SkyboxPrimitive.name, SkyboxPrimitive.instanciate);
+    SceneManager.addDependency(TrianglePrimitive.name, TrianglePrimitive.instanciate);
 
-  SceneManager.addDependency(RenderMeshBehaviour.name, RenderMeshBehaviour.instanciate)
-  SceneManager.addDependency(SkyboxRenderer.name, SkyboxRenderer.instanciate)
+    // shaders
+    SceneManager.addDependency(Shader.name, Shader.instanciate)
+    SceneManager.addDependency(SkyboxShader.name, SkyboxShader.instanciate)
+    SceneManager.addDependency(UnlitShader.name, UnlitShader.instanciate)
+    SceneManager.addDependency(LitShader.name, LitShader.instanciate)
 
-  SceneManager.addDependency(ColorMaterial.name, ColorMaterial.instanciate)
-  SceneManager.addDependency(UnlitMaterial.name, UnlitMaterial.instanciate)
-  SceneManager.addDependency(LitMaterial.name, LitMaterial.instanciate)
-  SceneManager.addDependency(CubemapMaterial.name, CubemapMaterial.instanciate)
+    SceneManager.addDependency(RenderMeshBehaviour.name, RenderMeshBehaviour.instanciate)
+    SceneManager.addDependency(SkyboxRenderer.name, SkyboxRenderer.instanciate)
 
-  //Behaviours
-  SceneManager.addDependency(CameraFlyBehaviour.name, CameraFlyBehaviour.instanciate)
+    SceneManager.addDependency(ColorMaterial.name, ColorMaterial.instanciate)
+    SceneManager.addDependency(UnlitMaterial.name, UnlitMaterial.instanciate)
+    SceneManager.addDependency(LitMaterial.name, LitMaterial.instanciate)
+    SceneManager.addDependency(CubemapMaterial.name, CubemapMaterial.instanciate)
 
-  Shader.preFetchFunctionsGlsl();
+    //Behaviours
+    SceneManager.addDependency(CameraFlyBehaviour.name, CameraFlyBehaviour.instanciate)
 
+    Shader.preFetchFunctionsGlsl();
+
+  }
 }

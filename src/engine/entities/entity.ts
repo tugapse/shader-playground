@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EntityBehaviour } from "../behaviours/entity-behaviour";
 import { Transform } from "../core/transform";
 import { Scene } from "./scene";
+import { EntityType } from "@engine/enums/entity-type";
 
 
 
@@ -15,6 +16,8 @@ export class GlEntity implements JsonSerializable {
 
   public scene!: Scene;
   public active: boolean = true;
+  public show: boolean = true;
+
   public tag: string = "Entity";
   public updateInEditor = false;
   protected behaviours: EntityBehaviour[] = []
@@ -22,6 +25,8 @@ export class GlEntity implements JsonSerializable {
   public get uuid(): string {
     return this._uuid;
   };
+
+  public entityType:EntityType|number = EntityType.STATIC;
 
 
   constructor(public name: String, public transform: Transform = new Transform()) {
@@ -99,8 +104,10 @@ export class GlEntity implements JsonSerializable {
   public fromJson(jsonObject: JsonSerializedData): void {
     if (jsonObject['type'] != this.constructor.name) return;
     this.name = jsonObject['name'];
+    this.entityType = jsonObject['entityType'] as EntityType;
     this._uuid = jsonObject['uuid'] || uuidv4();
     this.active = jsonObject['active'];
+    this.show = jsonObject['show'];
     this.tag = jsonObject['tag'];
     this.updateInEditor = jsonObject['updateInEditor'];
     this.transform.fromJson(jsonObject['transform']);
@@ -110,8 +117,10 @@ export class GlEntity implements JsonSerializable {
   public toJsonObject(): JsonSerializedData {
     const result = {
       uuid: this.uuid,
+      entityType: this.entityType,
       type: this.constructor.name,
       active: this.active,
+      show: this.show,
       name: this.name,
       tag: this.tag,
       transform: this.transform.toJsonObject(),

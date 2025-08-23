@@ -1,0 +1,25 @@
+<div *ngIf="transform">
+
+  <section>
+    <h5>Position</h5>
+    <div class="line-item">
+      <span>X</span> <input [value]="transform.position[0]" />
+      <span>Y</span> <input [value]="transform.position[1]" />
+      <span>Z</span> <input [value]="transform.position[2]" />
+    </div>
+
+    <h5>Rotation</h5>
+    <div class="line-item">
+      <span>X</span> <input [value]="transform.rotation[0]" />
+      <span>Y</span> <input [value]="transform.rotation[1]" />
+      <span>Z</span> <input [value]="transform.rotation[2]" />
+    </div>
+
+    <h5>Scale</h5>
+    <div class="line-item">
+      <span>X</span><input [value]="transform.localScale[0]" />
+      <span>Y</span> <input [value]="transform.localScale[1]" />
+      <span>Z</span> <input [value]="transform.localScale[2]" />
+    </div>
+  </section>
+</div>

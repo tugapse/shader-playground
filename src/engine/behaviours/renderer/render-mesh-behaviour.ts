@@ -4,7 +4,7 @@ import { Mesh, MeshData } from "@engine/core/mesh";
 import { Camera } from "@engine/entities/camera";
 import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
 import { SceneManager } from "@engine/entities/scene-manager";
-import { LightType } from "@engine/enums/light-type.enum";
+import { EntityType } from "@engine/enums/entity-type";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { LitMaterial } from "@engine/materials/lit-material";
@@ -116,7 +116,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
   protected setCameraMatrices() {
     const camera = Camera.mainCamera;
     const mvpMatrix = mat4.create();
-    this.parent.transform.updateMatrices  ();
+    this.parent.transform.updateMatrices();
     mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
     mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
@@ -142,9 +142,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   protected setLightInformation() {
     if (this.shader instanceof LitShader && this.enableLights) {
-      const lights = this.parent.scene.lights.filter(light => light.active);
+      const lights = this.parent.scene.lights.filter(light => light.active && light.show);
 
-      const ambientLight = lights.find(l => l.lightType === LightType.AMBIENT);
+      const ambientLight = lights.find(l => l.entityType === EntityType.LIGHT_AMBIENT);
       if (ambientLight) {
         this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, ambientLight.color);
       } else {
@@ -157,9 +157,9 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
   protected createLightObjectInfo(sceneLights: Light[]) {
     if (this.enableLights == false) return;
-    const directionalLights: DirectionalLight[] = sceneLights.filter(e => e.lightType === LightType.DIRECTIONAL) as DirectionalLight[];
-    const pointLights: PointLight[] = sceneLights.filter(e => e.lightType === LightType.POINT) as PointLight[];
-    const spotLights: SpotLight[] = sceneLights.filter(e => e.lightType === LightType.SPOT) as SpotLight[];
+    const directionalLights: DirectionalLight[] = sceneLights.filter(e => e.entityType === EntityType.LIGHT_DIRECTIONAL) as DirectionalLight[];
+    const pointLights: PointLight[] = sceneLights.filter(e => e.entityType === EntityType.LIGHT_POINT) as PointLight[];
+    const spotLights: SpotLight[] = sceneLights.filter(e => e.entityType === EntityType.LIGHT_SPOT) as SpotLight[];
 
     this.loadDirectionalLights(directionalLights);
     this.loadPointLights(pointLights);
