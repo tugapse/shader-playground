@@ -1,82 +1,95 @@
 import { EntityBehaviour } from "./entity-behaviour";
 import { Keybord, Mouse } from "../core/input";
-import { vec3, quat } from 'gl-matrix'; // Import quat for quaternion operations
+import { vec3, quat } from 'gl-matrix';
 import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 
 export class CameraFlyBehaviour extends EntityBehaviour {
 
-  static override instanciate():CameraFlyBehaviour { return new CameraFlyBehaviour(); }
-  public moveSpeed = 2.0;
-  public rotationSpeed = 0.1;
+  static override instanciate(): CameraFlyBehaviour { return new CameraFlyBehaviour(); }
+
+  public moveSpeed = 20;
+  public rotationSpeed = 0.8;
+  private _acceleration = 10;
+  public rotationDampening = 0.4;
+
+  private _forwardVelocity = 0;
+  private _strafeVelocity = 0;
+  private _upVelocity = 0;
+
+  private _currentYaw = 0;
+  private _currentPitch = 0;
 
   override update(ellapsed: number): void {
-
     const transform = this.parent.transform;
-    const effectiveMoveSpeed = this.moveSpeed * ellapsed;
 
-    let deltaForward = 0;
-    let deltaStrafe = 0;
-    let deltaUpWorld = 0;
+    const accelerationDelta = this._acceleration * ellapsed;
+    const maxSpeed = this.moveSpeed;
 
-    // Movement Input
     if (Keybord.keyDown['w']) {
-      deltaForward = 1;
+      this._forwardVelocity = Math.min(this._forwardVelocity + accelerationDelta, maxSpeed);
     } else if (Keybord.keyDown['s']) {
-      deltaForward = -1;
+      this._forwardVelocity = Math.max(this._forwardVelocity - accelerationDelta, -maxSpeed);
+    } else {
+      this._forwardVelocity = 0;
     }
 
     if (Keybord.keyDown['a']) {
-      deltaStrafe = -1;
+      this._strafeVelocity = Math.min(this._strafeVelocity + accelerationDelta, maxSpeed);
     } else if (Keybord.keyDown['d']) {
-      deltaStrafe = 1;
+      this._strafeVelocity = Math.max(this._strafeVelocity - accelerationDelta, -maxSpeed);
+    } else {
+      this._strafeVelocity = 0;
     }
 
     if (Keybord.keyDown['q']) {
-      deltaUpWorld = -1; // Move down in world space
+      this._upVelocity = Math.max(this._upVelocity - accelerationDelta, -maxSpeed);
     } else if (Keybord.keyDown['e']) {
-      deltaUpWorld = 1; // Move up in world space
+      this._upVelocity = Math.min(this._upVelocity + accelerationDelta, maxSpeed);
+    } else {
+      this._upVelocity = 0;
     }
-
-    // --- Camera Rotation Logic (Mouse Input) ---
-    if (Mouse.mouseButtonDown[0]) {
-      const mouseXDelta = -Mouse.mouseMovement.x * this.rotationSpeed * ellapsed;
-      const mouseYDelta = Mouse.mouseMovement.y * this.rotationSpeed * ellapsed;
-
-      // Apply Pitch (Up/Down Look): Rotate around the CAMERA'S LOCAL X-axis
-      // This is done by post-multiplying the current rotation with a new X-axis rotation.
-      // quat.rotateX(out, a, rad) takes a quaternion 'a' and applies rotation 'rad' around its X-axis.
-      quat.rotateX(transform.rotation, transform.rotation, mouseYDelta);
-
-      // Apply Yaw (Left/Right Look): Rotate around the WORLD'S UP (Y) axis
-      // This is done by pre-multiplying the current rotation with a new World-Y rotation.
-      // We create a new quaternion for this world-Y rotation.
-      const worldYawQuat = quat.setAxisAngle(quat.create(), [0, 1, 0], mouseXDelta);
-      quat.multiply(transform.rotation, worldYawQuat, transform.rotation);
-    }
-    // --- End Camera Rotation Logic ---
-
 
     // --- Camera Movement Logic ---
     const movementVector = vec3.create();
 
-    // Forward/Backward movement along camera's current forward vector
-    if (deltaForward !== 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.forward, deltaForward * effectiveMoveSpeed);
+    if (this._forwardVelocity !== 0) {
+      vec3.scaleAndAdd(movementVector, movementVector, transform.forward, this._forwardVelocity);
+    }
+    if (this._strafeVelocity !== 0) {
+      vec3.scaleAndAdd(movementVector, movementVector, transform.right, this._strafeVelocity);
+    }
+    if (this._upVelocity !== 0) {
+      const worldUp = vec3.fromValues(0, 1, 0);
+      vec3.scaleAndAdd(movementVector, movementVector, worldUp, this._upVelocity);
     }
 
-    // Strafe Left/Right movement along camera's current right vector
-    if (deltaStrafe !== 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.left, deltaStrafe * effectiveMoveSpeed);
+    transform.translate(movementVector[0] * ellapsed, movementVector[1] * ellapsed, movementVector[2] * ellapsed);
+
+    // --- Corrected Camera Rotation Logic (Mouse Input) ---
+    if (Mouse.mouseButtonDown[0]) {
+        this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed;
+        this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed;
     }
 
-    // Vertical movement along world's Up vector (e.g., for flying straight up/down)
-    if (deltaUpWorld !== 0) {
-      const worldUp = vec3.fromValues(0, 1, 0); // World's Up direction
-      vec3.scaleAndAdd(movementVector, movementVector, worldUp, deltaUpWorld * effectiveMoveSpeed);
-    }
+    // Clamp the pitch to prevent flipping
+    this._currentPitch = Math.max(-90, Math.min(90, this._currentPitch));
 
-    // Apply the accumulated movement to the camera's position
-    transform.translate(movementVector[0], movementVector[1], movementVector[2]);
+    // Create the yaw and pitch quaternions
+    const yawQuat = quat.create();
+    quat.fromEuler(yawQuat, 0, this._currentYaw, 0);
+
+    const pitchQuat = quat.create();
+    quat.fromEuler(pitchQuat, this._currentPitch, 0, 0);
+
+    // Combine them correctly to get the final roll-free rotation
+    const finalRotation = quat.create();
+    quat.multiply(finalRotation, yawQuat, pitchQuat);
+
+    // Smoothly interpolate the actual transform rotation towards the final rotation
+    const smoothedRotation = quat.create();
+    quat.slerp(smoothedRotation, transform.rotationQuat, finalRotation, this.rotationDampening);
+    transform.setRotationQuat(smoothedRotation);
+
     super.update(ellapsed);
   }
 
@@ -84,12 +97,14 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     return {
       ...super.toJsonObject(),
       moveSpeed: this.moveSpeed,
-      rotationSpeed: this.rotationSpeed
+      rotationSpeed: this.rotationSpeed,
+      rotationDampening: this.rotationDampening
     };
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
-    this.moveSpeed = jsonObject['moveSpeed'],
-      this.rotationSpeed = jsonObject['rotationSpeed']
+    this.moveSpeed = jsonObject['moveSpeed'];
+    this.rotationSpeed = jsonObject['rotationSpeed'];
+    this.rotationDampening = jsonObject['rotationDampening'];
   }
 }

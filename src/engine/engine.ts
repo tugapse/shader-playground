@@ -1,6 +1,7 @@
 import { CameraFlyBehaviour } from "./behaviours/camera-fly-behaviour";
 import { RenderMeshBehaviour } from "./behaviours/renderer/render-mesh-behaviour";
 import { SkyboxRenderer } from "./behaviours/renderer/skybox-renderer";
+import { Color } from "./core/color";
 import { MeshData } from "./core/mesh";
 import { Camera } from "./entities/camera";
 import { GlEntity } from "./entities/entity";
@@ -19,13 +20,13 @@ import { LitShader } from "./shaders/lit-shader";
 import { Shader } from "./shaders/shader";
 import { SkyboxShader } from "./shaders/skybox-shader";
 import { UnlitShader } from "./shaders/unlit-shader";
-export class Engine{
+export class Engine {
 
-  public static  initialize():void {
+  public static initialize(): void {
     this.registerDependencies();
   }
 
-  private static  registerDependencies():void {
+  private static registerDependencies(): void {
 
     // Entities
     SceneManager.addDependency(GlEntity.name, GlEntity.instanciate)
@@ -34,6 +35,8 @@ export class Engine{
     SceneManager.addDependency(PointLight.name, PointLight.instanciate);
     SceneManager.addDependency(SpotLight.name, SpotLight.instanciate);
     SceneManager.addDependency(DirectionalLight.name, DirectionalLight.instanciate);
+    SceneManager.addDependency(Color.name, () => new Color())
+
 
     // Geometry
     SceneManager.addDependency(MeshData.name, MeshData.instanciate);

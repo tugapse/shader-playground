@@ -1,0 +1,37 @@
+<!-- color-picker.component.html -->
+<div class="color-picker-container">
+
+  <!-- Main color selection area -->
+  <div
+    #colorArea
+    class="color-area"
+    [style.background-color]="'hsl(' + hue + ', 100%, 50%)'"
+    (mousedown)="onColorAreaMousedown($event)"
+  >
+    <!-- Saturation overlay (white to transparent from left) -->
+    <div class="saturation-overlay"></div>
+    <!-- Brightness overlay (black to transparent from bottom) -->
+    <div class="brightness-overlay"></div>
+
+    <!-- Color selection pointer -->
+    <div
+      #colorPointer
+      class="color-pointer"
+      [style.background-color]="'rgba(' + rgb255.r + ',' + rgb255.g + ',' + rgb255.b + ',' + alpha + ')'"
+    ></div>
+  </div>
+
+  <!-- Hue slider -->
+  <div class="hue-slider-wrapper" (mousedown)="onHueSliderMousedown($event)">
+    <div
+      #hueSlider
+      class="hue-slider"
+    ></div>
+    <!-- Hue slider pointer -->
+    <div
+      #huePointer
+      class="hue-pointer"
+    ></div>
+  </div>
+
+</div>

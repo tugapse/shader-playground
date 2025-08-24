@@ -1,7 +1,6 @@
 
 import { Component, OnDestroy } from '@angular/core';
 
-import { CameraFlyBehaviour } from '@engine/behaviours/camera-fly-behaviour';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
@@ -18,15 +17,16 @@ import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
-import { vec2, vec3, vec4 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
 
 import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
+import { Color } from '@engine/core/color';
+import { loadTorusPrimitive, Mesh, MeshData } from '@engine/core/mesh';
 import { LightMoveBehaviour } from './example/behaviours/light-move';
 import { LookAtFollowBehaviour } from './example/behaviours/look-at-follow';
 import { MoveBehaviour } from './example/behaviours/move';
 import { RotateBehaviour } from './example/behaviours/rotate';
-import { loadTorusPrimitive, MeshData, Mesh } from '@engine/core/mesh';
 
 @Component({
   selector: 'app-root',
@@ -83,11 +83,9 @@ export class App implements OnDestroy {
     if (renderer) {
       const material = renderer.shader.material as LitMaterial;
       material.uvScale = vec2.fromValues(500, 500)
-
-
     }
     plane.transform.translate(0, -2, 0);
-    plane.transform.rotate(270 * Math.PI / 180, 0, 0);
+    plane.transform.rotate(270, 0, 0);
     plane.transform.scale(500, 500, 500);
     scene.addEntity(plane);
   }
@@ -101,19 +99,19 @@ export class App implements OnDestroy {
     dlight.transform.lookAt(vec3.create(), vec3.fromValues(0,1,0));
     dlight.direction = vec3.create();
     vec3.normalize(dlight.direction, dlight.transform.back);
-    dlight.color = vec4.fromValues(0.5,0.5,0.5, 1);
+    dlight.color = new Color(0.5,0.5,0.5, 1);
     dlight.addBehaviour(new LightMoveBehaviour())
     this.dLight = dlight;
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
     plight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.002 };
-    plight.color = vec4.fromValues(1, 0.8, 0.6, 1);
+    plight.color = new Color(1, 0.8, 0.6, 1);
 
     const plight1 = new PointLight("Point light 1");
     // plight1.transform.translate(0, 1, 1);
     plight1.attenuation = { constant: 1, linear: 0.7, quadratic: 0.009 };
-    plight1.color = vec4.fromValues(1, 1, 1, 1);
+    plight1.color = new Color(1, 1, 1, 1);
     plight1.addBehaviour(new MoveBehaviour());
 
 
@@ -206,6 +204,7 @@ export class App implements OnDestroy {
     if (!Camera.mainCamera) return;
     Camera.mainCamera.updateInEditor = true;
     Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-    Camera.mainCamera.updateProjectionMatrix();
+    Camera.mainCamera.transform.lookAt(vec3.create());
+    Camera.mainCamera.update(0);
   }
 }

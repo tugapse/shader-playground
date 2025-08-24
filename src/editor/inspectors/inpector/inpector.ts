@@ -4,10 +4,11 @@ import { GlEntity } from '@engine/entities/entity';
 import { Icon } from "../../../app/components/icon/icon";
 import { TransformInspector } from "../transform-inspector/transform-inspector";
 import { EditorService } from '@editor/editor.service';
+import { ColorInspector } from "../color-inspector/color-inspector";
 
 @Component({
   selector: 'editor-inpector',
-  imports: [CommonModule, Icon, TransformInspector],
+  imports: [CommonModule, Icon, TransformInspector, ColorInspector],
   templateUrl: './inpector.html',
   styleUrl: './inpector.scss'
 })
@@ -29,11 +30,11 @@ export class Inpector {
   constructor(private editorService: EditorService) { }
 
   onNameChanged($event: any): void {
-    this.targetEntity!.name = $event.target.value;
+    this.entity!.name = $event.target.value;
   }
 
   onTagChanged($event: any): void {
-    this.targetEntity!.name = $event.target.value;
+    this.entity!.name = $event.target.value;
   }
   onClose() {
     this.entity = null;

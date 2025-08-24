@@ -9,6 +9,7 @@ export class Color extends JsonSerializable {
     const color = new Color();
     color.fromJson(jsonData);
     return color;
+
   }
   // getters
   public get r() { return this.vector[0]; }
@@ -42,6 +43,7 @@ export class Color extends JsonSerializable {
     this.r = jsonObject['r'];
     this.g = jsonObject['g'];
     this.b = jsonObject['b'];
+    this.a = jsonObject['b'];
   }
 
   public toVec3() {
@@ -53,4 +55,3 @@ export class Color extends JsonSerializable {
   }
 }
 
-SceneManager.addDependency(Color.name, () => new Color())

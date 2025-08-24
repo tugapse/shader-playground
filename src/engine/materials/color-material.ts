@@ -14,13 +14,14 @@ export class ColorMaterial extends JsonSerializable {
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      color: this.color,
+      color: this.color.toJsonObject(),
 
     }
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
     this.name = jsonObject['name'];
+    debugger
     this.color = Color.createFromJsonData(jsonObject['color']);
 
   }

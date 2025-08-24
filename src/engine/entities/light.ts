@@ -52,6 +52,7 @@ export class DirectionalLight extends Light {
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
+    debugger
     this.direction = jsonObject['direction'];
   }
 

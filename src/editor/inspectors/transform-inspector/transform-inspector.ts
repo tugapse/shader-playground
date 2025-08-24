@@ -18,5 +18,21 @@ export class TransformInspector {
     this.transform = value.transform;
   }
 
+  onPositionChanged(index: number, event: Event) {
+    const value = this.transform.position;
+    value[index] = (event.target as any).value;
+    this.transform.setPosition(...value);
+  }
 
+  onRotationChanged(index: number, event: Event) {
+    const value = this.transform.rotation;
+    value[index] = (event.target as any).value;
+    this.transform.setRotation(...value);
+  }
+
+  onScaleChanged(index: number, event: Event) {
+    const value = this.transform.localScale;
+    value[index] = (event.target as any).value;
+    this.transform.setScale(...value);
+  }
 }

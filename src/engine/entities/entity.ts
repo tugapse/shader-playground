@@ -46,7 +46,7 @@ export class GlEntity extends JsonSerializable {
 
   public update(ellapsed: number): void {
     if (!this.active) return;
-
+    this.transform.updateMatrices();
     for (const behaviour of this.behaviours) {
       behaviour.update(ellapsed);
     }

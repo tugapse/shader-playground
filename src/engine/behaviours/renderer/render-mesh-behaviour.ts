@@ -1,55 +1,31 @@
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { CanvasViewport } from "@engine/core/canvas-viewport";
-import { Mesh, MeshData } from "@engine/core/mesh";
-import { Camera } from "@engine/entities/camera";
 import { DirectionalLight, Light, PointLight, SpotLight } from "@engine/entities/light";
-import { SceneManager } from "@engine/entities/scene-manager";
 import { EntityType } from "@engine/enums/entity-type";
 import { ShaderUniformsEnum } from "@engine/enums/shader-uniforms.enum";
-import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
 import { LitMaterial } from "@engine/materials/lit-material";
 import { LitShader } from "@engine/shaders/lit-shader";
-import { Shader } from "@engine/shaders/shader";
-import { mat3, mat4, vec3 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
+import { RendererBehaviour } from "./renderer-behaviour";
 
-export class RenderMeshBehaviour extends EntityBehaviour {
+export class RenderMeshBehaviour extends RendererBehaviour {
 
   static override instanciate(gl: WebGL2RenderingContext): RenderMeshBehaviour {
     return new RenderMeshBehaviour(gl);
   }
 
-  public mesh!: Mesh;
-  public shader!: Shader;
-
-  protected time = 0;
   protected normalMapUniformLocation: WebGLUniformLocation | null = null;
-  protected worldMatrixUniformLocation: WebGLUniformLocation | null = null;
-  protected worldInverseTransposeMatrixUniformLocation: WebGLUniformLocation | null = null;
   protected tangentAttributeLocation: GLint = -1;
   protected bitangentAttributeLocation: GLint = -1;
-  public enableLights = true;
   public enableNormalmaps = true;
+  public enableLights = true;
 
-  constructor(public gl: WebGL2RenderingContext) {
-    super();
-    this.mesh = new Mesh();
-  }
 
-  override initialize(): boolean {
-    if (this._initialized) return false;
-    this.setGlSettings();
-    this.initializeShader();
-    return super.initialize();
-
-  }
-
-  override update(ellapsed: number): void {
-    this.time += ellapsed;
-    super.update(ellapsed);
+  constructor(public override gl: WebGL2RenderingContext) {
+    super(gl);
   }
 
   override draw(): void {
     if (!this.mesh || !this.shader.shaderProgram) { return }
+
     this.getNormalMapLocations();
     this.shader.bindBuffers();
     this.shader.use();
@@ -57,40 +33,22 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     this.gl.drawElements(this.gl.TRIANGLES, this.mesh.meshData.indices.length, this.gl.UNSIGNED_SHORT, 0);
   }
 
-  protected setGlSettings() {
-    this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.depthFunc(this.gl.LESS);
 
-    this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-    this.gl.enable(this.gl.CULL_FACE);
-    this.gl.cullFace(this.gl.BACK);
-    this.gl.frontFace(this.gl.CCW);
-  }
 
-  protected initializeShader() {
-    this.shader.initialize();
+  protected override initializeShader() {
+    super.initializeShader();
 
-    this.shader.buffers.position = this.gl.createBuffer();
     this.shader.buffers.normal = this.gl.createBuffer();
-    this.shader.buffers.uv = this.gl.createBuffer();
-    this.shader.buffers.indices = this.gl.createBuffer();
     this.shader.buffers.tangent = this.gl.createBuffer();
     this.shader.buffers.bitangent = this.gl.createBuffer();
     this.shader.initBuffers(this.gl, this.mesh.meshData);
 
   }
 
-  protected setShaderVariables() {
-    this.setGlSettings();
-    this.setCameraMatrices();
-    this.setModelWorldMatrices();
+  protected override setShaderVariables() {
     this.setLightInformation();
     this.setNormalMapsInformation();
-    this.shader.setFloat(ShaderUniformsEnum.U_TIME, this.time);
-    this.shader.setVec2(ShaderUniformsEnum.U_SCREEN_RESOLUTION, [CanvasViewport.rendererWidth, CanvasViewport.rendererHeight]);
-
-    this.shader.loadDataIntoShader();
+    super.setShaderVariables();
   }
 
   protected getNormalMapLocations() {
@@ -113,32 +71,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     }
   }
 
-  protected setCameraMatrices() {
-    const camera = Camera.mainCamera;
-    const mvpMatrix = mat4.create();
-    this.parent.transform.updateMatrices();
-    mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
-    mat4.multiply(mvpMatrix, mvpMatrix, this.parent.transform.modelMatrix);
-    this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
-  }
 
-  protected setModelWorldMatrices() {
-
-    if (this.worldMatrixUniformLocation) {
-      this.gl.uniformMatrix4fv(this.worldMatrixUniformLocation, false, this.parent.transform.modelMatrix);
-    }
-    if (this.worldInverseTransposeMatrixUniformLocation) {
-      const worldInverseTransposeMatrix = mat4.create(); // Start with a mat4
-      mat4.invert(worldInverseTransposeMatrix, this.parent.transform.modelMatrix);
-      mat4.transpose(worldInverseTransposeMatrix, worldInverseTransposeMatrix);
-
-      // Extract the 3x3 part for the mat3 uniform
-      const normalMatrixAsMat3 = mat3.create();
-      mat3.fromMat4(normalMatrixAsMat3, worldInverseTransposeMatrix);
-
-      this.gl.uniformMatrix3fv(this.worldInverseTransposeMatrixUniformLocation, false, normalMatrixAsMat3);
-    }
-  }
 
   protected setLightInformation() {
     if (this.shader instanceof LitShader && this.enableLights) {
@@ -191,7 +124,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
       spotPositionsFlat.push(...light.transform.position);
       const normalizedDir = vec3.normalize(vec3.create(), light.direction);
       spotDirectionsFlat.push(...normalizedDir);
-      spotColorsFlat.push(light.color.r, light.color.g, light.color.b);
+      spotColorsFlat.push(...light.color.toVec3());
       spotInnerConeCosFlat.push(Math.cos(light.coneAngles.inner));
       spotOuterConeCosFlat.push(Math.cos(light.coneAngles.outer));
       spotConstAttsFlat.push(light.attenuation.constant);
@@ -225,7 +158,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     directionalLights.forEach(light => {
       const normalizedDir = vec3.normalize(vec3.create(), light.direction);
       dirDirectionsFlat.push(...normalizedDir);
-      dirColorsFlat.push(light.color.r, light.color.g, light.color.b);
+      dirColorsFlat.push(...light.color.toVec3());
     });
 
     // Only send uniforms if the location is valid
@@ -253,7 +186,7 @@ export class RenderMeshBehaviour extends EntityBehaviour {
 
     pointLights.forEach(light => {
       pointPositionsFlat.push(...light.transform.position);
-      pointColorsFlat.push(light.color.r, light.color.g, light.color.b);
+      pointColorsFlat.push(...light.color.toVec3());
       pointConstAttsFlat.push(light.attenuation.constant);
       pointLinearAttsFlat.push(light.attenuation.linear);
       pointQuadraticAttsFlat.push(light.attenuation.quadratic);
@@ -270,19 +203,4 @@ export class RenderMeshBehaviour extends EntityBehaviour {
     }
   }
 
-  override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      shader: this.shader.toJsonObject(),
-      mesh: this.mesh.toJsonObject()
-    }
-  }
-
-  public override fromJson(jsonObject: JsonSerializedData): void {
-    const materialData = jsonObject['shader']['material'];
-    const material = SceneManager.instanciateObjectFromJsonData(materialData.type);
-    material.fromJson(materialData);
-    this.shader = SceneManager.instanciateObjectFromJsonData(jsonObject['shader']['type'], [this.gl, material]);
-    this.mesh.meshData = jsonObject['meshData'];
-  }
 }

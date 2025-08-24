@@ -27,6 +27,7 @@ export class EditorService {
     Camera.mainCamera.addBehaviour(new CameraFlyBehaviour());
 
 
+
   }
 
   loadScene(scene: Scene) {
