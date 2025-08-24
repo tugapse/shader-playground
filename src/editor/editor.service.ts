@@ -20,9 +20,9 @@ export class EditorService {
     this.camera = new Camera();
     this.camera.name = "Editor Camera"
     this.camera.updateInEditor = true;
-    this.camera.initialize();
-    this.camera.transform.translate(0,0,10);
+    this.camera.transform.translate(0, 0, -10);
     this.camera.transform.lookAt(vec3.create());
+    this.camera.initialize();
     Camera.setMainCamera(this.camera);
     Camera.mainCamera.addBehaviour(new CameraFlyBehaviour());
 

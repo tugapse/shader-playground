@@ -9,9 +9,9 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  distancey = 500;
+  distancey = 200;
   distance = 10000;
-  speed = 0.03;
+  speed = 0.12;
   t = 0;
 
 

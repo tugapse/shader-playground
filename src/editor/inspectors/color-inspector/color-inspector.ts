@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { ColorPickerComponent } from "src/app/components/color-picker/color-picker/color-picker";
 
 @Component({
   selector: 'editor-color-inspector',
-  imports: [ColorPickerComponent],
+  imports: [],
   templateUrl: './color-inspector.html',
   styleUrl: './color-inspector.scss'
 })

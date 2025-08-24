@@ -16,9 +16,9 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@engine/*": [
-        "src/engine/*"
-      ],
+     "@engine/*": [
+        "node_modules/omega-game-engine/dist/*"
+    ],
       "@editor/*": [
         "src/editor/*"
       ]

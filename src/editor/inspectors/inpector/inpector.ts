@@ -4,11 +4,10 @@ import { GlEntity } from '@engine/entities/entity';
 import { Icon } from "../../../app/components/icon/icon";
 import { TransformInspector } from "../transform-inspector/transform-inspector";
 import { EditorService } from '@editor/editor.service';
-import { ColorInspector } from "../color-inspector/color-inspector";
 
 @Component({
   selector: 'editor-inpector',
-  imports: [CommonModule, Icon, TransformInspector, ColorInspector],
+  imports: [CommonModule, Icon, TransformInspector],
   templateUrl: './inpector.html',
   styleUrl: './inpector.scss'
 })

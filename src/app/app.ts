@@ -1,7 +1,7 @@
 
 import { Component, OnDestroy } from '@angular/core';
 
-import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
+
 import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { EngineCache } from '@engine/core/engineCache';
@@ -27,6 +27,9 @@ import { LightMoveBehaviour } from './example/behaviours/light-move';
 import { LookAtFollowBehaviour } from './example/behaviours/look-at-follow';
 import { MoveBehaviour } from './example/behaviours/move';
 import { RotateBehaviour } from './example/behaviours/rotate';
+import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
+import { CameraFlyBehaviour } from '@engine/behaviours';
+import { Colors } from '@engine/core';
 
 @Component({
   selector: 'app-root',
@@ -96,22 +99,22 @@ export class App implements OnDestroy {
 
     const dlight = new DirectionalLight("Directional light");
     dlight.transform.translate(100, 150, 100);
-    dlight.transform.lookAt(vec3.create(), vec3.fromValues(0,1,0));
+    dlight.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
     dlight.direction = vec3.create();
     vec3.normalize(dlight.direction, dlight.transform.back);
-    dlight.color = new Color(0.5,0.5,0.5, 1);
+    dlight.color = new Color(0.5, 0.5, 0.5, 1);
     dlight.addBehaviour(new LightMoveBehaviour())
     this.dLight = dlight;
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
     plight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.002 };
-    plight.color = new Color(1, 0.8, 0.6, 1);
+    plight.color = Colors.yellow;
 
     const plight1 = new PointLight("Point light 1");
     // plight1.transform.translate(0, 1, 1);
     plight1.attenuation = { constant: 1, linear: 0.7, quadratic: 0.009 };
-    plight1.color = new Color(1, 1, 1, 1);
+    plight1.color = Colors.darkViolet;
     plight1.addBehaviour(new MoveBehaviour());
 
 
@@ -154,10 +157,10 @@ export class App implements OnDestroy {
     else if (shader?.material)
       material = shader.material as LitMaterial;
     material!.mainTexUrl = "assets/images/wood-texture.jpg";
-    // material!.normalTexUrl = "assets/images/wood-texture-normal-map.jpg";
-    // material!.normalMapStrength = 0.1;
-    // material!.specularStrength = 0.4
-    // material!.roughness = 0;
+    material!.normalTexUrl = "assets/images/wood-texture-normal-map.jpg";
+    material!.normalMapStrength = 0.1;
+    material!.specularStrength = 0.4
+    material!.roughness = 0;
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
@@ -202,9 +205,11 @@ export class App implements OnDestroy {
 
   private setupCamera(scene: Scene) {
     if (!Camera.mainCamera) return;
+    const behaviour = Camera.mainCamera.getBehaviour(CameraFlyBehaviour) as CameraFlyBehaviour;
+    behaviour.rotationSpeed = 0.5;
+
     Camera.mainCamera.updateInEditor = true;
     Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
     Camera.mainCamera.transform.lookAt(vec3.create());
-    Camera.mainCamera.update(0);
   }
 }
