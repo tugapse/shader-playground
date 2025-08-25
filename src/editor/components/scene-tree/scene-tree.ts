@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Scene } from '@engine/entities/scene';
-import { Icon } from "../../../app/components/icon/icon";
-import { Light } from '@engine/entities/light';
+import { Component, Input } from '@angular/core';
 import { GlEntity } from '@engine/entities/entity';
-import { SceneTreeService } from './scene-tree.service';
+import { Scene } from '@engine/entities/scene';
 import { EntityType } from '@engine/enums/entity-type';
-import { every } from 'rxjs';
+import { Icon } from "../../../app/components/icon/icon";
 import { EditorService } from '../../editor.service';
+import { SceneTreeService } from './scene-tree.service';
 
 
 @Component({
@@ -23,6 +21,9 @@ export class SceneTree {
     this.editorService.onSceneLoaded.subscribe(scene => {
       this.targetScene = scene;
       this.sceneTreeService.onEntitySelected.emit(undefined);
+    });
+    this.sceneTreeService.onEntitySelected.subscribe(entity=>{
+      this.selectedUuid = entity?.uuid;
     })
   }
 
@@ -31,8 +32,11 @@ export class SceneTree {
     this.scene = scene;
     this.prepareObjects();
   };
+
   objectsToDraw: GlEntity[] = []
   scene!: Scene;
+  selectedUuid!: string;
+
   readonly iconNames: { [key: string]: string } = {
     [EntityType.STATIC]: "fa-object-group",
     [EntityType.CAMERA]: "fa-camera",
@@ -49,8 +53,9 @@ export class SceneTree {
 
   entitySelected(entity: GlEntity, event: MouseEvent) {
     if (entity.uuid == (event.target! as any).id) {
+      this.selectedUuid = entity.uuid;
       this.sceneTreeService.onEntitySelected.emit(entity);
-      setTimeout(()=>this.editorService.requestCanvasResize(),30);
+      setTimeout(() => this.editorService.requestCanvasResize(), 30);
     }
   }
 

@@ -1,0 +1,21 @@
+:host {
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--editor-panel-border);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+
+  .header .buttons {
+    display: flex;
+  }
+
+  .header .icon {
+    cursor: pointer;
+  }
+
+
+}

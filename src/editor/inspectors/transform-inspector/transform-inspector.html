@@ -1,25 +1,26 @@
-<div *ngIf="transform">
-
+<editor-inpector-toggle-panel title="Transform" [collapsed]="false">
+  @if (transform) {
   <section>
-    <h5>Position</h5>
+    <span class="title">Position</span>
     <div class="line-item">
       <span>X</span> <input [value]="transform.position[0]" (change)="onPositionChanged(0,$event)" />
       <span>Y</span> <input [value]="transform.position[1]" (change)="onPositionChanged(1,$event)" />
-      <span>Z</span> <input [value]="transform.position[2]" (change)="onPositionChanged(2,$event)"/>
+      <span>Z</span> <input [value]="transform.position[2]" (change)="onPositionChanged(2,$event)" />
     </div>
 
-    <h5>Rotation</h5>
+    <span class="title">Rotation</span>
     <div class="line-item">
-      <span>X</span> <input [value]="transform.rotation[0]" (change)="onRotationChanged(0,$event)"/>
-      <span>Y</span> <input [value]="transform.rotation[1]" (change)="onRotationChanged(1,$event)"/>
-      <span>Z</span> <input [value]="transform.rotation[2]" (change)="onRotationChanged(2,$event)"/>
+      <span>X</span> <input [value]="transform.rotation[0]" (change)="onRotationChanged(0,$event)" />
+      <span>Y</span> <input [value]="transform.rotation[1]" (change)="onRotationChanged(1,$event)" />
+      <span>Z</span> <input [value]="transform.rotation[2]" (change)="onRotationChanged(2,$event)" />
     </div>
 
-    <h5>Scale</h5>
+    <span class="title">Scale</span>
     <div class="line-item">
-      <span>X</span><input [value]="transform.localScale[0]" (change)="onScaleChanged(0,$event)"/>
-      <span>Y</span> <input [value]="transform.localScale[1]"(change)="onScaleChanged(1,$event)" />
-      <span>Z</span> <input [value]="transform.localScale[2]" (change)="onScaleChanged(2,$event)"/>
+      <span>X</span><input [value]="transform.localScale[0]" (change)="onScaleChanged(0,$event)" />
+      <span>Y</span> <input [value]="transform.localScale[1]" (change)="onScaleChanged(1,$event)" />
+      <span>Z</span> <input [value]="transform.localScale[2]" (change)="onScaleChanged(2,$event)" />
     </div>
   </section>
-</div>
+  }
+</editor-inpector-toggle-panel>

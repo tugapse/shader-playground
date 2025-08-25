@@ -23,7 +23,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
     this.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
     const parentLight = (this.parent as DirectionalLight);
     if (parentLight.direction) {
-      parentLight.direction = this.transform.back;
+      parentLight.direction.set(...this.transform.back)
     }
     this.t += this.speed * ellapsed;
   }

@@ -1,8 +1,8 @@
 import { EventEmitter, Injectable } from "@angular/core";
-import { CameraFlyBehaviour } from "@engine/behaviours/camera-fly-behaviour";
 import { Camera } from "@engine/entities/camera";
 import { Scene } from "@engine/entities/scene";
 import { vec3 } from "gl-matrix";
+import { EditorCameraBehaviour } from "./behaviours/editor.camera";
 
 @Injectable({ providedIn: 'root' })
 export class EditorService {
@@ -24,7 +24,7 @@ export class EditorService {
     this.camera.transform.lookAt(vec3.create());
     this.camera.initialize();
     Camera.setMainCamera(this.camera);
-    Camera.mainCamera.addBehaviour(new CameraFlyBehaviour());
+    Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
 
 
 

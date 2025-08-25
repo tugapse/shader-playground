@@ -23,13 +23,14 @@ import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { Color } from '@engine/core/color';
 import { loadTorusPrimitive, Mesh, MeshData } from '@engine/core/mesh';
-import { LightMoveBehaviour } from './example/behaviours/light-move';
-import { LookAtFollowBehaviour } from './example/behaviours/look-at-follow';
-import { MoveBehaviour } from './example/behaviours/move';
-import { RotateBehaviour } from './example/behaviours/rotate';
+import { LightMoveBehaviour } from '../editor/behaviours/light-move';
+import { LookAtFollowBehaviour } from '../editor/behaviours/look-at-follow';
+import { MoveBehaviour } from '../editor/behaviours/move';
+import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { CameraFlyBehaviour } from '@engine/behaviours';
 import { Colors } from '@engine/core';
+import { Vector3 } from '@engine/core/vector';
 
 @Component({
   selector: 'app-root',
@@ -95,16 +96,16 @@ export class App implements OnDestroy {
 
   private createLights(scene: Scene) {
 
-    const ambient = new Light("Ambient Light");
 
     const dlight = new DirectionalLight("Directional light");
     dlight.transform.translate(100, 150, 100);
     dlight.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
-    dlight.direction = vec3.create();
-    vec3.normalize(dlight.direction, dlight.transform.back);
-    dlight.color = new Color(0.5, 0.5, 0.5, 1);
+    dlight.direction = new Vector3();
+    vec3.normalize(dlight.direction.vector, dlight.transform.forward);
+    dlight.color = Colors.azure;
     dlight.addBehaviour(new LightMoveBehaviour())
     this.dLight = dlight;
+    debugger
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
@@ -112,13 +113,11 @@ export class App implements OnDestroy {
     plight.color = Colors.yellow;
 
     const plight1 = new PointLight("Point light 1");
-    // plight1.transform.translate(0, 1, 1);
     plight1.attenuation = { constant: 1, linear: 0.7, quadratic: 0.009 };
     plight1.color = Colors.darkViolet;
     plight1.addBehaviour(new MoveBehaviour());
 
 
-    // scene.addEntity(ambient);
     scene.addEntity(dlight);
     scene.addEntity(plight);
     scene.addEntity(plight1);
@@ -131,13 +130,15 @@ export class App implements OnDestroy {
     monkeyEntity.transform.translate(-3.5, 0, 0);
     scene.addEntity(monkeyEntity);
 
+
+
     const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
-    movingMokeyEntity.addBehaviour(new LightMoveBehaviour())
     scene.addEntity(movingMokeyEntity);
 
     const lookAtBehaviour = new LookAtFollowBehaviour();
     lookAtBehaviour.targetId = this.dLight.uuid;
-    monkeyEntity.addBehaviour(lookAtBehaviour);
+    lookAtBehaviour.followTarget = true;
+    movingMokeyEntity.addBehaviour(lookAtBehaviour)
 
   }
 

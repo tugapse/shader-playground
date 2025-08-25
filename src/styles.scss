@@ -1,11 +1,18 @@
 @use './theme.scss';
 
 /* You can add global styles to this file, and also import other style files */
-html,body{
+html,
+body {
   margin: 0;
   padding: 0;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-h5,h4,h3,h2,h1{
+h5,
+h4,
+h3,
+h2,
+h1 {
   margin: 8px 2px;
 }

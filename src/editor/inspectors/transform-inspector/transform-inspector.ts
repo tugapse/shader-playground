@@ -3,10 +3,12 @@ import { EntityInspector } from '../inpector.editor';
 import { GlEntity } from '@engine/entities/entity';
 import { Transform } from '@engine/core/transform';
 import { CommonModule } from '@angular/common';
+import { InpectorTogglePanel } from "../components/inpector-toggle-panel/inpector-toggle-panel";
+import { VectorInspector } from "../components/vector-inspector/vector-inspector";
 
 @Component({
   selector: 'editor-transform-inspector',
-  imports: [CommonModule],
+  imports: [CommonModule, InpectorTogglePanel, VectorInspector],
   templateUrl: './transform-inspector.html',
   styleUrl: './transform-inspector.scss'
 })

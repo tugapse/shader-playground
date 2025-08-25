@@ -1,0 +1,34 @@
+:host {
+
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &>.title {
+      font-weight: 600;
+    }
+  }
+
+  .header .chevron {
+    padding: 6px;
+    cursor: pointer;
+  }
+
+  .container {
+    transition: all 0.3s;
+    padding: 8px 4px;
+    border-bottom: var(--editor-panel-border);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    background-color: #283549;
+
+    &.collapsed {
+      padding: 0px 4px;
+
+      overflow-y: hidden;
+      height: 0;
+    }
+  }
+}

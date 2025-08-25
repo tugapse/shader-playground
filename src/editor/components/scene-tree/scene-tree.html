@@ -9,7 +9,7 @@
 
   @for (obj of objectsToDraw; track $index) {
 
-  <div class="item-container" (click)="entitySelected(obj,$event)">
+  <div class="item-container" (click)="entitySelected(obj,$event)" [ngClass]="{selected:selectedUuid==obj.uuid}">
     <app-icon [iconName]="iconNames[obj.entityType]"></app-icon>
     <span class="item-value" [id]="obj.uuid">
       {{obj.name}}

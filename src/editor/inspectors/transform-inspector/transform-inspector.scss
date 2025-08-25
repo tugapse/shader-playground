@@ -1,7 +1,11 @@
 :host {
+
+
   section {
-    border-bottom: var(--editor-panel-border);
-    padding-bottom: 8px;
+    &>.title {
+      font-size: 12px;
+      font-weight: 500;
+    }
   }
 
   .line-item {

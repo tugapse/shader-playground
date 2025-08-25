@@ -1,0 +1,8 @@
+<div class="header">
+  <span class="title">{{title}}</span>
+  <app-icon class="chevron" [iconName]="collapsed ? 'fa-chevron-left' :'fa-chevron-down'"
+    (click)="collapsed=!collapsed"></app-icon>
+</div>
+<div class="container" [ngClass]="{collapsed:collapsed}">
+  <ng-content></ng-content>
+</div>

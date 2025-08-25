@@ -1,0 +1,8 @@
+@if (vector) {
+@for (item of vector.vector; track $index) {
+<div class="vector">
+  <span>{{vectorKeys[$index]}}</span>
+  <input [value]="vector.vector[$index]" (change)="onVectorChanged($index,$event)" />
+</div>
+}
+}

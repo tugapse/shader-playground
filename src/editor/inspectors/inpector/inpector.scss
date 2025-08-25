@@ -12,23 +12,6 @@
     border: var(--editor-panel-border);
     box-shadow: var(--editor-panel-box-shadow);
   }
-
-  .inspector .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: var(--editor-panel-border);
-    margin-bottom: 6px;
-  }
-
-  .inspector .header .buttons {
-    display: flex;
-  }
-
-  .inspector .header .icon {
-    cursor: pointer;
-  }
-
   .inspector section {
     display: flex;
     align-items: center;
