@@ -79,7 +79,8 @@ export class Canvas implements OnChanges {
 
   constructor(private editorService: EditorService) {
     Engine.initialize();
-    this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas());
+    this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
+    this.editorService.onCanvasRequestReset.subscribe(() => { this.disposeWebGL(); this.initWebGL() });
   }
 
   ngOnInit(): void { }
@@ -119,7 +120,7 @@ export class Canvas implements OnChanges {
       this.scene.update(delta);
 
       if (this.gl && this.canvasElement) {
-        this.scene.setGlRenderingContext(this.gl);
+        // this.scene.setGlRenderingContext(this.gl);
         this.scene.draw();
       }
       this.cleanInput();
@@ -143,6 +144,13 @@ export class Canvas implements OnChanges {
     }
 
     this.onGlContextCreated.emit(this.gl);
+    this.resizeCanvas();
+  }
+  private async disposeWebGL(): Promise<void> {
+    this.canvasElement = this.glCanvas.nativeElement;
+    this.canvasElement.width = 0;
+    this.canvasElement.height = 0;
+    this.onGlContextCreated.emit(undefined);
 
   }
 
