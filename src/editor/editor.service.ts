@@ -12,22 +12,21 @@ export class EditorService {
   onScenePause = new EventEmitter<Scene>();
   onSceneStop = new EventEmitter<Scene>();
 
+  editorRunningState = new EventEmitter<boolean>();
+
   onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
   onCanvasRequestResize = new EventEmitter();
+  onCanvasRequestReset = new EventEmitter();
 
   private camera!: Camera;
   constructor() {
     this.camera = new Camera();
     this.camera.name = "Editor Camera"
     this.camera.updateInEditor = true;
-    this.camera.transform.translate(0, 0, -10);
-    this.camera.transform.lookAt(vec3.create());
-    this.camera.initialize();
     Camera.setMainCamera(this.camera);
     Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
-
-
-
+    this.camera.initialize();
+    this.resetCameraPosition();
   }
 
   loadScene(scene: Scene) {
@@ -48,6 +47,12 @@ export class EditorService {
 
   requestSceneStop(scene?: Scene) {
     this.onSceneStop.emit(scene);
+  }
+
+  resetCameraPosition() {
+    this.camera.transform.setPosition(0, 0, 5);
+    this.camera.transform.lookAt(vec3.create());
+    this.camera.transform.setDirty(true);
   }
 
 

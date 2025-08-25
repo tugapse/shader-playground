@@ -14,11 +14,21 @@
     align-items: center;
   }
 
-  .line-item input {
-    max-width: 60px;
+  .line-item>span {
+    padding: 4px;
+
+    &:hover {
+      cursor: col-resize;
+    }
   }
 
+  .line-item .text-input {
+    max-width: 40px;
+    background: var(--editor-panel-text-input-background);
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border);
+    padding: 4px;
 
-
+  }
 
 }

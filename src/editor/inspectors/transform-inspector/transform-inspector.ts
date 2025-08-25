@@ -1,23 +1,62 @@
-import { Component, Input } from '@angular/core';
-import { EntityInspector } from '../inpector.editor';
-import { GlEntity } from '@engine/entities/entity';
-import { Transform } from '@engine/core/transform';
 import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { DragEventData, DragHandleDirective } from "@editor/directives/mouse-drag.directive";
+import { Transform } from '@engine/core/transform';
+import { GlEntity } from '@engine/entities/entity';
 import { InpectorTogglePanel } from "../components/inpector-toggle-panel/inpector-toggle-panel";
-import { VectorInspector } from "../components/vector-inspector/vector-inspector";
 
 @Component({
   selector: 'editor-transform-inspector',
-  imports: [CommonModule, InpectorTogglePanel, VectorInspector],
+  imports: [CommonModule, InpectorTogglePanel, DragHandleDirective],
   templateUrl: './transform-inspector.html',
   styleUrl: './transform-inspector.scss'
 })
 export class TransformInspector {
+  scaleX = 1;
+  scaleY = 1;
+  scaleZ = 1;
+
+  private valueScale = 0.1;
+  onSpanDrag(side: number, index: number, $event: DragEventData) {
+    const amount = $event.deltaX * this.valueScale;
+    switch (side) {
+      case 0:
+        this.performAction(index, amount, 0, 0);
+        break;
+      case 1:
+        this.performAction(index, 0, amount, 0);
+        break;
+      case 2:
+        this.performAction(index, 0, 0, amount);
+        break;
+    }
+  }
+
+  performAction(index: number, x: number, y: number, z: number) {
+    switch (index) {
+      case 0:
+        this.transform.translate(x, y, z);
+        break;
+      case 1:
+        this.transform.rotate(x, y, z);
+        break;
+      case 2:
+        this.scaleX += x;
+        this.scaleY += y;
+        this.scaleZ += z;
+        this.transform.setScale(this.scaleX, this.scaleY, this.scaleZ);
+        break;
+    }
+    this.transform.updateMatrices();
+  }
 
   transform!: Transform;
 
   @Input() set targetEntity(value: GlEntity) {
     this.transform = value.transform;
+    this.scaleX = this.transform.localScale[0];
+    this.scaleY = this.transform.localScale[1];
+    this.scaleZ = this.transform.localScale[2];
   }
 
   onPositionChanged(index: number, event: Event) {

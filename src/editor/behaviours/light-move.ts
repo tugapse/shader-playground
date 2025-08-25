@@ -1,7 +1,7 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
 import { DirectionalLight } from "@engine/entities/light";
 import { SceneManager } from "@engine/entities/scene-manager";
-import { vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 
 
 export class LightMoveBehaviour extends EntityBehaviour {
@@ -9,9 +9,9 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  distancey = 200;
-  distance = 10000;
-  speed = 0.12;
+  distance = 50;
+  distanceH = 100;
+  speed = 0.19;
   t = 0;
 
 
@@ -19,7 +19,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
     const x = Math.sin(this.t) * this.speed;
     const z = Math.cos(this.t) * this.speed;
 
-    this.transform.setPosition(this.distance * x, this.distancey, this.distance * z);
+    this.transform.setPosition(this.distanceH + x, this.distance, this.distanceH + z);
     this.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
     const parentLight = (this.parent as DirectionalLight);
     if (parentLight.direction) {

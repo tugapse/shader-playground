@@ -1,11 +1,17 @@
 import { CameraFlyBehaviour } from "@engine/behaviours";
+import { Vector3 } from "@engine/core/vector";
+import { vec3 } from "gl-matrix";
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
+
   override initialize(): boolean {
-    this.moveSpeed = 10;
-    this.rotationSpeed = 0.35;
+    super.initialize();
+    this.moveSpeed = 10.5;
+    this.rotationSpeed = 0.5;
     this.rotationDampening = 0.2;
-    return super.initialize();
+    this.transform.setDirty(true);
+
+    return true;
   }
 }

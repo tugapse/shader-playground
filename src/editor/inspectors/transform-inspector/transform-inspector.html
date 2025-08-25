@@ -3,23 +3,32 @@
   <section>
     <span class="title">Position</span>
     <div class="line-item">
-      <span>X</span> <input [value]="transform.position[0]" (change)="onPositionChanged(0,$event)" />
-      <span>Y</span> <input [value]="transform.position[1]" (change)="onPositionChanged(1,$event)" />
-      <span>Z</span> <input [value]="transform.position[2]" (change)="onPositionChanged(2,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(0,0, $event)">X</span>
+      <input class="text-input" [value]="transform.position[0]" (change)="onPositionChanged(0,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(1,0, $event)">Y</span>
+      <input class="text-input" [value]="transform.position[1]" (change)="onPositionChanged(1,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(2,0, $event)">Z</span>
+      <input class="text-input" [value]="transform.position[2]" (change)="onPositionChanged(2,$event)" />
     </div>
 
     <span class="title">Rotation</span>
     <div class="line-item">
-      <span>X</span> <input [value]="transform.rotation[0]" (change)="onRotationChanged(0,$event)" />
-      <span>Y</span> <input [value]="transform.rotation[1]" (change)="onRotationChanged(1,$event)" />
-      <span>Z</span> <input [value]="transform.rotation[2]" (change)="onRotationChanged(2,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(0,1, $event)">X</span> <input class="text-input"
+        [value]="transform.rotation[0]" (change)="onRotationChanged(0,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(1,1, $event)">Y</span> <input class="text-input"
+        [value]="transform.rotation[1]" (change)="onRotationChanged(1,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(2,1, $event)">Z</span> <input class="text-input"
+        [value]="transform.rotation[2]" (change)="onRotationChanged(2,$event)" />
     </div>
 
     <span class="title">Scale</span>
     <div class="line-item">
-      <span>X</span><input [value]="transform.localScale[0]" (change)="onScaleChanged(0,$event)" />
-      <span>Y</span> <input [value]="transform.localScale[1]" (change)="onScaleChanged(1,$event)" />
-      <span>Z</span> <input [value]="transform.localScale[2]" (change)="onScaleChanged(2,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(0,2, $event)">X</span><input class="text-input"
+        [value]="scaleX" (change)="onScaleChanged(0,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(1,2, $event)">Y</span><input class="text-input"
+        [value]="scaleY" (change)="onScaleChanged(1,$event)" />
+      <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(2,2, $event)">Z</span><input class="text-input"
+        [value]="scaleZ" (change)="onScaleChanged(2,$event)" />
     </div>
   </section>
   }

@@ -14,7 +14,7 @@ import { TopBar } from './components/top-bar/top-bar';
 
 @Component({
   selector: 'app-editor',
-  imports: [Canvas, Sidebar, CommonModule, Inpector,TopBar],
+  imports: [Canvas, Sidebar, CommonModule, Inpector, TopBar],
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })
@@ -24,6 +24,7 @@ export class Editor implements OnDestroy {
   selectedEntity!: GlEntity;
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
+  canvasVisible = true;
 
   private gl!: WebGL2RenderingContext;
   private subs$: Subscription[] = [];
@@ -42,11 +43,23 @@ export class Editor implements OnDestroy {
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
+    if (this.sceneState) {
+      const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
+      this.sceneState = null;
+      newScene.initialize();
+      this.editorService.loadScene(newScene)
+    }
     this.editorService.onRenderingContextCreated.emit(this.gl);
   }
 
   private onSceneLoaded(scene: Scene) {
+    if (this.scene) {
+      this.scene.destroy()
+    }
+    this.editorService.editorRunningState.emit(true);
     this.scene = scene;
+    this.scene.setGlRenderingContext(this.gl);
+    this.editorService.resetCameraPosition();
   }
 
   private onScenePlay(scene: Scene) {
@@ -63,15 +76,10 @@ export class Editor implements OnDestroy {
 
   private onSceneStop(scene: Scene) {
     if (scene.isRunning == false && this.isPaused == false) return;
-    this.isPaused = false;
     scene.isRunning = false;
+    this.isPaused = false;
     scene.destroy();
-    const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
-    this.sceneState = null;
-    this.editorService.loadScene(newScene);
-    newScene.initialize();
-
-
+    this.editorService.onCanvasRequestReset.emit();
   }
 
   private onSceneTreeEntitySelected(entity: GlEntity): void {
@@ -84,6 +92,7 @@ export class Editor implements OnDestroy {
     this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
+    // this.subs$.push(this.editorService.editorRunningState.subscribe(e => this.canvasVisible = e));
   }
 
 }
