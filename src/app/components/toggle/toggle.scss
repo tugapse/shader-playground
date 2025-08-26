@@ -1,0 +1,46 @@
+:host {
+  --slider-height: 12px;
+  --slider-width: 24px;
+  --slider-activeX:12px;
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: var(--slider-height);
+    width: var(--slider-width);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    background-color: #555c65;
+    /* Cor de fundo quando desativado */
+  }
+
+  .toggle-switch.active {
+    background-color: #44b0ef;
+    /* Cor de fundo quando ativado, usando o rosa */
+  }
+
+  .slider {
+    position: absolute;
+    height: var(--slider-height);
+    width: var(--slider-height);
+    background-color: #ffffff;
+    border-radius: 9999px;
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .toggle-switch.active .slider {
+    transform: translateX(var(--slider-activeX));
+  }
+
+
+
+}

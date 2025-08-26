@@ -9,12 +9,13 @@ import { ColorInspector } from "../color-inspector/color-inspector";
 import { InspectorHeader } from '../components/inspector-header/inspector-header';
 import { VectorInspector } from "../components/vector-inspector/vector-inspector";
 import { TransformInspector } from "../transform-inspector/transform-inspector";
+import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
 
 @Component({
   selector: 'editor-inpector',
   templateUrl: './inpector.html',
   styleUrl: './inpector.scss',
-  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector],
+  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector, InpectorTogglePanel],
 })
 export class Inpector {
   onVectorChanged(_t10: { key: string; type: string; property: any; }, $event: Vector4 | Vector3 | Vector2) {

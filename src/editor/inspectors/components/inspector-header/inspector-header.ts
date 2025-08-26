@@ -4,16 +4,18 @@ import { SceneTreeService } from '@editor/components/scene-tree/scene-tree.servi
 import { EditorService } from '@editor/editor.service';
 import { GlEntity } from '@engine/entities';
 import { Icon } from 'src/app/components/icon/icon';
+import { Toggle } from "src/app/components/toggle/toggle";
 
 @Component({
   selector: 'editor-inspector-header',
-  imports: [CommonModule, Icon],
+  imports: [CommonModule, Icon, Toggle],
   templateUrl: './inspector-header.html',
   styleUrl: './inspector-header.scss'
 })
 export class InspectorHeader {
 
   @Input() entity!: GlEntity | null;
+
 
   constructor(private readonly editorService: EditorService,
     private readonly sceneTreeService: SceneTreeService) { }

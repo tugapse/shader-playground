@@ -1,7 +1,9 @@
 @if(entity){
 <div class="header">
-  <app-icon title="Activate/Deactivate Entity. If disabled will disable the entity!" class="view-icon" [iconName]="entity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
-    (click)="entity.active = !entity.active"></app-icon>
+  <app-toggle title="Activate/Deactivate Entity. If disabled will disable the entity!"  [active]="entity.active" (change)="entity.active = !entity.active"></app-toggle>
+
+  <!-- <app-icon title="Activate/Deactivate Entity. If disabled will disable the entity!" class="view-icon" [iconName]="entity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
+    (click)="entity.active = !entity.active"></app-icon> -->
   <span>Inspector</span>
   <div class="buttons">
     <!-- <app-icon class="icon" iconName="fa-close" (click)="entity=null"></app-icon>
