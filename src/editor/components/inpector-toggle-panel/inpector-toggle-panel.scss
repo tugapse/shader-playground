@@ -18,17 +18,15 @@
 
   .container {
     transition: all 0.3s;
-    padding: 8px 4px;
     border-bottom: var(--editor-panel-border);
-    padding-bottom: 6px;
-    margin-bottom: 6px;
-    background-color: #283549;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    // background-color: #283549;
 
     &.collapsed {
       padding: 0px 4px;
-
       overflow-y: hidden;
-      height: 0;
+      height: 2px;
     }
   }
 }

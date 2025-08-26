@@ -20,6 +20,7 @@ export class InspectorHeader {
 
   onClose() {
     this.sceneTreeService.onEntitySelected.emit();
+    this.editorService.onEditorSaveStateRequest.emit();
     setTimeout(() => this.editorService.requestCanvasResize(), 30);
   }
 }

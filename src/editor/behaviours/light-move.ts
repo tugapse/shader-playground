@@ -9,22 +9,17 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  distance = 50;
-  distanceH = 100;
+  distance = 5;
+  distanceH = 10;
   speed = 0.19;
   t = 0;
+  nextDir: vec3 = vec3.create();
 
 
   public override update(ellapsed: number): void {
     const x = Math.sin(this.t) * this.speed;
     const z = Math.cos(this.t) * this.speed;
-
-    this.transform.setPosition(this.distanceH + x, this.distance, this.distanceH + z);
-    this.transform.lookAt(vec3.create(), vec3.fromValues(0, 1, 0));
-    const parentLight = (this.parent as DirectionalLight);
-    if (parentLight.direction) {
-      parentLight.direction.set(...this.transform.back)
-    }
+    this.transform.setRotation(x,1,z);
     this.t += this.speed * ellapsed;
   }
 }

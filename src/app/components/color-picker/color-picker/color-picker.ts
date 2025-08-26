@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import {
   AfterViewInit, Component, ElementRef,
-  EventEmitter, HostListener, NgZone, OnInit, Output, ViewChild
+  EventEmitter, HostListener, Input, NgZone, OnInit, Output, ViewChild
 } from "@angular/core";
 
 @Component({
@@ -17,6 +17,16 @@ export class ColorPickerComponent implements OnInit, AfterViewInit {
   @ViewChild('hueSlider', { static: true }) hueSlider!: ElementRef<HTMLDivElement>;
   @ViewChild('colorPointer', { static: true }) colorPointer!: ElementRef<HTMLDivElement>;
   @ViewChild('huePointer', { static: true }) huePointer!: ElementRef<HTMLDivElement>;
+
+  // Input color, the selected color (RGBA 0-1)
+  @Input() set color(value: { r: number, g: number, b: number, a: number }) {
+
+    const hsv = this.rgb01ToHsv(value.r, value.g, value.b);
+    this.hue = hsv.h;
+    this.saturation = hsv.s;
+    this.value = hsv.v;
+    this.updateAllColors();
+  }
 
   // Output event to emit the selected color (RGBA 0-1 and HEX)
   @Output() colorChange = new EventEmitter<{ rgba: { r: number, g: number, b: number, a: number }, hex: string }>();
@@ -158,12 +168,11 @@ export class ColorPickerComponent implements OnInit, AfterViewInit {
    * Updates all color format representations based on current HSV values.
    */
   private updateAllColors(): void {
-    this.rgba = this.hsvToRgb01(this.hue, this.saturation, this.value, this.alpha);
+    this.rgba = this.hsvToRgb01(this.hue,this.saturation,this.value,this.alpha);
     this.rgb255 = this.rgb01ToRgb255(this.rgba.r, this.rgba.g, this.rgba.b);
     this.hex = this.rgb255ToHex(this.rgb255.r, this.rgb255.g, this.rgb255.b);
     this.cmyk = this.rgb255ToCmyk(this.rgb255.r, this.rgb255.g, this.rgb255.b);
     this.hsl = this.rgb01ToHsl(this.rgba.r, this.rgba.g, this.rgba.b);
-
     // Emit the new color value
     this.colorChange.emit({ rgba: this.rgba, hex: this.hex });
   }
@@ -197,6 +206,39 @@ export class ColorPickerComponent implements OnInit, AfterViewInit {
     }
 
     return { r: r_prime + m, g: g_prime + m, b: b_prime + m, a };
+  }
+
+  /**
+  * Converts RGB (0-1 range) to HSV.
+  * @returns HSV object with values in the 0-1 range for S and V, and 0-360 for H
+  */
+  private rgb01ToHsv(r: number, g: number, b: number): { h: number, s: number, v: number } {
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let h = 0;
+
+    // Calculate Hue
+    if (delta === 0) {
+      h = 0; // achromatic
+    } else if (max === r) {
+      h = ((g - b) / delta) % 6;
+    } else if (max === g) {
+      h = (b - r) / delta + 2;
+    } else {
+      h = (r - g) / delta + 4;
+    }
+    h = Math.round(h * 60);
+    if (h < 0) {
+      h += 360;
+    }
+
+    // Calculate Saturation and Value
+    const s = max === 0 ? 0 : delta / max;
+    const v = max;
+
+    return { h, s, v };
   }
 
   /**
@@ -286,24 +328,5 @@ export class ColorPickerComponent implements OnInit, AfterViewInit {
       s: Math.round(s * 100),
       l: Math.round(l * 100)
     };
-  }
-
-  /**
-   * Copies the given text to the clipboard.
-   * @param text The text to copy.
-   */
-  copyToClipboard(text: string): void {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      console.log('Text copied to clipboard:', text);
-      // You could add a small visual feedback here, e.g., a temporary "Copied!" message
-    } catch (err) {
-      console.error('Failed to copy text:', err);
-    }
-    document.body.removeChild(textArea);
   }
 }

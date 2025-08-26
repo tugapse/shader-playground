@@ -6,20 +6,22 @@ import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
 import { LightAttenuation, LightConeAngles } from '@engine/entities';
 import { GlEntity } from '@engine/entities/entity';
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { TransformInspector } from "../transform-inspector/transform-inspector";
 import { InspectorHeader } from '../components/inspector-header/inspector-header';
-import { InpectorTogglePanel } from '../components/inpector-toggle-panel/inpector-toggle-panel';
+import { VectorInspector } from "../components/vector-inspector/vector-inspector";
+import { TransformInspector } from "../transform-inspector/transform-inspector";
 
 @Component({
   selector: 'editor-inpector',
-  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector],
   templateUrl: './inpector.html',
-  styleUrl: './inpector.scss'
+  styleUrl: './inpector.scss',
+  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector],
 })
 export class Inpector {
+  onVectorChanged(_t10: { key: string; type: string; property: any; }, $event: Vector4 | Vector3 | Vector2) {
+  }
 
   private excludeProperties = ["name", "tag", "active", "show", "destroyed", "behaviours", "updateInEditor", "scene"];
-  objectsToshow: { key: string, type: string }[] = []
+  objectsToshow: { key: string, type: string, property: any }[] = []
 
   private prepareProperties(entity: GlEntity) {
     if (entity) {
@@ -49,7 +51,13 @@ export class Inpector {
 
   onClose() {
     this.entity = null;
-    setTimeout(() => this.editorService.requestCanvasResize(), 30);
+    debugger
+    this.editorService.onEditorSaveStateRequest.emit(true);
+    this.editorService.requestCanvasResize();
+  }
+
+  onColorChanged(arg0: GlEntity, _t10: { key: string; type: string; property: any; }, $event: Color) {
+    debugger
   }
 
   private mapProperty(entity: GlEntity, key: string) {
@@ -70,13 +78,9 @@ export class Inpector {
         type = Transform.name;
         break;
       case ((entity as any)[key] instanceof Vector2):
-        type = Vector2.name;
-        break;
       case ((entity as any)[key] instanceof Vector3):
-        type = Vector3.name;
-        break;
       case ((entity as any)[key] instanceof Vector4):
-        type = Vector4.name;
+        type = "_Vector234";
         break;
 
       case ((entity as any)[key] instanceof Color):
@@ -94,7 +98,8 @@ export class Inpector {
         type = Object.name
         break;
     }
-    return { key, type }
+    const property = (entity as any)[key]
+    return { key, type, property }
   }
 
   private isValidProperty(key: string) {

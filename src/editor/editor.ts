@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GlEntity } from '@engine/entities/entity';
 import { Scene } from '@engine/entities/scene';
 import { SceneManager } from '@engine/entities/scene-manager';
@@ -18,7 +18,7 @@ import { TopBar } from './components/top-bar/top-bar';
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })
-export class Editor implements OnDestroy {
+export class Editor implements OnDestroy, OnInit {
 
   scene!: Scene;
   selectedEntity!: GlEntity;
@@ -35,6 +35,10 @@ export class Editor implements OnDestroy {
     private editorService: EditorService,
     private sceneTreeService: SceneTreeService) {
     this.subscribeEvents();
+  }
+
+  ngOnInit(): void {
+    this.loadFromStorage();
   }
 
   ngOnDestroy(): void {
@@ -54,12 +58,11 @@ export class Editor implements OnDestroy {
 
   private onSceneLoaded(scene: Scene) {
     if (this.scene) {
-      this.scene.destroy()
+      this.scene.destroy();
     }
     this.editorService.editorRunningState.emit(true);
     this.scene = scene;
     this.scene.setGlRenderingContext(this.gl);
-    this.editorService.resetCameraPosition();
   }
 
   private onScenePlay(scene: Scene) {
@@ -92,7 +95,26 @@ export class Editor implements OnDestroy {
     this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
-    // this.subs$.push(this.editorService.editorRunningState.subscribe(e => this.canvasVisible = e));
+    this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));
   }
 
+  onEditorSaveInStorage(): void {
+    const data = {
+      scene: this.scene.toJsonObject(),
+    }
+    const jsonString = JSON.stringify(data);
+    sessionStorage.setItem("omg_scene", jsonString);
+  }
+
+  loadFromStorage(): void {
+    const sceneDataString = sessionStorage.getItem("omg_scene");
+    if (sceneDataString) {
+      this.sceneState = JSON.parse(sceneDataString);
+      this.clearStorage();
+    }
+  }
+
+  clearStorage(): void {
+    sessionStorage.removeItem("omg_scene");
+  }
 }

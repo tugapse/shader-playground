@@ -9,13 +9,15 @@
   </section>
 
   @for (item of objectsToshow ; track $index) {
-  @switch (item.type) {
+    @switch (item.type) {
 
-  @case ("Transform") {<editor-transform-inspector [targetEntity]="entity"></editor-transform-inspector> }
-  @case ("_Color") {<editor-color-inspector></editor-color-inspector> }
+      @case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
+      @case ("_Color") {<editor-color-inspector [entity]="entity" [propertyName]="item.key"
+        [selectedColor]="item.property"></editor-color-inspector> }
+      @case ("_Vector234") { <editor-vector-inspector [vector]="item.property"
+        (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-
-  }
+    }
   }
 
   <!-- <editor-color-inspector></editor-color-inspector> -->

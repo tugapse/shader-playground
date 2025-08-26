@@ -11,6 +11,7 @@ export class EditorService {
   onScenePlay = new EventEmitter<Scene>();
   onScenePause = new EventEmitter<Scene>();
   onSceneStop = new EventEmitter<Scene>();
+  onEditorSaveStateRequest = new EventEmitter();
 
   editorRunningState = new EventEmitter<boolean>();
 
@@ -20,13 +21,7 @@ export class EditorService {
 
   private camera!: Camera;
   constructor() {
-    this.camera = new Camera();
-    this.camera.name = "Editor Camera"
-    this.camera.updateInEditor = true;
-    Camera.setMainCamera(this.camera);
-    Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
-    this.camera.initialize();
-    this.resetCameraPosition();
+    this.initializeEditorCamera();
   }
 
   loadScene(scene: Scene) {
@@ -50,9 +45,18 @@ export class EditorService {
   }
 
   resetCameraPosition() {
-    this.camera.transform.setPosition(0, 0, 5);
-    this.camera.transform.lookAt(vec3.create());
+    this.camera.transform.setPosition(0, 0, -5);
     this.camera.transform.setDirty(true);
+  }
+
+  protected initializeEditorCamera(){
+    this.camera = new Camera();
+    this.camera.name = "Editor Camera"
+    this.camera.updateInEditor = true;
+    Camera.setMainCamera(this.camera);
+    Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
+    this.camera.initialize();
+    this.resetCameraPosition();
   }
 
 

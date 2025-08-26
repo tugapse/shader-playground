@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { DragEventData, DragHandleDirective } from "@editor/directives/mouse-drag.directive";
 import { Transform } from '@engine/core/transform';
 import { GlEntity } from '@engine/entities/entity';
-import { InpectorTogglePanel } from "../components/inpector-toggle-panel/inpector-toggle-panel";
+import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
 
 @Component({
   selector: 'editor-transform-inspector',
@@ -52,7 +52,7 @@ export class TransformInspector {
 
   transform!: Transform;
 
-  @Input() set targetEntity(value: GlEntity) {
+  @Input() set entity(value: GlEntity) {
     this.transform = value.transform;
     this.scaleX = this.transform.localScale[0];
     this.scaleY = this.transform.localScale[1];

@@ -1,2 +1,6 @@
-
-<app-color-picker></app-color-picker>
+<editor-inpector-toggle-panel [title]="title">
+  <span class="panel-header" header-content
+    [style.background-color]="'rgba(' + selectedColor.r*255 + ',' + selectedColor.g*255 + ',' + selectedColor.b*255 + ',' + selectedColor.a + ')'"
+    ></span>
+  <app-color-picker (colorChange)="onColorChanged($event)" [color]="selectedColor"></app-color-picker>
+</editor-inpector-toggle-panel>

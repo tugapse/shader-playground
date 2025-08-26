@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Keybord, Mouse } from '@engine/core/input';
 
 import { CanvasViewport } from '@engine/core/canvas-viewport';
@@ -77,7 +77,7 @@ export class Canvas implements OnChanges {
     }
   }
 
-  constructor(private editorService: EditorService) {
+  constructor(private editorService: EditorService,privatezone:NgZone) {
     Engine.initialize();
     this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
     this.editorService.onCanvasRequestReset.subscribe(() => { this.disposeWebGL(); this.initWebGL() });

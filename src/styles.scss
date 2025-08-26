@@ -16,3 +16,10 @@ h2,
 h1 {
   margin: 8px 2px;
 }
+
+.no-select {
+  user-select: none;         /* Standard property */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* Internet Explorer/Edge */
+}
