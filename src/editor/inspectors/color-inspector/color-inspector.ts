@@ -11,7 +11,7 @@ import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpe
 })
 export class ColorInspector implements OnInit {
 
-  @Input() entity!: { [key: string]: any }
+  @Input() entity?: { [key: string]: any }
   @Input() propertyName: string = "";
   @Input() selectedColor = new Color();
 
@@ -27,13 +27,11 @@ export class ColorInspector implements OnInit {
   }
 
   onColorChanged($event: { rgba: { r: number; g: number; b: number; a: number; }; hex: string; }) {
-
-    this.entity[this.propertyName] = this.selectedColor.clone()
-    this.colorChange.emit(this.selectedColor.clone());
+    if (this.entity) this.entity[this.propertyName] = this.selectedColor.clone()
     this.zone.run(() => {
       this.selectedColor = new Color($event.rgba.r, $event.rgba.g, $event.rgba.b, $event.rgba.a);
       this.colorRgbaString = `"rgba(${this.selectedColor.r * 255} ,${this.selectedColor.g}, ${this.selectedColor.b} ,${this.selectedColor.a});"`
-
+      this.colorChange.emit(this.selectedColor.clone());
     });
 
   }

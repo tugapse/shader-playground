@@ -7,7 +7,7 @@ import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { EngineCache } from '@engine/core/engineCache';
 import { Camera } from '@engine/entities/camera';
 import { GlEntity } from '@engine/entities/entity';
-import { DirectionalLight, PointLight } from '@engine/entities/light';
+import { DirectionalLight, PointLight, SpotLight } from '@engine/entities/light';
 import { Scene } from '@engine/entities/scene';
 import { CubemapMaterial } from '@engine/materials/cubemap-material';
 import { LitMaterial } from '@engine/materials/lit-material';
@@ -17,12 +17,12 @@ import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
-import { vec2, vec3 } from 'gl-matrix';
+import { vec2, vec3, vec4 } from 'gl-matrix';
 
 import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
-import { Colors } from '@engine/core';
+import { Color, Colors } from '@engine/core';
 import { loadTorusPrimitive, Mesh, MeshData } from '@engine/core/mesh';
 import { Vector3 } from '@engine/core/vector';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
@@ -40,7 +40,7 @@ export class App implements OnDestroy {
 
   private gl!: WebGL2RenderingContext;
   private scene!: Scene;
-  dLight!: DirectionalLight;
+  light!: DirectionalLight;
   torus!: GlEntity;
 
   constructor(private editorService: EditorService) {
@@ -106,21 +106,21 @@ export class App implements OnDestroy {
 
     dlight.color = Colors.cadetBlue;
     dlight.addBehaviour(new LightMoveBehaviour())
-    this.dLight = dlight;
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
     plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
     plight.color = Colors.red;
 
-    const plight1 = new PointLight("Point light 1");
-    plight1.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
-    plight1.color = Colors.green;
-    plight1.addBehaviour(new MoveBehaviour());
-
+    const spotLight = new SpotLight("Point light 1");
+    spotLight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.008 };
+    spotLight.coneAngles = {inner:15 , outer:20}
+    spotLight.color = new Color();
+    // spotLight.addBehaviour(new LightMoveBehaviour());
+    this.light = spotLight;
 
     scene.addEntity(plight);
-    scene.addEntity(plight1);
+    scene.addEntity(spotLight);
     scene.addEntity(dlight);
   }
 
@@ -130,14 +130,13 @@ export class App implements OnDestroy {
     const monkeyEntity = this.createEntity("Monkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     monkeyEntity.transform.translate(3.5, 0, 0);
     scene.addEntity(monkeyEntity);
-    monkeyEntity.transform.setParent(this.dLight.transform)
+    monkeyEntity.transform.setParent(this.light.transform)
 
 
 
     const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
     movingMokeyEntity.transform.translate(-3.5, 0, 0);
 
-    movingMokeyEntity.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(movingMokeyEntity);
 
   }
@@ -160,8 +159,8 @@ export class App implements OnDestroy {
     material!.mainTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg";
     material!.normalTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg";
     material!.normalMapStrength = 0.5;
-    material!.specularStrength = 0.5;
-    material!.roughness = 0.5;
+    material!.specularStrength = 1;
+    material!.roughness = 1;
     meshRenderer.mesh = mesh;
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);

@@ -10,18 +10,20 @@ import { InspectorHeader } from '../components/inspector-header/inspector-header
 import { VectorInspector } from "../components/vector-inspector/vector-inspector";
 import { TransformInspector } from "../transform-inspector/transform-inspector";
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
+import { ObjectInspector } from "../object-inspector/object-inspector";
 
 @Component({
   selector: 'editor-inpector',
   templateUrl: './inpector.html',
   styleUrl: './inpector.scss',
-  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector, InpectorTogglePanel],
+  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector, InpectorTogglePanel, ObjectInspector],
 })
 export class Inpector {
+
   onVectorChanged(_t10: { key: string; type: string; property: any; }, $event: Vector4 | Vector3 | Vector2) {
   }
 
-  private excludeProperties = ["name", "tag", "active", "show", "destroyed", "behaviours", "updateInEditor", "scene"];
+  @Input() excludeProperties = ["name", "tag", "active", "show", "destroyed", "entityType", "behaviours", "updateInEditor", "scene"];
   objectsToshow: { key: string, type: string, property: any }[] = []
 
   private prepareProperties(entity: GlEntity) {
@@ -29,6 +31,7 @@ export class Inpector {
       this.objectsToshow = Object.keys(entity)
         .filter(this.isValidProperty.bind(this))
         .map(key => this.mapProperty(entity, key));
+      debugger
       console.debug("Inspector Primitives", this.objectsToshow);
     }
   }
@@ -57,23 +60,9 @@ export class Inpector {
     this.editorService.requestCanvasResize();
   }
 
-  onColorChanged(arg0: GlEntity, _t10: { key: string; type: string; property: any; }, $event: Color) {
-    debugger
-  }
-
   private mapProperty(entity: GlEntity, key: string) {
     let type = "";
     switch (true) {
-      // primitives
-      case ((entity as any)[key] instanceof Number):
-        type = Number.name;
-        break;
-      case ((entity as any)[key] instanceof String):
-        type = String.name;
-        break;
-      case ((entity as any)[key] instanceof Boolean):
-        type = Boolean.name;
-        break;
       // Engine Objects
       case ((entity as any)[key] instanceof Transform):
         type = Transform.name;
@@ -86,12 +75,6 @@ export class Inpector {
 
       case ((entity as any)[key] instanceof Color):
         type = Color.name;
-        break;
-      case ((entity as any)[key] instanceof LightAttenuation):
-        type = LightAttenuation.name;
-        break;
-      case ((entity as any)[key] instanceof LightConeAngles):
-        type = LightConeAngles.name;
         break;
 
 

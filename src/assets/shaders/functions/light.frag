@@ -52,8 +52,8 @@ for (int i = 0; i < u_numPointLights; ++i) {
       1.0 /
       (u_pointLightConstantAtts[i] + u_pointLightLinearAtts[i] * distancePoint +
        u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
-  attenuationPoint = clamp(attenuationPoint, 0.0,
-                           1.0); // Clamp to prevent brightening very close
+  // attenuationPoint = clamp(attenuationPoint, 0.0,
+  //                          1.0); // Clamp to prevent brightening very close
 
   // Diffuse component
   float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);

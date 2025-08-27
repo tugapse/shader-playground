@@ -1,0 +1,25 @@
+:host {
+
+  .line-item {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .line-item>span {
+    padding: 4px;
+
+    &:hover {
+      cursor: col-resize;
+    }
+  }
+
+  .line-item .text-input {
+    max-width: 40px;
+    background: transparent;
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border);
+    padding: 4px;
+
+  }
+}

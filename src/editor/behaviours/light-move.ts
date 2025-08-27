@@ -11,7 +11,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
 
   distance = 5;
   distanceH = 10;
-  speed = 0.19;
+  speed = 0.49;
   t = 0;
   nextDir: vec3 = vec3.create();
 

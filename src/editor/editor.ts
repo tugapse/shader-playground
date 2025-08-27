@@ -21,7 +21,6 @@ import { TopBar } from './components/top-bar/top-bar';
 export class Editor implements OnDestroy, OnInit {
 
   scene!: Scene;
-  selectedEntity!: GlEntity;
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
   canvasVisible = true;
@@ -47,12 +46,12 @@ export class Editor implements OnDestroy, OnInit {
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
-    if (this.sceneState) {
-      const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
-      this.sceneState = null;
-      newScene.initialize();
-      this.editorService.loadScene(newScene)
-    }
+    // if (this.sceneState) {
+    //   const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
+    //   this.sceneState = null;
+    //   newScene.initialize();
+    //   this.editorService.loadScene(newScene)
+    // }
     this.editorService.onRenderingContextCreated.emit(this.gl);
   }
 
@@ -60,13 +59,13 @@ export class Editor implements OnDestroy, OnInit {
     if (this.scene) {
       this.scene.destroy();
     }
-    this.editorService.editorRunningState.emit(true);
+    // this.editorService.editorRunningState.emit(true);
     this.scene = scene;
     this.scene.setGlRenderingContext(this.gl);
   }
 
   private onScenePlay(scene: Scene) {
-    if (!this.sceneState) this.sceneState = JSON.parse(JSON.stringify(scene.toJsonObject()));
+    this.sceneState = JSON.parse(JSON.stringify(scene.toJsonObject()));
     this.scene.isRunning = true;
     this.isPaused = false;
   }
@@ -81,7 +80,7 @@ export class Editor implements OnDestroy, OnInit {
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;
-    scene.destroy();
+    // scene.destroy();
     this.editorService.onCanvasRequestReset.emit();
   }
 
