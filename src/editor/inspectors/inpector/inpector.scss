@@ -1,7 +1,6 @@
 :host {
   .inspector {
-    min-width: 300px;
-    max-width: 300px;
+    min-width: 200px;
     height: 100%;
     box-sizing: border-box;
     display: flex;
@@ -11,6 +10,17 @@
     color: var(--editor-panel-color);
     border: var(--editor-panel-border);
     box-shadow: var(--editor-panel-box-shadow);
+    position: absolute;
+    height: 90%;
+    transform: translateX(5vw) translateY(5vh);
+    top:0;
+    left:0;
+
+  }
+
+  .inspector .content {
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .inspector section {
@@ -32,5 +42,16 @@
     padding: 4px;
     width: 100%;
     max-width: 60%;
+  }
+
+  .inspector .footer {
+    position: sticky;
+    margin-top: auto;
+    bottom: 0;
+  }
+
+  .inspector .footer span {
+    width: 100%;
+    background-color: var(--editor-panel-background);
   }
 }

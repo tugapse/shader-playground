@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { TextInputInspector } from "../components/text-input-inspector/text-input-inspector";
+import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { Toggle } from "src/app/components/toggle/toggle";
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { VectorInspector } from "../components/vector-inspector/vector-inspector";
+import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { Color } from '@engine/core';
 import { Vector4, Vector3, Vector2 } from '@engine/core/vector';
 

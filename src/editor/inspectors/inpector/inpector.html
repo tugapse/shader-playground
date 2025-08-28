@@ -1,32 +1,41 @@
 @if (entity) {
-<div class="inspector">
-  <editor-inspector-header [entity]="entity"></editor-inspector-header>
-  <editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
-    <section>
-      <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
-    </section>
-    <section>
-      <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
-    </section>
-  </editor-inpector-toggle-panel>
+<div class="inspector" appMovable movableHandleId="header" resizeHandleId="resize-handle">
+  <editor-inspector-header id="header" [entity]="entity"></editor-inspector-header>
 
-  @for (item of objectsToshow ; track $index) {
-  @switch (item.type) {
+  <div class="content">
 
-  @case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
+    <editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
+      <section>
+        <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
+      </section>
+      <section>
+        <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
+      </section>
+    </editor-inpector-toggle-panel>
 
-  @case ("_Color") {<editor-color-inspector [entity]="entity" [propertyName]="item.key"
-    [selectedColor]="item.property"></editor-color-inspector> }
+    @for (item of objectsToshow ; track $index) {
+    @switch (item.type) {
 
-  @case ("_Vector234") { <editor-vector-inspector [vector]="item.property"
-    (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
+    @case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
 
-  @case ("Object") { <editor-object-inspector [title]="item.key.capitalize()" [targetObject]="item"
-  ></editor-object-inspector>}
+    @case ("_Color") {<editor-color-inspector [entity]="entity" [propertyName]="item.key"
+      [selectedColor]="item.property"></editor-color-inspector> }
 
-  }
-  }
+    @case ("_Vector234") { <editor-vector-inspector [vector]="item.property"
+      (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-  <!-- <editor-color-inspector></editor-color-inspector> -->
+    @case ("Object") { <editor-object-inspector [title]="item.key.capitalize()"
+      [targetObject]="item"></editor-object-inspector>}
+
+    }
+    }
+
+  </div>
+
+  <section class="footer">
+    <span></span><app-icon id="resize-handle" iconName="fa-sort"></app-icon>
+  </section>
+
+
 </div>
 }

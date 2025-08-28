@@ -1,22 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
+import { MovableDirective } from '@editor/directives/moveable.directive';
 import { EditorService } from '@editor/editor.service';
 import { Color, Transform } from '@engine/core';
 import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
-import { LightAttenuation, LightConeAngles } from '@engine/entities';
 import { GlEntity } from '@engine/entities/entity';
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { InspectorHeader } from '../components/inspector-header/inspector-header';
-import { VectorInspector } from "../components/vector-inspector/vector-inspector";
-import { TransformInspector } from "../transform-inspector/transform-inspector";
-import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
+import { InspectorHeader } from '../../components/inspector/inspector-header/inspector-header';
+import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ObjectInspector } from "../object-inspector/object-inspector";
+import { TransformInspector } from "../transform-inspector/transform-inspector";
+import { Icon } from "src/app/components/icon/icon";
 
 @Component({
   selector: 'editor-inpector',
   templateUrl: './inpector.html',
   styleUrl: './inpector.scss',
-  imports: [CommonModule, InspectorHeader, TransformInspector, ColorInspector, VectorInspector, InpectorTogglePanel, ObjectInspector],
+  imports: [
+    CommonModule, InspectorHeader, TransformInspector, ColorInspector,
+    VectorInspector, InpectorTogglePanel, ObjectInspector, MovableDirective,
+    Icon
+],
 })
 export class Inpector {
 

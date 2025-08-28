@@ -1,23 +1,55 @@
-* {
+:root { /* It's good practice to define global variables in :root */
   --editor-panel-outer-padding: 10px;
   --editor-panel-background: #19212e;
   --editor-panel-color: #e6edf3;
   --editor-panel-border: 1px solid #30363d;
   --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
 
-  // inputs
+  /* inputs */
   --editor-panel-text-input-background: #383d44;
   --editor-panel-text-input-color: #ffffff;
   --editor-panel-text-input-border: none;
 
-  // icons
+  /* icons */
   --editor-icon-button-background: #383d44;
   --editor-icon-button-color: #496183;
-
   --editor-icon-button-hover-background: #323841;
   --editor-icon-button-hover-color: #2c70cf;
-
   --editor-icon-button-selected-background: #2c70cf;
   --editor-icon-button-selected-color: #323841;
 
+  /* --- New Scrollbar Variables --- */
+  --scrollbar-track-background: var(--editor-panel-background); /* Using editor-panel-background for the track */
+  --scrollbar-thumb-background: #555; /* A dark gray for the thumb */
+  --scrollbar-thumb-border-color: #3a3a3a; /* A subtle border for the thumb */
+  --scrollbar-thumb-hover-background: #777; /* Lighter gray on hover */
 }
+
+
+/* For WebKit browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-background);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-background);
+  border-radius: 5px;
+  border: 1px solid var(--scrollbar-thumb-border-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-background);
+}
+
+/* Optional: For Firefox */
+/* html, body {
+  scrollbar-color: var(--scrollbar-thumb-background) var(--scrollbar-track-background);
+  scrollbar-width: thin;
+}
+*/

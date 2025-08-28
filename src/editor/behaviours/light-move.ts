@@ -9,9 +9,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  distance = 5;
-  distanceH = 10;
-  speed = 0.49;
+  speed = 0.9;
   t = 0;
   nextDir: vec3 = vec3.create();
 
@@ -19,7 +17,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
   public override update(ellapsed: number): void {
     const x = Math.sin(this.t) * this.speed;
     const z = Math.cos(this.t) * this.speed;
-    this.transform.setRotation(x,1,z);
+    this.transform.setRotation(30,this.t,0);
     this.t += this.speed * ellapsed;
   }
 }

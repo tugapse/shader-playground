@@ -77,7 +77,7 @@ export class Canvas implements OnChanges {
     }
   }
 
-  constructor(private editorService: EditorService,privatezone:NgZone) {
+  constructor(private editorService: EditorService) {
     Engine.initialize();
     this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
     this.editorService.onCanvasRequestReset.subscribe(() => { this.disposeWebGL(); this.initWebGL() });
@@ -120,7 +120,6 @@ export class Canvas implements OnChanges {
       this.scene.update(delta);
 
       if (this.gl && this.canvasElement) {
-        // this.scene.setGlRenderingContext(this.gl);
         this.scene.draw();
       }
       this.cleanInput();

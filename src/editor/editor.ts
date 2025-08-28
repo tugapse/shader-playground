@@ -11,6 +11,7 @@ import { Sidebar } from './components/sidebar/sidebar';
 import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
 import { TopBar } from './components/top-bar/top-bar';
+import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 
 @Component({
   selector: 'app-editor',
@@ -24,6 +25,7 @@ export class Editor implements OnDestroy, OnInit {
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
   canvasVisible = true;
+  private editorRenderBehaviour!: EditorRenderBehaviour;
 
   private gl!: WebGL2RenderingContext;
   private subs$: Subscription[] = [];
@@ -53,15 +55,18 @@ export class Editor implements OnDestroy, OnInit {
     //   this.editorService.loadScene(newScene)
     // }
     this.editorService.onRenderingContextCreated.emit(this.gl);
+    this.editorRenderBehaviour = new EditorRenderBehaviour(this.gl);
   }
 
   private onSceneLoaded(scene: Scene) {
     if (this.scene) {
+      this.scene.removeBehaviour(this.editorRenderBehaviour);
       this.scene.destroy();
     }
     // this.editorService.editorRunningState.emit(true);
     this.scene = scene;
     this.scene.setGlRenderingContext(this.gl);
+    scene.addBehaviour(this.editorRenderBehaviour)
   }
 
   private onScenePlay(scene: Scene) {
