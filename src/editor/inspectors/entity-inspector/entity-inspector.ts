@@ -56,17 +56,6 @@ export class EntityInspector extends ObjectInspector {
     this.entity.name = $event.target.value;
   }
 
-  onClose() {
-    this.entity = null;
-    debugger
-    this.editorService.onEditorSaveStateRequest.emit(true);
-    this.editorService.requestCanvasResize();
-  }
-
-  behaviourChange(_t36: EntityBehaviour, $event: any) {
-    debugger;
-  }
-
   override onValueChanged(entityProperty: any, value: string | number | boolean): void {
     if (!this.entity) return;
     this.entity[entityProperty.key] = value;
@@ -74,7 +63,6 @@ export class EntityInspector extends ObjectInspector {
   }
 
   override onColorChanged(entityProperty: ITargetObject, value: Color): void {
-    debugger
     if (!this.entity) return;
     this.entity[entityProperty.key] = value;
     // entityProperty.property[entityProperty.key] = value;

@@ -1,16 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
-import { Toggle } from "src/app/components/toggle/toggle";
-import { ColorInspector } from "../color-inspector/color-inspector";
-import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { Color } from '@engine/core';
-import { Vector4, Vector3, Vector2 } from '@engine/core/vector';
-import { EntityBehaviour } from '@engine/behaviours';
-import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
+import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
 import { GlEntity } from '@engine/entities';
-import { ColorMaterial } from '@engine/materials';
+import { ColorMaterial, LitMaterial, UnlitMaterial } from '@engine/materials';
 import { Shader } from '@engine/shaders/shader';
+import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
+import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
+import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
+import { ColorInspector } from "../color-inspector/color-inspector";
 
 export interface ITargetObject {
   [key: string]: any;
@@ -32,8 +30,8 @@ export class ObjectInspector {
 
 
   @Input() allowProperties: string[] = [];
-  @Input() denyProperties: string[] = [];
-  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh"];
+  @Input() denyProperties: string[] = ["meshData", "gl", "mesh"];
+  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh","vetor234"];
 
   @Input() label: string = "No title";
 
@@ -49,9 +47,10 @@ export class ObjectInspector {
 
   onValueChanged(property: ITargetObject, value: string | number | boolean) {
     if (!this._selectedObject || (value as any) instanceof Event) return;
-    debugger
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
+    this.loadProperties();
+
   }
 
   onVectorChanged(property: ITargetObject, value: Vector4 | Vector3 | Vector2) {
@@ -59,6 +58,8 @@ export class ObjectInspector {
 
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
+    this.loadProperties();
+
   }
 
   onColorChanged(property: ITargetObject, value: Color) {
@@ -66,6 +67,7 @@ export class ObjectInspector {
 
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
+    this.loadProperties();
   }
 
 
@@ -99,7 +101,11 @@ export class ObjectInspector {
       result = Shader.name;
     if (newValue instanceof ColorMaterial)
       result = 'material';
-    if (newValue instanceof Float32Array)
+    if (newValue instanceof LitMaterial)
+      result = 'material';
+    if (newValue instanceof UnlitMaterial )
+      result = 'material';
+    if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4)
       result = "vector234";
 
     return result.replace("_", "").toLowerCase()
@@ -116,7 +122,8 @@ export class ObjectInspector {
   protected isValidPropertyType(key: string): boolean {
     if (!this._selectedObject) return false;
     const value = this._selectedObject.property?.[key] || this._selectedObject[key];
-    const bool = this.isNotPrivate(key) && this.validTypes.includes(typeof value);
+    const obType = this.getObjectType(value)
+    const bool = this.isNotPrivate(key) && this.validTypes.includes(obType);
     debugger
     return bool;
   }

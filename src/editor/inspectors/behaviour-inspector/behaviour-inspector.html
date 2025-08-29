@@ -5,9 +5,11 @@
     (change)="behaviour.active = !behaviour.active"></app-boolean-inspector>
 
   @for (item of _properties; track $index) { @switch (item.type) {
-  <!--
+
+  @case ("entity") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key].uuid"
+   readonly ></editor-text-input-inspector> }
   @case ("string") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key]"
-    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> } -->
+    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
 
   @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()"
     [value]="behaviour[item.key]" (change)="onValueChanged(item,$event)"
@@ -16,14 +18,14 @@
   @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
     (change)="onValueChanged(item,$event)"></app-boolean-inspector>}
 
-  @case ("_Color") {<editor-color-inspector [selectedColor]="behaviour[item.key]"
+  @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="behaviour[item.key]"
     (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
 
-  @case ("_Vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
+  @case ("vector") { <editor-vector-inspector [vector]="behaviour[item.key]"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
   @default {
-  <editor-object-inspector [label]="item.key.capitalize()"
+   <editor-object-inspector [label]="item.key.capitalize()"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
 
   }}

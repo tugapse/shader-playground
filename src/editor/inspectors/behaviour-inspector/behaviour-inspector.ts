@@ -15,13 +15,12 @@ import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspe
 })
 export class BehaviourInspector extends ObjectInspector {
 
-  override denyProperties: string[]=["active"]
+  override denyProperties: string[]=["active", "parent"]
 
 
   @Input() set behaviour(value: EntityBehaviour) {
     this._selectedObject = { key: value.className, type: value.className, property: value };
     super.loadProperties();
-    debugger
   };
 
   get behaviour() { return this._selectedObject?.property }

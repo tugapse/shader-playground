@@ -35,10 +35,10 @@
 
 @case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
 
-@case ("_Color") {<editor-color-inspector [selectedColor]="entity[entityProperty.key]"
+@case ("_Color") {<editor-color-inspector [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
   (colorChange)="onColorChanged(entityProperty,$event)"></editor-color-inspector>}
 
-@case ("Object") {<editor-object-inspector [title]="entityProperty.key.capitalize()"
+@case ("object") {<editor-object-inspector [label]="entityProperty.key.capitalize()"
   [targetObject]="entityProperty"></editor-object-inspector>}
 
 }
@@ -50,7 +50,7 @@
 
 @for (behaviour of entity.behaviours ; track $index) {
 <editor-behaviour-inspector [behaviour]="behaviour"
-  [title]="behaviour.className.capitalize()"></editor-behaviour-inspector>
+  [label]="behaviour.className.capitalize()"></editor-behaviour-inspector>
 }
 }
 
