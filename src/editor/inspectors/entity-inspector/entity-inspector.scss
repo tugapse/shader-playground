@@ -1,4 +1,6 @@
 :host {
+  min-width: 200px;
+
   section {
     display: flex;
     align-items: center;
@@ -19,5 +21,10 @@
     padding: 4px;
     width: 100%;
     max-width: 60%;
+  }
+
+  .behaviours-header {
+
+    color:rgb(57, 148, 190)
   }
 }

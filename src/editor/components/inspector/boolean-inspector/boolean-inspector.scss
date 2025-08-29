@@ -9,7 +9,9 @@
 
   .line-item>span {
     padding: 4px;
-    min-width: 80px;
+    min-width: 90px;
+    max-width: 150px;
+
     &:hover {
       cursor: col-resize;
     }

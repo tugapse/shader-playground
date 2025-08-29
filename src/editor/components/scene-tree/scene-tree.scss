@@ -22,7 +22,9 @@
     transition: all var(--trans-time);
     align-items: center;
     display: flex;
-    border-radius: 8px;
+    border-radius: 2px;
+    margin: 2px 0;
+    padding: 2px 0;
 
     &:hover {
       color: rgb(159, 187, 219);

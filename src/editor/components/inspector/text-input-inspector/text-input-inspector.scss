@@ -9,7 +9,9 @@
 
   .line-item>span {
     padding: 4px;
-    min-width: 80px;
+    min-width: 90px;
+    max-width: 150px;
+
     &:hover {
       cursor: col-resize;
     }
@@ -17,6 +19,7 @@
 
   .line-item .text-input {
     width: 100%;
+    margin: 0 4px ;
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);

@@ -8,15 +8,17 @@ import { Color } from '@engine/core';
 import { Vector4, Vector3, Vector2 } from '@engine/core/vector';
 import { EntityBehaviour } from '@engine/behaviours';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
+import { GlEntity } from '@engine/entities';
+import { ColorMaterial } from '@engine/materials';
+import { Shader } from '@engine/shaders/shader';
 
 export interface ITargetObject {
   [key: string]: any;
   key: string, type: string, property: any
 }
 
-export interface ITargetProperty {
-  [key: string]: any;
-  key: string, type: string, value: any
+export interface ITargetProperty extends ITargetObject {
+  value: any
 }
 
 
@@ -31,7 +33,9 @@ export class ObjectInspector {
 
   @Input() allowProperties: string[] = [];
   @Input() denyProperties: string[] = [];
-  @Input() title: string = "No title";
+  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh"];
+
+  @Input() label: string = "No title";
 
   @Input() set targetObject(value: ITargetObject) {
     this._selectedObject = value;
@@ -43,48 +47,77 @@ export class ObjectInspector {
   _properties: any[] = [];
 
 
-  onValueChanged(property: ITargetProperty, value: string | number | boolean) {
-    if (!this._selectedObject) return;
+  onValueChanged(property: ITargetObject, value: string | number | boolean) {
+    if (!this._selectedObject || (value as any) instanceof Event) return;
+    debugger
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
   }
 
-  onVectorChanged(property: ITargetProperty, value: Vector4 | Vector3 | Vector2) {
-    throw new Error('Method not implemented.');
+  onVectorChanged(property: ITargetObject, value: Vector4 | Vector3 | Vector2) {
+    if (!this._selectedObject || (value as any) instanceof Event) return;
+
+    this._selectedObject.property[property.key] = value;
+    this.change.emit(this._selectedObject.property);
   }
 
-  onColorChanged(property: ITargetProperty, value: Color) {
-    throw new Error('Method not implemented.');
+  onColorChanged(property: ITargetObject, value: Color) {
+    if (!this._selectedObject || (value as any) instanceof Event) return;
+
+    this._selectedObject.property[property.key] = value;
+    this.change.emit(this._selectedObject.property);
   }
 
 
 
   protected loadProperties() {
-    if (!this._selectedObject) return;
+    if (!this._selectedObject?.property) {
+      console.debug("Error: ", !this._selectedObject);
+      return
+    };
 
     this._properties = [];
     const object = this._selectedObject.property;
     const keys = Object.keys(object).filter(this.isPropertyValid.bind(this));
     for (const key of keys) {
-      console.debug(key,)
       const newValue = (object)[key];
-      this._properties.push({ key, type: typeof newValue, value: newValue });
-      console.debug(typeof newValue);
+      let newObType: string = typeof newValue;
+      if (newObType == 'object') {
+        newObType = this.getObjectType(newValue);
+      }
+      this._properties.push({ key, type: newObType, value: newValue });
+      console.debug(this._properties)
     }
   }
 
+  getObjectType(newValue: Object): string {
+    let result = newValue.constructor.name;
+
+    if (newValue instanceof GlEntity)
+      result = 'entity';
+    if (newValue instanceof Shader)
+      result = Shader.name;
+    if (newValue instanceof ColorMaterial)
+      result = 'material';
+    if (newValue instanceof Float32Array)
+      result = "vector234";
+
+    return result.replace("_", "").toLowerCase()
+  }
+
   protected isPropertyValid(key: string) {
-    if (this.allowProperties.length > 0) return this.allowProperties.includes(key);
-    if (this.denyProperties.length > 0) return this.denyProperties.includes(key) == false;
-    return key.startsWith("_") == false;
+    const notPrivate = key.startsWith("_") == false;
+    if (this.allowProperties.length > 0) return this.allowProperties.includes(key) && notPrivate;
+    if (this.denyProperties.length > 0) return this.denyProperties.includes(key) == false && notPrivate;
+    return notPrivate;
   }
 
 
   protected isValidPropertyType(key: string): boolean {
     if (!this._selectedObject) return false;
-
     const value = this._selectedObject.property?.[key] || this._selectedObject[key];
-    const bool = this.isNotPrivate(key) && (typeof value == 'number' || typeof value == 'string' || typeof value == 'boolean');
+    const bool = this.isNotPrivate(key) && this.validTypes.includes(typeof value);
+    debugger
     return bool;
   }
   protected isNotPrivate(key: String) {

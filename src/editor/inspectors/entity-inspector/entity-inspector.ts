@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { EditorService } from '@editor/editor.service';
 import { GlEntity } from '@engine/entities/entity';
-import { ObjectInspector } from '../object-inspector/object-inspector';
+import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { EntityBehaviour } from '@engine/behaviours/entity-behaviour';
 import { Transform } from '@engine/core/transform';
 import { Color } from '@engine/core';
@@ -23,8 +23,8 @@ import { Toggle } from "src/app/components/toggle/toggle";
 })
 export class EntityInspector extends ObjectInspector {
 
-  @Input() excludeProperties = ["name", "active","updateInEditor","entityType", "show", "tag", "destroyed","behaviours", "scene"];
-  objectsToshow: { key: string, type: string, property: any }[] = []
+  @Input() excludeProperties = ["name", "active", "updateInEditor", "entityType", "show", "tag", "destroyed", "behaviours", "scene"];
+  objectsToshow: ITargetObject[] = []
 
   private prepareProperties(entity: GlEntity) {
     if (entity) {
@@ -32,7 +32,6 @@ export class EntityInspector extends ObjectInspector {
         .filter(this.isPropertyValid.bind(this))
         .map(key => this.mapProperty(entity, key));
       debugger
-      console.debug("Inspector Primitives", this.objectsToshow);
     }
   }
 
@@ -74,9 +73,15 @@ export class EntityInspector extends ObjectInspector {
     entityProperty.property[entityProperty.key] = value;
   }
 
+  override onColorChanged(entityProperty: ITargetObject, value: Color): void {
+    debugger
+    if (!this.entity) return;
+    this.entity[entityProperty.key] = value;
+    // entityProperty.property[entityProperty.key] = value;
+  }
+
   private mapProperty(entity: GlEntity, key: string) {
     let type = "";
-    console.debug(typeof entity)
     const propertyType = typeof entity[key]
     switch (true) {
 

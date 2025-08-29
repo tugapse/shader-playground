@@ -1,14 +1,12 @@
 @if (entity) {
+
 <editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
-  <section>
-    <span>Update in Editor</span><app-toggle [active]="entity.updateInEditor"
+  <section> <span>Update in Editor</span><app-toggle [active]="entity.updateInEditor"
       (change)="entity.updateInEditor = !entity.updateInEditor"></app-toggle>
   </section>
-  <section>
-    <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
+  <section> <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
   </section>
-  <section>
-    <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
+  <section> <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
   </section>
 
   @for (entityProperty of objectsToshow ; track $index) {
@@ -36,18 +34,24 @@
 @switch (entityProperty.type) {
 
 @case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
-@case ("_Color") {<editor-color-inspector [entity]="entity" [propertyName]="entityProperty.key"
-  [selectedColor]="entityProperty.property"></editor-color-inspector> }
-@case ("Object") { <editor-object-inspector [title]="entityProperty.key.capitalize()"
+
+@case ("_Color") {<editor-color-inspector [selectedColor]="entity[entityProperty.key]"
+  (colorChange)="onColorChanged(entityProperty,$event)"></editor-color-inspector>}
+
+@case ("Object") {<editor-object-inspector [title]="entityProperty.key.capitalize()"
   [targetObject]="entityProperty"></editor-object-inspector>}
 
 }
 }
 
-<h4>Behaviours</h4>
+@if(entity.behaviours.length >0){
+
+<h4 class="behaviours-header">Behaviours</h4>
 
 @for (behaviour of entity.behaviours ; track $index) {
 <editor-behaviour-inspector [behaviour]="behaviour"
   [title]="behaviour.className.capitalize()"></editor-behaviour-inspector>
 }
+}
+
 }

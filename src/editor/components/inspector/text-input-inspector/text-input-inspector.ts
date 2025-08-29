@@ -18,17 +18,16 @@ export class TextInputInspector {
   @Output() change = new EventEmitter<string | number>();
 
   onChange($event: Event) {
-    debugger
     const newValue = ($event.target as any).value;
     this.value = this.isNumber ? Number(newValue) : newValue;
-    this.change.emit(newValue);
+    this.change.emit(this.value);
   }
 
   onDrag($event: DragEventData) {
     if (this.isNumber) {
       const newValue = ($event.deltaX * this.dragScale) + (+this.value || 0);
       this.value = newValue as number;
-      this.change.emit(newValue);
+      this.change.emit(this.value);
     }
   }
 }
