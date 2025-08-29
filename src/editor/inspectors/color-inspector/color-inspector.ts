@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { Color } from '@engine/core/color';
-import { ColorPickerComponent } from "src/app/components/color-picker/color-picker/color-picker";
+import { ColorPickerComponent } from "src/app/components/color-picker/color-picker";
 import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
 
 @Component({

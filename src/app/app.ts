@@ -12,7 +12,6 @@ import { Scene } from '@engine/entities/scene';
 import { CubemapMaterial } from '@engine/materials/cubemap-material';
 import { LitMaterial } from '@engine/materials/lit-material';
 import { CubePrimitive } from '@engine/primitives/cube-primitive';
-import { SpherePrimitive } from '@engine/primitives/sphere-primitive';
 import { LitShader } from '@engine/shaders/lit-shader';
 import { Shader } from '@engine/shaders/shader';
 import { SkyboxShader } from '@engine/shaders/skybox-shader';
@@ -21,13 +20,11 @@ import { vec2, vec3 } from 'gl-matrix';
 import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
-import { Color, Colors } from '@engine/core';
+import { Colors } from '@engine/core';
 import { loadTorusPrimitive, Mesh, MeshData } from '@engine/core/mesh';
 import { PlanePrimitive } from '@engine/primitives';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { EditorRenderBehaviour } from './extra/editor-render-behaviour';
-import { RendererBehaviour } from '@engine/behaviours';
 
 @Component({
   selector: 'app-root',
@@ -83,14 +80,9 @@ export class App implements OnDestroy {
     if (renderer && renderer.shader) {
       const material = renderer.shader.material as LitMaterial;
       material.normalMapStrength = 1;
-      material.specularStrength = 0.8;
-      material.roughness = 1.1;
+      material.specularStrength = 2;
+      material.roughness = 0.8;
       material.uvScale = vec2.fromValues(50, 50)
-
-
-
-      renderer.mesh.meshData.invertNormals();
-      debugger
     }
     plane.transform.translate(0, -2, 0);
     // plane.transform.rotate(270, 0, 0);
@@ -162,7 +154,7 @@ export class App implements OnDestroy {
       material = shader.material as LitMaterial;
     material!.mainTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg";
     material!.normalTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg";
-    material!.normalMapStrength = 0.5;
+    material!.normalMapStrength = 5;
     material!.specularStrength = 1;
     material!.roughness = 1;
     meshRenderer.mesh = mesh;

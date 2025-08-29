@@ -2,16 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GlEntity } from '@engine/entities/entity';
 import { Scene } from '@engine/entities/scene';
-import { SceneManager } from '@engine/entities/scene-manager';
 import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { Subscription } from 'rxjs';
+import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { Canvas } from './components/canvas/canvas';
 import { SceneTreeService } from './components/scene-tree/scene-tree.service';
 import { Sidebar } from './components/sidebar/sidebar';
+import { TopBar } from './components/top-bar/top-bar';
 import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
-import { TopBar } from './components/top-bar/top-bar';
-import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
+import { SceneManager } from '@engine/entities';
 
 @Component({
   selector: 'app-editor',
@@ -48,29 +48,28 @@ export class Editor implements OnDestroy, OnInit {
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
-    // if (this.sceneState) {
-    //   const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
-    //   this.sceneState = null;
-    //   newScene.initialize();
-    //   this.editorService.loadScene(newScene)
-    // }
     this.editorService.onRenderingContextCreated.emit(this.gl);
-    this.editorRenderBehaviour = new EditorRenderBehaviour(this.gl);
+    if(this.sceneState){
+      const newScene = SceneManager.loadScene(this.gl,this.sceneState);
+      debugger
+      this.editorService.loadScene(newScene);
+      this.sceneState = null;
+    }
   }
 
   private onSceneLoaded(scene: Scene) {
     if (this.scene) {
-      this.scene.removeBehaviour(this.editorRenderBehaviour);
       this.scene.destroy();
     }
-    // this.editorService.editorRunningState.emit(true);
     this.scene = scene;
     this.scene.setGlRenderingContext(this.gl);
-    scene.addBehaviour(this.editorRenderBehaviour)
+    this.scene.inEditMode = true;
   }
 
   private onScenePlay(scene: Scene) {
-    this.sceneState = JSON.parse(JSON.stringify(scene.toJsonObject()));
+    this.sceneState = SceneManager.creatSceneSnapshot(scene);
+    console.debug(this.sceneState);
+    this.scene.initialize();
     this.scene.isRunning = true;
     this.isPaused = false;
   }
@@ -85,7 +84,7 @@ export class Editor implements OnDestroy, OnInit {
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;
-    // scene.destroy();
+    scene.destroy();
     this.editorService.onCanvasRequestReset.emit();
   }
 

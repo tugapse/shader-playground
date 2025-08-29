@@ -9,10 +9,11 @@
   @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()" [value]="item.value"
     (change)="onValueChanged(item,$event)" [dragScale]="0.001"></editor-text-input-inspector> }
 
-  @case ("boolean") { <span>{{item.key}}</span> <app-toggle [active]="item.value" (change)="onValueChanged(item,$event)" ></app-toggle>}
+  @case ("boolean") { <app-boolean-inspector [active]="item.property"
+    (change)="item.property = $event"></app-boolean-inspector>}
 
   @case ("_Color") {<editor-color-inspector [propertyName]="item.key" [selectedColor]="item.value"
-    (colorChange)="onColorChanged($event)"></editor-color-inspector> }
+    (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
 
   @case ("_Vector234") { <editor-vector-inspector [vector]="item.value"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}

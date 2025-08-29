@@ -1,4 +1,5 @@
 :host {
+  width: 250px;
   .inspector {
     min-width: 200px;
     height: 100%;
@@ -23,31 +24,14 @@
     overflow-x: hidden;
   }
 
-  .inspector section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
-  }
 
-  .inspector section span {
-    word-break: keep-all;
-    white-space: nowrap;
-  }
-
-  .inspector section .text-input {
-    background: transparent;
-    color: var(--editor-panel-text-input-color);
-    border: var(--editor-panel-text-input-border);
-    padding: 4px;
-    width: 100%;
-    max-width: 60%;
-  }
 
   .inspector .footer {
+    display: flex;
     position: sticky;
     margin-top: auto;
     bottom: 0;
+    width: 100%;
   }
 
   .inspector .footer span {

@@ -1,0 +1,23 @@
+:host {
+  section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding-top: 4px;
+  }
+
+  section span {
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+
+  section .text-input {
+    background: transparent;
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border);
+    padding: 4px;
+    width: 100%;
+    max-width: 60%;
+  }
+}

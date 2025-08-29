@@ -62,7 +62,7 @@ export class SceneTree {
   prepareObjects() {
     if (!this.scene) return;
     const objectsDict = this.scene.objects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = this.scene.objects;
+    const rootObjects = [this.scene, ...this.scene.objects];
     this.objectsToDraw = rootObjects;
   }
 }

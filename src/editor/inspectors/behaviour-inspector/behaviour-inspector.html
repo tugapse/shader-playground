@@ -1,0 +1,28 @@
+@if (behaviour) {
+<editor-inpector-toggle-panel [title]="title">
+
+  @for (item of _properties; track $index) {
+  @switch (item.type) {
+
+  @case ("string") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key]"
+    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
+
+  @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()" [value]="behaviour[item.key]"
+    (change)="onValueChanged(item,$event)" [dragScale]="0.001"></editor-text-input-inspector> }
+
+  @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
+    (change)="onValueChanged(item,$event)"></app-boolean-inspector>}
+
+  @case ("_Color") {<editor-color-inspector [propertyName]="item.key" [selectedColor]="behaviour[item.key]"
+    (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
+
+  @case ("_Vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
+    (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
+
+  }
+  }
+
+
+</editor-inpector-toggle-panel>
+
+}

@@ -1,0 +1,53 @@
+@if (entity) {
+<editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
+  <section>
+    <span>Update in Editor</span><app-toggle [active]="entity.updateInEditor"
+      (change)="entity.updateInEditor = !entity.updateInEditor"></app-toggle>
+  </section>
+  <section>
+    <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
+  </section>
+  <section>
+    <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
+  </section>
+
+  @for (entityProperty of objectsToshow ; track $index) {
+  @switch (entityProperty.type) {
+  @case ("string") { <editor-text-input-inspector [label]="entityProperty.key.capitalize()"
+    [value]="entityProperty.property" (change)="onValueChanged(entityProperty,  $event)"></editor-text-input-inspector>
+  }
+
+  @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="entityProperty.key.capitalize()"
+    [value]="entityProperty.property" (change)="onValueChanged(entityProperty,$event)"
+    [dragScale]="0.001"></editor-text-input-inspector>
+  }
+
+  @case ("boolean") {<app-boolean-inspector [label]="entityProperty.key.capitalize()"
+    [active]="entity[entityProperty.key]" (change)="onValueChanged(entityProperty, $event)"></app-boolean-inspector>}
+
+  @case ("_Vector234") { <editor-vector-inspector [vector]="entityProperty.property"
+    (vectorChanged)="onVectorChanged(entityProperty, $event)"></editor-vector-inspector>}
+  }
+  }
+
+</editor-inpector-toggle-panel>
+
+@for (entityProperty of objectsToshow ; track $index) {
+@switch (entityProperty.type) {
+
+@case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
+@case ("_Color") {<editor-color-inspector [entity]="entity" [propertyName]="entityProperty.key"
+  [selectedColor]="entityProperty.property"></editor-color-inspector> }
+@case ("Object") { <editor-object-inspector [title]="entityProperty.key.capitalize()"
+  [targetObject]="entityProperty"></editor-object-inspector>}
+
+}
+}
+
+<h4>Behaviours</h4>
+
+@for (behaviour of entity.behaviours ; track $index) {
+<editor-behaviour-inspector [behaviour]="behaviour"
+  [title]="behaviour.className.capitalize()"></editor-behaviour-inspector>
+}
+}

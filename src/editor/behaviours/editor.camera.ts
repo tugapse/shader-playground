@@ -1,6 +1,4 @@
 import { CameraFlyBehaviour } from "@engine/behaviours";
-import { Vector3 } from "@engine/core/vector";
-import { vec3 } from "gl-matrix";
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
@@ -11,6 +9,7 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     this.rotationSpeed = 0.5;
     this.rotationDampening = 0.2;
     this.transform.setDirty(true);
+    this._acceleration = 6;
 
     return true;
   }
