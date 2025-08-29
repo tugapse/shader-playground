@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
+import { TextInputInspector } from "../text-input-inspector/text-input-inspector";
 
 @Component({
   selector: 'editor-vector-inspector',
-  imports: [],
+  imports: [TextInputInspector],
   templateUrl: './vector-inspector.html',
   styleUrl: './vector-inspector.scss'
 })

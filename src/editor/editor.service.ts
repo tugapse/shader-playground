@@ -44,10 +44,6 @@ export class EditorService {
     this.onSceneStop.emit(scene);
   }
 
-  resetCameraPosition() {
-    this.camera.transform.setPosition(0, 0, -5);
-    this.camera.transform.setDirty(true);
-  }
 
   protected initializeEditorCamera(){
     this.camera = new Camera();
@@ -56,7 +52,8 @@ export class EditorService {
     Camera.setMainCamera(this.camera);
     Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
     this.camera.initialize();
-    this.resetCameraPosition();
+    this.camera.update(1);
+    this.camera.transform.translate(2,3,10);
   }
 
 

@@ -7,7 +7,7 @@
   @for (item of _properties; track $index) { @switch (item.type) {
 
   @case ("entity") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key].uuid"
-   readonly ></editor-text-input-inspector> }
+    readonly></editor-text-input-inspector> }
   @case ("string") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key]"
     (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
 
@@ -21,11 +21,11 @@
   @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="behaviour[item.key]"
     (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
 
-  @case ("vector") { <editor-vector-inspector [vector]="behaviour[item.key]"
+  @case ("vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
   @default {
-   <editor-object-inspector [label]="item.key.capitalize()"
+  <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
 
   }}

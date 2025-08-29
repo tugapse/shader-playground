@@ -31,9 +31,10 @@ export class ObjectInspector {
 
   @Input() allowProperties: string[] = [];
   @Input() denyProperties: string[] = ["meshData", "gl", "mesh"];
-  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh","vetor234"];
+  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh", "vetor234"];
 
   @Input() label: string = "No title";
+  @Input() isChild = false;
 
   @Input() set targetObject(value: ITargetObject) {
     this._selectedObject = value;
@@ -103,9 +104,9 @@ export class ObjectInspector {
       result = 'material';
     if (newValue instanceof LitMaterial)
       result = 'material';
-    if (newValue instanceof UnlitMaterial )
+    if (newValue instanceof UnlitMaterial)
       result = 'material';
-    if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4)
+    if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
       result = "vector234";
 
     return result.replace("_", "").toLowerCase()
@@ -124,7 +125,7 @@ export class ObjectInspector {
     const value = this._selectedObject.property?.[key] || this._selectedObject[key];
     const obType = this.getObjectType(value)
     const bool = this.isNotPrivate(key) && this.validTypes.includes(obType);
-    debugger
+
     return bool;
   }
   protected isNotPrivate(key: String) {

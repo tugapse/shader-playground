@@ -15,7 +15,7 @@ import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspe
 })
 export class BehaviourInspector extends ObjectInspector {
 
-  override denyProperties: string[]=["active", "parent"]
+  override denyProperties: string[]=["active", "parent", "enableLights"]
 
 
   @Input() set behaviour(value: EntityBehaviour) {

@@ -1,7 +1,6 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { DirectionalLight } from "@engine/entities/light";
+import { Vector3 } from "@engine/core/vector";
 import { SceneManager } from "@engine/entities/scene-manager";
-import { mat4, vec3 } from "gl-matrix";
 
 
 export class LightMoveBehaviour extends EntityBehaviour {
@@ -9,16 +8,15 @@ export class LightMoveBehaviour extends EntityBehaviour {
     return new LightMoveBehaviour()
   }
 
-  speed = 0.9;
-  t = 0;
-  nextDir: vec3 = vec3.create();
+  public rotationSpeed = 1.5;
+  public rotation = new Vector3();
+  _t = 0;
 
 
   public override update(ellapsed: number): void {
-    const x = Math.sin(this.t) * this.speed;
-    const z = Math.cos(this.t) * this.speed;
-    this.transform.setRotation(30,this.t,0);
-    this.t += this.speed * ellapsed;
+
+    this.transform.setRotation(this.rotation.x, this.rotation.y * this._t, this.rotation.z);
+    this._t += this.rotationSpeed * ellapsed;
   }
 }
 

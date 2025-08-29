@@ -28,5 +28,11 @@
       overflow-y: hidden;
       height: 2px;
     }
+
+    &.child {
+      background-color: #283549;
+      padding: 2px 2px;
+
+    }
   }
 }

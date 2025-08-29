@@ -31,7 +31,7 @@ export class EntityInspector extends ObjectInspector {
       this.objectsToshow = Object.keys(entity)
         .filter(this.isPropertyValid.bind(this))
         .map(key => this.mapProperty(entity, key));
-      debugger
+
     }
   }
 

@@ -49,12 +49,8 @@ export class Editor implements OnDestroy, OnInit {
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
     this.editorService.onRenderingContextCreated.emit(this.gl);
-    if(this.sceneState){
-      const newScene = SceneManager.loadScene(this.gl,this.sceneState);
-      debugger
-      this.editorService.loadScene(newScene);
-      this.sceneState = null;
-    }
+
+
   }
 
   private onSceneLoaded(scene: Scene) {
@@ -84,7 +80,11 @@ export class Editor implements OnDestroy, OnInit {
     scene.isRunning = false;
     this.isPaused = false;
     scene.destroy();
-    this.editorService.onCanvasRequestReset.emit();
+      const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
+
+      this.editorService.loadScene(newScene);
+      this.sceneState = null;
+    // this.editorService.onCanvasRequestReset.emit();
   }
 
   private onSceneTreeEntitySelected(entity: GlEntity): void {

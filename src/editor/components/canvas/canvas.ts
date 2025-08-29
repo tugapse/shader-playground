@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Keybord, Mouse } from '@engine/core/input';
+import { Keybord, Mouse, cleanLastFrame } from '@engine/core/input';
 
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { Engine } from '@engine/engine';
@@ -60,6 +60,7 @@ export class Canvas implements OnChanges {
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
+    if (this.isFocused) event.preventDefault();
     Mouse.mouseButtonDown[event.button] = true;
   }
 
@@ -75,6 +76,24 @@ export class Canvas implements OnChanges {
         Mouse.mouseButtonDown[buttonIndex] = false;
       }
     }
+  }
+
+  @HostListener('focus', ['$event.target!'])
+  onFocus(target: EventTarget): void {
+    this.isFocused = true
+  }
+
+  @HostListener('blur', ['$event.target!'])
+  onBlur(target: EventTarget): void {
+    this.isFocused = false;
+
+  }
+
+  @HostListener('window:wheel', ['$event'])
+  onMouseScroll(event: WheelEvent): void {
+    if(!this.isFocused) return;
+    Mouse.wheelY = event.deltaY;
+    Mouse.wheelX = event.deltaX;
   }
 
   constructor(private editorService: EditorService) {
@@ -128,10 +147,7 @@ export class Canvas implements OnChanges {
   }
 
   private cleanInput(): void {
-    Mouse.mouseMovement.x = 0;
-    Mouse.mouseMovement.y = 0;
-    Keybord.keyUp = {};
-    Keybord.keyPress = {};
+    cleanLastFrame()
   }
 
   private async initWebGL(): Promise<void> {

@@ -4,6 +4,6 @@
   <app-icon class="chevron" [iconName]="collapsed ? 'fa-chevron-left' :'fa-chevron-down'"
     (click)="collapsed=!collapsed"></app-icon>
 </div>
-<div class="container" [ngClass]="{collapsed:collapsed}">
+<div class="container" [ngClass]="{collapsed:collapsed,child:isChild}">
   <ng-content></ng-content>
 </div>

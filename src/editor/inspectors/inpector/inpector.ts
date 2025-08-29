@@ -31,7 +31,7 @@ export class Inpector {
 
   onClose() {
     this.entity = null;
-    debugger
+
     this.editorService.onEditorSaveStateRequest.emit(true);
     this.editorService.requestCanvasResize();
   }

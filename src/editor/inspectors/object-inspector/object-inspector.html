@@ -1,4 +1,4 @@
-<editor-inpector-toggle-panel [title]="label">
+<editor-inpector-toggle-panel [isChild]="isChild" [title]="label">
   @if (_selectedObject) {
 
   @for (item of _properties; track $index) {
@@ -21,13 +21,13 @@
   @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [title]="item.key" [active]="item.property"
     (change)="item.property = $event"></app-boolean-inspector>}
 
-  @case ("color") {<editor-color-inspector [title]="item.key" [selectedColor]="item.value"
+  @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="item.value"
     (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
 
   @case ("vector234") { <editor-vector-inspector [vectorKeys]="['x','y','z','w']" [vector]="item.value"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-  @default { <editor-object-inspector [label]="item.key.capitalize()"
+  @default { <editor-object-inspector [isChild]="true" [label]="item.type.capitalize()"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
   }
   }

@@ -38,14 +38,59 @@ export class App implements OnDestroy {
   private scene!: Scene;
   light!: DirectionalLight;
   torus!: GlEntity;
+  needToResetCamera: boolean = false;
 
   constructor(private editorService: EditorService) {
     this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
-    this.editorService.onSceneLoaded.subscribe(this.initialiScene.bind(this));
+    this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
+  }
+
+  onEditorLoadScene(scene: Scene): any {
+    this.scene = scene;
+    this.initializeScene(scene);
   }
 
   ngOnDestroy(): void {
     this.scene?.destroy();
+  }
+
+  private async onGlContextCreated(gl: WebGL2RenderingContext) {
+    this.gl = gl
+    if (!this.scene) {
+      await this.createNewScene();
+    }
+  }
+
+
+  async createNewScene() {
+    const scene = new Scene();
+    scene.name = "Main Scene";
+    await this.loadAssets(scene);
+    this.needToResetCamera=true;
+    this.editorService.loadScene(scene);
+  }
+
+  private async loadAssets(scene: Scene) {
+    await this.createFloor(scene);
+    await this.otherObjetcs(scene);
+    await this.createSkybox(scene);
+    await this.createLights(scene);
+    await this.addMonkeyObj(scene);
+
+  }
+
+  private initializeScene(scene: Scene): any {
+    this.scene = scene
+    this.scene.initialize();
+    this.setupCamera();
+  }
+
+  private setupCamera() {
+    if (!Camera.mainCamera) return;
+    Camera.mainCamera.updateInEditor = true;
+    Camera.mainCamera.update(0);
+    Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
+
   }
 
 
@@ -177,33 +222,5 @@ export class App implements OnDestroy {
     scene.addEntity(cube);
   }
 
-  private async onGlContextCreated(gl: WebGL2RenderingContext) {
-    this.gl = gl
-    const scene = new Scene();
-    scene.name = "Main Scene";
-    await this.loadAssets(scene);
-    this.editorService.loadScene(scene);
-  }
 
-  private async loadAssets(scene: Scene) {
-    await this.createFloor(scene);
-    await this.otherObjetcs(scene);
-    await this.createSkybox(scene);
-    await this.createLights(scene);
-    await this.addMonkeyObj(scene);
-
-  }
-
-  private initialiScene(scene: Scene): any {
-    this.scene = scene
-    this.scene.initialize();
-    this.setupCamera(this.scene);
-  }
-
-  private setupCamera(scene: Scene) {
-    if (!Camera.mainCamera) return;
-    Camera.mainCamera.updateInEditor = true;
-    Camera.mainCamera.aspectRatio = CanvasViewport.rendererWidth / CanvasViewport.rendererHeight;
-    Camera.mainCamera.transform.lookAt(vec3.create());
-  }
 }
