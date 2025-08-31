@@ -33,12 +33,12 @@
 @for (entityProperty of objectsToshow ; track $index) {
 @switch (entityProperty.type) {
 
-@case ("Transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
+@case ("transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
 
-@case ("_Color") {<editor-color-inspector [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
+@case ("color") {<editor-color-inspector [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
   (colorChange)="onColorChanged(entityProperty,$event)"></editor-color-inspector>}
 
-@case ("Object") {<editor-object-inspector [label]="entityProperty.key.capitalize()"
+@case ("object") {<editor-object-inspector [label]="entityProperty.key.capitalize()"
   [targetObject]="entityProperty"></editor-object-inspector>}
 
 }

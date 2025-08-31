@@ -1,4 +1,5 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { ObjectInstanciator } from "@engine/core/object-instanciator";
 import { SceneManager } from "@engine/entities/scene-manager";
 
 
@@ -24,4 +25,4 @@ export class MoveBehaviour extends EntityBehaviour {
   }
 }
 
-SceneManager.addDependency(MoveBehaviour.name, MoveBehaviour.instanciate);
+ObjectInstanciator.addDependency(MoveBehaviour.name, MoveBehaviour.instanciate);

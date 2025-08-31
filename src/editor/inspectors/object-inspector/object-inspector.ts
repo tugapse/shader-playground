@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color } from '@engine/core';
+import { Color, Transform } from '@engine/core';
 import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
 import { GlEntity } from '@engine/entities';
 import { ColorMaterial, LitMaterial, UnlitMaterial } from '@engine/materials';
@@ -9,10 +9,12 @@ import { BooleanInspector } from "../../components/inspector/boolean-inspector/b
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
+import { EntityBehaviour } from '@engine/behaviours';
+import { Texture } from '@engine/textures';
 
 export interface ITargetObject {
   [key: string]: any;
-  key: string, type: string, property: any
+  key: string, type: string, property?: any, name?: string
 }
 
 export interface ITargetProperty extends ITargetObject {
@@ -43,7 +45,7 @@ export class ObjectInspector {
   @Output() change = new EventEmitter();
 
   _selectedObject?: ITargetObject;
-  _properties: any[] = [];
+  _properties: ITargetProperty[] = [];
 
 
   onValueChanged(property: ITargetObject, value: string | number | boolean) {
@@ -75,7 +77,7 @@ export class ObjectInspector {
 
   protected loadProperties() {
     if (!this._selectedObject?.property) {
-      console.debug("Error: ", !this._selectedObject);
+      // console.debug("Error: ", !this._selectedObject);
       return
     };
 
@@ -85,26 +87,32 @@ export class ObjectInspector {
     for (const key of keys) {
       const newValue = (object)[key];
       let newObType: string = typeof newValue;
+      // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);
       if (newObType == 'object') {
         newObType = this.getObjectType(newValue);
       }
-      this._properties.push({ key, type: newObType, value: newValue });
-      console.debug(this._properties)
+
+      this._properties.push({ key, type: newObType, value: newValue, name: newValue['name'] || '' });
+      // console.debug(this._properties)
     }
   }
 
   getObjectType(newValue: Object): string {
-    let result = newValue.constructor.name;
+    let result = (typeof newValue) as string;
 
+    if (newValue instanceof Transform)
+      result = 'transform';
     if (newValue instanceof GlEntity)
       result = 'entity';
+    if (newValue instanceof EntityBehaviour)
+      result = 'entityBehaviour';
     if (newValue instanceof Shader)
-      result = Shader.name;
-    if (newValue instanceof ColorMaterial)
-      result = 'material';
-    if (newValue instanceof LitMaterial)
-      result = 'material';
-    if (newValue instanceof UnlitMaterial)
+      result = 'shader';
+    if (newValue instanceof Texture)
+      result = 'texture';
+    if (newValue instanceof Color)
+      result = 'color';
+    if (newValue instanceof ColorMaterial || newValue instanceof LitMaterial || newValue instanceof UnlitMaterial)
       result = 'material';
     if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
       result = "vector234";

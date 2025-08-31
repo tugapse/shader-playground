@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GlEntity } from '@engine/entities/entity';
 import { Scene } from '@engine/entities/scene';
-import { JsonSerializedData } from '@engine/interfaces/json-serialized-data';
 import { Subscription } from 'rxjs';
 import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { Canvas } from './components/canvas/canvas';
@@ -12,6 +11,7 @@ import { TopBar } from './components/top-bar/top-bar';
 import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
 import { SceneManager } from '@engine/entities';
+import { JsonSerializedData } from '@engine/interfaces/json-serialized-data.interface';
 
 @Component({
   selector: 'app-editor',
@@ -36,6 +36,7 @@ export class Editor implements OnDestroy, OnInit {
     private editorService: EditorService,
     private sceneTreeService: SceneTreeService) {
     this.subscribeEvents();
+    (window as any)['omegaEditor'] = this;
   }
 
   ngOnInit(): void {

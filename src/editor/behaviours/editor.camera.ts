@@ -1,8 +1,14 @@
 import { CameraFlyBehaviour } from "@engine/behaviours";
+import { Transform } from "@engine/core";
 import { Mouse } from "@engine/core/input";
 import { vec3 } from "gl-matrix";
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
+
+  override get transform(): Transform {
+    if(!this.parent) debugger;
+    return this.parent.transform;
+  }
 
   public scroolSpeed = 5;
   public initialPitch = 15;

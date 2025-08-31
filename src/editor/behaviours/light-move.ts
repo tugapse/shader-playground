@@ -1,4 +1,5 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { ObjectInstanciator } from "@engine/core/object-instanciator";
 import { Vector3 } from "@engine/core/vector";
 import { SceneManager } from "@engine/entities/scene-manager";
 
@@ -21,4 +22,4 @@ export class LightMoveBehaviour extends EntityBehaviour {
 }
 
 
-SceneManager.addDependency(LightMoveBehaviour.name, LightMoveBehaviour.instanciate);
+ObjectInstanciator.addDependency(LightMoveBehaviour.name, LightMoveBehaviour.instanciate);

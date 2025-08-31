@@ -21,7 +21,7 @@ import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { Colors } from '@engine/core';
-import { loadTorusPrimitive, Mesh, MeshData } from '@engine/core/mesh';
+import {  Mesh, MeshData } from '@engine/core/mesh';
 import { PlanePrimitive } from '@engine/primitives';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
@@ -96,7 +96,7 @@ export class App implements OnDestroy {
 
   private async otherObjetcs(scene: Scene) {
 
-    const torusPrimitive = await loadTorusPrimitive();
+    const torusPrimitive = await EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
     const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);

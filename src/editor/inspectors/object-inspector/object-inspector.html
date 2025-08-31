@@ -1,8 +1,5 @@
 <editor-inpector-toggle-panel [isChild]="isChild" [title]="label">
-  @if (_selectedObject) {
-
-  @for (item of _properties; track $index) {
-  @switch (item.type) {
+  @if (_selectedObject) { @for (item of _properties; track $index) { @switch (item.type) {
 
 
 
@@ -27,10 +24,9 @@
   @case ("vector234") { <editor-vector-inspector [vectorKeys]="['x','y','z','w']" [vector]="item.value"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-  @default { <editor-object-inspector [isChild]="true" [label]="item.type.capitalize()"
+  @default { <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
-  }
-  }
-  }
+
+  } } }
 
 </editor-inpector-toggle-panel>

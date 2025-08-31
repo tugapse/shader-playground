@@ -23,16 +23,19 @@
     margin-bottom: 12px;
     // background-color: #283549;
 
-    &.collapsed {
-      padding-bottom: 0;
-      overflow-y: hidden;
-      height: 2px;
-    }
-
     &.child {
       background-color: #283549;
       padding: 2px 2px;
+      margin-bottom: 4px;
+      overflow-y: hidden;
+      border: none;
 
+    }
+
+    &.collapsed {
+      padding: 0;
+      overflow-y: hidden;
+      height: 2px;
     }
   }
 }

@@ -1,7 +1,8 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
+import { ObjectInstanciator } from "@engine/core/object-instanciator";
 import { GlEntity } from "@engine/entities/entity";
 import { SceneManager } from "@engine/entities/scene-manager";
-import { JsonSerializedData } from "@engine/interfaces/json-serialized-data";
+import { JsonSerializedData } from "@engine/interfaces/json-serialized-data.interface";
 
 export class LookAtFollowBehaviour extends EntityBehaviour {
 
@@ -53,4 +54,4 @@ export class LookAtFollowBehaviour extends EntityBehaviour {
   }
 }
 
-SceneManager.addDependency(LookAtFollowBehaviour.name, LookAtFollowBehaviour.instanciate);
+ObjectInstanciator.addDependency(LookAtFollowBehaviour.name, LookAtFollowBehaviour.instanciate);

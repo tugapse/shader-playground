@@ -1,5 +1,6 @@
 import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { SceneManager } from "@engine/entities/scene-manager";
+import { ObjectInstanciator } from "@engine/core/object-instanciator";
+
 
 
 
@@ -18,4 +19,4 @@ export class RotateBehaviour extends EntityBehaviour {
     );
   }
 }
-SceneManager.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);
+ObjectInstanciator.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);
