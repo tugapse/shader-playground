@@ -44,6 +44,7 @@ export class SceneTree {
     [EntityType.LIGHT_DIRECTIONAL]: "fa-sun",
     [EntityType.LIGHT_POINT]: "fa-lightbulb",
     [EntityType.LIGHT_SPOT]: "fa-traffic-light",
+    [EntityType.SCENE]: "fa-bank",
   }
 
   toggleObj(obj: GlEntity, event: Event) {
@@ -62,7 +63,7 @@ export class SceneTree {
   prepareObjects() {
     if (!this.scene) return;
     const objectsDict = this.scene.objects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = [this.scene, ...this.scene.objects];
+    const rootObjects = [ ...this.scene.objects];
     this.objectsToDraw = rootObjects;
   }
 }

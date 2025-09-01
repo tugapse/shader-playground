@@ -21,10 +21,13 @@ import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
 import { Colors } from '@engine/core';
-import {  Mesh, MeshData } from '@engine/core/mesh';
-import { PlanePrimitive } from '@engine/primitives';
+import { Mesh, MeshData } from '@engine/core/mesh';
+import { PlanePrimitive, SpherePrimitive } from '@engine/primitives';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
+import { ColorMaterial, UnlitMaterial } from '@engine/materials';
+import { UnlitShader } from '@engine/shaders';
+import { RendererBehaviour } from '@engine/behaviours';
 
 @Component({
   selector: 'app-root',
@@ -66,7 +69,7 @@ export class App implements OnDestroy {
     const scene = new Scene();
     scene.name = "Main Scene";
     await this.loadAssets(scene);
-    this.needToResetCamera=true;
+    this.needToResetCamera = true;
     this.editorService.loadScene(scene);
   }
 
@@ -111,8 +114,8 @@ export class App implements OnDestroy {
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
     scene.addEntity(cube);
 
-    const primitive = await EngineCache.getMeshDataFromObj("assets/primitives/axis.obj")
-    const sphere = this.createEntity("sphere", primitive, new RenderMeshBehaviour(this.gl));
+    const primitive = new PlanePrimitive(5);
+    const sphere = this.createEntity("sphere", primitive, new RenderMeshBehaviour(this.gl),new UnlitShader(this.gl,new UnlitMaterial()));
     // sphere.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(sphere);
     // sphere.addBehaviour();
@@ -135,14 +138,27 @@ export class App implements OnDestroy {
     scene.addEntity(plane);
   }
 
-  private createLights(scene: Scene) {
+  private async createLights(scene: Scene) {
 
+    const monkeyObj = await EngineCache.getMeshDataFromObj("assets/primitives/axis.obj");
+    const material = new ColorMaterial();
+    const shader = new Shader(this.gl, material);
+    // shader.fragUri = "assets/shaders/editor/handle/handle.frag";
+    // shader.vertexUri = "assets/shaders/editor/handle/handle.vert";
+    shader.recompile();
+    // shader.initialize();
+
+
+    const rendererBehaviour = new RenderMeshBehaviour(this.gl);
+    rendererBehaviour.shader = shader;
+    rendererBehaviour.mesh.meshData = monkeyObj;
 
     const dlight = new DirectionalLight("Directional light");
     dlight.transform.rotate(0.7, 1, 0.2);
 
     dlight.color = Colors.cadetBlue;
     dlight.addBehaviour(new LightMoveBehaviour())
+    dlight.addBehaviour(rendererBehaviour)
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
@@ -170,7 +186,7 @@ export class App implements OnDestroy {
 
     monkeyEntity.transform.translate(3.5, 0, 0);
     scene.addEntity(monkeyEntity);
-    monkeyEntity.transform.setParent(this.light.transform)
+    // monkeyEntity.transform.setParent(this.light.transform)
 
 
 

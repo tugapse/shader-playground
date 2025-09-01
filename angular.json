@@ -51,7 +51,7 @@
                 }
               ],
               "outputHashing": "all",
-              "optimization": false,
+              "optimization": true,
               "namedChunks": true
             },
             "development": {
