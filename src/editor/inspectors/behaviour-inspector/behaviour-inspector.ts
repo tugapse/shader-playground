@@ -3,9 +3,9 @@ import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/in
 import { BooleanInspector } from "@editor/components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "@editor/components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
-import { EntityBehaviour } from '@engine/behaviours';
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
+import { EntityBehaviour } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-behaviour-inspector',

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
 import { TextInputInspector } from "../text-input-inspector/text-input-inspector";
+import { Vector4, Vector3, Vector2 } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-vector-inspector',

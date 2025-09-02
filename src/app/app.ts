@@ -1,33 +1,12 @@
 
 import { Component, OnDestroy } from '@angular/core';
-
-
-import { SkyboxRenderer } from '@engine/behaviours/renderer/skybox-renderer';
-import { CanvasViewport } from '@engine/core/canvas-viewport';
-import { EngineCache } from '@engine/core/engineCache';
-import { Camera } from '@engine/entities/camera';
-import { GlEntity } from '@engine/entities/entity';
-import { DirectionalLight, PointLight, SpotLight } from '@engine/entities/light';
-import { Scene } from '@engine/entities/scene';
-import { CubemapMaterial } from '@engine/materials/cubemap-material';
-import { LitMaterial } from '@engine/materials/lit-material';
-import { CubePrimitive } from '@engine/primitives/cube-primitive';
-import { LitShader } from '@engine/shaders/lit-shader';
-import { Shader } from '@engine/shaders/shader';
-import { SkyboxShader } from '@engine/shaders/skybox-shader';
 import { vec2, vec3 } from 'gl-matrix';
 
 import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
-import { RenderMeshBehaviour } from '@engine/behaviours/renderer/render-mesh-behaviour';
-import { Colors } from '@engine/core';
-import { Mesh, MeshData } from '@engine/core/mesh';
-import { PlanePrimitive, SpherePrimitive } from '@engine/primitives';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { ColorMaterial, UnlitMaterial } from '@engine/materials';
-import { UnlitShader } from '@engine/shaders';
-import { RendererBehaviour } from '@engine/behaviours';
+import { Camera, CanvasViewport, ColorMaterial, Colors, CubemapMaterial, CubePrimitive, DirectionalLight, EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, PlanePrimitive, PointLight, RenderMeshBehaviour, Scene, Shader, SkyboxRenderer, SkyboxShader, SpotLight, UnlitMaterial, UnlitShader } from 'omega-game-engine';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +18,7 @@ export class App implements OnDestroy {
 
   private gl!: WebGL2RenderingContext;
   private scene!: Scene;
-  light!: DirectionalLight;
+  light!: DirectionalLight|SpotLight;
   torus!: GlEntity;
   needToResetCamera: boolean = false;
 
@@ -222,6 +201,7 @@ export class App implements OnDestroy {
 
     if (material) {
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
+
     }
     entity.addBehaviour(meshRenderer);
 
@@ -232,6 +212,7 @@ export class App implements OnDestroy {
 
     const cubePrimitive = new CubePrimitive();
     const material = new CubemapMaterial();
+    material.name = "Skybox"
     const shader = new SkyboxShader(this.gl, material);
     const cube = this.createEntity("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
 

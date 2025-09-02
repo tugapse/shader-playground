@@ -1,8 +1,7 @@
 import { EventEmitter, Injectable } from "@angular/core";
-import { Camera } from "@engine/entities/camera";
-import { Scene } from "@engine/entities/scene";
-import { vec3 } from "gl-matrix";
+import { Scene, Camera } from "omega-game-engine";
 import { EditorCameraBehaviour } from "./behaviours/editor.camera";
+
 
 @Injectable({ providedIn: 'root' })
 export class EditorService {

@@ -1,13 +1,13 @@
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { ObjectInstanciator } from "@engine/core/object-instanciator";
-import { SceneManager } from "@engine/entities/scene-manager";
+import { EntityBehaviour, ObjectInstanciator } from "omega-game-engine";
 
 
 
 export class MoveBehaviour extends EntityBehaviour {
+
   static override instanciate(): MoveBehaviour {
     return new MoveBehaviour()
   }
+  protected override _className = "MoveBehaviour";
 
   distance = 10;
   speed = 0.9;
@@ -25,4 +25,4 @@ export class MoveBehaviour extends EntityBehaviour {
   }
 }
 
-ObjectInstanciator.addDependency(MoveBehaviour.name, MoveBehaviour.instanciate);
+ObjectInstanciator.addDependency("MoveBehaviour", MoveBehaviour.instanciate);

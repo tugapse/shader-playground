@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MovableDirective } from '@editor/directives/moveable.directive';
 import { EditorService } from '@editor/editor.service';
-import { GlEntity } from '@engine/entities/entity';
 import { Icon } from "src/app/components/icon/icon";
 import { InspectorHeader } from '../../components/inspector/inspector-header/inspector-header';
 import { EntityInspector } from "../entity-inspector/entity-inspector";
+import { GlEntity } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-inpector',

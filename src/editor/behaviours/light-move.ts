@@ -1,17 +1,12 @@
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { ObjectInstanciator } from "@engine/core/object-instanciator";
-import { Vector3 } from "@engine/core/vector";
-import { SceneManager } from "@engine/entities/scene-manager";
-
+import { EntityBehaviour, Vector3, ObjectInstanciator } from "omega-game-engine";
 
 export class LightMoveBehaviour extends EntityBehaviour {
+
   static override instanciate(): LightMoveBehaviour {
     return new LightMoveBehaviour()
   }
 
-  override get className(): string {
-    return "LightMoveBehaviour";
-  }
+  protected override _className = "LightMoveBehaviour";
 
   public rotationSpeed = 1.5;
   public rotation = new Vector3();
@@ -45,4 +40,4 @@ export class LightMoveBehaviour extends EntityBehaviour {
 }
 
 
-ObjectInstanciator.addDependency(LightMoveBehaviour.name, LightMoveBehaviour.instanciate);
+ObjectInstanciator.addDependency("LightMoveBehaviour", LightMoveBehaviour.instanciate);

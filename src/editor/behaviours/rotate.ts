@@ -1,6 +1,4 @@
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { ObjectInstanciator } from "@engine/core/object-instanciator";
-
+import { EntityBehaviour, ObjectInstanciator } from "omega-game-engine";
 
 
 
@@ -9,6 +7,8 @@ export class RotateBehaviour extends EntityBehaviour {
   static override instanciate(): RotateBehaviour {
     return new RotateBehaviour();
   }
+  protected override _className = "RotateBehaviour";
+
 
   speed = 0.005;
   public override update(ellapsed: number): void {
@@ -19,4 +19,4 @@ export class RotateBehaviour extends EntityBehaviour {
     );
   }
 }
-ObjectInstanciator.addDependency(RotateBehaviour.name, RotateBehaviour.instanciate);
+ObjectInstanciator.addDependency("RotateBehaviour", RotateBehaviour.instanciate);

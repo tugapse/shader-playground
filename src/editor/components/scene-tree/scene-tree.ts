@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { GlEntity } from '@engine/entities/entity';
-import { Scene } from '@engine/entities/scene';
-import { EntityType } from '@engine/enums/entity-type';
+
 import { Icon } from "../../../app/components/icon/icon";
 import { EditorService } from '../../editor.service';
 import { SceneTreeService } from './scene-tree.service';
+import { Scene, GlEntity, EntityType } from 'omega-game-engine';
 
 
 @Component({

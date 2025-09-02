@@ -1,14 +1,13 @@
-import { EntityBehaviour } from "@engine/behaviours/entity-behaviour";
-import { ObjectInstanciator } from "@engine/core/object-instanciator";
-import { GlEntity } from "@engine/entities/entity";
-import { SceneManager } from "@engine/entities/scene-manager";
-import { JsonSerializedData } from "@engine/interfaces/json-serialized-data.interface";
+import { EntityBehaviour, GlEntity, JsonSerializedData, ObjectInstanciator } from "omega-game-engine";
+
 
 export class LookAtFollowBehaviour extends EntityBehaviour {
 
   static override instanciate(): LookAtFollowBehaviour {
     return new LookAtFollowBehaviour();
   }
+    protected override _className = "LookAtFollowBehaviour";
+
 
   private target!: GlEntity | undefined;
   public targetId!: string;
@@ -54,4 +53,4 @@ export class LookAtFollowBehaviour extends EntityBehaviour {
   }
 }
 
-ObjectInstanciator.addDependency(LookAtFollowBehaviour.name, LookAtFollowBehaviour.instanciate);
+ObjectInstanciator.addDependency("LookAtFollowBehaviour", LookAtFollowBehaviour.instanciate);

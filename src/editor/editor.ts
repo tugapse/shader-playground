@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { GlEntity } from '@engine/entities/entity';
-import { Scene } from '@engine/entities/scene';
 import { Subscription } from 'rxjs';
 import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { Canvas } from './components/canvas/canvas';
@@ -10,8 +8,8 @@ import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
 import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
-import { SceneManager } from '@engine/entities';
-import { JsonSerializedData } from '@engine/interfaces/json-serialized-data.interface';
+import { Scene, GlEntity, JsonSerializedData, SceneManager } from 'omega-game-engine';
+
 
 @Component({
   selector: 'app-editor',

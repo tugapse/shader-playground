@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { SceneTreeService } from '@editor/components/scene-tree/scene-tree.service';
 import { EditorService } from '@editor/editor.service';
-import { GlEntity } from '@engine/entities';
+import { GlEntity } from 'omega-game-engine';
 import { Icon } from 'src/app/components/icon/icon';
 import { Toggle } from "src/app/components/toggle/toggle";
 

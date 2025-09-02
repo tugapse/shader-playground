@@ -1,16 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color, Transform } from '@engine/core';
-import { Vector2, Vector3, Vector4 } from '@engine/core/vector';
-import { GlEntity } from '@engine/entities';
-import { ColorMaterial, LitMaterial, UnlitMaterial } from '@engine/materials';
-import { Shader } from '@engine/shaders/shader';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { EntityBehaviour } from '@engine/behaviours';
-import { Texture } from '@engine/textures';
+import { Vector4, Vector3, Vector2, Color, Transform, GlEntity, EntityBehaviour, Shader, Texture, ColorMaterial, LitMaterial, UnlitMaterial } from 'omega-game-engine';
+
 
 export interface ITargetObject {
   [key: string]: any;
@@ -87,12 +82,15 @@ export class ObjectInspector {
     for (const key of keys) {
       const newValue = (object)[key];
       let newObType: string = typeof newValue;
+      let name = "";
       // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);
       if (newObType == 'object') {
         newObType = this.getObjectType(newValue);
+        newValue.name = newValue.name ||  " no name";
+        name = newValue.name
       }
 
-      this._properties.push({ key, type: newObType, value: newValue, name: newValue['name'] || '' });
+      this._properties.push({ key, type: newObType, value: newValue, name });
       // console.debug(this._properties)
     }
   }

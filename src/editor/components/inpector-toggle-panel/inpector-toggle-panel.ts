@@ -12,4 +12,6 @@ export class InpectorTogglePanel {
   @Input() title: string = "NoName";
   @Input() collapsed: boolean = true;
   @Input() isChild: boolean = false;
+
+  @Input() rightAlign = false;
 }

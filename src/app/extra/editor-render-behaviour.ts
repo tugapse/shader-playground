@@ -1,10 +1,4 @@
-import { RendererBehaviour, RenderMeshBehaviour } from "@engine/behaviours";
-import { EngineCache, Mesh } from "@engine/core";
-import { Camera, GlEntity, Scene } from "@engine/entities";
-import { GLPrimitiveType } from "@engine/enums";
-import { JsonSerializedData, SceneEntityBehaviour } from "@engine/interfaces";
-import { ColorMaterial } from "@engine/materials";
-import { Shader } from "@engine/shaders";
+import { RenderMeshBehaviour, SceneEntityBehaviour, RendererBehaviour, ColorMaterial, Shader, GLPrimitiveType, Mesh, EngineCache, Scene, Camera, GlEntity, JsonSerializedData } from "omega-game-engine";
 
 export class EditorRenderBehaviour extends RenderMeshBehaviour implements SceneEntityBehaviour {
 

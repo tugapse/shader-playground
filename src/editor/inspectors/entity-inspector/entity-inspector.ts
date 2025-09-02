@@ -4,13 +4,13 @@ import { BooleanInspector } from "@editor/components/inspector/boolean-inspector
 import { TextInputInspector } from "@editor/components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
 import { EditorService } from '@editor/editor.service';
-import { Color } from '@engine/core';
-import { GlEntity } from '@engine/entities/entity';
+
 import { Toggle } from "src/app/components/toggle/toggle";
 import { BehaviourInspector } from "../behaviour-inspector/behaviour-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { TransformInspector } from "../transform-inspector/transform-inspector";
+import { GlEntity, Color } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -25,6 +25,7 @@ export class EntityInspector extends ObjectInspector {
 
   private prepareProperties(entity: GlEntity) {
     if (entity) {
+      debugger
       this.objectsToshow = Object.keys(entity)
         .filter(this.isPropertyValid.bind(this))
         .map(key => this.mapProperty(entity, key));

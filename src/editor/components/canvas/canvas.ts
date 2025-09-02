@@ -1,10 +1,5 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Keybord, Mouse, cleanLastFrame } from '@engine/core/input';
-
-import { CanvasViewport } from '@engine/core/canvas-viewport';
-import { Engine } from '@engine/engine';
-import { Camera } from '@engine/entities/camera';
-import { Scene } from '@engine/entities/scene';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Camera, CanvasViewport, Engine, Keybord, Mouse, Scene, cleanLastFrame } from 'omega-game-engine';
 import { EditorService } from '../../editor.service';
 @Component({
   selector: 'editor-canvas',
@@ -29,6 +24,8 @@ export class Canvas implements OnChanges {
 
 
   public gl!: WebGL2RenderingContext | null;
+
+  public gameEngine: Engine;
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
@@ -91,13 +88,13 @@ export class Canvas implements OnChanges {
 
   @HostListener('window:wheel', ['$event'])
   onMouseScroll(event: WheelEvent): void {
-    if(!this.isFocused) return;
+    if (!this.isFocused) return;
     Mouse.wheelY = event.deltaY;
     Mouse.wheelX = event.deltaX;
   }
 
   constructor(private editorService: EditorService) {
-    Engine.initialize();
+    this.gameEngine = new Engine();
     this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
     this.editorService.onCanvasRequestReset.subscribe(() => { this.disposeWebGL(); this.initWebGL() });
   }
@@ -106,8 +103,10 @@ export class Canvas implements OnChanges {
 
   ngAfterViewInit(): void {
     this.initWebGL();
+    this.gameEngine.initialize(this.canvasElement);
     this.render(0);
     this.resizeCanvas();
+
 
   }
 

@@ -1,9 +1,10 @@
-import { CameraFlyBehaviour } from "@engine/behaviours";
-import { Transform } from "@engine/core";
-import { Mouse } from "@engine/core/input";
+
 import { vec3 } from "gl-matrix";
+import { CameraFlyBehaviour, Transform, Mouse } from "omega-game-engine";
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
+
+
 
   override get transform(): Transform {
     if(!this.parent) debugger;

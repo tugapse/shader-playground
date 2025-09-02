@@ -1,5 +1,5 @@
 @if (behaviour) {
-<editor-inpector-toggle-panel [title]="label">
+<editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
 
   <app-boolean-inspector [label]="'Active'" [active]="behaviour.active"
     (change)="behaviour.active = !behaviour.active"></app-boolean-inspector>
