@@ -6,7 +6,7 @@ import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/editor.service';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { Camera, CanvasViewport, ColorMaterial, Colors, CubemapMaterial, CubePrimitive, DirectionalLight, EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, PlanePrimitive, PointLight, RenderMeshBehaviour, Scene, Shader, SkyboxRenderer, SkyboxShader, SpotLight, UnlitMaterial, UnlitShader } from 'omega-game-engine';
+import { Camera, CanvasViewport, ColorMaterial, Colors, CubemapMaterial, CubemapTexture, CubePrimitive, DirectionalLight, EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, PlanePrimitive, PointLight, RenderMeshBehaviour, Scene, Shader, SkyboxRenderer, SkyboxShader, SpotLight, Texture, UnlitMaterial, UnlitShader } from 'omega-game-engine';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +18,7 @@ export class App implements OnDestroy {
 
   private gl!: WebGL2RenderingContext;
   private scene!: Scene;
-  light!: DirectionalLight|SpotLight;
+  light!: DirectionalLight | SpotLight;
   torus!: GlEntity;
   needToResetCamera: boolean = false;
 
@@ -94,7 +94,7 @@ export class App implements OnDestroy {
     scene.addEntity(cube);
 
     const primitive = new PlanePrimitive(5);
-    const sphere = this.createEntity("sphere", primitive, new RenderMeshBehaviour(this.gl),new UnlitShader(this.gl,new UnlitMaterial()));
+    const sphere = this.createEntity("sphere", primitive, new RenderMeshBehaviour(this.gl), new UnlitShader(this.gl, new UnlitMaterial()));
     // sphere.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(sphere);
     // sphere.addBehaviour();
@@ -192,17 +192,22 @@ export class App implements OnDestroy {
       material = new LitMaterial();
     else if (shader?.material)
       material = shader.material as LitMaterial;
-    material!.mainTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg";
-    material!.normalTexUrl = "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg";
-    material!.normalMapStrength = 5;
-    material!.specularStrength = 1;
-    material!.roughness = 1;
-    meshRenderer.mesh = mesh;
 
     if (material) {
-      meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
+      const wallstoneTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg", this.gl);
+      const wallNormalTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
 
+      material.mainTex = wallstoneTexture;
+      material.normalTex = wallNormalTexture;
+      material.normalMapStrength = 5;
+      material.specularStrength = 1;
+      material.roughness = 1;
+
+      meshRenderer.mesh = mesh;
+      meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
     }
+
+
     entity.addBehaviour(meshRenderer);
 
     return entity;
@@ -213,10 +218,27 @@ export class App implements OnDestroy {
     const cubePrimitive = new CubePrimitive();
     const material = new CubemapMaterial();
     material.name = "Skybox"
+    const texture = EngineCache.getTextureCube({
+      right: "assets/images/skybox/cloud/right.jpeg",
+      left: "assets/images/skybox/cloud/left.jpeg",
+      up: "assets/images/skybox/cloud/top.jpeg",
+      bottom: "assets/images/skybox/cloud/bottom.jpeg",
+      front: "assets/images/skybox/cloud/front.jpeg",
+      back: "assets/images/skybox/cloud/back.jpeg"
+    }, this.gl) as CubemapTexture;
+    material.mainTex = texture;
     const shader = new SkyboxShader(this.gl, material);
     const cube = this.createEntity("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
 
     scene.addEntity(cube);
+  }
+
+  private createTextures() {
+    const floorTexture = EngineCache.getTexture2D("assets/images/wood-textures.jpg", this.gl);
+
+    return {
+
+    };
   }
 
 

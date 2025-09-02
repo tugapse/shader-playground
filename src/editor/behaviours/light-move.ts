@@ -8,12 +8,13 @@ export class LightMoveBehaviour extends EntityBehaviour {
 
   protected override _className = "LightMoveBehaviour";
 
-  public rotationSpeed = 1.5;
-  public rotation = new Vector3();
-  public hour = 0;
-  public min = 0;
-  public sec = 0;
-  public timeString = "";
+  public rotationSpeed = 0.5;
+
+  _rotation = new Vector3();
+  _hour = 0;
+  _min = 0;
+  _sec = 0;
+  _timeString = "";
 
   public isNight = false;
 
@@ -21,8 +22,8 @@ export class LightMoveBehaviour extends EntityBehaviour {
 
   public override update(ellapsed: number): void {
     this._t += this.rotationSpeed * ellapsed;
-    const x = Math.sin(this._t) * Math.PI* 2;
-    const y = Math.cos(this._t) * Math.PI* 2;
+    const x = Math.sin(this._t) * Math.PI * 2;
+    const y = Math.cos(this._t) * Math.PI * 2;
     this.isNight = y <= 0;
 
     let now = 0;
@@ -31,11 +32,11 @@ export class LightMoveBehaviour extends EntityBehaviour {
     else
       now = (((x + 1) * 0.5))
 
-    this.hour = Math.floor(5 + now*12)%24;
-    this.min = Math.floor(this.hour / 60);
-    this.sec = Math.floor(this.min / 60);
-    this.timeString = `${this.hour}:${this.min}:${this.sec}`
-    this.transform.setRotation(this.rotation.x + x, this.rotation.y + y, this.rotation.z);
+    this._hour = Math.floor(5 + now * 12) % 24;
+    this._min = Math.floor(this._hour / 60);
+    this._sec = Math.floor(this._min / 60);
+    this._timeString = `${this._hour}:${this._min}:${this._sec}`
+    this.transform.setRotation(this._rotation.x + x, this._rotation.y + y, this._rotation.z);
   }
 }
 

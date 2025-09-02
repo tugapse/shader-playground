@@ -15,7 +15,7 @@ import { EntityBehaviour } from 'omega-game-engine';
 })
 export class BehaviourInspector extends ObjectInspector {
 
-  override denyProperties: string[]=["active", "parent", "enableLights", "mesh"]
+  override denyProperties: string[]=["active", "parent", "enableLights", "mesh", "time","drawPrimitiveType"]
 
 
   @Input() set behaviour(value: EntityBehaviour) {

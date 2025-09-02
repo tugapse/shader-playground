@@ -37,6 +37,9 @@ export class ObjectInspector {
     this._selectedObject = value;
     this.loadProperties();
   }
+  @Input() showPrivateProperties = false;
+  @Input() showAllProperties = false;
+
   @Output() change = new EventEmitter();
 
   _selectedObject?: ITargetObject;
@@ -86,7 +89,6 @@ export class ObjectInspector {
       // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);
       if (newObType == 'object') {
         newObType = this.getObjectType(newValue);
-        newValue.name = newValue.name ||  " no name";
         name = newValue.name
       }
 
@@ -119,6 +121,7 @@ export class ObjectInspector {
   }
 
   protected isPropertyValid(key: string) {
+    console.debug("I was called !!!!")
     const notPrivate = key.startsWith("_") == false;
     if (this.allowProperties.length > 0) return this.allowProperties.includes(key) && notPrivate;
     if (this.denyProperties.length > 0) return this.denyProperties.includes(key) == false && notPrivate;
@@ -130,11 +133,12 @@ export class ObjectInspector {
     if (!this._selectedObject) return false;
     const value = this._selectedObject.property?.[key] || this._selectedObject[key];
     const obType = this.getObjectType(value)
-    const bool = this.isNotPrivate(key) && this.validTypes.includes(obType);
+    const bool = this.showAllProperties ? true : (this.isNotPrivate(key) && this.validTypes.includes(obType));
 
     return bool;
   }
   protected isNotPrivate(key: String) {
+    if (this.showPrivateProperties) return true;
     return key.startsWith("_") == false
   }
 

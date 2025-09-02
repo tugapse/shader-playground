@@ -25,11 +25,12 @@
     // background-color: #283549;
 
     &.child {
-      background-color: #283549;
-      padding: 2px 2px;
+      border-color: white;
+      padding: 2px 0;
       margin-bottom: 4px;
       overflow-y: hidden;
       border: none;
+      border-left: solid 1px #1c2b3d;
 
     }
 

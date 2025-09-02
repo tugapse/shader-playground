@@ -15,12 +15,14 @@
   }
 
   section .text-input {
+   width: 100%;
+    margin: 0 4px ;
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
     padding: 4px;
-    width: 100%;
-    max-width: 60%;
+    text-align: right;
+    margin-right: 12px;
   }
 
   .behaviours-header {
