@@ -1,8 +1,11 @@
 @if (behaviour) {
 <editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
 
-  <app-boolean-inspector [label]="'Active'" [active]="behaviour.active"
+
+  <app-boolean-inspector align="right" header-content [active]="behaviour.active"
     (change)="behaviour.active = !behaviour.active"></app-boolean-inspector>
+
+
 
   @for (item of _properties; track $index) { @switch (item.type) {
 
@@ -24,8 +27,8 @@
   @case ("vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-  @case ("enum") {<editor-enum-inspector [label]="item.key" [items]="item.property"
-    [selected]="item.value" (change)="onEnumChanged(item, $event)"></editor-enum-inspector> }
+  @case ("enum") {<editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
+    (change)="onEnumChanged(item, $event)"></editor-enum-inspector> }
 
   @default {
   <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()"
@@ -34,6 +37,19 @@
   }}
 
 
+
+  <editor-inpector-toggle-panel [title]="'Enable Functions'" [isChild]="true">
+    @for (item of _renderEnable; track $index) {
+    <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
+      (change)="onValueChanged(item,$event)"></app-boolean-inspector>
+    }
+  </editor-inpector-toggle-panel>
+  <editor-inpector-toggle-panel [title]="'Render Settings'" [isChild]="true">
+    @for (item of _renderProperties; track $index) {
+    <editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
+      (change)="onEnumChanged(item, $event)"></editor-enum-inspector>
+    }
+  </editor-inpector-toggle-panel>
 </editor-inpector-toggle-panel>
 
 }

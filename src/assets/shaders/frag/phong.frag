@@ -22,7 +22,7 @@ void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
 
   vec4 sampledTexColor = texture(u_mainTex, uv);
-  vec4 baseColor = vec4(sampledTexColor.rgb * u_matColor.rgb, sampledTexColor.a);
+  vec4 baseColor = vec4(sampledTexColor.rgb * u_matColor.rgb, (u_matColor.a * sampledTexColor.a) );
 
 
 //@INCLUDE_LIGHT_FUNC

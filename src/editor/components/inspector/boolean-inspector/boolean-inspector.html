@@ -1,3 +1,5 @@
 <div class="line-item">
-  <span>{{label}}</span> <app-toggle [active]="active" (change)="change.emit($event)"></app-toggle>
+
+  @if(label){<span>{{label}}</span>}
+  <app-toggle [active]="active" (change)="change.emit($event)"></app-toggle>
 </div>

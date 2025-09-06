@@ -69,6 +69,7 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   protected onScenePlay(scene: Scene) {
+    if(this.scene.isRunning) return;
     this.sceneState = SceneManager.creatSceneSnapshot(scene);
     this.scene.initialize();
     this.scene.isRunning = true;

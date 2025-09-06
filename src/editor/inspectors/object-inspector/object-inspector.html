@@ -1,5 +1,6 @@
 <editor-inpector-toggle-panel [isChild]="isChild" [title]="label" [collapsed]="isChild">
   @if (_selectedObject) {
+
   @for (item of _properties; track $index) {
   @if (item.value != undefined) {
   @switch (item.type) {
@@ -29,7 +30,7 @@
 
   @case ("enum") {<editor-enum-inspector [label]="item.key.capitalize()"></editor-enum-inspector> }
 
-  @default { <editor-object-inspector  [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
+  @default { <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
 
   }

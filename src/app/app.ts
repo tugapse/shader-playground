@@ -63,11 +63,11 @@ export class App implements OnDestroy {
   }
 
   private async loadAssets(scene: Scene) {
-    // await this.createFloor(scene);
-    // await this.otherObjetcs(scene);
-    // await this.createSkybox(scene);
-    // await this.createLights(scene);
-    // await this.addMonkeyObj(scene);
+    await this.createFloor(scene);
+    await this.otherObjetcs(scene);
+    await this.createLights(scene);
+    await this.addMonkeyObj(scene);
+    await this.createSkybox(scene);
 
   }
 
@@ -105,9 +105,7 @@ export class App implements OnDestroy {
 
     const primitive = new SpherePrimitive();
     const sphere = this.createEntity("sphere", primitive, new TexturedRendererBehaviour(this.gl), new LitShader(this.gl, new LitMaterial()));
-    // sphere.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(sphere);
-    // sphere.addBehaviour();
   }
 
   private createFloor(scene: Scene) {
@@ -115,16 +113,14 @@ export class App implements OnDestroy {
     const primitive = new PlanePrimitive(10);
 
     const material = new LitMaterial();
-    material.mainTex = EngineCache.getTexture2D( "assets/images/default/grid.jpg" , this.gl);
-    material.normalTex = EngineCache.getTexture2D( "assets/images/default/grid.jpg" , this.gl);
+    material.mainTex = EngineCache.getTexture2D( "assets/images/wood-texture.jpg" , this.gl);
+    material.normalTex = EngineCache.getTexture2D( "assets/images/wood-texture-normal-map.jpg" , this.gl);
     material.name = "Grid material";
 
     const shader = new LitShader(this.gl, material);
     const renderer = new TexturedRendererBehaviour(this.gl);
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
-    renderer.renderLayer = RenderLayer.TRANSPARENT;
-    renderer.dephMode = DephFunction.Always;
     planeEntity.addBehaviour(renderer);
 
     scene.addEntity(planeEntity);

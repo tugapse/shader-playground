@@ -59,7 +59,8 @@ export class Canvas implements OnChanges {
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
-    if (this.isFocused) event.preventDefault();
+    if (this.isFocused) event.preventDefault(); {
+    }
     Mouse.mouseButtonDown[event.button] = true;
   }
 
@@ -146,12 +147,13 @@ export class Canvas implements OnChanges {
 
   public render(timestamp: number) {
 
+    const elapsed = timestamp - this.lastTime;
     if (!this.scene || this.shouldRender() == false) {
       setTimeout(() => requestAnimationFrame(this.render.bind(this)), 50);
       this.cleanInput();
+      this.lastTime = timestamp - (elapsed % this.frameInterval);
       return;
     }
-    const elapsed = timestamp - this.lastTime;
 
     if (elapsed > this.frameInterval) {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
