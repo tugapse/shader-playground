@@ -21,6 +21,8 @@ export class Canvas implements OnChanges {
   private readonly fps = 60;
   private readonly frameInterval = 1000 / this.fps;
   public isFocused: boolean = false;
+  private isTabActive: boolean = true;
+  private isWindowFocused: boolean = true;
 
 
   public gl!: WebGL2RenderingContext | null;
@@ -93,6 +95,21 @@ export class Canvas implements OnChanges {
     Mouse.wheelX = event.deltaX;
   }
 
+  @HostListener('document:visibilitychange')
+  onVisibilityChange() {
+    this.isTabActive = !document.hidden;
+  }
+
+  @HostListener('window:focus')
+  onWindowFocus() {
+    this.isWindowFocused = true;
+  }
+
+  @HostListener('window:blur')
+  onWindowBlur() {
+    this.isWindowFocused = false;
+  }
+
   constructor(private editorService: EditorService) {
     this.gameEngine = new Engine();
     this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
@@ -123,10 +140,15 @@ export class Canvas implements OnChanges {
     this.scene?.destroy();
   }
 
+  public shouldRender() {
+    return this.isTabActive && this.isWindowFocused;
+  }
+
   public render(timestamp: number) {
 
-    if (!this.scene) {
-      requestAnimationFrame(this.render.bind(this));
+    if (!this.scene || this.shouldRender() == false) {
+      setTimeout(() => requestAnimationFrame(this.render.bind(this)), 50);
+      this.cleanInput();
       return;
     }
     const elapsed = timestamp - this.lastTime;
@@ -140,8 +162,8 @@ export class Canvas implements OnChanges {
       if (this.gl && this.canvasElement) {
         this.scene.draw();
       }
-      this.cleanInput();
     }
+    this.cleanInput();
     requestAnimationFrame(this.render.bind(this));
   }
 

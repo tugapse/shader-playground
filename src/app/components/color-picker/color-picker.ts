@@ -52,7 +52,6 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
   public isColorAreaDragging: boolean = false;
   public isHueSliderDragging: boolean = false;
   public isAlphaSliderDragging: boolean = false;
-  public readonly math = Math;
 
   private resizeObserver: ResizeObserver | null = null; // Declare ResizeObserver
 
@@ -120,7 +119,6 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private setupResizeObserver(): void {
     this.resizeObserver = new ResizeObserver(entries => {
-      // Run inside NgZone because ResizeObserver callbacks run outside
       this.zone.run(() => {
         for (const entry of entries) {
           if (entry.target === this.colorArea.nativeElement || entry.target === this.hueSlider.nativeElement) {
@@ -133,21 +131,26 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    // Observe both the color area and hue slider
     this.resizeObserver.observe(this.colorArea.nativeElement);
     this.resizeObserver.observe(this.hueSlider.nativeElement);
   }
 
   private updateColorFromColorArea(event: MouseEvent): void {
     const rect = this.colorArea.nativeElement.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
 
-    x = Math.max(0, Math.min(x, rect.width));
-    y = Math.max(0, Math.min(y, rect.height));
+    // Clamp the mouse coordinates to the bounds of the color area
+    const clampedX = Math.max(rect.left, Math.min(event.clientX, rect.right));
+    const clampedY = Math.max(rect.top, Math.min(event.clientY, rect.bottom));
 
-    this.saturation = x / rect.width;
-    this.value = 1 - (y / rect.height);
+    let x = clampedX - rect.left;
+    let y = clampedY - rect.top;
+
+    if (rect.width > 0) {
+      this.saturation = x / rect.width;
+    }
+    if (rect.height > 0) {
+      this.value = 1 - (y / rect.height);
+    }
 
     this.updateAllColors();
     this.updateColorPointerPosition();
@@ -155,11 +158,12 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updateHueFromHueSlider(event: MouseEvent): void {
     const rect = this.hueSlider.nativeElement.getBoundingClientRect();
-    let x = event.clientX - rect.left;
+    const clampedX = Math.max(rect.left, Math.min(event.clientX, rect.right));
+    let x = clampedX - rect.left;
 
-    x = Math.max(0, Math.min(x, rect.width));
-
-    this.hue = (x / rect.width) * 360;
+    if (rect.width > 0) {
+      this.hue = (x / rect.width) * 360;
+    }
 
     this.updateAllColors();
     this.updateHuePointerPosition();
@@ -167,10 +171,12 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
 
    private updateAlphaFromAlphaSlider(event: MouseEvent): void {
     const rect = this.alphaSlider.nativeElement.getBoundingClientRect();
-    let y = event.clientY - rect.top; // Corrected line
+    const clampedY = Math.max(rect.top, Math.min(event.clientY, rect.bottom));
+    let y = clampedY - rect.top;
 
-    y = Math.max(0, Math.min(y, rect.height));
-    this.alpha = 1 - (y / rect.height);
+    if (rect.height > 0) {
+      this.alpha = 1 - (y / rect.height);
+    }
 
     this.updateAllColors();
     this.updateAlphaPointerPosition();

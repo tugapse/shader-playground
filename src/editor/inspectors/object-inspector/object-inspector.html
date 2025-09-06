@@ -27,7 +27,9 @@
   @case ("vector234") { <editor-vector-inspector [vectorKeys]="['x','y','z','w']" [vector]="item.value"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
 
-  @default { <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
+  @case ("enum") {<editor-enum-inspector [label]="item.key.capitalize()"></editor-enum-inspector> }
+
+  @default { <editor-object-inspector  [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
 
   }

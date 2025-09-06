@@ -13,7 +13,7 @@
 
   @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()"
     [value]="behaviour[item.key]" (change)="onValueChanged(item,$event)"
-    [dragScale]="0.001" ></editor-text-input-inspector> }
+    [dragScale]="0.001"></editor-text-input-inspector> }
 
   @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
     (change)="onValueChanged(item,$event)"></app-boolean-inspector>}
@@ -23,6 +23,9 @@
 
   @case ("vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
     (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
+
+  @case ("enum") {<editor-enum-inspector [label]="item.key" [items]="item.property"
+    [selected]="item.value" (change)="onEnumChanged(item, $event)"></editor-enum-inspector> }
 
   @default {
   <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()"

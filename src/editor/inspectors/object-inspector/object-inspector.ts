@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
+import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from 'omega-game-engine';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { Vector4, Vector3, Vector2, Color, Transform, GlEntity, EntityBehaviour, Shader, Texture, ColorMaterial, LitMaterial, UnlitMaterial } from 'omega-game-engine';
+import { EnumInspector } from "../enum-inspector/enum-inspector";
 
 
 export interface ITargetObject {
@@ -19,7 +20,8 @@ export interface ITargetProperty extends ITargetObject {
 
 @Component({
   selector: 'editor-object-inspector',
-  imports: [InpectorTogglePanel, TextInputInspector, ColorInspector, VectorInspector, BooleanInspector],
+  imports: [InpectorTogglePanel, TextInputInspector, ColorInspector,
+    VectorInspector, BooleanInspector, EnumInspector],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss'
 })

@@ -4,36 +4,47 @@ import { BooleanInspector } from "@editor/components/inspector/boolean-inspector
 import { TextInputInspector } from "@editor/components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
-import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
+import { ITargetObject, ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
 import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from 'omega-game-engine';
+import { EnumInspector } from "../enum-inspector/enum-inspector";
+import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector],
+  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector],
   templateUrl: './behaviour-inspector.html',
   styleUrl: './behaviour-inspector.scss'
 })
 export class BehaviourInspector extends ObjectInspector {
 
-  protected drawingEnums: { [key: string]: string[] } = {
-    'renderLayer': Object.keys(RenderLayer),
-    'cullFace': Object.keys(CullFace),
-    'dephMode': Object.keys(DephFunction),
-    'faceWinding': Object.keys(FaceWinding)
+
+  // prepare enums related to rendering
+  protected drawingEnums: { [key: string]: { key: string, value: number }[] } = {
+    'renderLayer': Object.keys(RenderLayer).filter(k => Number.isNaN(+k))
+    .map((e: string) => { return { key: e, value: (RenderLayer as any)[(e)] as number } }),
+
+    'cullFace': Object.keys(CullFace).filter(k => Number.isNaN(+k))
+    .map((e: string) => { return { key: e, value: (CullFace as any)[e] } }),
+
+    'dephMode': Object.keys(DephFunction).filter(k => Number.isNaN(+k))
+    .map((e: string) => { return { key: e, value: (DephFunction as any)[e] } }),
+
+    'faceWinding': Object.keys(FaceWinding).filter(k => Number.isNaN(+k))
+    .map((e: string) => { return { key: e, value: (FaceWinding as any)[e] } }),
   }
-  protected renderBooleans = [ "enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer" ];
+  protected renderBooleans = ["enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer"];
 
 
   override denyProperties: string[] = ["active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
-     ...Object.keys(this.drawingEnums),"blendMode", // inner emuns
-     ...this.renderBooleans,
+    ...Object.keys(this.drawingEnums), "blendMode", // inner emuns
+    ...this.renderBooleans,
 
 
   ]
 
   @Input() set behaviour(value: EntityBehaviour) {
     this._selectedObject = { key: value.className, type: value.className, property: value };
-    super.loadProperties();
+    this.loadProperties();
   };
 
   get behaviour() { return this._selectedObject?.property }
@@ -45,18 +56,36 @@ export class BehaviourInspector extends ObjectInspector {
 
   protected override loadProperties(): void {
     super.loadProperties();
-    const renderEnums = [];
-    for (const prop of Object.keys(this.drawingEnums)) {
-      if (this._selectedObject?.property[prop]) {
-        renderEnums.push({ key: prop, enumOptions: this.drawingEnums[prop] });
+
+    for (const enumName of Object.keys(this.drawingEnums)) {
+      const value = this._selectedObject?.property[enumName];
+      const arrayValues: DropdownItem[] = [];
+      for (const enumObj of this.drawingEnums[enumName]) {
+        arrayValues.push(enumObj)
+      }
+      if (value != undefined) {
+
+        const p: ITargetProperty = {
+          key: enumName,
+          type: "enum",
+          property: arrayValues,
+          value: arrayValues.find(e => e.value == value)
+        };
+
+        this._properties.push(p);
       }
     }
 
-    const renderBooleans = [];
-    for (const prop of Object.keys(this.renderBooleans)) {
-      if (this._selectedObject?.property[prop]) {
-        renderBooleans.push({ key: prop, enumOptions: this._selectedObject?.property[prop] });
-      }
-    }
+
+    // const renderBooleans = [];
+    // for (const prop of Object.keys(this.renderBooleans)) {
+    //   if (this._selectedObject?.property[prop]) {
+    //     renderBooleans.push({ key: prop, enumOptions: this._selectedObject?.property[prop] });
+    //   }
+    // }
+  }
+  onEnumChanged(_t5: ITargetProperty, $event: DropdownItem) {
+    debugger
+
   }
 }

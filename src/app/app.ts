@@ -63,11 +63,11 @@ export class App implements OnDestroy {
   }
 
   private async loadAssets(scene: Scene) {
-    await this.createFloor(scene);
-    await this.otherObjetcs(scene);
-    await this.createSkybox(scene);
-    await this.createLights(scene);
-    await this.addMonkeyObj(scene);
+    // await this.createFloor(scene);
+    // await this.otherObjetcs(scene);
+    // await this.createSkybox(scene);
+    // await this.createLights(scene);
+    // await this.addMonkeyObj(scene);
 
   }
 

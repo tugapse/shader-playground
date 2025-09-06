@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Output, EventEmitter, Renderer2, OnDestroy, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, Output, EventEmitter, Renderer2, OnDestroy, Input, RendererStyleFlags2 } from '@angular/core';
 
 /**
  * Defines the possible modes for the drag directive.
@@ -101,7 +101,7 @@ export class DragHandleDirective implements OnDestroy {
     this.startY = event.clientY;
 
     this.originalCursor = document.body.style.cursor;
-    this.renderer.setStyle(document.body, 'cursor', this.dragCursor);
+    this.renderer.setStyle(document.body, 'cursor', this.dragCursor, RendererStyleFlags2.Important);
     // Add class to prevent text selection globally during drag
     this.renderer.addClass(document.body, 'no-select');
 
