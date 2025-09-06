@@ -11,9 +11,6 @@ export class LightMoveBehaviour extends EntityBehaviour {
   public rotationSpeed = 0.5;
 
   _rotation = new Vector3();
-  _hour = 0;
-  _min = 0;
-  _sec = 0;
   _timeString = "";
 
   public isNight = false;
@@ -25,18 +22,9 @@ export class LightMoveBehaviour extends EntityBehaviour {
     const x = Math.sin(this._t) * Math.PI * 2;
     const y = Math.cos(this._t) * Math.PI * 2;
     this.isNight = y <= 0;
-
-    let now = 0;
-    if (this.isNight)
-      now = 2 - (((x + 1) * 0.5))
-    else
-      now = (((x + 1) * 0.5))
-
-    this._hour = Math.floor(5 + now * 12) % 24;
-    this._min = Math.floor(this._hour / 60);
-    this._sec = Math.floor(this._min / 60);
-    this._timeString = `${this._hour}:${this._min}:${this._sec}`
     this.transform.setRotation(this._rotation.x + x, this._rotation.y + y, this._rotation.z);
+    this.transform.setPosition(this._rotation.x + x, this._rotation.y + y, this._rotation.z);
+
   }
 }
 

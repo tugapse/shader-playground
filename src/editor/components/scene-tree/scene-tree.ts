@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 import { Icon } from "../../../app/components/icon/icon";
-import { EditorService } from '../../editor.service';
-import { SceneTreeService } from './scene-tree.service';
+import { SceneTreeService } from '../../services/scene-tree.service';
 import { Scene, GlEntity, EntityType } from 'omega-game-engine';
+import { EditorService } from '@editor/services/editor.service';
 
 
 @Component({
@@ -62,7 +62,7 @@ export class SceneTree {
   prepareObjects() {
     if (!this.scene) return;
     const objectsDict = this.scene.objects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = [ ...this.scene.objects];
+    const rootObjects = [ this.scene, ...this.scene.objects];
     this.objectsToDraw = rootObjects;
   }
 }

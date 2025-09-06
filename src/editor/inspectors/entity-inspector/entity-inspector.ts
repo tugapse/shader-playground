@@ -3,7 +3,6 @@ import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/in
 import { BooleanInspector } from "@editor/components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "@editor/components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
-import { EditorService } from '@editor/editor.service';
 
 import { Toggle } from "src/app/components/toggle/toggle";
 import { BehaviourInspector } from "../behaviour-inspector/behaviour-inspector";
@@ -11,6 +10,7 @@ import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { TransformInspector } from "../transform-inspector/transform-inspector";
 import { GlEntity, Color } from 'omega-game-engine';
+import { EditorService } from '@editor/services/editor.service';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -25,7 +25,6 @@ export class EntityInspector extends ObjectInspector {
 
   private prepareProperties(entity: GlEntity) {
     if (entity) {
-      debugger
       this.objectsToshow = Object.keys(entity)
         .filter(this.isPropertyValid.bind(this))
         .map(key => this.mapProperty(entity, key));
@@ -68,7 +67,6 @@ export class EntityInspector extends ObjectInspector {
 
   private mapProperty(entity: GlEntity, key: string) {
     const type = this.getObjectType(entity[key]);
-    debugger
     const property = entity[key]
 
     return { key, type, property }

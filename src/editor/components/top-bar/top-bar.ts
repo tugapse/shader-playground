@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { EditorService } from '@editor/editor.service';
+import { EditorService } from '@editor/services/editor.service';
 import { Scene } from 'omega-game-engine';
 import { Icon } from 'src/app/components/icon/icon';
 

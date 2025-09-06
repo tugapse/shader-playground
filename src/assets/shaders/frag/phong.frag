@@ -7,7 +7,7 @@ uniform vec2 u_uvOffset;
 uniform sampler2D u_mainTex;
 uniform sampler2D u_normalMap; // Uniform for the normal map texture
 
-@INCLUDE_LIGHT_HEADER
+//@INCLUDE_LIGHT_HEADER
 
 in vec2 v_uv;
 in vec3 v_normal;   // Interpolated normal (from vertex shader)
@@ -22,10 +22,11 @@ void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
 
   vec4 sampledTexColor = texture(u_mainTex, uv);
-  vec4 baseColor = sampledTexColor * u_matColor;
+  vec4 baseColor = vec4(sampledTexColor.rgb * u_matColor.rgb, sampledTexColor.a);
 
 
-@INCLUDE_LIGHT_FUNC
+//@INCLUDE_LIGHT_FUNC
+
   // --- Final Color Output ---
   // Clamp the final lit color to the [0.0, 1.0] range before outputting.
   // fragColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);

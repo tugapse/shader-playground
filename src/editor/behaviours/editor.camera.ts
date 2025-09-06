@@ -1,13 +1,12 @@
 
 import { vec3 } from "gl-matrix";
-import { CameraFlyBehaviour, Transform, Mouse } from "omega-game-engine";
+import { CameraFlyBehaviour, Transform, Mouse, JsonSerializedData } from "omega-game-engine";
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
 
 
   override get transform(): Transform {
-    if(!this.parent) debugger;
     return this.parent.transform;
   }
 
@@ -19,8 +18,8 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     super.initialize();
     this.moveSpeed = 20.5;
     this.moveDampening = 0.1;
-    this.rotationSpeed = 0.5;
-    this.rotationDampening = 0.15;
+    this.rotationSpeed = 0.4;
+    this.rotationDampening = 0.25;
     this._acceleration = 8;
     this._currentPitch = this.initialPitch;
     this._currentYaw = this.initialYaw;
@@ -33,4 +32,6 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
       this._forwardVelocity += -Mouse.wheelY * ellapsed * this.scroolSpeed;
     }
   }
+
+
 }

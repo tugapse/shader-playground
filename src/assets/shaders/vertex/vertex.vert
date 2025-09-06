@@ -48,4 +48,5 @@ void main() {
 
   // Calculate the final vertex position in clip space
   gl_Position =  u_mvpMatrix * vec4(a_position, 1.0);
+  gl_PointSize = 10.0;
 }

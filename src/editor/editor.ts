@@ -3,12 +3,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { Canvas } from './components/canvas/canvas';
-import { SceneTreeService } from './components/scene-tree/scene-tree.service';
+import { SceneTreeService } from './services/scene-tree.service';
 import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
-import { EditorService } from './editor.service';
 import { Inpector } from './inspectors/inpector/inpector';
-import { Scene, GlEntity, JsonSerializedData, SceneManager } from 'omega-game-engine';
+import { Scene, GlEntity, JsonSerializedData, SceneManager, Color, Colors } from 'omega-game-engine';
+import { EditorService } from './services/editor.service';
+import { EditorGridBehaviour } from './behaviours/editor.grid.behaviour';
 
 
 @Component({
@@ -23,16 +24,17 @@ export class Editor implements OnDestroy, OnInit {
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
   canvasVisible = true;
-  private editorRenderBehaviour!: EditorRenderBehaviour;
+  protected editorRenderBehaviour!: EditorRenderBehaviour;
 
-  private gl!: WebGL2RenderingContext;
-  private subs$: Subscription[] = [];
+  protected gl!: WebGL2RenderingContext;
+  protected subs$: Subscription[] = [];
 
-  private sceneState?: JsonSerializedData | null = null;
+  protected sceneState?: JsonSerializedData | null = null;
+  protected gridBehaviour!: EditorGridBehaviour;
 
   constructor(
-    private editorService: EditorService,
-    private sceneTreeService: SceneTreeService) {
+    protected editorService: EditorService,
+    protected sceneTreeService: SceneTreeService) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
   }
@@ -48,49 +50,54 @@ export class Editor implements OnDestroy, OnInit {
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
     this.editorService.onRenderingContextCreated.emit(this.gl);
+    this.createEditorBehaviours();
+
 
 
   }
 
-  private onSceneLoaded(scene: Scene) {
+  protected onSceneLoaded(scene: Scene) {
     if (this.scene) {
       this.scene.destroy();
     }
     this.scene = scene;
+    this.scene.clearColor = Colors.cornflowerBlue;
     this.scene.setGlRenderingContext(this.gl);
     this.scene.inEditMode = true;
+    this.scene.addBehaviour(this.gridBehaviour);
+    this.gridBehaviour.initialize();
   }
 
-  private onScenePlay(scene: Scene) {
+  protected onScenePlay(scene: Scene) {
     this.sceneState = SceneManager.creatSceneSnapshot(scene);
     this.scene.initialize();
     this.scene.isRunning = true;
     this.isPaused = false;
   }
 
-  private onScenePause(scene: Scene) {
+  protected onScenePause(scene: Scene) {
     if (scene.isRunning == false) return;
     scene.isRunning = false;
     this.isPaused = true;
   }
 
-  private onSceneStop(scene: Scene) {
+  protected onSceneStop(scene: Scene) {
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;
     scene.destroy();
-      const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
+    const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
 
-      this.editorService.loadScene(newScene);
-      this.sceneState = null;
+    this.editorService.loadScene(newScene);
+    this.sceneState = null;
     // this.editorService.onCanvasRequestReset.emit();
   }
 
-  private onSceneTreeEntitySelected(entity: GlEntity): void {
+  protected onSceneTreeEntitySelected(entity: GlEntity): void {
     this.inspectorSelectedEntity = entity;
   }
 
-  private subscribeEvents(): void {
+  protected subscribeEvents(): void {
     this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
     this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));
     this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
@@ -117,5 +124,10 @@ export class Editor implements OnDestroy, OnInit {
 
   clearStorage(): void {
     sessionStorage.removeItem("omg_scene");
+  }
+
+  createEditorBehaviours() {
+    this.gridBehaviour = new EditorGridBehaviour(this.gl);
+
   }
 }

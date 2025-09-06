@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from "@angular/core";
+import { EditorCameraBehaviour } from "@editor/behaviours/editor.camera";
 import { Scene, Camera } from "omega-game-engine";
-import { EditorCameraBehaviour } from "./behaviours/editor.camera";
 
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +22,8 @@ export class EditorService {
   constructor() {
     this.initializeEditorCamera();
   }
+
+
 
   loadScene(scene: Scene) {
     this.onSceneLoaded.emit(scene);

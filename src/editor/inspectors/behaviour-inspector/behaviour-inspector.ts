@@ -5,7 +5,7 @@ import { TextInputInspector } from "@editor/components/inspector/text-input-insp
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
-import { EntityBehaviour } from 'omega-game-engine';
+import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-behaviour-inspector',
@@ -15,8 +15,21 @@ import { EntityBehaviour } from 'omega-game-engine';
 })
 export class BehaviourInspector extends ObjectInspector {
 
-  override denyProperties: string[]=["active", "parent", "enableLights", "mesh", "time","drawPrimitiveType"]
+  protected drawingEnums: { [key: string]: string[] } = {
+    'renderLayer': Object.keys(RenderLayer),
+    'cullFace': Object.keys(CullFace),
+    'dephMode': Object.keys(DephFunction),
+    'faceWinding': Object.keys(FaceWinding)
+  }
+  protected renderBooleans = [ "enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer" ];
 
+
+  override denyProperties: string[] = ["active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
+     ...Object.keys(this.drawingEnums),"blendMode", // inner emuns
+     ...this.renderBooleans,
+
+
+  ]
 
   @Input() set behaviour(value: EntityBehaviour) {
     this._selectedObject = { key: value.className, type: value.className, property: value };
@@ -28,5 +41,22 @@ export class BehaviourInspector extends ObjectInspector {
   override onValueChanged(property: ITargetObject, value: string | number | boolean): void {
     if ((typeof value == 'number' || typeof value == 'string' || typeof value == 'boolean'))
       this._selectedObject!.property[property.key] = value;
+  }
+
+  protected override loadProperties(): void {
+    super.loadProperties();
+    const renderEnums = [];
+    for (const prop of Object.keys(this.drawingEnums)) {
+      if (this._selectedObject?.property[prop]) {
+        renderEnums.push({ key: prop, enumOptions: this.drawingEnums[prop] });
+      }
+    }
+
+    const renderBooleans = [];
+    for (const prop of Object.keys(this.renderBooleans)) {
+      if (this._selectedObject?.property[prop]) {
+        renderBooleans.push({ key: prop, enumOptions: this._selectedObject?.property[prop] });
+      }
+    }
   }
 }

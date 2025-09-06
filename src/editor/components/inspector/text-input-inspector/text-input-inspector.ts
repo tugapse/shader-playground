@@ -14,6 +14,8 @@ export class TextInputInspector {
   @Input() value!: string | number;
   @Input() isNumber = false;
   @Input() dragScale = 1.0;
+  @Input() numberDecimals = 6;
+
 
   @Output() change = new EventEmitter<string | number>();
 
@@ -26,7 +28,7 @@ export class TextInputInspector {
   onDrag($event: DragEventData) {
     if (this.isNumber) {
       const newValue = ($event.deltaX * this.dragScale) + (+this.value || 0);
-      this.value = newValue as number;
+      this.value = Number(  newValue.toFixed(this.numberDecimals)) as number;
       this.change.emit(this.value);
     }
   }

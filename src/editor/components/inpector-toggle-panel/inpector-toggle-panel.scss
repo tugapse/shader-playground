@@ -12,9 +12,14 @@
 
   }
 
+  .header .title {
+    color: var(--editor-panel-H-color);
+  }
+
   .header .chevron {
     padding: 6px;
     cursor: pointer;
+    color: var(--editor-panel-chevron-color);
   }
 
   .container {
@@ -25,19 +30,18 @@
     // background-color: #283549;
 
     &.child {
-      border-color: white;
       padding: 2px 0;
       margin-bottom: 4px;
       overflow-y: hidden;
       border: none;
-      border-left: solid 1px #1c2b3d;
+
 
     }
 
     &.collapsed {
       padding: 0;
       overflow-y: hidden;
-      height: 2px;
+      height: 0px;
     }
   }
 }

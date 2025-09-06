@@ -13,7 +13,7 @@
 
   @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()"
     [value]="behaviour[item.key]" (change)="onValueChanged(item,$event)"
-    [dragScale]="0.001"></editor-text-input-inspector> }
+    [dragScale]="0.001" ></editor-text-input-inspector> }
 
   @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
     (change)="onValueChanged(item,$event)"></app-boolean-inspector>}

@@ -13,10 +13,14 @@ import {
 })
 export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
 
+
   @ViewChild('colorArea', { static: true }) colorArea!: ElementRef<HTMLDivElement>;
-  @ViewChild('hueSlider', { static: true }) hueSlider!: ElementRef<HTMLDivElement>;
   @ViewChild('colorPointer', { static: true }) colorPointer!: ElementRef<HTMLDivElement>;
+  @ViewChild('hueSlider', { static: true }) hueSlider!: ElementRef<HTMLDivElement>;
   @ViewChild('huePointer', { static: true }) huePointer!: ElementRef<HTMLDivElement>;
+  @ViewChild('alphaSlider', { static: true }) alphaSlider!: ElementRef<HTMLDivElement>;
+  @ViewChild('alphaPointer', { static: true }) alphaPointer!: ElementRef<HTMLDivElement>;
+
 
   @Input() set color(value: { r: number, g: number, b: number, a: number }) {
     if (!value) return; // Handle null/undefined input gracefully
@@ -29,6 +33,7 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateAllColors();
     this.updateColorPointerPosition();
     this.updateHuePointerPosition();
+    this.updateAlphaPointerPosition();
   }
 
   @Output() colorChange = new EventEmitter<{ rgba: { r: number, g: number, b: number, a: number }, hex: string }>();
@@ -46,6 +51,7 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isColorAreaDragging: boolean = false;
   public isHueSliderDragging: boolean = false;
+  public isAlphaSliderDragging: boolean = false;
   public readonly math = Math;
 
   private resizeObserver: ResizeObserver | null = null; // Declare ResizeObserver
@@ -59,6 +65,7 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.updateColorPointerPosition();
     this.updateHuePointerPosition();
+    this.updateAlphaPointerPosition();
     this.setupResizeObserver(); // Set up the observer after view is initialized
   }
 
@@ -67,22 +74,33 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onColorAreaMousedown(event: MouseEvent): void {
+    event.preventDefault(); // Prevents the default browser action, like text selection
     this.isColorAreaDragging = true;
     this.updateColorFromColorArea(event);
   }
 
   onHueSliderMousedown(event: MouseEvent): void {
+    event.preventDefault(); // Prevents the default browser action, like text selection
     this.isHueSliderDragging = true;
     this.updateHueFromHueSlider(event);
   }
 
+  onAlphaSliderMousedown(event: MouseEvent) {
+    event.preventDefault(); // Prevents the default browser action, like text selection
+    this.isAlphaSliderDragging = true;
+    this.updateAlphaFromAlphaSlider(event);
+  }
+
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
+    event.preventDefault(); // Prevents the default browser action, like text selection
     this.zone.run(() => {
       if (this.isColorAreaDragging) {
         this.updateColorFromColorArea(event);
       } else if (this.isHueSliderDragging) {
         this.updateHueFromHueSlider(event);
+      } else if (this.isAlphaSliderDragging) {
+        this.updateAlphaFromAlphaSlider(event);
       }
     });
   }
@@ -92,6 +110,7 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.zone.run(() => {
       this.isColorAreaDragging = false;
       this.isHueSliderDragging = false;
+      this.isAlphaSliderDragging = false;
     });
   }
 
@@ -108,6 +127,7 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
             // Re-update pointer positions on resize
             this.updateColorPointerPosition();
             this.updateHuePointerPosition();
+            this.updateAlphaPointerPosition();
           }
         }
       });
@@ -145,6 +165,17 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateHuePointerPosition();
   }
 
+   private updateAlphaFromAlphaSlider(event: MouseEvent): void {
+    const rect = this.alphaSlider.nativeElement.getBoundingClientRect();
+    let y = event.clientY - rect.top; // Corrected line
+
+    y = Math.max(0, Math.min(y, rect.height));
+    this.alpha = 1 - (y / rect.height);
+
+    this.updateAllColors();
+    this.updateAlphaPointerPosition();
+  }
+
   private updateColorPointerPosition(): void {
     // Only update if colorArea is ready and has dimensions
     if (!this.colorArea || !this.colorArea.nativeElement.clientWidth) return;
@@ -163,6 +194,15 @@ export class ColorPickerComponent implements OnInit, AfterViewInit, OnDestroy {
     const rect = this.hueSlider.nativeElement.getBoundingClientRect();
     const x = (this.hue / 360) * rect.width;
     this.huePointer.nativeElement.style.left = `${x}px`;
+  }
+
+  private updateAlphaPointerPosition(): void {
+    // Only update if hueSlider is ready and has dimensions
+    if (!this.alphaSlider || !this.alphaSlider.nativeElement.clientWidth) return;
+
+    const rect = this.alphaSlider.nativeElement.getBoundingClientRect();
+    const y = (1-this.alpha) * rect.height;
+    this.alphaPointer.nativeElement.style.top = `${y}px`;
   }
 
   private updateAllColors(): void {

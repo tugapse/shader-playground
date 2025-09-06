@@ -98,7 +98,18 @@ export class ObjectInspector {
   }
 
   getObjectType(newValue: Object): string {
+    const className = (newValue as any)['className'];
     let result = (typeof newValue) as string;
+
+    if (className) {
+      switch (className) {
+        case 'Color':
+          return 'color';
+        case 'GLEntity':
+          return 'entity';
+      }
+    }
+
 
     if (newValue instanceof Transform)
       result = 'transform';
@@ -110,8 +121,8 @@ export class ObjectInspector {
       result = 'shader';
     if (newValue instanceof Texture)
       result = 'texture';
-    if (newValue instanceof Color)
-      result = 'color';
+    // if (newValue instanceof Color)
+    //   result = 'color';
     if (newValue instanceof ColorMaterial || newValue instanceof LitMaterial || newValue instanceof UnlitMaterial)
       result = 'material';
     if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
@@ -121,7 +132,6 @@ export class ObjectInspector {
   }
 
   protected isPropertyValid(key: string) {
-    console.debug("I was called !!!!")
     const notPrivate = key.startsWith("_") == false;
     if (this.allowProperties.length > 0) return this.allowProperties.includes(key) && notPrivate;
     if (this.denyProperties.length > 0) return this.denyProperties.includes(key) == false && notPrivate;
@@ -130,6 +140,7 @@ export class ObjectInspector {
 
 
   protected isValidPropertyType(key: string): boolean {
+    console.debug("I was called !!!!")
     if (!this._selectedObject) return false;
     const value = this._selectedObject.property?.[key] || this._selectedObject[key];
     const obType = this.getObjectType(value)

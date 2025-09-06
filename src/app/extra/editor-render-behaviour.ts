@@ -1,6 +1,6 @@
-import { RenderMeshBehaviour, SceneEntityBehaviour, RendererBehaviour, ColorMaterial, Shader, GLPrimitiveType, Mesh, EngineCache, Scene, Camera, GlEntity, JsonSerializedData } from "omega-game-engine";
+import { TexturedRendererBehaviour, SceneEntityBehaviour, RendererBehaviour, ColorMaterial, Shader, GLPrimitiveType, Mesh, EngineCache, Scene, Camera, GlEntity, JsonSerializedData } from "omega-game-engine";
 
-export class EditorRenderBehaviour extends RenderMeshBehaviour implements SceneEntityBehaviour {
+export class EditorRenderBehaviour extends TexturedRendererBehaviour implements SceneEntityBehaviour {
 
   protected handleRenderer!: RendererBehaviour;
   protected instanceBuffer: WebGLBuffer | null = null; // Initialize to null

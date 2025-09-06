@@ -3,10 +3,12 @@ import { Component, OnDestroy } from '@angular/core';
 import { vec2, vec3 } from 'gl-matrix';
 
 import { Editor } from '@editor/editor';
-import { EditorService } from '@editor/editor.service';
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { Camera, CanvasViewport, ColorMaterial, Colors, CubemapMaterial, CubemapTexture, CubePrimitive, DirectionalLight, EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, PlanePrimitive, PointLight, RenderMeshBehaviour, Scene, Shader, SkyboxRenderer, SkyboxShader, SpotLight, Texture, UnlitMaterial, UnlitShader } from 'omega-game-engine';
+import { Camera, CanvasViewport, Color, ColorMaterial, Colors, CubemapMaterial, CubemapTexture, CubePrimitive, DephFunction, DirectionalLight,
+  EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator, PlanePrimitive, PointLight,  RenderLayer,  Scene, Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight, Texture, TexturedRendererBehaviour, UnlitMaterial, UnlitShader } from 'omega-game-engine';
+import { EditorSkyboxMaterial, EditorSkyboxShader } from '@editor/core/shaders/skybox.shader';
+import { EditorService } from '@editor/services/editor.service';
 
 @Component({
   selector: 'app-root',
@@ -25,11 +27,17 @@ export class App implements OnDestroy {
   constructor(private editorService: EditorService) {
     this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
     this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
+    Shader.SHADER_FUNCTIONS["//@INCLUDE_FUNC"] = "assets/shaders/functions/functions.frag";
+
+    ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate);
+    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial);
+
   }
 
   onEditorLoadScene(scene: Scene): any {
     this.scene = scene;
     this.initializeScene(scene);
+
   }
 
   ngOnDestroy(): void {
@@ -45,6 +53,8 @@ export class App implements OnDestroy {
 
 
   async createNewScene() {
+
+
     const scene = new Scene();
     scene.name = "Main Scene";
     await this.loadAssets(scene);
@@ -79,42 +89,45 @@ export class App implements OnDestroy {
   private async otherObjetcs(scene: Scene) {
 
     const torusPrimitive = await EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
-    const torus = this.createEntity("torus", torusPrimitive, new RenderMeshBehaviour(this.gl));
+    const torus = this.createEntity("torus", torusPrimitive, new TexturedRendererBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);
 
     torus.addBehaviour(new RotateBehaviour());
     scene.addEntity(torus);
 
-    const cube = this.createEntity("cube", new CubePrimitive(), new RenderMeshBehaviour(this.gl));
+    const cube = this.createEntity("cube", new CubePrimitive(), new TexturedRendererBehaviour(this.gl));
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.up, 2.5);
     cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
     scene.addEntity(cube);
 
-    const primitive = new PlanePrimitive(5);
-    const sphere = this.createEntity("sphere", primitive, new RenderMeshBehaviour(this.gl), new UnlitShader(this.gl, new UnlitMaterial()));
+    const primitive = new SpherePrimitive();
+    const sphere = this.createEntity("sphere", primitive, new TexturedRendererBehaviour(this.gl), new LitShader(this.gl, new LitMaterial()));
     // sphere.addBehaviour(new LightMoveBehaviour());
     scene.addEntity(sphere);
     // sphere.addBehaviour();
   }
 
   private createFloor(scene: Scene) {
-    const plane = this.createEntity("plane", new PlanePrimitive(1), new RenderMeshBehaviour(this.gl));
+    const planeEntity = new GlEntity("Floor");
+    const primitive = new PlanePrimitive(10);
 
-    const renderer = plane.getBehaviour(RenderMeshBehaviour) as RenderMeshBehaviour;
-    if (renderer && renderer.shader) {
-      const material = renderer.shader.material as LitMaterial;
-      material.normalMapStrength = 1;
-      material.specularStrength = 2;
-      material.roughness = 0.8;
-      material.uvScale = vec2.fromValues(50, 50)
-    }
-    plane.transform.translate(0, -2, 0);
-    // plane.transform.rotate(270, 0, 0);
-    plane.transform.scale(500, 500, 500);
-    scene.addEntity(plane);
+    const material = new LitMaterial();
+    material.mainTex = EngineCache.getTexture2D( "assets/images/default/grid.jpg" , this.gl);
+    material.normalTex = EngineCache.getTexture2D( "assets/images/default/grid.jpg" , this.gl);
+    material.name = "Grid material";
+
+    const shader = new LitShader(this.gl, material);
+    const renderer = new TexturedRendererBehaviour(this.gl);
+    renderer.shader = shader;
+    renderer.mesh.meshData = primitive;
+    renderer.renderLayer = RenderLayer.TRANSPARENT;
+    renderer.dephMode = DephFunction.Always;
+    planeEntity.addBehaviour(renderer);
+
+    scene.addEntity(planeEntity);
   }
 
   private async createLights(scene: Scene) {
@@ -122,15 +135,15 @@ export class App implements OnDestroy {
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/primitives/axis.obj");
     const material = new ColorMaterial();
     const shader = new Shader(this.gl, material);
-    // shader.fragUri = "assets/shaders/editor/handle/handle.frag";
-    // shader.vertexUri = "assets/shaders/editor/handle/handle.vert";
-    shader.recompile();
-    // shader.initialize();
+    this.gl.enable(this.gl.STENCIL_TEST);
+    this.gl.stencilFunc(this.gl.LEQUAL, 0, 0b1110011);
 
 
-    const rendererBehaviour = new RenderMeshBehaviour(this.gl);
+
+    const rendererBehaviour = new TexturedRendererBehaviour(this.gl);
     rendererBehaviour.shader = shader;
     rendererBehaviour.mesh.meshData = monkeyObj;
+
 
     const dlight = new DirectionalLight("Directional light");
     dlight.transform.rotate(0.7, 1, 0.2);
@@ -158,10 +171,11 @@ export class App implements OnDestroy {
 
   private async addMonkeyObj(scene: Scene) {
 
+
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyEntity = this.createEntity(
-      "Monkey", monkeyObj, new RenderMeshBehaviour(this.gl),
-      new LitShader(this.gl, new LitMaterial()));
+      "Monkey", monkeyObj, new TexturedRendererBehaviour(this.gl),
+      new UnlitShader(this.gl, new UnlitMaterial()));
 
     monkeyEntity.transform.translate(3.5, 0, 0);
     scene.addEntity(monkeyEntity);
@@ -169,7 +183,7 @@ export class App implements OnDestroy {
 
 
 
-    const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new RenderMeshBehaviour(this.gl));
+    const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new TexturedRendererBehaviour(this.gl));
     movingMokeyEntity.transform.translate(-3.5, 0, 0);
     movingMokeyEntity.addBehaviour(new LightMoveBehaviour())
     scene.addEntity(movingMokeyEntity);
@@ -178,7 +192,7 @@ export class App implements OnDestroy {
 
   private createEntity(
     name: string, meshData: MeshData,
-    meshRenderer: RenderMeshBehaviour,
+    meshRenderer: TexturedRendererBehaviour,
     shader?: Shader,
     material?: LitMaterial
   ): GlEntity {
@@ -213,32 +227,45 @@ export class App implements OnDestroy {
     return entity;
   }
 
-  private async createSkybox(scene: Scene) {
+  private async createSkybox(scene: Scene, useWhiteTexture = true) {
 
+    const renderer = new SkyboxRenderer(this.gl);
+    const material = new EditorSkyboxMaterial();
+    const shader = new EditorSkyboxShader(this.gl, material);
     const cubePrimitive = new CubePrimitive();
-    const material = new CubemapMaterial();
-    material.name = "Skybox"
-    const texture = EngineCache.getTextureCube({
+    renderer.writeToDephBuffer = false;
+    renderer.renderLayer = RenderLayer.SKYBOX;
+    renderer.shader = shader;
+    renderer.mesh.meshData = cubePrimitive;
+
+    material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
+    material.color = Colors.aliceBlue;
+
+    const whiteTexUris = {
+      right: "assets/images/white.jpg",
+      left: "assets/images/white.jpg",
+      up: "assets/images/white.jpg",
+      bottom: "assets/images/white.jpg",
+      front: "assets/images/white.jpg",
+      back: "assets/images/white.jpg"
+    }
+
+    const skyboxTextures = {
       right: "assets/images/skybox/cloud/right.jpeg",
       left: "assets/images/skybox/cloud/left.jpeg",
       up: "assets/images/skybox/cloud/top.jpeg",
       bottom: "assets/images/skybox/cloud/bottom.jpeg",
       front: "assets/images/skybox/cloud/front.jpeg",
       back: "assets/images/skybox/cloud/back.jpeg"
-    }, this.gl) as CubemapTexture;
+
+    }
+    const texture = EngineCache.getTextureCube(useWhiteTexture ? whiteTexUris : skyboxTextures, this.gl) as CubemapTexture;
     material.mainTex = texture;
-    const shader = new SkyboxShader(this.gl, material);
-    const cube = this.createEntity("Skybox", cubePrimitive, new SkyboxRenderer(this.gl), shader);
-
-    scene.addEntity(cube);
-  }
-
-  private createTextures() {
-    const floorTexture = EngineCache.getTexture2D("assets/images/wood-textures.jpg", this.gl);
-
-    return {
-
-    };
+    const skyboxEntity = new GlEntity(material.name);
+    skyboxEntity.addBehaviour(renderer);
+    const c = new Color();
+    console.debug(c.className)
+    scene.addEntity(skyboxEntity);
   }
 
 

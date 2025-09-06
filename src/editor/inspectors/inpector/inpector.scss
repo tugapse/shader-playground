@@ -2,7 +2,7 @@
 
   .inspector {
     height: 100%;
-    width: 250px;
+    width: 300px;
     min-width: 200px;
 
     box-sizing: border-box;
@@ -15,7 +15,7 @@
     box-shadow: var(--editor-panel-box-shadow);
     position: absolute;
     height: 90%;
-    transform: translateX(7vw) translateY(5vh);
+    transform: translateX(12vw) translateY(5vh);
     top: 0;
     left: 0;
 

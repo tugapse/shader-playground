@@ -1,7 +1,7 @@
-<editor-inpector-toggle-panel [isChild]="isChild" [title]="label">
+<editor-inpector-toggle-panel [isChild]="isChild" [title]="label" [collapsed]="isChild">
   @if (_selectedObject) {
   @for (item of _properties; track $index) {
-  @if (item.value) {
+  @if (item.value != undefined) {
   @switch (item.type) {
 
 

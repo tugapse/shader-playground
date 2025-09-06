@@ -31,13 +31,18 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
 .color-picker-container {
   padding: 2px;
   box-shadow: $shadow-lg;
-  background-color: #1f2937;;
+  background-color: #1f2937;
+  ;
   font-family: 'Inter', sans-serif;
 }
 
 .header {
   @include flex-center-between;
   margin-bottom: 1rem;
+}
+
+.color-container {
+  display: flex;
 }
 
 .color-area {
@@ -69,6 +74,33 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
   }
 }
 
+.alpha-slider-wrapper {
+  position: relative;
+  display: block;
+  width: 12px;
+  min-height: 100%;
+  margin-left: 12px;
+  cursor: s-resize;
+
+  .alpha-slider {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, #000000 0%, #ffffff 100%);
+  }
+
+  .alpha-pointer {
+    position: absolute;
+    left: 50%;
+    width: 12px;
+    height: 4px;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+  }
+}
+
 .hue-slider-wrapper {
   position: relative;
   width: 100%;
@@ -95,6 +127,7 @@ $shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.
     pointer-events: none;
   }
 }
+
 // Ensure the main app wrapper uses the Inter font if desired globally
 body {
   font-family: 'Inter', sans-serif;

@@ -9,6 +9,9 @@
     margin-bottom: 6px;
 
   }
+  .header .title{
+    color:var(--editor-panel-header-title-color);
+  }
 
   .header .buttons {
     display: flex;

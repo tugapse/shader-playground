@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MovableDirective } from '@editor/directives/moveable.directive';
-import { EditorService } from '@editor/editor.service';
 import { Icon } from "src/app/components/icon/icon";
 import { InspectorHeader } from '../../components/inspector/inspector-header/inspector-header';
 import { EntityInspector } from "../entity-inspector/entity-inspector";
 import { GlEntity } from 'omega-game-engine';
+import { EditorService } from '@editor/services/editor.service';
 
 @Component({
   selector: 'editor-inpector',

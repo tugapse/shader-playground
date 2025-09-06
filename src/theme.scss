@@ -1,8 +1,11 @@
 :root { /* It's good practice to define global variables in :root */
   --editor-panel-outer-padding: 10px;
-  --editor-panel-background: #19212e;
-  --editor-panel-color: #e6edf3;
-  --editor-panel-border: 1px solid #30363d;
+  --editor-panel-background: #273244;
+  --editor-panel-color: #c9cdd1;
+  --editor-panel-header-title-color: #c9cdd1;
+  --editor-panel-H-color: #d5e8f5;
+  --editor-panel-chevron-color: #ffffff;
+  --editor-panel-border: 1px solid #aeb3b9;
   --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
 
   /* inputs */

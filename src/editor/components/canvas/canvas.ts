@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { EditorService } from '@editor/services/editor.service';
 import { Camera, CanvasViewport, Engine, Keybord, Mouse, Scene, cleanLastFrame } from 'omega-game-engine';
-import { EditorService } from '../../editor.service';
 @Component({
   selector: 'editor-canvas',
   imports: [],
