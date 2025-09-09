@@ -23,7 +23,7 @@ export class LightMoveBehaviour extends EntityBehaviour {
     const y = Math.cos(this._t) * Math.PI * 2;
     this.isNight = y <= 0;
     this.transform.setRotation(this._rotation.x + x, this._rotation.y + y, this._rotation.z);
-    this.transform.setPosition(this._rotation.x + x, this._rotation.y + y, this._rotation.z);
+    this.transform.setPosition(this._rotation.x + x, this._rotation.y + y, this._rotation.z + x-y);
 
   }
 }

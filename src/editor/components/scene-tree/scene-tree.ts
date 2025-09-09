@@ -19,7 +19,8 @@ export class SceneTree {
   constructor(public sceneTreeService: SceneTreeService, private editorService: EditorService) {
     this.editorService.onSceneLoaded.subscribe(scene => {
       this.targetScene = scene;
-      this.sceneTreeService.onEntitySelected.emit(undefined);
+      const entity = scene.getEntitieByUuid(this.selectedUuid);
+      this.sceneTreeService.onEntitySelected.emit(entity);
     });
     this.sceneTreeService.onEntitySelected.subscribe(entity=>{
       this.selectedUuid = entity?.uuid;

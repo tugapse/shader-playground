@@ -13,6 +13,7 @@ export class Canvas implements OnChanges {
 
   @Output() onGlContextCreated: EventEmitter<WebGL2RenderingContext> = new EventEmitter();
 
+
   @ViewChild('glCanvas')
   private glCanvas!: ElementRef<HTMLCanvasElement>;
   private canvasElement!: HTMLCanvasElement;
@@ -29,6 +30,11 @@ export class Canvas implements OnChanges {
 
   public gameEngine: Engine;
 
+  @HostListener('contextmenu', ['$event'])
+  onContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    // Here you can add logic to show your custom context menu
+  }
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
     this.resizeCanvas();
@@ -159,8 +165,9 @@ export class Canvas implements OnChanges {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
 
       const delta = elapsed / 1000;
+      this.editorService.onUpdateFrame.next(delta);
       this.scene.update(delta);
-
+      this.editorService.onRenderFrame.next(this.gl);
       if (this.gl && this.canvasElement) {
         this.scene.draw();
       }

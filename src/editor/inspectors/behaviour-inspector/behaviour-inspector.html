@@ -31,25 +31,28 @@
     (change)="onEnumChanged(item, $event)"></editor-enum-inspector> }
 
   @default {
-  <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()"
+  <editor-object-inspector [isChild]="true" [label]="item.value?.name || item.key.capitalize()"
     [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
 
   }}
 
 
-
+  @if (_renderEnable.length>0) {
   <editor-inpector-toggle-panel [title]="'Enable Functions'" [isChild]="true">
     @for (item of _renderEnable; track $index) {
     <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
       (change)="onValueChanged(item,$event)"></app-boolean-inspector>
     }
   </editor-inpector-toggle-panel>
+  }
+  @if (_renderProperties.length>0) {
+
   <editor-inpector-toggle-panel [title]="'Render Settings'" [isChild]="true">
     @for (item of _renderProperties; track $index) {
     <editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
       (change)="onEnumChanged(item, $event)"></editor-enum-inspector>
     }
   </editor-inpector-toggle-panel>
+  }
 </editor-inpector-toggle-panel>
-
 }

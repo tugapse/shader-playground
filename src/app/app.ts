@@ -1,14 +1,21 @@
 
 import { Component, OnDestroy } from '@angular/core';
-import { vec2, vec3 } from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 
+import { EditorSkyboxMaterial, EditorSkyboxShader } from '@editor/core/shaders/skybox.shader';
 import { Editor } from '@editor/editor';
+import { EditorService } from '@editor/services/editor.service';
+import {
+  Camera, CanvasViewport,
+  ColorMaterial, Colors, CubemapMaterial, CubemapTexture, CubePrimitive,
+  DirectionalLight,
+  EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator,
+  PlanePrimitive, PointLight, RenderLayer, Scene, Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  TexturedRendererBehaviour, UnlitMaterial, UnlitShader
+} from 'omega-game-engine';
+
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { Camera, CanvasViewport, Color, ColorMaterial, Colors, CubemapMaterial, CubemapTexture, CubePrimitive, DephFunction, DirectionalLight,
-  EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator, PlanePrimitive, PointLight,  RenderLayer,  Scene, Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight, Texture, TexturedRendererBehaviour, UnlitMaterial, UnlitShader } from 'omega-game-engine';
-import { EditorSkyboxMaterial, EditorSkyboxShader } from '@editor/core/shaders/skybox.shader';
-import { EditorService } from '@editor/services/editor.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +34,11 @@ export class App implements OnDestroy {
   constructor(private editorService: EditorService) {
     this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
     this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
-    Shader.SHADER_FUNCTIONS["//@INCLUDE_FUNC"] = "assets/shaders/functions/functions.frag";
+    Shader.SHADER_FUNCTIONS = {
+      "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
+      "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
+      "@INCLUD_FUNC": "assets/shaders/functions/functions.frag"
+    };
 
     ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate);
     ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial);
@@ -113,14 +124,18 @@ export class App implements OnDestroy {
     const primitive = new PlanePrimitive(10);
 
     const material = new LitMaterial();
-    material.mainTex = EngineCache.getTexture2D( "assets/images/wood-texture.jpg" , this.gl);
-    material.normalTex = EngineCache.getTexture2D( "assets/images/wood-texture-normal-map.jpg" , this.gl);
-    material.name = "Grid material";
+
 
     const shader = new LitShader(this.gl, material);
     const renderer = new TexturedRendererBehaviour(this.gl);
+    renderer.name = "Renderer";
+
+    material.mainTex = EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
+    // material.normalTex = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
+
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
+
     planeEntity.addBehaviour(renderer);
 
     scene.addEntity(planeEntity);
@@ -137,6 +152,7 @@ export class App implements OnDestroy {
 
 
     const rendererBehaviour = new TexturedRendererBehaviour(this.gl);
+    rendererBehaviour.name = "Renderer";
     rendererBehaviour.shader = shader;
     rendererBehaviour.mesh.meshData = monkeyObj;
 
@@ -226,41 +242,29 @@ export class App implements OnDestroy {
   private async createSkybox(scene: Scene, useWhiteTexture = true) {
 
     const renderer = new SkyboxRenderer(this.gl);
-    const material = new EditorSkyboxMaterial();
-    const shader = new EditorSkyboxShader(this.gl, material);
-    const cubePrimitive = new CubePrimitive();
+    const material = new CubemapMaterial();
+    const shader = new SkyboxShader(this.gl, material);
+    const cubePrimitive = new SpherePrimitive();
     renderer.writeToDephBuffer = false;
-    renderer.renderLayer = RenderLayer.SKYBOX;
     renderer.shader = shader;
     renderer.mesh.meshData = cubePrimitive;
 
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
-    material.color = Colors.aliceBlue;
-
-    const whiteTexUris = {
-      right: "assets/images/white.jpg",
-      left: "assets/images/white.jpg",
-      up: "assets/images/white.jpg",
-      bottom: "assets/images/white.jpg",
-      front: "assets/images/white.jpg",
-      back: "assets/images/white.jpg"
-    }
 
     const skyboxTextures = {
-      right: "assets/images/skybox/cloud/right.jpeg",
-      left: "assets/images/skybox/cloud/left.jpeg",
-      up: "assets/images/skybox/cloud/top.jpeg",
-      bottom: "assets/images/skybox/cloud/bottom.jpeg",
-      front: "assets/images/skybox/cloud/front.jpeg",
-      back: "assets/images/skybox/cloud/back.jpeg"
+      right: "assets/images/skybox/blue/right.jpeg",
+      left: "assets/images/skybox/blue/left.jpeg",
+      up: "assets/images/skybox/blue/top.jpeg",
+      bottom: "assets/images/skybox/blue/bottom.jpeg",
+      front: "assets/images/skybox/blue/front.jpeg",
+      back: "assets/images/skybox/blue/back.jpeg"
 
     }
-    const texture = EngineCache.getTextureCube(useWhiteTexture ? whiteTexUris : skyboxTextures, this.gl) as CubemapTexture;
+    const texture =  EngineCache.getTextureCube( skyboxTextures, this.gl);
     material.mainTex = texture;
     const skyboxEntity = new GlEntity(material.name);
+
     skyboxEntity.addBehaviour(renderer);
-    const c = new Color();
-    console.debug(c.className)
     scene.addEntity(skyboxEntity);
   }
 

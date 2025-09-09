@@ -1,15 +1,20 @@
+import { JsonSerializable } from "omega-game-engine";
+
 /**
  * Represents a 3D bounding box defined by its minimum and maximum coordinates.
  */
-export class BoundingBox {
+export class BoundingBox extends JsonSerializable {
   constructor(
+
     public min_x: number,
     public max_x: number,
     public min_y: number,
     public max_y: number,
     public min_z: number,
     public max_z: number
-  ) {}
+  ) {
+    super("BoundingBox");
+  }
 
   /**
    * Gets the width of the bounding box.
@@ -32,29 +37,18 @@ export class BoundingBox {
     return this.max_z - this.min_z;
   }
 
-  /**
-   * Returns a string representation of the bounding box's dimensions.
-   */
-  getDimensions(): string {
-    return `Width: ${this.width}, Height: ${this.height}, Depth: ${this.depth}`;
-  }
 }
 
 /**
  * Represents a 3D bounding sphere defined by its center and radius.
  */
-export class BoundingSphere {
+export class BoundingSphere extends JsonSerializable {
   constructor(
     public x: number,
     public y: number,
     public z: number,
     public radius: number
-  ) {}
-
-  /**
-   * Returns a string representation of the bounding sphere's properties.
-   */
-  toString(): string {
-    return `Center: (${this.x}, ${this.y}, ${this.z}), Radius: ${this.radius}`;
+  ) {
+    super("BoundingSphere");
   }
 }

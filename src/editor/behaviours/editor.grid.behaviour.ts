@@ -1,13 +1,14 @@
 
-import { Color, ColorMaterial, Colors, DephFunction, GlEntity, Mesh, MeshData, RendererBehaviour, SceneEntityBehaviour, Shader, Vector3 } from "omega-game-engine";
-import { BoundingBox } from "../overrides/bounding-box";
 import { vec3 } from "gl-matrix";
+import { Color, ColorMaterial, Colors, DephFunction, Mesh, MeshData, RendererBehaviour, SceneEntityBehaviour, Shader, Vector3 } from "omega-game-engine";
 
 
 export class EditorGridBehaviour extends RendererBehaviour implements SceneEntityBehaviour {
 
   public gridColor: Color = new Color(0.31, 0.31, 0.48);
-  private _boundingBox?: BoundingBox;
+  public gridLineWidt  = 1.0;
+
+
 
   constructor(gl: WebGL2RenderingContext) {
     super(gl);
@@ -16,42 +17,32 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
     this.dephMode = DephFunction.LessOrEqual;
     this.createMesh();
     this._gl.lineWidth(1.0);
+
   }
 
-  protected createMesh(){
+  protected createMesh() {
     this.mesh = new Mesh();
     this.mesh.meshData = new MeshData([]);
   }
 
   protected createGridVertices() {
-    const vertices:vec3[] = [];
+    const vertices: vec3[] = [];
     return vertices;
-  }
-
-  public setTargetEntity(entity: GlEntity | null) {
-    if (entity == null) {
-      this._boundingBox = undefined;
-      return;
-    }
-    const renderer = entity.getBehaviour(RendererBehaviour);
-    if (!renderer){
-      console.debug("no renderer found!", entity.name);
-      return;
-    }
   }
 
 
   override draw(): void {
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
-
+    const count = 10;
     this.shader.use();
     this.setShaderVariables();
     this.shader.material.color.set(...this.gridColor.toVec4())
-    const count = 10;
     this.drawHorizontalLines(count);
     this.drawVerticalLines(count);
   }
+
+
 
   protected drawVerticalLines(count: number = 10) {
     let fromV = new Vector3();

@@ -1,6 +1,7 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { EditorCameraBehaviour } from "@editor/behaviours/editor.camera";
 import { Scene, Camera } from "omega-game-engine";
+import { BehaviorSubject, Observable } from "rxjs";
 
 
 @Injectable({ providedIn: 'root' })
@@ -17,6 +18,9 @@ export class EditorService {
   onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
   onCanvasRequestResize = new EventEmitter();
   onCanvasRequestReset = new EventEmitter();
+
+  onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(null);
+  onUpdateFrame = new BehaviorSubject<number>(0);
 
   private camera!: Camera;
   constructor() {
@@ -46,7 +50,7 @@ export class EditorService {
   }
 
 
-  protected initializeEditorCamera(){
+  protected initializeEditorCamera() {
     this.camera = new Camera();
     this.camera.name = "Editor Camera"
     this.camera.updateInEditor = true;
@@ -54,7 +58,9 @@ export class EditorService {
     Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
     this.camera.initialize();
     this.camera.update(1);
-    this.camera.transform.translate(2,3,10);
+    this.camera.transform.translate(2, 3, 10);
+    this.camera.fieldOfView = 65;
+    debugger
   }
 
 

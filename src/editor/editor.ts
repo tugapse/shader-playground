@@ -7,9 +7,11 @@ import { SceneTreeService } from './services/scene-tree.service';
 import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
 import { Inpector } from './inspectors/inpector/inpector';
-import { Scene, GlEntity, JsonSerializedData, SceneManager, Color, Colors } from 'omega-game-engine';
+import { Scene, GlEntity, JsonSerializedData, SceneManager, Color, Colors, Shader, Vector3 } from 'omega-game-engine';
 import { EditorService } from './services/editor.service';
-import { EditorGridBehaviour } from './behaviours/editor.grid.behaviour';
+import { EditorGridBehaviour as EditorSceneBehaviour } from './behaviours/editor.grid.behaviour';
+import { EditorBoundingBoxBehaviour } from './behaviours/editor-boudingbox.behaviour';
+import { EntityPicker as EditorEntityPicker } from './behaviours/entitypick.behaviour';
 
 
 @Component({
@@ -30,7 +32,9 @@ export class Editor implements OnDestroy, OnInit {
   protected subs$: Subscription[] = [];
 
   protected sceneState?: JsonSerializedData | null = null;
-  protected gridBehaviour!: EditorGridBehaviour;
+  protected editorSceneBehaviour!: EditorSceneBehaviour;
+  protected editorBoundingBoxBehaviour!: EditorBoundingBoxBehaviour;
+  protected editorPickerBehaviour!: EditorEntityPicker;
 
   constructor(
     protected editorService: EditorService,
@@ -51,9 +55,6 @@ export class Editor implements OnDestroy, OnInit {
     this.gl = gl;
     this.editorService.onRenderingContextCreated.emit(this.gl);
     this.createEditorBehaviours();
-
-
-
   }
 
   protected onSceneLoaded(scene: Scene) {
@@ -64,12 +65,15 @@ export class Editor implements OnDestroy, OnInit {
     this.scene.clearColor = Colors.cornflowerBlue;
     this.scene.setGlRenderingContext(this.gl);
     this.scene.inEditMode = true;
-    this.scene.addBehaviour(this.gridBehaviour);
-    this.gridBehaviour.initialize();
+    this.addEditorBehaviours();
+
+    this.editorSceneBehaviour.initialize();
   }
 
+
+
   protected onScenePlay(scene: Scene) {
-    if(this.scene.isRunning) return;
+    if (this.scene.isRunning) return;
     this.sceneState = SceneManager.creatSceneSnapshot(scene);
     this.scene.initialize();
     this.scene.isRunning = true;
@@ -96,6 +100,9 @@ export class Editor implements OnDestroy, OnInit {
 
   protected onSceneTreeEntitySelected(entity: GlEntity): void {
     this.inspectorSelectedEntity = entity;
+    this.editorBoundingBoxBehaviour.setTargetEntity(entity);
+    this.editorPickerBehaviour.setTargetEntity(entity);
+
   }
 
   protected subscribeEvents(): void {
@@ -128,7 +135,16 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   createEditorBehaviours() {
-    this.gridBehaviour = new EditorGridBehaviour(this.gl);
+    this.editorSceneBehaviour = new EditorSceneBehaviour(this.gl);
+    this.editorBoundingBoxBehaviour = new EditorBoundingBoxBehaviour(this.gl);
+    this.editorPickerBehaviour = new EditorEntityPicker(this.gl, this.sceneTreeService);
+    this.editorPickerBehaviour.boundingBehaviour = this.editorBoundingBoxBehaviour;
 
+  }
+
+  addEditorBehaviours() {
+    this.scene.addBehaviour(this.editorSceneBehaviour);
+    this.scene.addBehaviour(this.editorBoundingBoxBehaviour);
+    this.scene.addBehaviour(this.editorPickerBehaviour);
   }
 }
