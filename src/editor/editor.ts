@@ -12,6 +12,8 @@ import { EditorService } from './services/editor.service';
 import { EditorGridBehaviour as EditorSceneBehaviour } from './behaviours/editor.grid.behaviour';
 import { EditorBoundingBoxBehaviour } from './behaviours/editor-boudingbox.behaviour';
 import { EntityPicker as EditorEntityPicker } from './behaviours/entitypick.behaviour';
+import { EditorSettingsService } from './services/editor.settings';
+import { IEditorSettings } from './interfaces/editor-settings';
 
 
 @Component({
@@ -36,9 +38,11 @@ export class Editor implements OnDestroy, OnInit {
   protected editorBoundingBoxBehaviour!: EditorBoundingBoxBehaviour;
   protected editorPickerBehaviour!: EditorEntityPicker;
 
+  private settings!: IEditorSettings;
   constructor(
     protected editorService: EditorService,
-    protected sceneTreeService: SceneTreeService) {
+    protected sceneTreeService: SceneTreeService,
+    protected editorSettings: EditorSettingsService) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
   }
@@ -73,7 +77,11 @@ export class Editor implements OnDestroy, OnInit {
 
 
   protected onScenePlay(scene: Scene) {
-    if (this.scene.isRunning) return;
+    if (this.scene.isRunning || this.isPaused){
+      this.scene.isRunning = true;
+      this.isPaused = false;
+      return;
+    }
     this.sceneState = SceneManager.creatSceneSnapshot(scene);
     this.scene.initialize();
     this.scene.isRunning = true;
@@ -101,8 +109,6 @@ export class Editor implements OnDestroy, OnInit {
   protected onSceneTreeEntitySelected(entity: GlEntity): void {
     this.inspectorSelectedEntity = entity;
     this.editorBoundingBoxBehaviour.setTargetEntity(entity);
-    this.editorPickerBehaviour.setTargetEntity(entity);
-
   }
 
   protected subscribeEvents(): void {
@@ -112,6 +118,7 @@ export class Editor implements OnDestroy, OnInit {
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
     this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));
+    this.subs$.push(this.editorSettings.onSettingsChanged.subscribe(this.updateEditorSettings.bind(this)));
   }
 
   onEditorSaveInStorage(): void {
@@ -139,12 +146,19 @@ export class Editor implements OnDestroy, OnInit {
     this.editorBoundingBoxBehaviour = new EditorBoundingBoxBehaviour(this.gl);
     this.editorPickerBehaviour = new EditorEntityPicker(this.gl, this.sceneTreeService);
     this.editorPickerBehaviour.boundingBehaviour = this.editorBoundingBoxBehaviour;
-
+    this.updateEditorSettings(this.settings);
   }
 
   addEditorBehaviours() {
     this.scene.addBehaviour(this.editorSceneBehaviour);
     this.scene.addBehaviour(this.editorBoundingBoxBehaviour);
     this.scene.addBehaviour(this.editorPickerBehaviour);
+  }
+  private updateEditorSettings(newSettings: IEditorSettings) {
+    this.settings = newSettings;
+
+    this.editorSceneBehaviour.gridColor = this.settings.sceneEditor.gridColor;
+    this.editorBoundingBoxBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
+    this.editorBoundingBoxBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
   }
 }

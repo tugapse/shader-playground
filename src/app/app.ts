@@ -16,6 +16,7 @@ import {
 
 import { LightMoveBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
+import { LookAtFollowBehaviour } from '@editor/behaviours/look-at-follow';
 
 @Component({
   selector: 'app-root',
@@ -75,8 +76,8 @@ export class App implements OnDestroy {
 
   private async loadAssets(scene: Scene) {
     await this.createFloor(scene);
-    await this.otherObjetcs(scene);
     await this.createLights(scene);
+    await this.otherObjetcs(scene);
     await this.addMonkeyObj(scene);
     await this.createSkybox(scene);
 
@@ -101,9 +102,9 @@ export class App implements OnDestroy {
 
     const torusPrimitive = await EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
     const torus = this.createEntity("torus", torusPrimitive, new TexturedRendererBehaviour(this.gl));
+    torus.transform.setParent(this.light.transform);
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);
-
     torus.addBehaviour(new RotateBehaviour());
     scene.addEntity(torus);
 
@@ -260,7 +261,7 @@ export class App implements OnDestroy {
       back: "assets/images/skybox/blue/back.jpeg"
 
     }
-    const texture =  EngineCache.getTextureCube( skyboxTextures, this.gl);
+    const texture = EngineCache.getTextureCube(skyboxTextures, this.gl);
     material.mainTex = texture;
     const skyboxEntity = new GlEntity(material.name);
 

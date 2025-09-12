@@ -1,7 +1,10 @@
 @if(entity){
 <div class="header">
-  <app-toggle title="Activate/Deactivate Entity. If disabled will disable the entity!"  [active]="entity.active" (change)="entity.active = !entity.active"></app-toggle>
-
+  <app-toggle title="Activate and deactivate the entity. If disabled will prevernt update and draw"
+    [active]="entity.active" (change)="entity.active = !entity.active"></app-toggle>
+  <app-icon title="Activate and deactivate the entity render. If disabled will prevernt only the draw on the entity"
+    class="view-icon" [iconName]="entity.show ? 'fa-eye' : 'fa-eye-slash'"
+    (click)="entity.show = !entity.show"></app-icon>
   <!-- <app-icon title="Activate/Deactivate Entity. If disabled will disable the entity!" class="view-icon" [iconName]="entity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
     (click)="entity.active = !entity.active"></app-icon> -->
   <span class="title">{{windowTitle}}</span>
@@ -9,7 +12,7 @@
     <!-- <app-icon class="icon" iconName="fa-close" (click)="entity=null"></app-icon>
     <app-icon class="view-icon" [iconName]="entity.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
       (click)="entity.active = !entity.active"></app-icon> -->
-    <app-icon title="Close inspector"  class="icon" iconName="fa-close" (click)="onClose()"></app-icon>
+    <app-icon title="Close inspector" class="icon" iconName="fa-close" (click)="onClose()"></app-icon>
   </div>
 </div>
 

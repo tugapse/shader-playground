@@ -14,7 +14,7 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
     super(gl);
     const material = new ColorMaterial();
     this.shader = new Shader(this._gl, material);
-    this.dephMode = DephFunction.LessOrEqual;
+    this.dephMode = DephFunction.Less;
     this.createMesh();
     this._gl.lineWidth(1.0);
 

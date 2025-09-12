@@ -2,22 +2,17 @@
   <h4>Scene Tree</h4>
   <div>
     <app-icon class="icon" iconName="fa-add"></app-icon>
-    <app-icon class="icon" iconName="fa-filter"></app-icon>
+    <!-- <app-icon class="icon" iconName="fa-filter"></app-icon> -->
   </div>
 </div>
-<section>
-
-  @for (obj of objectsToDraw; track $index) {
-
-  <div class="item-container" (click)="entitySelected(obj,$event)" [ngClass]="{selected:selectedUuid==obj.uuid}">
-    <app-icon [iconName]="iconNames[obj.entityType]"></app-icon>
-    <span class="item-value" [id]="obj.uuid">
-      {{obj.name}}
-    </span>
-    <app-icon class="view-icon" [iconName]="obj.show ? 'fa-eye' : 'fa-eye-slash'"
-      (click)="toggleObj(obj,$event)"></app-icon>
-  </div>
+<div class="tree-body">
+  @for (node of sceneTreeNodes; track node.name) {
+  <app-tree-node [node]="node" [selectedNodeId]="selectedUuid"
+    (nodeSelected)="onNodeSelected($event)" (nodeDropped)="handleNodeDropped($event)" />
   }@empty {
   <div>No Objects added to the scene</div>
   }
-</section>
+</div>
+<div class="tree">
+
+</div>

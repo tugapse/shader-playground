@@ -5,48 +5,16 @@
 
   .tree-header {
     display: flex;
+    flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
-    background-image: linear-gradient(to right, #19212e, #1b2636, #0c1d3a);
-    width: 100%;
     padding: 4px;
   }
-  .tree-header .icon{
-    &:hover{
-      cursor: pointer;
-      color: #4715dc;
-    }
-  }
 
-  section .item-container {
-    transition: all var(--trans-time);
-    align-items: center;
-    display: flex;
-    border-radius: 2px;
-    margin: 2px 0;
-    padding: 2px 0;
-
+  .tree-header .icon {
     &:hover {
-      color: rgb(159, 187, 219);
-      background-image: linear-gradient(to right, #0c1d3a, #0095eb);
       cursor: pointer;
-    }
-    &.selected{
-      background-color: #0095eb;
-    }
-  }
-
-  section .item-value {
-    flex-grow: 1;
-    margin-left: 4px;
-  }
-
-  section .view-icon {
-    cursor: pointer;
-    transition: all var(--trans-time);
-
-    &:hover {
-      color: #202020
+      color: #07acff;
     }
   }
 }

@@ -29,11 +29,7 @@ void main() {
                         (u_matColor.a * sampledTexColor.a));
 
   @INCLUDE_LIGHT_FUNC
-
-      // --- Final Color Output ---
-      // Clamp the final lit color to the [0.0, 1.0] range before outputting.
-      // fragColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
-      fragColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
+  fragColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
 
   if (u_id > 0.0) {
     fragColor = vec4(u_id / 255.0, 0.0, 0.0, 1.0);

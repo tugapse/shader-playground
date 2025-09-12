@@ -1,0 +1,17 @@
+<div class="tree-node" [id]="node.id" [class.drop-inside]="isDropInside" [class.drop-above]="isDropAbove"
+  [class.drop-below]="isDropBelow" [class.selected]="selectedNodeId == node.id" [draggable]="true"
+  (dragstart)="onDragStart($event)" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)" (click)="onMouseUp(node,$event)">
+  <div class="tree-node-content">
+    <app-icon [iconName]="node.icon"></app-icon>
+    <div class="tree-node-name"> {{ node.name }} </div>
+  </div>
+</div>
+@if (node.children && node.children.length > 0) {
+<div class="tree-node-children">
+  @for (childNode of node.children; track childNode.name) {
+  <app-tree-node [node]="childNode" [selectedNodeId]="selectedNodeId"
+  (nodeSelected)="onNodeClick($event)" (nodeDropped)="onChildDropped($event)" />
+  }
+</div>
+}

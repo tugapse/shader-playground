@@ -28,7 +28,7 @@ export class EntityPicker extends RendererBehaviour implements SceneEntityBehavi
   }
   afterUpdate(): void {
 
-   }
+  }
   beforeDraw(): void {
 
   }
@@ -43,31 +43,10 @@ export class EntityPicker extends RendererBehaviour implements SceneEntityBehavi
   override draw(): void {
 
     this.renderAndGetSelected();
-            if (Mouse.mouseButtonDown[0] && this.sceneTreeService && this.selectedEntityId != this.lastClickedId) {
+    if (Mouse.mouseButtonDown[0] && this.sceneTreeService && this.selectedEntityId != this.lastClickedId) {
       this.lastClickedId = this.selectedEntityId;
-      debugger
-      this.sceneTreeService.onEntitySelected.emit((this.parent as Scene).objects[this.selectedEntityId-1]);
+      this.sceneTreeService.onEntitySelected.emit((this.parent as Scene).objects[this.selectedEntityId - 1]);
     }
-  }
-
-
-  public setTargetEntity(entity: GlEntity | null) {
-    if (this.material && this.entityTexture) {
-      this.material.mainTex = this.entityTexture;
-    }
-    if (entity == null) {
-      return;
-    }
-    const renderer = entity.getBehaviour(RendererBehaviour) as RendererBehaviour;
-    if (!renderer) {
-      console.debug("no renderer found!", entity.name);
-      return;
-    }
-    // if (renderer.shader?.material) {
-    //   this.material = (renderer.shader.material as UnlitMaterial)
-    //   this.entityTexture = this.material.mainTex;
-    //   this.material.mainTex = this.renderTexture;
-    // }
   }
 
   public renderAndGetSelected() {
@@ -75,7 +54,6 @@ export class EntityPicker extends RendererBehaviour implements SceneEntityBehavi
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
 
-    // this.renderTexture.bind();
     if (this.width != CanvasViewport.rendererWidth || this.height != CanvasViewport.rendererHeight) {
       if (this.renderLayer) this.renderTexture.destroy();
       this.width = CanvasViewport.rendererWidth;

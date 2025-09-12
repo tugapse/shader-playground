@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { SceneTree } from "../scene-tree/scene-tree";
 import { Scene } from 'omega-game-engine';
+import { SceneTree } from "../scene-tree/scene-tree";
 
 @Component({
   selector: 'editor-sidebar',

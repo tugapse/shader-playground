@@ -7,10 +7,22 @@
     border-bottom: var(--editor-panel-border);
     padding-bottom: 6px;
     margin-bottom: 6px;
+    gap: 6px;
 
   }
-  .header .title{
-    color:var(--editor-panel-header-title-color);
+
+  .header .view-icon {
+    padding: 2px 4px;
+    &:hover {
+      cursor: pointer;
+      color: #07acff;
+    }
+  }
+
+  .header .title {
+    text-align: center;
+    color: var(--editor-panel-header-title-color);
+    flex-grow: 1;
   }
 
   .header .buttons {
