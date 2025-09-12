@@ -77,7 +77,7 @@ export class Editor implements OnDestroy, OnInit {
 
 
   protected onScenePlay(scene: Scene) {
-    if (this.scene.isRunning || this.isPaused){
+    if (this.scene.isRunning || this.isPaused) {
       this.scene.isRunning = true;
       this.isPaused = false;
       return;
@@ -156,9 +156,12 @@ export class Editor implements OnDestroy, OnInit {
   }
   private updateEditorSettings(newSettings: IEditorSettings) {
     this.settings = newSettings;
+    if (this.editorSceneBehaviour)
+      this.editorSceneBehaviour.gridColor = this.settings.sceneEditor.gridColor;
+    if (this.editorBoundingBoxBehaviour) {
 
-    this.editorSceneBehaviour.gridColor = this.settings.sceneEditor.gridColor;
-    this.editorBoundingBoxBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
-    this.editorBoundingBoxBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
+      this.editorBoundingBoxBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
+      this.editorBoundingBoxBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
+    }
   }
 }

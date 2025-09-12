@@ -44,7 +44,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
       console.debug("no renderer found!", entity.name);
       return;
     }
-    const box = renderer.mesh.meshData.get_bounding_box(renderer.mesh.meshData.vertices);
+    const box = renderer.mesh.meshData.getBoundingBox(renderer.mesh.meshData.vertices);
     this.selectedBoundingBox = box;
     this.selectedEntity = entity;
   }
@@ -59,7 +59,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
       console.debug("no renderer found!", entity.name);
       return;
     }
-    const box = renderer.mesh.meshData.get_bounding_box(renderer.mesh.meshData.vertices);
+    const box = renderer.mesh.meshData.getBoundingBox(renderer.mesh.meshData.vertices);
     this.hoveredBoundingBox = box;
     this.hoveredEntity = entity;
   }
