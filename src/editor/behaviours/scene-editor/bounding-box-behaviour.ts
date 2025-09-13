@@ -1,9 +1,15 @@
 
-import { BoundingBox, Camera, Color, ColorMaterial, Colors, DephFunction, GlEntity, Mesh, MeshData, RendererBehaviour, SceneEntityBehaviour, Shader, ShaderUniformsEnum, Transform, Vector3 } from "omega-game-engine";
 import { mat4, vec3 } from "gl-matrix";
+import {
+  BoundingBox, Camera, Color,
+  ColorMaterial, Colors, DephFunction, GlEntity, Mesh, MeshData,
+  RendererBehaviour,
+  Shader, ShaderUniformsEnum,
+  Transform, Vector3
+} from "omega-game-engine";
 
 
-export class EditorBoundingBoxBehaviour extends RendererBehaviour implements SceneEntityBehaviour {
+export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
   public selectedBoundingBoxColor: Color = Colors.gray;
   public selectedBoundingBoxLineWidth = 3.0;
@@ -20,6 +26,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
     super(gl);
     const material = new ColorMaterial();
     this.shader = new Shader(this._gl, material);
+    this.shader.initialize();
     this.dephMode = DephFunction.LessOrEqual;
     this.createMesh();
   }
@@ -64,9 +71,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
     this.hoveredEntity = entity;
   }
 
-
-
-  override draw(): void {
+  public override draw(): void {
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
 
@@ -109,10 +114,10 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
 
     // looking from front
     // top left far left quad
-    const topLeftFar = new Vector3(min_x - spacing, max_y + spacing, min_z- spacing);
-    const topLeftNear = new Vector3(min_x - spacing, max_y+ spacing, max_z+ spacing);
-    const bottomLeftFar = new Vector3(min_x - spacing, min_y - spacing, min_z- spacing);
-    const bottomLeftNear = new Vector3(min_x - spacing, min_y - spacing, max_z+ spacing);
+    const topLeftFar = new Vector3(min_x - spacing, max_y + spacing, min_z - spacing);
+    const topLeftNear = new Vector3(min_x - spacing, max_y + spacing, max_z + spacing);
+    const bottomLeftFar = new Vector3(min_x - spacing, min_y - spacing, min_z - spacing);
+    const bottomLeftNear = new Vector3(min_x - spacing, min_y - spacing, max_z + spacing);
 
     this.drawLine(topLeftFar, topLeftNear);
     this.drawLine(bottomLeftFar, bottomLeftNear);
@@ -120,10 +125,10 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
     this.drawLine(topLeftNear, bottomLeftNear);
 
     // top right far right quad
-    const topRightFar = new Vector3(max_x+ spacing, max_y+ spacing, min_z- spacing);
-    const topRightNear = new Vector3(max_x+ spacing, max_y+ spacing, max_z+ spacing);
-    const bottomRightFar = new Vector3(max_x+ spacing, min_y- spacing, min_z- spacing);
-    const bottomRightNear = new Vector3(max_x, min_y- spacing, max_z+ spacing);
+    const topRightFar = new Vector3(max_x + spacing, max_y + spacing, min_z - spacing);
+    const topRightNear = new Vector3(max_x + spacing, max_y + spacing, max_z + spacing);
+    const bottomRightFar = new Vector3(max_x + spacing, min_y - spacing, min_z - spacing);
+    const bottomRightNear = new Vector3(max_x, min_y - spacing, max_z + spacing);
 
     this.drawLine(topRightFar, topRightNear);
     this.drawLine(bottomRightFar, bottomRightNear);
@@ -156,21 +161,8 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour implements Sce
       fromH.set(-count, 0, z);
       toH.set(count, 0, z);
       this.drawLine(fromH, toH);
-
     }
 
-
-
-  }
-
-
-  beforeUpdate(ellapsed: number): void {
-  }
-  afterUpdate(): void {
-  }
-  beforeDraw(): void {
-  }
-  afterDraw(): void {
   }
 
 }

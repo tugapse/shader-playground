@@ -1,12 +1,12 @@
 
 import { vec3 } from "gl-matrix";
-import { Color, ColorMaterial, Colors, DephFunction, Mesh, MeshData, RendererBehaviour, SceneEntityBehaviour, Shader, Vector3 } from "omega-game-engine";
+import { Color, ColorMaterial, DephFunction, Mesh, MeshData, RendererBehaviour, RenderLayer, SceneEntityBehaviour, Shader, Vector3 } from "omega-game-engine";
 
 
-export class EditorGridBehaviour extends RendererBehaviour implements SceneEntityBehaviour {
+export class EditorGridBehaviour extends RendererBehaviour {
 
   public gridColor: Color = new Color(0.31, 0.31, 0.48);
-  public gridLineWidt  = 1.0;
+  public gridLineWidt = 1.0;
 
 
 
@@ -14,7 +14,9 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
     super(gl);
     const material = new ColorMaterial();
     this.shader = new Shader(this._gl, material);
+    this.shader.initialize();
     this.dephMode = DephFunction.Less;
+    this.renderLayer = RenderLayer.POST_SCENE;
     this.createMesh();
     this._gl.lineWidth(1.0);
 
@@ -22,6 +24,7 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
 
   protected createMesh() {
     this.mesh = new Mesh();
+
     this.mesh.meshData = new MeshData([]);
   }
 
@@ -33,7 +36,9 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
 
   override draw(): void {
     if (!this.shader?._shaderProgram) return;
-    if (!this._initialized) super.initialize();
+    if (!this._initialized) {
+      this.initialize();
+    }
     const count = 10;
     this.shader.use();
     this.setShaderVariables();
@@ -67,16 +72,6 @@ export class EditorGridBehaviour extends RendererBehaviour implements SceneEntit
 
 
 
-  }
-
-
-  beforeUpdate(ellapsed: number): void {
-  }
-  afterUpdate(): void {
-  }
-  beforeDraw(): void {
-  }
-  afterDraw(): void {
   }
 
 }

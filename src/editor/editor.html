@@ -3,9 +3,9 @@
 <div class="container">
 
   <editor-sidebar [scene]="scene"></editor-sidebar>
+    @if(canvasVisible){ <editor-canvas tabindex="0" class="canvas" [scene]="scene"
+      (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>}
 
-  @if(canvasVisible){ <editor-canvas tabindex="0" class="canvas" [scene]="scene"
-    (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>}
 
 </div>
 

@@ -1,9 +1,8 @@
-import { mat4 } from "gl-matrix";
-import { RendererBehaviour, SceneEntityBehaviour, Texture, CanvasViewport, Scene, Shader, ColorMaterial, MeshData, UnlitMaterial, GlEntity, Camera, ShaderUniformsEnum, Mouse } from "omega-game-engine";
-import { EditorBoundingBoxBehaviour } from "./editor-boudingbox.behaviour";
 import { SceneTreeService } from "@editor/services/scene-tree.service";
+import { CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, Texture, UnlitMaterial } from "omega-game-engine";
+import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
 
-export class EntityPicker extends RendererBehaviour implements SceneEntityBehaviour {
+export class EntityPicker extends RendererBehaviour {
 
   renderTexture: Texture;
   entityTexture?: Texture;
@@ -21,32 +20,27 @@ export class EntityPicker extends RendererBehaviour implements SceneEntityBehavi
     super(gl);
     this.renderTexture = Texture.create(gl, 1024, 1024, null);
     this.shader = new Shader(gl, new ColorMaterial());
+    this.shader.initialize();
     this.mesh.meshData = new MeshData([]);
-  }
-
-  beforeUpdate(ellapsed: number): void {
-  }
-  afterUpdate(): void {
-
-  }
-  beforeDraw(): void {
-
-  }
-  afterDraw(): void { }
-
-  override update(ellapsed: number): void {
-
-
   }
 
 
   override draw(): void {
 
     this.renderAndGetSelected();
-    if (Mouse.mouseButtonDown[0] && this.sceneTreeService && this.selectedEntityId != this.lastClickedId) {
+    if (this.canSelectEntity()) {
       this.lastClickedId = this.selectedEntityId;
       this.sceneTreeService.onEntitySelected.emit((this.parent as Scene).objects[this.selectedEntityId - 1]);
     }
+  }
+
+  private canSelectEntity() {
+    return (
+      Keybord.keyDown['control'] &&
+      Mouse.mouseButtonDown[0] &&
+      this.sceneTreeService &&
+      this.selectedEntityId != this.lastClickedId
+    );
   }
 
   public renderAndGetSelected() {
@@ -64,9 +58,9 @@ export class EntityPicker extends RendererBehaviour implements SceneEntityBehavi
     this.setRenderTarget(this.renderTexture.glTexture!, this.width, this.height);
 
     const obs = (this.parent as Scene).objects;
-    let count = 0.0;
+    let count = 0;
     for (const ob of obs) {
-      count += 1.0;
+      count += 1;
       const renderer = ob.getBehaviour(RendererBehaviour);
       if (renderer?.shader?._shaderProgram) {
         renderer.shader.use();

@@ -154,6 +154,7 @@ export class Canvas implements OnChanges {
   public render(timestamp: number) {
 
     const elapsed = timestamp - this.lastTime;
+
     if (!this.scene || this.shouldRender() == false) {
       setTimeout(() => requestAnimationFrame(this.render.bind(this)), 50);
       this.cleanInput();
@@ -167,9 +168,9 @@ export class Canvas implements OnChanges {
       const delta = elapsed / 1000;
       this.editorService.onUpdateFrame.next(delta);
       this.scene.update(delta);
-      this.editorService.onRenderFrame.next(this.gl);
       if (this.gl && this.canvasElement) {
         this.scene.draw();
+        this.editorService.onRenderFrame.next(this.gl);
       }
     }
     this.cleanInput();

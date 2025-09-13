@@ -26,7 +26,7 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     return true;
   }
 
-protected override updateInput(ellapsed: number) {
+  protected override updateInput(ellapsed: number) {
     if (!this._initialized || !this.parent?.transform) return;
     const transform = this.parent.transform;
 
@@ -71,7 +71,7 @@ protected override updateInput(ellapsed: number) {
       this._strafeVelocity += Mouse.mouseMovement.x * this.moveDampening / 2.0;
     }
 
-   this._forwardVelocity -= Mouse.wheelY * this.moveDampening ;
+    this._forwardVelocity -= Mouse.wheelY * this.moveDampening;
 
     // --- Camera Movement Logic ---
     const movementVector = vec3.create();
@@ -112,7 +112,5 @@ protected override updateInput(ellapsed: number) {
     quat.slerp(smoothedRotation, transform.rotationQuat, finalRotation, this.rotationDampening);
     transform.setRotationQuat(smoothedRotation);
   }
-
-
 
 }

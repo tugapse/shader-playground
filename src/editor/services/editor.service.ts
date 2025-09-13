@@ -1,7 +1,7 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { EditorCameraBehaviour } from "@editor/behaviours/editor.camera";
-import { Scene, Camera } from "omega-game-engine";
-import { BehaviorSubject, Observable } from "rxjs";
+import { Camera, Scene } from "omega-game-engine";
+import { BehaviorSubject } from "rxjs";
 
 
 @Injectable({ providedIn: 'root' })
@@ -60,7 +60,6 @@ export class EditorService {
     this.camera.update(1);
     this.camera.transform.translate(2, 3, 10);
     this.camera.fieldOfView = 65;
-    debugger
   }
 
 
