@@ -4,12 +4,6 @@ import { CameraFlyBehaviour, Keybord, Mouse, Transform } from "omega-game-engine
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
-
-
-  override get transform(): Transform {
-    return this.parent.transform;
-  }
-
   public scroolSpeed = 2;
   public initialPitch = 15;
   public initialYaw = -180;
@@ -19,21 +13,25 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     this.moveSpeed = 20.5;
     this.moveDampening = 0.2;
     this.rotationSpeed = 0.4;
-    this.rotationDampening = 0.3;
+    this.rotationDampening = 0.2;
     this._acceleration = 5;
     this._currentPitch = this.initialPitch;
     this._currentYaw = this.initialYaw;
     return true;
   }
 
-  protected override updateInput(ellapsed: number) {
-    if (!this._initialized || !this.parent?.transform) return;
-    const transform = this.parent.transform;
-
+  protected updateMoveVelocity(ellapsed: number) {
     const accelerationDelta = this._acceleration * ellapsed;
     const maxSpeed = this.moveSpeed;
     const stopThreshold = 0.1;
 
+    this.updateForwardVelocity(accelerationDelta, maxSpeed, stopThreshold);
+    this.updateStrafeVelocity(accelerationDelta,maxSpeed,stopThreshold);
+    this.updateUpVelocity(accelerationDelta,maxSpeed,stopThreshold);
+
+  }
+
+  protected updateForwardVelocity(accelerationDelta: number, maxSpeed: number, stopThreshold: number) {
     if (Keybord.keyDown[this.moveKeys.forward]) {
       this._forwardVelocity = Math.min(this._forwardVelocity + accelerationDelta, maxSpeed);
     } else if (Keybord.keyDown[this.moveKeys.back]) {
@@ -44,18 +42,9 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
         this._forwardVelocity = 0;
       }
     }
+  }
 
-    if (Keybord.keyDown[this.moveKeys.left]) {
-      this._strafeVelocity = Math.min(this._strafeVelocity + accelerationDelta, maxSpeed);
-    } else if (Keybord.keyDown[this.moveKeys.right]) {
-      this._strafeVelocity = Math.max(this._strafeVelocity - accelerationDelta, -maxSpeed);
-    } else {
-      this._strafeVelocity *= (1 - this.moveDampening);
-      if (Math.abs(this._strafeVelocity) < stopThreshold) {
-        this._strafeVelocity = 0;
-      }
-    }
-
+  protected updateStrafeVelocity(accelerationDelta: number, maxSpeed: number, stopThreshold: number) {
     if (Keybord.keyDown[this.moveKeys.up]) {
       this._upVelocity = Math.max(this._upVelocity - accelerationDelta, -maxSpeed);
     } else if (Keybord.keyDown[this.moveKeys.down]) {
@@ -66,14 +55,33 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
         this._upVelocity = 0;
       }
     }
+  }
+
+  protected updateUpVelocity(accelerationDelta: number, maxSpeed: number, stopThreshold: number) {
+    if (Keybord.keyDown[this.moveKeys.left]) {
+      this._strafeVelocity = Math.min(this._strafeVelocity + accelerationDelta, maxSpeed);
+    } else if (Keybord.keyDown[this.moveKeys.right]) {
+      this._strafeVelocity = Math.max(this._strafeVelocity - accelerationDelta, -maxSpeed);
+    } else {
+      this._strafeVelocity *= (1 - this.moveDampening);
+      if (Math.abs(this._strafeVelocity) < stopThreshold) {
+        this._strafeVelocity = 0;
+      }
+    }
+  }
+
+  protected updaterotationVelocity() {
     if (Mouse.mouseButtonDown[this.lookMouseButtons.pan]) {
       this._upVelocity += Mouse.mouseMovement.y * this.moveDampening / 2.0;
       this._strafeVelocity += Mouse.mouseMovement.x * this.moveDampening / 2.0;
     }
+  }
 
-    this._forwardVelocity -= Mouse.wheelY * this.moveDampening;
+  protected updateScrollVelocity() {
+    this._forwardVelocity -= Mouse.wheelY * this.moveDampening * this.scroolSpeed;
+  }
 
-    // --- Camera Movement Logic ---
+  protected applyMovementVelocity(transform: Transform, ellapsed: number) {
     const movementVector = vec3.create();
 
     // Scale and add movement components based on current velocities
@@ -91,7 +99,9 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
     transform.translate(movementVector[0] * ellapsed, movementVector[1] * ellapsed, movementVector[2] * ellapsed);
 
+  }
 
+  protected applyRotationVelocity(transform: Transform, ellapsed: number) {
     if (Mouse.mouseButtonDown[this.lookMouseButtons.look]) {
       this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed;
       this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed;
@@ -111,6 +121,19 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     const smoothedRotation = quat.create();
     quat.slerp(smoothedRotation, transform.rotationQuat, finalRotation, this.rotationDampening);
     transform.setRotationQuat(smoothedRotation);
+  }
+
+  protected override updateInput(ellapsed: number) {
+    if (!this._initialized || !this.parent?.transform) return;
+    const transform = this.parent.transform;
+
+    this.updateMoveVelocity(ellapsed);
+    this.updateScrollVelocity();
+    this.updaterotationVelocity();
+
+    this.applyMovementVelocity(transform, ellapsed);
+    this.applyRotationVelocity(transform, ellapsed);
+
   }
 
 }

@@ -167,6 +167,7 @@ export class Editor implements OnDestroy, OnInit {
     this.editorBoundingBoxBehaviour.parent = this.scene;
     this.editorPickerBehaviour.parent = this.scene;
   }
+
   private updateEditorSettings(newSettings: IEditorSettings) {
     this.settings = newSettings;
     if (this.editorGridBehaviour)
