@@ -144,18 +144,6 @@ export class App implements OnDestroy {
 
   private async createLights(scene: Scene) {
 
-    const monkeyObj = await EngineCache.getMeshDataFromObj("assets/primitives/axis.obj");
-    const material = new ColorMaterial();
-    const shader = new Shader(this.gl, material);
-    this.gl.enable(this.gl.STENCIL_TEST);
-    this.gl.stencilFunc(this.gl.LEQUAL, 0, 0b1110011);
-
-
-
-    const rendererBehaviour = new TexturedRendererBehaviour(this.gl);
-    rendererBehaviour.name = "Renderer";
-    rendererBehaviour.shader = shader;
-    rendererBehaviour.mesh.meshData = monkeyObj;
 
 
     const dlight = new DirectionalLight("Directional light");
@@ -163,7 +151,6 @@ export class App implements OnDestroy {
 
     dlight.color = Colors.cadetBlue;
     dlight.addBehaviour(new LightMoveBehaviour())
-    dlight.addBehaviour(rendererBehaviour)
 
     const plight = new PointLight("Point light");
     plight.transform.translate(0, 0, 0);
@@ -188,7 +175,7 @@ export class App implements OnDestroy {
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyEntity = this.createEntity(
       "Monkey", monkeyObj, new TexturedRendererBehaviour(this.gl),
-      new UnlitShader(this.gl, new UnlitMaterial()));
+      new LitShader(this.gl, new LitMaterial()));
 
     monkeyEntity.transform.translate(3.5, 0, 0);
     scene.addEntity(monkeyEntity);
@@ -215,15 +202,18 @@ export class App implements OnDestroy {
 
     mesh.meshData = meshData;
 
-    if (!shader && !material)
+    if (!shader && !material) {
       material = new LitMaterial();
+    }
     else if (shader?.material)
       material = shader.material as LitMaterial;
+
 
     if (material) {
       const wallstoneTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg", this.gl);
       const wallNormalTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
 
+      material.name = "Lit Material";
       material.mainTex = wallstoneTexture;
       material.normalTex = wallNormalTexture;
       material.normalMapStrength = 5;
@@ -232,9 +222,10 @@ export class App implements OnDestroy {
 
       meshRenderer.mesh = mesh;
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);
+      meshRenderer.shader.name = "Lit Shader";
     }
 
-
+    meshRenderer.name = meshRenderer.name || "Renderer"
     entity.addBehaviour(meshRenderer);
 
     return entity;

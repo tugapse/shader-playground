@@ -4,7 +4,7 @@ import { CameraFlyBehaviour, Keybord, Mouse, Transform } from "omega-game-engine
 
 export class EditorCameraBehaviour extends CameraFlyBehaviour {
 
-  public scroolSpeed = 2;
+  public scroolSpeed = 0.05;
   public initialPitch = 15;
   public initialYaw = -180;
 
@@ -12,9 +12,9 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
     super.initialize();
     this.moveSpeed = 20.5;
     this.moveDampening = 0.2;
-    this.rotationSpeed = 0.4;
-    this.rotationDampening = 0.2;
-    this._acceleration = 5;
+    this.rotationSpeed = 0.35;
+    this.rotationDampening = 0.16;
+    this._acceleration = 3;
     this._currentPitch = this.initialPitch;
     this._currentYaw = this.initialYaw;
     return true;
@@ -78,7 +78,7 @@ export class EditorCameraBehaviour extends CameraFlyBehaviour {
   }
 
   protected updateScrollVelocity() {
-    this._forwardVelocity -= Mouse.wheelY * this.moveDampening * this.scroolSpeed;
+    this._forwardVelocity -= Mouse.wheelY * this._acceleration * this.moveDampening * this.scroolSpeed;
   }
 
   protected applyMovementVelocity(transform: Transform, ellapsed: number) {

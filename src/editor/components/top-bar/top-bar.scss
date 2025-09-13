@@ -12,7 +12,29 @@
 
   }
 
-  .top-bar .play-icon.play {
+  .top-bar .center-menu .play-icon.play {
     color: green;
+  }
+
+  .top-bar .left-menu {
+    padding-left: 24px;
+    .item {
+      transition: all 0.3s;
+      padding: 4px 8px;
+      margin-left: 8px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover{
+        color: #5baed4;
+        background-color: #263142;
+      }
+    }
+
+  }
+
+  .top-bar .center-menu {
+    flex-grow: 1;
+    text-align: center;
   }
 }
