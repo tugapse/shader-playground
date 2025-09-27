@@ -19,6 +19,7 @@ export class EditorGridBehaviour extends RendererBehaviour {
     this.renderLayer = RenderLayer.POST_SCENE;
     this.createMesh();
     this._gl.lineWidth(1.0);
+    this.active = false;
 
   }
 
@@ -35,13 +36,12 @@ export class EditorGridBehaviour extends RendererBehaviour {
 
 
   override draw(): void {
-    if (!this.shader?._shaderProgram) return;
+    if (!this.shader?._shaderProgram || !this.active) return;
     if (!this._initialized) {
       this.initialize();
     }
     const count = 10;
     this.shader.use();
-    this.setShaderVariables();
     this.shader.material.color.set(...this.gridColor.toVec4())
     this.drawHorizontalLines(count);
     this.drawVerticalLines(count);

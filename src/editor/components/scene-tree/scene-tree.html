@@ -2,13 +2,18 @@
   <h4>Scene Tree</h4>
   <div>
     <app-icon class="icon" iconName="fa-add"></app-icon>
+    <div class="dropdown">
+      <div>Emdivty Game Object</div>
+      <div>Light</div>
+      <div>Camera</div>
+    </div>
     <!-- <app-icon class="icon" iconName="fa-filter"></app-icon> -->
   </div>
 </div>
 <div class="tree-body">
   @for (node of sceneTreeNodes; track node.name) {
-  <app-tree-node [node]="node" [selectedNodeId]="selectedUuid"
-    (nodeSelected)="onNodeSelected($event)" (nodeDropped)="handleNodeDropped($event)" />
+  <app-tree-node [node]="node" [selectedNodeId]="selectedUuid" (nodeSelected)="onNodeSelected($event)"
+    (nodeDropped)="handleNodeDropped($event)" />
   }@empty {
   <div>No Objects added to the scene</div>
   }

@@ -4,4 +4,6 @@
     [style.background-color]="'rgba(' + selectedColor.r*255 + ',' + selectedColor.g*255 + ',' + selectedColor.b*255 + ',' + selectedColor.a + ')'"
     >{{ r + " , " + g + " , " + b + " , " + a }}</span>
   <app-color-picker (colorChange)="onColorChanged($event)" [color]="selectedColor"></app-color-picker>
+
+
 </editor-inpector-toggle-panel>

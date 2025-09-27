@@ -1,25 +1,27 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
-import { CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, Texture, UnlitMaterial } from "omega-game-engine";
+import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "omega-game-engine";
 import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
+import { mat4 } from "gl-matrix";
 
 export class EntityPicker extends RendererBehaviour {
 
   renderTexture: Texture;
-  entityTexture?: Texture;
   selectedEntityId = -1;
-  material?: UnlitMaterial;
   width = 0;
   height = 0;
   boundingBehaviour!: EditorBoundingBoxBehaviour;
   mousePressed = false;
   lastClickedId = 0;
+  dontNeedControlToSelect = true;
 
 
 
   constructor(gl: WebGL2RenderingContext, private sceneTreeService: SceneTreeService) {
     super(gl);
     this.renderTexture = Texture.create(gl, 1024, 1024, null);
-    this.shader = new Shader(gl, new ColorMaterial());
+    (window as any)['testTexture'] = this.renderTexture;
+    this.shader = new Shader(gl, new ColorMaterial(),
+      "assets/shaders/frag/entity-picker.frag");
     this.shader.initialize();
     this.mesh.meshData = new MeshData([]);
   }
@@ -35,8 +37,9 @@ export class EntityPicker extends RendererBehaviour {
   }
 
   private canSelectEntity() {
+
     return (
-      Keybord.keyDown['control'] &&
+      (this.dontNeedControlToSelect || Keybord.keyDown['control']) &&
       Mouse.mouseButtonDown[0] &&
       this.sceneTreeService &&
       this.selectedEntityId != this.lastClickedId
@@ -48,28 +51,24 @@ export class EntityPicker extends RendererBehaviour {
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
 
-    if (this.width != CanvasViewport.rendererWidth || this.height != CanvasViewport.rendererHeight) {
-      if (this.renderLayer) this.renderTexture.destroy();
-      this.width = CanvasViewport.rendererWidth;
-      this.height = CanvasViewport.rendererHeight;
-
-      this.renderTexture = Texture.create(this._gl, this.width, this.height);
-    }
-    this.setRenderTarget(this.renderTexture.glTexture!, this.width, this.height);
+    this.refreshTexture();
+    this.startPass(this.renderTexture.glTexture!, this.width, this.height);
 
     const obs = (this.parent as Scene).objects;
+
     let count = 0;
+    this.shader.use();
     for (const ob of obs) {
       count += 1;
       const renderer = ob.getBehaviour(RendererBehaviour);
       if (renderer?.shader?._shaderProgram) {
-        renderer.shader.use();
-        renderer.shader.setFloat('u_id', count);
-        renderer.shader.setFloat('u_sid', this.selectedEntityId);
-        ob.draw();
-        renderer.shader.setFloat('u_id', 0);
+        renderer.shader.bindBuffers();
+        this.shader.setFloat('u_entity_id', count);
+        this.setMatrices(ob.transform);
+        this._gl.drawElements(WebGL2RenderingContext.TRIANGLES, renderer.mesh.meshData.indices.length, this._gl.UNSIGNED_SHORT, 0);
       }
     }
+    this.shader.setFloat('u_entity_id', 0);
 
     const pixel = new Uint8Array(4);
     this._gl.readPixels(Mouse.mousePosition.x, this.height - Mouse.mousePosition.y, 1, 1, this._gl.RGBA, this._gl.UNSIGNED_BYTE, pixel);
@@ -82,10 +81,28 @@ export class EntityPicker extends RendererBehaviour {
       if (this.boundingBehaviour)
         this.boundingBehaviour.setHoveredEntity(entity);
     }
+    this.endPass();
+  }
 
 
-    // this.renderTexture.unBind();
-    this.clearRenderTarget();
+  private refreshTexture() {
+    if (this.width != CanvasViewport.rendererWidth || this.height != CanvasViewport.rendererHeight) {
+      if (this.renderTexture) this.renderTexture.destroy();
+      this.width = CanvasViewport.rendererWidth;
+      this.height = CanvasViewport.rendererHeight;
+
+      this.renderTexture = Texture.create(this._gl, this.width, this.height);
+    }
+  }
+
+  setMatrices(transform: Transform) {
+    if (this.shader) {
+      const camera = Camera.mainCamera;
+      const mvpMatrix = mat4.create();
+      mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
+      mat4.multiply(mvpMatrix, mvpMatrix, transform.modelMatrix);
+      this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
+    }
   }
 
 }

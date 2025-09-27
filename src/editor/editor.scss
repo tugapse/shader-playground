@@ -18,4 +18,13 @@
   height: calc(100% - 32px);
 }
 
+.container .canvas-info{
+  position: fixed;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.486);
+  left: 50vw;
+  margin-top: 10px;
+}
+
 // Left Sidebar styling

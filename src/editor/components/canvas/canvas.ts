@@ -1,17 +1,21 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, NgZone, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
 import { Camera, CanvasViewport, Engine, Keybord, Mouse, Scene, cleanLastFrame } from 'omega-game-engine';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'editor-canvas',
   imports: [],
   templateUrl: './canvas.html',
-  styleUrl: './canvas.scss'
+  styleUrl: './canvas.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Canvas implements OnChanges {
+export class Canvas implements OnChanges, OnDestroy {
 
   @Input() scene!: Scene;
 
   @Output() onGlContextCreated: EventEmitter<WebGL2RenderingContext> = new EventEmitter();
+  @Output() fps = new BehaviorSubject(0);
 
 
   @ViewChild('glCanvas')
@@ -19,11 +23,14 @@ export class Canvas implements OnChanges {
   private canvasElement!: HTMLCanvasElement;
 
   private lastTime = 0;
-  private readonly fps = 60;
-  private readonly frameInterval = 1000 / this.fps;
+  private readonly targetFps = 60;
+  private readonly frameInterval = 1000 / this.targetFps;
   public isFocused: boolean = false;
   private isTabActive: boolean = true;
   private isWindowFocused: boolean = true;
+  private frameCount = 0;
+  private lastFpsUpdateTime = 0;
+  private destroy$ = new Subject<void>();
 
 
   public gl!: WebGL2RenderingContext | null;
@@ -33,7 +40,6 @@ export class Canvas implements OnChanges {
   @HostListener('contextmenu', ['$event'])
   onContextMenu(event: MouseEvent) {
     event.preventDefault();
-    // Here you can add logic to show your custom context menu
   }
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
@@ -117,10 +123,10 @@ export class Canvas implements OnChanges {
     this.isWindowFocused = false;
   }
 
-  constructor(private editorService: EditorService) {
+  constructor(private editorService: EditorService, private ngZone: NgZone, private cd: ChangeDetectorRef, private renderer: Renderer2) {
     this.gameEngine = new Engine();
-    this.editorService.onCanvasRequestResize.subscribe(() => this.resizeCanvas(true));
-    this.editorService.onCanvasRequestReset.subscribe(() => { this.disposeWebGL(); this.initWebGL() });
+    this.editorService.onCanvasRequestResize.pipe(takeUntil(this.destroy$)).subscribe(() => this.resizeCanvas(true));
+    this.editorService.onCanvasRequestReset.pipe(takeUntil(this.destroy$)).subscribe(() => { this.disposeWebGL(); this.initWebGL() });
   }
 
   ngOnInit(): void { }
@@ -128,7 +134,9 @@ export class Canvas implements OnChanges {
   ngAfterViewInit(): void {
     this.initWebGL();
     this.gameEngine.initialize(this.canvasElement);
-    this.render(0);
+    this.ngZone.runOutsideAngular(() => {
+      this.render(0);
+    });
     this.resizeCanvas();
 
 
@@ -145,6 +153,8 @@ export class Canvas implements OnChanges {
 
   ngOnDestroy(): void {
     this.scene?.destroy();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   public shouldRender() {
@@ -152,19 +162,15 @@ export class Canvas implements OnChanges {
   }
 
   public render(timestamp: number) {
-
     const elapsed = timestamp - this.lastTime;
-
     if (!this.scene || this.shouldRender() == false) {
       setTimeout(() => requestAnimationFrame(this.render.bind(this)), 50);
       this.cleanInput();
       this.lastTime = timestamp - (elapsed % this.frameInterval);
       return;
     }
-
     if (elapsed > this.frameInterval) {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
-
       const delta = elapsed / 1000;
       this.editorService.onUpdateFrame.next(delta);
       this.scene.update(delta);
@@ -172,6 +178,16 @@ export class Canvas implements OnChanges {
         this.scene.draw();
         this.editorService.onRenderFrame.next(this.gl);
       }
+    }
+    this.frameCount++;
+    const fpsElapsed = timestamp - this.lastFpsUpdateTime;
+    if (fpsElapsed >= 1000) {
+      const actualFps = (this.frameCount / fpsElapsed) * 1000;
+      this.ngZone.run(() => {
+        this.fps.next(Math.round(actualFps));
+      });
+      this.frameCount = 0;
+      this.lastFpsUpdateTime = timestamp;
     }
     this.cleanInput();
     requestAnimationFrame(this.render.bind(this));
@@ -194,10 +210,9 @@ export class Canvas implements OnChanges {
   }
   private async disposeWebGL(): Promise<void> {
     this.canvasElement = this.glCanvas.nativeElement;
-    this.canvasElement.width = 0;
-    this.canvasElement.height = 0;
+    this.renderer.setAttribute(this.canvasElement, 'width', '0');
+    this.renderer.setAttribute(this.canvasElement, 'height', '0');
     this.onGlContextCreated.emit(undefined);
-
   }
 
   private resizeCanvas(force = false): void {
@@ -205,8 +220,8 @@ export class Canvas implements OnChanges {
     const displayHeight = this.glCanvas.nativeElement.clientHeight;
 
     if (force || (this.glCanvas.nativeElement.width !== displayWidth || this.glCanvas.nativeElement.height !== displayHeight)) {
-      this.glCanvas.nativeElement.width = displayWidth;
-      this.glCanvas.nativeElement.height = displayHeight;
+      this.renderer.setAttribute(this.glCanvas.nativeElement, 'width', displayWidth.toString());
+      this.renderer.setAttribute(this.glCanvas.nativeElement, 'height', displayHeight.toString());
       this.gl?.viewport(0, 0, this.glCanvas.nativeElement.width, this.glCanvas.nativeElement.height);
       CanvasViewport.rendererWidth = displayWidth;
       CanvasViewport.rendererHeight = displayHeight;

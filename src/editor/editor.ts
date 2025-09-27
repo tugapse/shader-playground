@@ -28,6 +28,8 @@ export class Editor implements OnDestroy, OnInit {
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
   canvasVisible = true;
+  fpsCounter: number = 0;
+
   protected editorRenderBehaviour!: EditorRenderBehaviour;
 
   protected gl!: WebGL2RenderingContext;
@@ -129,8 +131,8 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   private onUpdateFrame(ellapsed: number) {
-  //   this.editorGridBehaviour?.update(ellapsed);
-  //   this.editorBoundingBoxBehaviour?.update(ellapsed);
+    //   this.editorGridBehaviour?.update(ellapsed);
+    //   this.editorBoundingBoxBehaviour?.update(ellapsed);
   }
 
   onEditorSaveInStorage(): void {
@@ -177,5 +179,9 @@ export class Editor implements OnDestroy, OnInit {
       this.editorBoundingBoxBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
       this.editorBoundingBoxBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
     }
+  }
+
+  onFpsUpdated(fps: number) {
+    this.fpsCounter = fps;
   }
 }

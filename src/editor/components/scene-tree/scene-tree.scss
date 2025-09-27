@@ -17,4 +17,14 @@
       color: #07acff;
     }
   }
+
+  .dropdown{
+    display: none;
+    position: absolute;
+    padding: 8px;
+    background-color: black;
+  }
+  .dropdown .item {
+
+  }
 }

@@ -86,6 +86,15 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       this.drawBoundingBox(this.selectedBoundingBox);
     }
 
+    if (this.selectedEntity) {
+      const frw = vec3.scaleAndAdd(vec3.create(), this.selectedEntity.transform.position, this.selectedEntity.transform.forward, 2);
+      this.shader.material.color.set(1, 0, 0);
+      this.drawPoint(new Vector3(...this.selectedEntity.transform.position));
+      this.shader.material.color.set(0, 0, 1);
+      this.drawPoint(new Vector3(...frw));
+      this.drawLine(new Vector3(...this.selectedEntity.transform.position), new Vector3(...frw))
+    }
+
     if (this.hoveredBoundingBox && this.hoveredEntity) {
       this._gl.lineWidth(this.hoveredBoundingBoxLineWidth)
       this.shader.material.color.set(...this.hoveredBoundingBoxColor.toVec4())

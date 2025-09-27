@@ -11,31 +11,6 @@ uniform vec2 u_uvOffset;
 uniform sampler2D u_mainTex;
 uniform sampler2D u_normalMap; // New: Uniform for the normal map texture
 
-uniform vec4 u_ambientLight; // Ambient light color
-
-// Uniforms for multiple Directional Lights:
-uniform int u_numDirectionalLights;
-uniform vec3 u_directionalLightDirections[MAX_DIRECTIONAL_LIGHTS];
-uniform vec3 u_directionalLightColors[MAX_DIRECTIONAL_LIGHTS];
-
-// New Uniforms for multiple Point Lights:
-uniform int u_numPointLights;
-uniform vec3 u_pointLightPositions[MAX_POINT_LIGHTS];
-uniform vec3 u_pointLightColors[MAX_POINT_LIGHTS];
-uniform float u_pointLightConstantAtts[MAX_POINT_LIGHTS];
-uniform float u_pointLightLinearAtts[MAX_POINT_LIGHTS];
-uniform float u_pointLightQuadraticAtts[MAX_POINT_LIGHTS];
-
-// New Uniforms for multiple Spot Lights:
-uniform int u_numSpotLights;
-uniform vec3 u_spotLightPositions[MAX_SPOT_LIGHTS];
-uniform vec3 u_spotLightDirections[MAX_SPOT_LIGHTS];
-uniform vec3 u_spotLightColors[MAX_SPOT_LIGHTS];
-uniform float u_spotLightInnerConeCos[MAX_SPOT_LIGHTS];
-uniform float u_spotLightOuterConeCos[MAX_SPOT_LIGHTS];
-uniform float u_spotLightConstantAtts[MAX_SPOT_LIGHTS];
-uniform float u_spotLightLinearAtts[MAX_SPOT_LIGHTS];
-uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 
 
 in vec2 v_uv;
