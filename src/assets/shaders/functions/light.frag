@@ -94,7 +94,7 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
   vec3 halfVec = normalize(lightDir + viewDir);
   float shadowFactor =
-      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
+      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, -lightDir);
 
   float specularIntensity =
       pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;

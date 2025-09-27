@@ -111,7 +111,7 @@ export class TexturedRendererBehaviour extends RendererBehaviour {
 
     // 3. Create the light's eye position by offsetting it from the frustum center.
     const lightPosition = vec3.create();
-    vec3.scaleAndAdd(lightPosition, frustumCenter, lightDirection, -(far - frustumSize));
+    vec3.scaleAndAdd(lightPosition, frustumCenter, lightDirection, -( frustumSize));
 
     // 4. Calculate the light's view matrix using mat4.lookAt.
     // To prevent the matrix from becoming unstable when the light is directly

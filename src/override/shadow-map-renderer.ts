@@ -1,12 +1,12 @@
-import { mat4 } from "gl-matrix";
-import { Camera, ColorMaterial, CullFace, DephFunction, MeshData, RendererBehaviour, RenderLayer, Shader, ShaderUniformsEnum, Texture, Transform } from "omega-game-engine";
+import { mat4, vec3 } from "gl-matrix";
+import { Camera, ColorMaterial, CullFace, DephFunction, GlEntity, MeshData, RendererBehaviour, RenderLayer, Shader, ShaderUniformsEnum, Texture, Transform } from "omega-game-engine";
 import { TexturedRendererBehaviour } from "./renderer";
 import { ShadowCasterRenderer } from "./shadow-renderer";
 
 export class ShadowMapRenderer extends TexturedRendererBehaviour {
 
   public shadowmapTexture: Texture;
-  public static shadowMapSize = 2048;
+  public static shadowMapSize = 4096;
   protected framebuffer!: WebGLFramebuffer;
 
   // A dedicated shader for the depth-only pass
@@ -54,6 +54,7 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
     const objs = this.parent.scene.objects.filter(ob => (
       ob.active && ob.show &&
       ob.getBehaviour(ShadowCasterRenderer)?.castShadows));
+      objs.sort(this.sortByDistance.bind(this));
 
     for (const oj of objs) {
       const renderer = oj.getBehaviour(RendererBehaviour);
@@ -98,6 +99,12 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
       // Set the final combined matrix on the DEPTH shader.
       this.depthShader.setMat4("u_mvpMatrix", lightMvpMatrix);
     }
+  }
+
+  protected sortByDistance(a: GlEntity, b: GlEntity) {
+    const aD = vec3.distance(a.transform.position, this.transform.position);
+    const bD = vec3.distance(b.transform.position, this.transform.position);
+    return  bD-aD;
   }
 
   override startPass(texture: WebGLTexture, width: number, height: number): void {

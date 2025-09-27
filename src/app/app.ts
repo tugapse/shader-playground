@@ -19,7 +19,7 @@ import {
 
 import { ShadowMapRenderer } from 'src/override/shadow-map-renderer';
 import { ShadowCasterRenderer } from 'src/override/shadow-renderer';
-import { LightMoveBehaviour } from '../editor/behaviours/light-move';
+import { SunBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { TexturedRendererBehaviour } from 'src/override/renderer';
 
@@ -130,7 +130,7 @@ export class App implements OnDestroy {
     const material = new LitMaterial();
 
     const shader = new LitShader(this.gl, material);
-    const renderer = new TexturedRendererBehaviour(this.gl);
+    const renderer = new ShadowCasterRenderer(this.gl);
     renderer.name = "Renderer";
 
     material.mainTex = EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
@@ -152,17 +152,14 @@ export class App implements OnDestroy {
 
 
     const dlight = new DirectionalLight("Directional light");
-    dlight.transform.rotate(0.7, 1, 0.2);
-
-
-    dlight.color = new Color(0.20 , 0.35 , 0.69 , 0.72);
-    dlight.addBehaviour(new LightMoveBehaviour())
+    dlight.color = new Color(0.20 , 0.35 , 0.69 , 1.0);
+    dlight.addBehaviour(new SunBehaviour())
     dlight.addBehaviour(new ShadowMapRenderer(this.gl));
+
     const renderer = dlight.getBehaviour(ShadowMapRenderer);
     if (renderer) { this.shadowMapTexture = renderer.shadowmapTexture }
 
     const plight = new PointLight("Point light");
-    plight.transform.translate(0, 0, 0);
     plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
     plight.color = Colors.red;
 
@@ -170,12 +167,14 @@ export class App implements OnDestroy {
     spotLight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.008 };
     spotLight.coneAngles = { inner: 15, outer: 20 }
     spotLight.color = Colors.azure;
-    spotLight.addBehaviour(new LightMoveBehaviour());
-    this.light = dlight;
+    spotLight.addBehaviour(new SunBehaviour());
 
-    // scene.addEntity(plight);
-    // scene.addEntity(spotLight);
+    scene.addEntity(plight);
+    scene.addEntity(spotLight);
     scene.addEntity(dlight);
+
+
+    this.light = dlight;
   }
 
   private async addMonkeyObj(scene: Scene) {
@@ -195,7 +194,6 @@ export class App implements OnDestroy {
     scene.addEntity(movingMokeyEntity);
 
     movingMokeyEntity.transform.setParent(this.light.transform)
-    // movingMokeyEntity.addBehaviour(new LightMoveBehaviour())
   }
 
   private createEntity(
@@ -224,9 +222,9 @@ export class App implements OnDestroy {
       material.name = "Lit Material";
       material.mainTex = wallstoneTexture;
       material.normalTex = wallNormalTexture;
-      material.normalMapStrength = 5;
-      material.specularStrength = 1;
-      material.roughness = 1;
+      material.normalMapStrength = 1;
+      material.specularStrength = 0.2;
+      material.roughness = 0.5;
 
       meshRenderer.mesh = mesh;
       meshRenderer.shader = shader || new LitShader(this.gl, material as LitMaterial);

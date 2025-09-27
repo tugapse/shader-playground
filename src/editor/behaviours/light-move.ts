@@ -1,10 +1,10 @@
 import { quat2, vec3 } from "gl-matrix";
 import { EntityBehaviour, Vector3, ObjectInstanciator, Camera } from "omega-game-engine";
 
-export class LightMoveBehaviour extends EntityBehaviour {
+export class SunBehaviour extends EntityBehaviour {
 
-  static override instanciate(): LightMoveBehaviour {
-    return new LightMoveBehaviour()
+  static override instanciate(): SunBehaviour {
+    return new SunBehaviour()
   }
 
   protected override _className = "LightMoveBehaviour";
@@ -12,7 +12,9 @@ export class LightMoveBehaviour extends EntityBehaviour {
   public rotationSpeed = 0.5;
   private center = vec3.create();
   private up = vec3.fromValues(0, 1, 0);
-  public distance = 5;
+  public distance = 100;
+  public height = 1;
+  public rotationAmount = 0;
 
   _rotation = new Vector3();
   _timeString = "";
@@ -22,16 +24,26 @@ export class LightMoveBehaviour extends EntityBehaviour {
   _t = 0;
 
   public override update(ellapsed: number): void {
+    this.rotationAmount += ellapsed * this.rotationSpeed;
+
+    if (this.height > 180) this.height = 180;
+    if (this.height < -180) this.height = -180;
+    this.rotationAmount = this.rotationAmount % 360;
 
 
-    this._t += this.rotationSpeed * ellapsed;
-    const x = Math.cos(this._t) * Math.PI * 2;
-    const z = Math.sin(this._t) * Math.PI * 2;
-    // this.isNight = z <= 0;
 
-    this.transform.setPosition(x * this.distance, this.distance , z * this.distance);
-    this.transform.updateMatrices();
-    this.transform.lookAt(this.center,this.up)
+    const x = Math.cos(this.rotationAmount);
+    const z = Math.sin(this.rotationAmount);
+
+    const mappedHeight = (this.height + 180) / 360 * this.distance * 2 - this.distance;
+
+
+
+    this.transform.setPosition(x * this.distance, mappedHeight, z * this.distance);
+
+    this.isNight = this.height <= 0;
+
+    this.transform.lookAt(this.center, this.up)
   }
 
 
@@ -40,4 +52,4 @@ export class LightMoveBehaviour extends EntityBehaviour {
 
 
 
-ObjectInstanciator.addDependency("LightMoveBehaviour", LightMoveBehaviour.instanciate);
+ObjectInstanciator.addDependency("LightMoveBehaviour", SunBehaviour.instanciate);
