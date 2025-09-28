@@ -12,8 +12,8 @@ export class SunBehaviour extends EntityBehaviour {
   public rotationSpeed = 0.5;
   private center = vec3.create();
   private up = vec3.fromValues(0, 1, 0);
-  public distance = 100;
-  public height = 1;
+  public distance = 1000000;
+  public height = 50;
   public rotationAmount = 0;
 
   _rotation = new Vector3();
@@ -21,13 +21,23 @@ export class SunBehaviour extends EntityBehaviour {
 
   public isNight = false;
 
-  _t = 0;
+  _t = 10;
+
+  constructor() {
+    super();
+  }
+
+  override initialize(): boolean {
+    super.initialize();
+    this.update(this._t);
+    return true;
+  }
 
   public override update(ellapsed: number): void {
     this.rotationAmount += ellapsed * this.rotationSpeed;
 
-    if (this.height > 180) this.height = 180;
-    if (this.height < -180) this.height = -180;
+    if (this.height > 190) this.height = 190;
+    if (this.height < -190) this.height = -190;
     this.rotationAmount = this.rotationAmount % 360;
 
 

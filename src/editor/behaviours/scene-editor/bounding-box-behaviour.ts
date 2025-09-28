@@ -87,12 +87,27 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
 
     if (this.selectedEntity) {
-      const frw = vec3.scaleAndAdd(vec3.create(), this.selectedEntity.transform.position, this.selectedEntity.transform.forward, 2);
-      this.shader.material.color.set(1, 0, 0);
-      this.drawPoint(new Vector3(...this.selectedEntity.transform.position));
+      this._gl.lineWidth(3)
+      const scale = 1;
+
+      const frw = vec3.scale(vec3.create(), this.selectedEntity.transform.forward, scale);
+      const right = vec3.scale(vec3.create(), this.selectedEntity.transform.right, scale);
+      const up = vec3.scale(vec3.create(), this.selectedEntity.transform.up, scale);
+
+      this.enableDephTest = false;
       this.shader.material.color.set(0, 0, 1);
+      this.drawLine(new Vector3(), new Vector3(...frw));
       this.drawPoint(new Vector3(...frw));
-      this.drawLine(new Vector3(...this.selectedEntity.transform.position), new Vector3(...frw))
+
+      this.shader.material.color.set(0, 1, 0);
+      this.drawLine(new Vector3(), new Vector3(...up));
+      this.drawPoint(new Vector3(...up));
+
+      this.shader.material.color.set(1, 0, 0);
+      this.drawLine(new Vector3(), new Vector3(...right));
+      this.drawPoint(new Vector3(...right));
+      this.enableDephTest = true;
+
     }
 
     if (this.hoveredBoundingBox && this.hoveredEntity) {
@@ -111,6 +126,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     if (this.shader) {
       const camera = Camera.mainCamera;
       const mvpMatrix = mat4.create();
+      // remove the scale
       mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
       mat4.multiply(mvpMatrix, mvpMatrix, transform.modelMatrix);
       this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);

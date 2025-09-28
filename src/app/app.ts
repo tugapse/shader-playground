@@ -44,7 +44,8 @@ export class App implements OnDestroy {
     Shader.SHADER_FUNCTIONS = {
       "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
       "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
-      "@INCLUD_FUNC": "assets/shaders/functions/functions.frag"
+      "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
+      "@INCLUDE_PCF_FUNC": "assets/shaders/functions/pcf.frag"
     };
 
     ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate);

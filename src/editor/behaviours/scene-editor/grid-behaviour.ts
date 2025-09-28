@@ -19,7 +19,7 @@ export class EditorGridBehaviour extends RendererBehaviour {
     this.renderLayer = RenderLayer.POST_SCENE;
     this.createMesh();
     this._gl.lineWidth(1.0);
-    this.active = false;
+    // this.active = false;
 
   }
 

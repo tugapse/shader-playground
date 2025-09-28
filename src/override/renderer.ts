@@ -78,7 +78,9 @@ export class TexturedRendererBehaviour extends RendererBehaviour {
 
       if (lightEntity) {
         const textureUnit = 2;
-        const { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
+        let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
+        // We need to apply the object's model matrix to the light MVP for shadow receiving.
+        mat4.multiply(lightMvpMatrix, lightMvpMatrix, this.transform.modelMatrix);
         this.shader.setMat4('u_lightMVPMatrix', lightMvpMatrix);
         this.shader.setVec2('u_shadowMapSize', [ShadowMapRenderer.shadowMapSize, ShadowMapRenderer.shadowMapSize]);
         this.shader.setTexture('u_shadowMap', this.shadowMapTexture, textureUnit);
