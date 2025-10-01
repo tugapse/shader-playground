@@ -11,17 +11,15 @@ import {
   Colors, CubemapMaterial,
   CubePrimitive,
   DirectionalLight,
-  EngineCache, GlEntity, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator,
+  EngineCache, GlEntity, Light, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator,
   PlanePrimitive, PointLight,
-  Scene, Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  Scene, Shader, ShadowMapRenderer, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  TexturedRendererBehaviour,
 
 } from 'omega-game-engine';
 
-import { ShadowMapRenderer } from 'src/override/shadow-map-renderer';
-import { ShadowCasterRenderer } from 'src/override/shadow-renderer';
 import { SunBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { TexturedRendererBehaviour } from 'src/override/renderer';
 
 @Component({
   selector: 'app-root',
@@ -108,21 +106,21 @@ export class App implements OnDestroy {
   private async otherObjetcs(scene: Scene) {
 
     const torusPrimitive = await EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
-    const torus = this.createEntity("torus", torusPrimitive, new ShadowCasterRenderer(this.gl));
+    const torus = this.createEntity("torus", torusPrimitive, new TexturedRendererBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);
     torus.addBehaviour(new RotateBehaviour());
     scene.addEntity(torus);
 
-    const cube = this.createEntity("cube", new CubePrimitive(), new ShadowCasterRenderer(this.gl));
+    const cube = this.createEntity("cube", new CubePrimitive(), new TexturedRendererBehaviour(this.gl));
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.up, 2.5);
-    cube.transform.setPosition(cubePos[0], cubePos[1], cubePos[2]);
+    cube.transform.setWorldPosition(cubePos[0], cubePos[1], cubePos[2]);
     scene.addEntity(cube);
 
     const primitive = new SpherePrimitive();
-    const sphere = this.createEntity("sphere", primitive, new ShadowCasterRenderer(this.gl), new LitShader(this.gl, new LitMaterial()));
+    const sphere = this.createEntity("sphere", primitive, new TexturedRendererBehaviour(this.gl), new LitShader(this.gl, new LitMaterial()));
     scene.addEntity(sphere);
   }
 
@@ -131,7 +129,7 @@ export class App implements OnDestroy {
     const material = new LitMaterial();
 
     const shader = new LitShader(this.gl, material);
-    const renderer = new ShadowCasterRenderer(this.gl);
+    const renderer = new TexturedRendererBehaviour(this.gl);
     renderer.name = "Renderer";
 
     material.mainTex = EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
@@ -153,7 +151,7 @@ export class App implements OnDestroy {
 
 
     const dlight = new DirectionalLight("Directional light");
-    dlight.color = new Color(0.20 , 0.35 , 0.69 , 1.0);
+    dlight.color = Colors.white;
     dlight.addBehaviour(new SunBehaviour())
     dlight.addBehaviour(new ShadowMapRenderer(this.gl));
 
@@ -170,8 +168,9 @@ export class App implements OnDestroy {
     spotLight.color = Colors.azure;
     spotLight.addBehaviour(new SunBehaviour());
 
-    scene.addEntity(plight);
-    scene.addEntity(spotLight);
+    scene.addEntity(new Light("Ambient light"));
+    // scene.addEntity(plight);
+    // scene.addEntity(spotLight);
     scene.addEntity(dlight);
 
 
@@ -183,7 +182,7 @@ export class App implements OnDestroy {
 
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
     const monkeyEntity = this.createEntity(
-      "Monkey", monkeyObj, new ShadowCasterRenderer(this.gl),
+      "Monkey", monkeyObj, new TexturedRendererBehaviour(this.gl),
       new LitShader(this.gl, new LitMaterial()));
 
     monkeyEntity.transform.translate(3.5, 0, 0);

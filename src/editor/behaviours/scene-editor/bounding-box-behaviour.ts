@@ -1,8 +1,9 @@
 
 import { mat4, vec3 } from "gl-matrix";
 import {
-  BoundingBox, Camera, Color,
+  BoundingBox, Camera, CanvasViewport, Color,
   ColorMaterial, Colors, DephFunction, GlEntity, Mesh, MeshData,
+  Mouse,
   RendererBehaviour,
   Shader, ShaderUniformsEnum,
   Transform, Vector3
@@ -122,13 +123,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
   protected override setCameraMatrices(): void { }
 
-  setMatrices(transform: Transform) {
+  setMatrices(transform: Transform, modelMatrix?: mat4) {
     if (this.shader) {
       const camera = Camera.mainCamera;
       const mvpMatrix = mat4.create();
+      const matrix = modelMatrix ? modelMatrix : transform.modelMatrix;
       // remove the scale
       mat4.multiply(mvpMatrix, camera.projectionMatrix, camera.viewMatrix);
-      mat4.multiply(mvpMatrix, mvpMatrix, transform.modelMatrix);
+      mat4.multiply(mvpMatrix, mvpMatrix, matrix);
       this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
     }
   }

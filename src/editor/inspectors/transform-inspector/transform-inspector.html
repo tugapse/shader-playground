@@ -4,21 +4,21 @@
     <span class="title">Position</span>
     <div class="line-item">
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(0,0, $event)">X</span>
-      <input class="text-input" [value]="transform.position[0]" (change)="onPositionChanged(0,$event)" />
+      <input class="text-input" [value]="transform.worldPosition[0]" (change)="onPositionChanged(0,$event)" />
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(1,0, $event)">Y</span>
-      <input class="text-input" [value]="transform.position[1]" (change)="onPositionChanged(1,$event)" />
+      <input class="text-input" [value]="transform.worldPosition[1]" (change)="onPositionChanged(1,$event)" />
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(2,0, $event)">Z</span>
-      <input class="text-input" [value]="transform.position[2]" (change)="onPositionChanged(2,$event)" />
+      <input class="text-input" [value]="transform.worldPosition[2]" (change)="onPositionChanged(2,$event)" />
     </div>
 
     <span class="title">Rotation</span>
     <div class="line-item">
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(0,1, $event)">X</span> <input class="text-input"
-        [value]="transform.rotation[0]" (change)="onRotationChanged(0,$event)" />
+        [value]="transform.worldRotation[0]" (change)="onRotationChanged(0,$event)" />
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(1,1, $event)">Y</span> <input class="text-input"
-        [value]="transform.rotation[1]" (change)="onRotationChanged(1,$event)" />
+        [value]="transform.worldRotation[1]" (change)="onRotationChanged(1,$event)" />
       <span appDragHandle [dragCursor]="'move'" (drag)="onSpanDrag(2,1, $event)">Z</span> <input class="text-input"
-        [value]="transform.rotation[2]" (change)="onRotationChanged(2,$event)" />
+        [value]="transform.worldRotation[2]" (change)="onRotationChanged(2,$event)" />
     </div>
 
     <span class="title">Scale</span>

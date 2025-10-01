@@ -1,6 +1,5 @@
 import { EventEmitter, Injectable } from "@angular/core";
-import { EditorCameraBehaviour } from "@editor/behaviours/editor.camera";
-import { Camera, Scene } from "omega-game-engine";
+import {Camera,  CameraFlyBehaviour,  Scene } from "omega-game-engine";
 import { BehaviorSubject } from "rxjs";
 
 
@@ -54,12 +53,12 @@ export class EditorService {
     this.camera = new Camera();
     this.camera.name = "Editor Camera"
     this.camera.updateInEditor = true;
-    Camera.setMainCamera(this.camera);
-    Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
     this.camera.initialize();
-    this.camera.update(1);
-    this.camera.transform.translate(2, 3, 10);
+
+    this.camera.addBehaviour(new CameraFlyBehaviour());
     this.camera.fieldOfView = 65;
+    this.camera.transform.translate(2, 3, 10);
+    Camera.setMainCamera(this.camera);
   }
 
 

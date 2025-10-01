@@ -77,7 +77,6 @@ export class ObjectInspector {
 
   protected loadProperties() {
     if (!this._selectedObject?.property) {
-      // console.debug("Error: ", !this._selectedObject);
       return
     };
 
@@ -86,6 +85,7 @@ export class ObjectInspector {
     const keys = Object.keys(object).filter(this.isPropertyValid.bind(this));
     for (const key of keys) {
       const newValue = (object)[key];
+      if(!newValue) continue;
       let newObType: string = typeof newValue;
       let name = "";
       // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);

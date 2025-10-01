@@ -41,15 +41,12 @@ export class SunBehaviour extends EntityBehaviour {
     this.rotationAmount = this.rotationAmount % 360;
 
 
-
     const x = Math.cos(this.rotationAmount);
     const z = Math.sin(this.rotationAmount);
 
-    const mappedHeight = (this.height + 180) / 360 * this.distance * 2 - this.distance;
+    const mappedHeight = (-this.height + 180) / 360 * this.distance * 2 - this.distance;
 
-
-
-    this.transform.setPosition(x * this.distance, mappedHeight, z * this.distance);
+    this.transform.worldPosition = [x * this.distance, mappedHeight, z * this.distance];
 
     this.isNight = this.height <= 0;
 

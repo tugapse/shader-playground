@@ -10,8 +10,6 @@ uniform float u_emmission;
 uniform float u_id;
 uniform float u_sid;
 
-
-
 in vec2 v_uv;
 in vec3 v_normal;
 in vec3 v_position;

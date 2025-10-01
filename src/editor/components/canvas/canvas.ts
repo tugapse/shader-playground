@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, NgZone, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Camera, CanvasViewport, Engine, Keybord, Mouse, Scene, cleanLastFrame } from 'omega-game-engine';
+import { Camera, CanvasViewport, Scene, cleanLastFrame, Keybord, Mouse, Engine } from 'omega-game-engine';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 @Component({
@@ -25,13 +25,7 @@ export class Canvas implements OnChanges, OnDestroy {
   private lastTime = 0;
   private readonly targetFps = 60;
   private readonly frameInterval = 1000 / this.targetFps;
-  public isFocused: boolean = false;
-  private isTabActive: boolean = true;
-  private isWindowFocused: boolean = true;
   private frameCount = 0;
-  private lastFpsUpdateTime = 0;
-  private destroy$ = new Subject<void>();
-
 
   public gl!: WebGL2RenderingContext | null;
 
@@ -45,83 +39,8 @@ export class Canvas implements OnChanges, OnDestroy {
   onResize(event: Event) {
     this.resizeCanvas();
   }
-
-  @HostListener('keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent) {
-    Keybord.keyDown[event.key.toLowerCase()] = true;
-  }
-
-  @HostListener('keyup', ['$event'])
-  onKeyUp(event: KeyboardEvent) {
-    if (Keybord.keyDown[event.key.toLowerCase()]) {
-      Keybord.keyUp[event.key.toLowerCase()] = true;
-      Keybord.keyPress[event.key.toLowerCase()] = true;
-    }
-    Keybord.keyDown[event.key.toLowerCase()] = false;
-  }
-
-  @HostListener('mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
-    const canvasRect = this.canvasElement.getBoundingClientRect();
-    Mouse.mousePosition.x = Math.max(event.clientX - canvasRect.x, 0);
-    Mouse.mousePosition.y = Math.max(event.clientY - canvasRect.y, 0);
-    Mouse.mouseMovement.x = event.movementX;
-    Mouse.mouseMovement.y = event.movementY;
-  }
-
-  @HostListener('mousedown', ['$event'])
-  onMouseDown(event: MouseEvent): void {
-    if (this.isFocused) event.preventDefault(); {
-    }
-    Mouse.mouseButtonDown[event.button] = true;
-  }
-
-  @HostListener('mouseup', ['$event'])
-  onMouseUp(event: MouseEvent): void {
-    Mouse.mouseButtonDown[event.button] = false;
-  }
-
-  @HostListener('mouseleave', [])
-  onMouseLeave(): void {
-    for (const buttonIndex in Mouse.mouseButtonDown) {
-      if (Mouse.mouseButtonDown[buttonIndex]) {
-        Mouse.mouseButtonDown[buttonIndex] = false;
-      }
-    }
-  }
-
-  @HostListener('focus', ['$event.target!'])
-  onFocus(target: EventTarget): void {
-    this.isFocused = true
-  }
-
-  @HostListener('blur', ['$event.target!'])
-  onBlur(target: EventTarget): void {
-    this.isFocused = false;
-
-  }
-
-  @HostListener('window:wheel', ['$event'])
-  onMouseScroll(event: WheelEvent): void {
-    if (!this.isFocused) return;
-    Mouse.wheelY = event.deltaY;
-    Mouse.wheelX = event.deltaX;
-  }
-
-  @HostListener('document:visibilitychange')
-  onVisibilityChange() {
-    this.isTabActive = !document.hidden;
-  }
-
-  @HostListener('window:focus')
-  onWindowFocus() {
-    this.isWindowFocused = true;
-  }
-
-  @HostListener('window:blur')
-  onWindowBlur() {
-    this.isWindowFocused = false;
-  }
+  private lastFpsUpdateTime = 0;
+  private destroy$ = new Subject<void>();
 
   constructor(private editorService: EditorService, private ngZone: NgZone, private cd: ChangeDetectorRef, private renderer: Renderer2) {
     this.gameEngine = new Engine();
@@ -158,7 +77,7 @@ export class Canvas implements OnChanges, OnDestroy {
   }
 
   public shouldRender() {
-    return this.isTabActive && this.isWindowFocused;
+    return this.gameEngine.isTabActive && this.gameEngine.isWindowFocused;
   }
 
   public render(timestamp: number) {

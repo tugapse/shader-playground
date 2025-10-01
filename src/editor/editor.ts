@@ -1,19 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Colors, GlEntity, JsonSerializedData, Scene } from 'omega-game-engine';
 import { Subscription } from 'rxjs';
 import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
+import { EditorBoundingBoxBehaviour } from './behaviours/scene-editor/bounding-box-behaviour';
+import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
+import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { Canvas } from './components/canvas/canvas';
-import { SceneTreeService } from './services/scene-tree.service';
 import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
 import { Inpector } from './inspectors/inpector/inpector';
-import { Scene, GlEntity, JsonSerializedData, SceneManager, Color, Colors, Shader, Vector3 } from 'omega-game-engine';
-import { EditorService } from './services/editor.service';
-import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
-import { EditorSettingsService } from './services/editor.settings';
 import { IEditorSettings } from './interfaces/editor-settings';
-import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
-import { EditorBoundingBoxBehaviour } from './behaviours/scene-editor/bounding-box-behaviour';
+import { EditorService } from './services/editor.service';
+import { EditorSettingsService } from './services/editor.settings';
+import { SceneTreeService } from './services/scene-tree.service';
+import { SceneManager } from 'src/override/scenemanager';
 
 
 @Component({

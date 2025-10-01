@@ -23,7 +23,7 @@ export class LookAtFollowBehaviour extends EntityBehaviour {
   override update(ellapsed: number): void {
     if (!this.target) this.initialize();
     if (this.target) {
-      this.transform.lookAt(this.target.transform.position);
+      this.transform.lookAt(this.target.transform.worldPosition);
       this.transform.updateMatrices();
       if (this.followTarget) {
         const dir = this.transform.forward;
