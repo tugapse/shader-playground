@@ -14,7 +14,7 @@ import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
-import { SceneManager } from 'src/override/scenemanager';
+import { SceneManager } from '@editor/overrides/scenemanager';
 
 
 @Component({
