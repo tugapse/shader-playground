@@ -1,7 +1,9 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
-import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "omega-game-engine";
+import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "omega-game-engine";
 import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
 import { mat4 } from "gl-matrix";
+
+import { EditorScene as Scene } from '@editor/overrides/scene';
 
 export class EntityPicker extends RendererBehaviour {
 

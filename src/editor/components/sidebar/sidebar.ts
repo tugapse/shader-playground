@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Scene } from 'omega-game-engine';
+import { EditorScene as Scene  } from '@editor/overrides/scene';
 import { SceneTree } from "../scene-tree/scene-tree";
 
 @Component({

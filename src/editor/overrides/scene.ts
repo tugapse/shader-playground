@@ -1,6 +1,7 @@
 import { vec3 } from "gl-matrix";
 import { GlEntity, Color, Colors, SceneEntityBehaviour, EntityType, Light, Texture, Camera, RendererBehaviour, RenderLayer, JsonSerializedData, CubemapTexture, Scene } from "omega-game-engine";
 import { ShadowMapRenderer } from "./shadowmap-renderer";
+import { SceneFog } from "./scene-fog";
 
 /**
   Represents a scene in the 3D world, acting as a container for entities and managing the main game loop operations like update and draw.
@@ -10,16 +11,18 @@ export class EditorScene extends Scene {
 
   protected _shadowmapRenderer!: ShadowMapRenderer;
   public get shadowmapRenderer() { return this._shadowmapRenderer; }
+  public fog: SceneFog;
 
   constructor() {
     super();
+    this.fog = new SceneFog(Colors.cornflowerBlue, 0, 0.002);
   }
 
   override setGlRenderingContext(gl: WebGL2RenderingContext): void {
-    if (!this._shadowmapRenderer){
+    super.setGlRenderingContext(gl);
+    if (!this._shadowmapRenderer) {
       this._shadowmapRenderer = new ShadowMapRenderer(this.gl, this);
       this.shadowMap = this._shadowmapRenderer.shadowmapTexture;
-
     }
   }
 
@@ -33,12 +36,16 @@ export class EditorScene extends Scene {
    */
   public override draw(): void {
     if (this.destroyed || !this.gl || !Camera.mainCamera) return;
-    // this.shadowmapRenderer.drawShadowMap();
+
+    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
+    if (lightEntity) {
+      this.shadowmapRenderer.drawShadowapTexture(lightEntity.transform);
+    }
 
     const activeObjects = this.objects.filter(ob => ob.active && ob.show).sort((a, b) => this.sortByRenderLayer(a, b));
+    const preObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.PRE_SCENE);
     const opaqueObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.OPAQUE);
     const transparentObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.TRANSPARENT);
-    const preObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.PRE_SCENE);
     const postObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.POST_SCENE);
     const skyboxObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.SKYBOX);
 
@@ -49,9 +56,6 @@ export class EditorScene extends Scene {
     transparentObjects.sort((a, b) => this.sortByDistance(a, b));
     skyboxObjects.sort((a, b) => this.sortByDistance(a, b));
 
-
-    this.behaviours.filter(behaviour => behaviour.active).forEach(behaviour => behaviour.beforeDraw());
-
     this.gl.clearColor(this.clearColor.r, this.clearColor.g, this.clearColor.b, 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT);
 
@@ -61,11 +65,8 @@ export class EditorScene extends Scene {
     for (const object of postObjects) { object.draw(); }
     for (const object of skyboxObjects) { object.draw(); }
 
-    super.draw();
 
-    this.behaviours.filter(behaviour => behaviour.active).forEach(behaviour => behaviour.afterDraw());
   }
-
 
 
 }

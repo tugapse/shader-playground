@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Scene } from 'omega-game-engine';
 import { Icon } from 'src/app/components/icon/icon';
+import { EditorScene as Scene } from '@editor/overrides/scene';
 
 @Component({
   selector: 'editor-top-bar',
@@ -11,8 +11,9 @@ import { Icon } from 'src/app/components/icon/icon';
 })
 export class TopBar {
 
+
   @Input() scene!: Scene;
-  @Input() isEditorPaused!:boolean;
+  @Input() isEditorPaused!: boolean;
 
   constructor(private editorService: EditorService) {
 
@@ -31,4 +32,5 @@ export class TopBar {
     this.editorService.requestSceneStop(this.scene);
 
   }
+
 }

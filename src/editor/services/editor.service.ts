@@ -1,7 +1,8 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
-import {Camera,  CameraFlyBehaviour,  Scene } from "omega-game-engine";
+import { Camera, CameraFlyBehaviour } from "omega-game-engine";
 import { BehaviorSubject } from "rxjs";
+import { EditorScene as Scene } from '@editor/overrides/scene';
 
 
 @Injectable({ providedIn: 'root' })
@@ -55,10 +56,9 @@ export class EditorService {
     this.camera.name = "Editor Camera"
     this.camera.fieldOfView = 65;
     this.camera.transform.translate(2, 3, 10);
-    this.camera.transform.rotate(0, 180, 10);
-    this.camera.addBehaviour(new CameraFlyBehaviour());
+    this.camera.transform.rotate(0, 180, 0);
     this.camera.initialize();
-
+    this.camera.addBehaviour(new CameraFlyBehaviour())
     Camera.setMainCamera(this.camera);
     this.camera.updateInEditor = true;
   }

@@ -1,4 +1,5 @@
-import { EngineCache, EntityBehaviour, GlEntity, JsonSerializable, JsonSerializedData, MeshData, ObjectInstanciator, Scene, Transform } from "omega-game-engine";
+import { EngineCache, EntityBehaviour, GlEntity, JsonSerializable, JsonSerializedData, MeshData, ObjectInstanciator,  Transform } from "omega-game-engine";
+import { EditorScene as Scene } from '@editor/overrides/scene';
 
 /**
   A static class responsible for managing the loading, instantiation, and serialization of scenes and their components.
