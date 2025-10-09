@@ -1,5 +1,5 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
-import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "omega-game-engine";
+import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "@engine";
 import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
 import { mat4 } from "gl-matrix";
 
@@ -21,7 +21,7 @@ export class EntityPicker extends RendererBehaviour {
   constructor(gl: WebGL2RenderingContext, private sceneTreeService: SceneTreeService) {
     super(gl);
     this.renderTexture = Texture.create(gl, 1024, 1024, null);
-    (window as any)['testTexture'] = this.renderTexture;
+    // (window as any)['testTexture'] = this.renderTexture;
     this.shader = new Shader(gl, new ColorMaterial(),
       "assets/shaders/frag/entity-picker.frag");
     this.shader.initialize();

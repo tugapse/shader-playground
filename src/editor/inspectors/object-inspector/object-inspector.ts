@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from 'omega-game-engine';
+import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from '@engine';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";

@@ -1,4 +1,4 @@
-import { TexturedRendererBehaviour, SceneEntityBehaviour, RendererBehaviour, ColorMaterial, Shader, GLPrimitiveType, Mesh, EngineCache, Camera, GlEntity, JsonSerializedData } from "omega-game-engine";
+import { TexturedRendererBehaviour, SceneEntityBehaviour, RendererBehaviour, ColorMaterial, Shader, GLPrimitiveType, Mesh, EngineCache, Camera, GlEntity, JsonSerializedData } from "@engine";
 import { EditorScene as Scene } from '@editor/overrides/scene';
 
 export class EditorRenderBehaviour extends TexturedRendererBehaviour implements SceneEntityBehaviour {

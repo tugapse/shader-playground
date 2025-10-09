@@ -1,4 +1,4 @@
-import { Color } from "omega-game-engine";
+import { Color } from "@engine";
 
 export interface IEditorSettings {
 

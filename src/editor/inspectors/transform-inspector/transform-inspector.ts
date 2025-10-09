@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { DragEventData, DragHandleDirective } from "@editor/directives/mouse-drag.directive";
 import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
-import { GlEntity, Transform } from 'omega-game-engine';
+import { GlEntity, Transform } from '@engine';
 
 @Component({
   selector: 'editor-transform-inspector',

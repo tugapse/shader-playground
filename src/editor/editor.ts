@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Colors, GlEntity, JsonSerializedData} from 'omega-game-engine';
+import { Colors, GlEntity, JsonSerializedData} from '@engine';
 import { Subscription } from 'rxjs';
 import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { EditorBoundingBoxBehaviour } from './behaviours/scene-editor/bounding-box-behaviour';

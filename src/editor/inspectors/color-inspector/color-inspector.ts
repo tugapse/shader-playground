@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { ColorPickerComponent } from "src/app/components/color-picker/color-picker";
 import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color } from 'omega-game-engine';
+import { Color } from '@engine';
 
 @Component({
   selector: 'editor-color-inspector',

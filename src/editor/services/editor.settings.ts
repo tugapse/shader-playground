@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { IEditorSettings } from "@editor/interfaces/editor-settings";
-import { Color, Colors, JsonSerializable, JsonSerializedData } from "omega-game-engine";
+import { Color, Colors, JsonSerializable, JsonSerializedData } from "@engine";
 import { BehaviorSubject } from "rxjs";
 
 

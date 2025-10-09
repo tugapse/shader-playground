@@ -8,6 +8,7 @@
 
     &>.title {
       font-weight: 600;
+      padding-left: 4px;
     }
 
   }
@@ -31,11 +32,12 @@
     // background-color: #283549;
 
     &.child {
-      padding: 2px 0;
+      padding: 2px 0 ;
+      margin-left: 4px;
       margin-bottom: 4px;
       overflow-y: hidden;
       border: none;
-
+      background-color: #2d3d53;
 
     }
 

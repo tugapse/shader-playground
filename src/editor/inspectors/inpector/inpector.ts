@@ -4,7 +4,7 @@ import { MovableDirective } from '@editor/directives/moveable.directive';
 import { Icon } from "src/app/components/icon/icon";
 import { InspectorHeader } from '../../components/inspector/inspector-header/inspector-header';
 import { EntityInspector } from "../entity-inspector/entity-inspector";
-import { GlEntity } from 'omega-game-engine';
+import { GlEntity } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 
 @Component({

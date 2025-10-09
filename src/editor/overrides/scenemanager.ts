@@ -1,4 +1,4 @@
-import { EngineCache, EntityBehaviour, GlEntity, JsonSerializable, JsonSerializedData, MeshData, ObjectInstanciator,  Transform } from "omega-game-engine";
+import { EngineCache, EntityBehaviour, GlEntity, JsonSerializable, JsonSerializedData, MeshData, ObjectInstanciator,  Transform } from "@engine";
 import { EditorScene as Scene } from '@editor/overrides/scene';
 
 /**
@@ -18,7 +18,11 @@ export class SceneManager {
    * @returns {Scene} - The loaded or newly created Scene instance.
    */
   public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Scene {
+
+    EngineCache.clear();
     scene = scene || new Scene();
+    scene.setGlRenderingContext(gl);
+
     const { meshMaps, objects, textureMaps } = jsonData;
     const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
     SceneManager.instaciateAndLoadSceneTextures(textureMaps, gl);
@@ -37,7 +41,7 @@ export class SceneManager {
  * @returns {{ [key: string]: MeshData }} - A map of mesh UUIDs to MeshData instances.
  */
   private static instaciateAndLoadSceneTextures(texturesMaps: any, gl: WebGL2RenderingContext): void {
-
+    return
     for (const textureJsonData of Object.values(texturesMaps) as any[]) {
       if (textureJsonData.url) {
         EngineCache.getTexture2D(textureJsonData.url, gl);

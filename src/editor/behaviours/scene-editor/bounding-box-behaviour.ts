@@ -7,7 +7,7 @@ import {
   RendererBehaviour,
   Shader, ShaderUniformsEnum,
   Transform, Vector3
-} from "omega-game-engine";
+} from "@engine";
 
 
 export class EditorBoundingBoxBehaviour extends RendererBehaviour {

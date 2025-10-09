@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, NgZone, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Camera, CanvasViewport, cleanLastFrame, Keybord, Mouse, Engine } from 'omega-game-engine';
+import { Camera, CanvasViewport, cleanLastFrame, Keybord, Mouse, Engine } from '@engine';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { EditorScene as Scene } from '@editor/overrides/scene';

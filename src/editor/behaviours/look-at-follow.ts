@@ -1,4 +1,4 @@
-import { EntityBehaviour, GlEntity, JsonSerializedData, ObjectInstanciator } from "omega-game-engine";
+import { EntityBehaviour, GlEntity, JsonSerializedData, ObjectInstanciator } from "@engine";
 
 
 export class LookAtFollowBehaviour extends EntityBehaviour {

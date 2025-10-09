@@ -3,7 +3,7 @@ import {
   TexturedRendererBehaviour, Texture, Shader, RenderLayer, CullFace, DephFunction,
   ColorMaterial, MeshData, RendererBehaviour, ShaderUniformsEnum, Transform, Camera, GlEntity,
   CanvasViewport
-} from "omega-game-engine";
+} from "@engine";
 import { EditorScene } from "./scene";
 
 /**
@@ -15,6 +15,7 @@ import { EditorScene } from "./scene";
  * @augments {TexturedRendererBehaviour}
  */
 export class ShadowMapRenderer {
+
 
   /**
    * The depth texture that stores the shadow map.
@@ -132,6 +133,7 @@ export class ShadowMapRenderer {
     // End the render pass, unbinding the framebuffer and restoring the default state.
     this.endPass();
   }
+
   endPass() {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight);
@@ -193,5 +195,14 @@ export class ShadowMapRenderer {
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
+  }
+
+  destroy() {
+    this.shadowmapTexture.destroy();
+    this.depthShader.destroy();
+    this.whiteTexture.destroy();
+    if (this.framebuffer) {
+      this.gl.deleteFramebuffer(this.framebuffer);
+    }
   }
 }

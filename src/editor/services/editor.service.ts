@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
-import { Camera, CameraFlyBehaviour } from "omega-game-engine";
+import { Camera, CameraFlyBehaviour } from "@engine";
 import { BehaviorSubject } from "rxjs";
 import { EditorScene as Scene } from '@editor/overrides/scene';
 

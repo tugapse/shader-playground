@@ -10,7 +10,7 @@ import { Icon } from "src/app/components/icon/icon";
 })
 export class InpectorTogglePanel {
   @Input() title: string = "NoName";
-  @Input() collapsed: boolean = true;
+  @Input() collapsed: boolean = false;
   @Input() isAbleToCollapse: boolean = true;
   @Input() isChild: boolean = false;
 

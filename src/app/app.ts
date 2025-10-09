@@ -13,9 +13,11 @@ import {
   DirectionalLight,
   EngineCache, GlEntity, Light, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator,
   PlanePrimitive, PointLight,
-  Shader,   SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  UnlitMaterial,
+  UnlitShader,
 
-} from 'omega-game-engine';
+} from '@engine';
 
 import { SunBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
@@ -82,9 +84,9 @@ export class App implements OnDestroy {
 
   private async loadAssets(scene: Scene) {
     await this.createLights(scene);
-    await this.otherObjetcs(scene);
-    await this.addMonkeyObj(scene);
-    await this.createSkybox(scene);
+    // await this.otherObjetcs(scene);
+    // await this.addMonkeyObj(scene);
+    // await this.createSkybox(scene);
     await this.createFloor(scene);
 
   }
@@ -127,20 +129,24 @@ export class App implements OnDestroy {
 
   private createFloor(scene: Scene) {
     const primitive = new PlanePrimitive(50);
-    const material = new LitMaterial();
+    const material = new UnlitMaterial();
 
-    const shader = new LitShader(this.gl, material);
+    const shader = new UnlitShader(this.gl, material);
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.name = "Renderer";
 
     material.mainTex = EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
-    material.normalTex = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
+    material.mainTex.bind()
+    material.mainTex.setWrapS(this.gl.REPEAT);
+    material.mainTex.setWrapT(this.gl.REPEAT);
+    material.mainTex.setTextureParameters();
+    material.mainTex.unBind();
 
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
 
     const planeEntity = new GlEntity("Floor");
-    planeEntity.transform.translate(0,-2,0);
+    planeEntity.transform.translate(0, -2, 0);
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
 
@@ -188,7 +194,7 @@ export class App implements OnDestroy {
     const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new MeshRendererBehaviour(this.gl));
     scene.addEntity(movingMokeyEntity);
 
-    movingMokeyEntity.transform.setParent(this.light.transform)
+    // movingMokeyEntity.transform.setParent(this.light.transform)
   }
 
   private createEntity(

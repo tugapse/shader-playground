@@ -1,5 +1,5 @@
 import { mat4, vec3, vec4 } from "gl-matrix";
-import { Camera, CanvasViewport, Mouse } from "omega-game-engine";
+import { Camera, CanvasViewport, Mouse } from "@engine";
 
 export class Raycast {
 

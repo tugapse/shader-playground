@@ -1,7 +1,6 @@
-import { vec3 } from "gl-matrix";
-import { GlEntity, Color, Colors, SceneEntityBehaviour, EntityType, Light, Texture, Camera, RendererBehaviour, RenderLayer, JsonSerializedData, CubemapTexture, Scene } from "omega-game-engine";
-import { ShadowMapRenderer } from "./shadowmap-renderer";
+import { Camera, Colors, EngineCache, EntityType, GlEntity, JsonSerializedData, RendererBehaviour, RenderLayer, Scene } from "@engine";
 import { SceneFog } from "./scene-fog";
+import { ShadowMapRenderer } from "./shadowmap-renderer";
 
 /**
   Represents a scene in the 3D world, acting as a container for entities and managing the main game loop operations like update and draw.
@@ -35,7 +34,7 @@ export class EditorScene extends Scene {
    * @returns {void}
    */
   public override draw(): void {
-    if (this.destroyed || !this.gl || !Camera.mainCamera) return;
+    if (this.destroyed || !this.gl || !Camera.mainCamera || !this.shadowmapRenderer) return;
 
     const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
     if (lightEntity) {
@@ -68,5 +67,21 @@ export class EditorScene extends Scene {
 
   }
 
+  override toJsonObject(): JsonSerializedData {
+    return {
+      ...super.toJsonObject(),
+    }
+  }
+
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    debugger
+  }
+
+  override destroy(): void {
+    super.destroy();
+    this.shadowmapRenderer.destroy();
+    EngineCache.clear();
+  }
 
 }

@@ -1,5 +1,5 @@
 import { vec3, mat4 } from "gl-matrix";
-import { RendererBehaviour, GLPrimitiveType, Transform, ShaderUniformsEnum, LitMaterial, LitShader, EntityType, Light, DirectionalLight, PointLight, SpotLight, Camera } from "omega-game-engine";
+import { RendererBehaviour, GLPrimitiveType, Transform, ShaderUniformsEnum, LitMaterial, LitShader, EntityType, Light, DirectionalLight, PointLight, SpotLight, Camera } from "@engine";
 import { SceneFog } from "./scene-fog";
 
 /**

@@ -1,6 +1,6 @@
 
 import { vec3 } from "gl-matrix";
-import { Color, ColorMaterial, DephFunction, Mesh, MeshData, RendererBehaviour, RenderLayer, SceneEntityBehaviour, Shader, Vector3 } from "omega-game-engine";
+import { Color, ColorMaterial, DephFunction, Mesh, MeshData, RendererBehaviour, RenderLayer, SceneEntityBehaviour, Shader, Vector3 } from "@engine";
 
 
 export class EditorGridBehaviour extends RendererBehaviour {

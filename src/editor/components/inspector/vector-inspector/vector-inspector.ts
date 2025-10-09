@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TextInputInspector } from "../text-input-inspector/text-input-inspector";
-import { Vector4, Vector3, Vector2 } from 'omega-game-engine';
+import { Vector4, Vector3, Vector2 } from '@engine';
 
 @Component({
   selector: 'editor-vector-inspector',
@@ -12,10 +12,12 @@ export class VectorInspector {
 
   @Input() vectorKeys = ["x", "y", "z", "w"];
   @Input() vector!: Vector4 | Vector3 | Vector2;
+  @Input() label: string = "No title";
+  @Input() scale: number = 1;
   @Output() vectorChanged = new EventEmitter<Vector4 | Vector3 | Vector2>()
 
-  onVectorChanged(index: number, $event: Event) {
-    this.vector.vector[index] = ($event.target as any).value;
+  onVectorChanged(index: number, value:string|number) {
+    this.vector.vector[index] = +(+value).toFixed(3) ;
     this.vectorChanged.emit(this.vector);
   }
 }

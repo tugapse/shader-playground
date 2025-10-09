@@ -5,7 +5,7 @@ import { TextInputInspector } from "@editor/components/inspector/text-input-insp
 import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
-import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from 'omega-game-engine';
+import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from '@engine';
 import { EnumInspector } from "../enum-inspector/enum-inspector";
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 

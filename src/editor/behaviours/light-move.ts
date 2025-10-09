@@ -1,5 +1,5 @@
 import { quat2, vec3 } from "gl-matrix";
-import { EntityBehaviour, Vector3, ObjectInstanciator, Camera } from "omega-game-engine";
+import { EntityBehaviour, Vector3, ObjectInstanciator, Camera } from "@engine";
 
 export class SunBehaviour extends EntityBehaviour {
 
