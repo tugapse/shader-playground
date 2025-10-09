@@ -528,6 +528,10 @@ export class Texture extends JsonSerializable {
     return {
       ...super.toJsonObject(),
       url: this.textureUri,
+      minFilter: this._minFilter,
+      magFilter: this._magFilter,
+      wrapS: this._wrapS,
+      wrapT: this._wrapT,
     };
   }
 
@@ -540,5 +544,21 @@ export class Texture extends JsonSerializable {
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
     this.textureUri = jsonObject["url"];
+    if (jsonObject["minFilter"]) {
+      this._minFilter = jsonObject["minFilter"] as TextureFilterMode;
+    }
+    if (jsonObject["magFilter"]) {
+      this._magFilter = jsonObject["magFilter"] as TextureFilterMode;
+    }
+    if (jsonObject["wrapS"]) {
+      this._wrapS = jsonObject["wrapS"] as TextureWrapMode;
+    }
+    if (jsonObject["wrapT"]) {
+      this._wrapT = jsonObject["wrapT"] as TextureWrapMode;
+    }
+
+    if (this.isImageLoaded) {
+      this.setTextureParameters();
+    }
   }
 }
