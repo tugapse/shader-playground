@@ -71,28 +71,28 @@ export class Texture extends JsonSerializable {
   protected _isLoading: boolean = false;
   /**
    * The minification filter.
-   * @protected
+   * @public
    * @type {TextureFilterMode}
    */
-  protected _minFilter: TextureFilterMode = TextureFilterMode.LINEAR_MIPMAP_LINEAR;
+  public minFilter: TextureFilterMode = TextureFilterMode.LINEAR_MIPMAP_LINEAR;
   /**
    * The magnification filter.
-   * @protected
+   * @public
    * @type {TextureFilterMode}
    */
-  protected _magFilter: TextureFilterMode = TextureFilterMode.LINEAR;
+  public magFilter: TextureFilterMode = TextureFilterMode.LINEAR;
   /**
    * The texture wrap mode for the S (horizontal) axis.
-   * @protected
+   * @public
    * @type {TextureWrapMode}
    */
-  protected _wrapS: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
+  public wrapS: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
   /**
    * The texture wrap mode for the T (vertical) axis.
-   * @protected
+   * @public
    * @type {TextureWrapMode}
    */
-  protected _wrapT: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
+  public wrapT: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
   /**
    * A flag to indicate if the texture is currently in a bound state.
    * @protected
@@ -303,10 +303,10 @@ export class Texture extends JsonSerializable {
   public setTextureParameters(): void {
     if (!this.gl) return;
     this.bind();
-    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.MIN_FILTER, this._minFilter);
-    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.MAG_FILTER, this._magFilter);
-    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.WRAP_S, this._wrapS);
-    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.WRAP_T, this._wrapT);
+    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.MIN_FILTER, this.minFilter);
+    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.MAG_FILTER, this.magFilter);
+    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.WRAP_S, this.wrapS);
+    this.gl.texParameteri(TextureTarget.TEXTURE_2D, TextureParameter.WRAP_T, this.wrapT);
     this.gl.generateMipmap(TextureTarget.TEXTURE_2D);
     this.unBind();
   }
@@ -317,7 +317,7 @@ export class Texture extends JsonSerializable {
    * @returns {void}
    */
   public setMinFilter(filter: TextureFilterMode): void {
-    this._minFilter = filter;
+    this.minFilter = filter;
     this.setTextureParameters();
   }
 
@@ -327,7 +327,7 @@ export class Texture extends JsonSerializable {
    * @returns {void}
    */
   public setMagFilter(filter: TextureFilterMode): void {
-    this._magFilter = filter;
+    this.magFilter = filter;
     this.setTextureParameters();
   }
 
@@ -337,7 +337,7 @@ export class Texture extends JsonSerializable {
    * @returns {void}
    */
   public setWrapS(wrap: TextureWrapMode): void {
-    this._wrapS = wrap;
+    this.wrapS = wrap;
     this.setTextureParameters();
   }
 
@@ -347,7 +347,7 @@ export class Texture extends JsonSerializable {
    * @returns {void}
    */
   public setWrapT(wrap: TextureWrapMode): void {
-    this._wrapT = wrap;
+    this.wrapT = wrap;
     this.setTextureParameters();
   }
 
@@ -451,7 +451,7 @@ export class Texture extends JsonSerializable {
    * @returns {void}
    */
   public bind(): void {
-    if (!this.gl || this._isBound) {
+    if (!this.gl) {
       return;
     }
     this.gl.bindTexture(TextureTarget.TEXTURE_2D, this._glTexture);
@@ -528,10 +528,10 @@ export class Texture extends JsonSerializable {
     return {
       ...super.toJsonObject(),
       url: this.textureUri,
-      minFilter: this._minFilter,
-      magFilter: this._magFilter,
-      wrapS: this._wrapS,
-      wrapT: this._wrapT,
+      minFilter: this.minFilter,
+      magFilter: this.magFilter,
+      wrapS: this.wrapS,
+      wrapT: this.wrapT,
     };
   }
 
@@ -545,16 +545,16 @@ export class Texture extends JsonSerializable {
     super.fromJson(jsonObject);
     this.textureUri = jsonObject["url"];
     if (jsonObject["minFilter"]) {
-      this._minFilter = jsonObject["minFilter"] as TextureFilterMode;
+      this.minFilter = jsonObject["minFilter"] as TextureFilterMode;
     }
     if (jsonObject["magFilter"]) {
-      this._magFilter = jsonObject["magFilter"] as TextureFilterMode;
+      this.magFilter = jsonObject["magFilter"] as TextureFilterMode;
     }
     if (jsonObject["wrapS"]) {
-      this._wrapS = jsonObject["wrapS"] as TextureWrapMode;
+      this.wrapS = jsonObject["wrapS"] as TextureWrapMode;
     }
     if (jsonObject["wrapT"]) {
-      this._wrapT = jsonObject["wrapT"] as TextureWrapMode;
+      this.wrapT = jsonObject["wrapT"] as TextureWrapMode;
     }
 
     if (this.isImageLoaded) {
