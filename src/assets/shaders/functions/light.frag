@@ -62,7 +62,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal,
       shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
     }
   }
-  return shadow / 9.0;
+  return max(0.1, shadow / 9.0);
 }
 
 // This function calculates the final lit color, including shadows

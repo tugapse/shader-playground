@@ -82,9 +82,9 @@ export class App implements OnDestroy {
 
   private async loadAssets(scene: Scene) {
     await this.createLights(scene);
-    // await this.otherObjetcs(scene);
+    await this.otherObjetcs(scene);
     await this.addMonkeyObj(scene);
-    // await this.createSkybox(scene);
+    await this.createSkybox(scene);
     await this.createFloor(scene);
 
   }
@@ -127,13 +127,15 @@ export class App implements OnDestroy {
 
   private async createFloor(scene: Scene) {
     const primitive = new PlanePrimitive(50);
-    const material = new UnlitMaterial();
+    const material = new LitMaterial();
 
-    const shader = new UnlitShader(this.gl, material);
+    const shader = new LitShader(this.gl, material);
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.name = "Renderer";
 
     material.mainTex = await EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
+    material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal.jpg", this.gl);
+
 
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
