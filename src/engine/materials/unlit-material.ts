@@ -54,8 +54,8 @@ export class UnlitMaterial extends ColorMaterial {
       this.mainTex = EngineCache.getTexture2D(jsonObject["mainTex"].url);
       this.mainTex.fromJson(jsonObject['mainTex']);
     }
-    this.uvScale.set(jsonObject['uvScale']);
-    this.uvOffset.set(jsonObject['uvOffset']);
+    jsonObject['uvScale'] && this.uvScale.set(...jsonObject['uvScale']);
+    jsonObject['uvOffset'] && this.uvOffset.set(...jsonObject['uvOffset']);
   }
 
   /**

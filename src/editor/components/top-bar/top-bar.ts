@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
+import { Scene } from '@engine';
 import { Icon } from 'src/app/components/icon/icon';
-import { EditorScene as Scene } from '@editor/overrides/scene';
 
 @Component({
   selector: 'editor-top-bar',

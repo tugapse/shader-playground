@@ -26,7 +26,11 @@ export class SceneManager {
    * @returns {Scene} - The loaded or newly created Scene instance.
    */
   public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Scene {
+
+    EngineCache.clear();
     scene = scene || new Scene();
+    scene.setGlRenderingContext(gl);
+
     const { meshMaps, objects, textureMaps } = jsonData;
     const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
     SceneManager.instaciateAndLoadSceneTextures(textureMaps, gl);
@@ -44,21 +48,20 @@ export class SceneManager {
  * @param {any} meshMaps - The raw mesh data from the JSON.
  * @returns {{ [key: string]: MeshData }} - A map of mesh UUIDs to MeshData instances.
  */
-  private static instaciateAndLoadSceneTextures(texturesMaps: any, gl: WebGL2RenderingContext): void {
-
-    for (const textureJsonData of Object.values(texturesMaps) as any[]) {
-      if (textureJsonData.url) {
-        EngineCache.getTexture2D(textureJsonData.url, gl);
-      } else if (textureJsonData.urls) {
-        const keys = textureJsonData.urls.split("|");
-        EngineCache.getTextureCube({
-          right: keys[0], left: keys[1],
-          up: keys[2], bottom: keys[3],
-          front: keys[4], back: keys[5],
-        }, gl);
+  private static async instaciateAndLoadSceneTextures(texturesMaps: any, gl: WebGL2RenderingContext): Promise<void> {
+      for (const textureJsonData of Object.values(texturesMaps) as any[]) {
+        if (textureJsonData.url) {
+          await EngineCache.getTexture2D(textureJsonData.url, gl);
+        } else if (textureJsonData.urls) {
+          const keys = textureJsonData.urls.split("|");
+          await EngineCache.getTextureCube({
+            right: keys[0], left: keys[1],
+            up: keys[2], bottom: keys[3],
+            front: keys[4], back: keys[5],
+          }, gl);
+        }
       }
     }
-  }
   /**
     Instantiates mesh data objects from the scene JSON data.
    * @private

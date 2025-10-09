@@ -3,12 +3,11 @@ import { Component, Input } from '@angular/core';
 
 import { Icon } from "../../../app/components/icon/icon";
 import { SceneTreeService } from '../../services/scene-tree.service';
-import { GlEntity, EntityType } from '@engine';
+import { GlEntity, EntityType, Scene } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { TreeNode } from './scene-node';
 import { TreeNodeComponent } from './tree-node/tree-node';
 
-import { EditorScene as Scene } from '@editor/overrides/scene';
 
 @Component({
   selector: 'app-scene-tree',

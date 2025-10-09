@@ -1,7 +1,6 @@
-import { EntityBehaviour, RendererBehaviour } from "./behaviours";
+import { EntityBehaviour, MeshRendererBehaviour, RendererBehaviour } from "./behaviours";
 import { CameraFlyBehaviour } from "./behaviours/camera-fly-behaviour";
 import { SkyboxRenderer } from "./behaviours/renderer/skybox-renderer";
-import { TexturedRendererBehaviour } from "./behaviours/renderer/textured-renderer-behaviour";
 import { Keybord, Mouse, Transform } from "./core";
 import { Color } from "./core/color";
 import { MeshData } from "./core/mesh";
@@ -169,7 +168,7 @@ export class Engine {
     // Behaviours (Renderers)
     ObjectInstanciator.addDependency("EntityBehaviour", EntityBehaviour.instanciate);
     ObjectInstanciator.addDependency("RendererBehaviour", RendererBehaviour.instanciate);
-    ObjectInstanciator.addDependency("TexturedRendererBehaviour", TexturedRendererBehaviour.instanciate);
+    ObjectInstanciator.addDependency("MeshRendererBehaviour",MeshRendererBehaviour.instanciate);
     ObjectInstanciator.addDependency("SkyboxRenderer", SkyboxRenderer.instanciate);
 
     // Materials

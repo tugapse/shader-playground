@@ -34,7 +34,7 @@ export abstract class EngineCache {
   /**
     The private cache instance.
    * @private
-    
+
    * @type {StorageSpaces}
    */
   private static __cache: StorageSpaces = {
@@ -45,34 +45,32 @@ export abstract class EngineCache {
   /**
     An instance of the OBJ parser used for loading mesh data.
    * @private
-    
+
    * @type {ObjParser}
    */
   private static objPArser: ObjParser = new ObjParser();
 
   /**
     Retrieves a 2D texture from the cache or loads and caches it if not present.
-    
+
    * @param {string} uri - The URI of the texture.
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @returns {Texture} - The cached or newly loaded Texture instance.
    */
   public static getTexture2D(uri: string, gl?: WebGL2RenderingContext): Texture {
-    let result = new Texture(gl, uri);
-    result.load();
+
+    let result = EngineCache.__cache.textures[uri];
+    if (!result) {
+      result = new Texture(gl, uri);
+      EngineCache.__cache.textures[uri] = result;
+      result.load();
+    }
     return result;
-    // let result = EngineCache.__cache.textures[uri];
-    // if (!result) {
-    //   result = new Texture(gl, uri);
-    //   EngineCache.__cache.textures[uri] = result;
-    //   result.load();
-    // }
-    // return result;
   }
 
   /**
   Retrieves a Cube texture from the cache or loads and caches it if not present.
-  
+
  * @param {string} uri - The URI of the texture.
  * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
  * @returns {Texture} - The cached or newly loaded Texture instance.
@@ -92,8 +90,8 @@ export abstract class EngineCache {
 
   /**
     Retrieves mesh data parsed from an OBJ file from the cache or loads, parses, and caches it if not present.
-    
-    
+
+
    * @param {string} uri - The URI of the OBJ file.
    * @returns {Promise<MeshData>} - A promise that resolves with the mesh data.
    */
@@ -110,8 +108,8 @@ export abstract class EngineCache {
 
   /**
     Retrieves shader source code from the cache or loads and caches it if not present.
-    
-    
+
+
    * @param {string} uri - The URI of the shader source file.
    * @returns {Promise<string>} - A promise that resolves with the shader source code as a string.
    */

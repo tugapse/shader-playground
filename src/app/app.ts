@@ -11,8 +11,9 @@ import {
   Colors, CubemapMaterial,
   CubePrimitive,
   DirectionalLight,
-  EngineCache, GlEntity, Light, LitMaterial, LitShader, Mesh, MeshData, ObjectInstanciator,
+  EngineCache, GlEntity, Light, LitMaterial, LitShader, Mesh, MeshData, MeshRendererBehaviour, ObjectInstanciator,
   PlanePrimitive, PointLight,
+  Scene,
   Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
   UnlitMaterial,
   UnlitShader,
@@ -21,9 +22,6 @@ import {
 
 import { SunBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { MeshRendererBehaviour } from '@editor/overrides/mesh-renderer';
-
-import { EditorScene as Scene } from '@editor/overrides/scene';
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
@@ -85,7 +83,7 @@ export class App implements OnDestroy {
   private async loadAssets(scene: Scene) {
     await this.createLights(scene);
     // await this.otherObjetcs(scene);
-    // await this.addMonkeyObj(scene);
+    await this.addMonkeyObj(scene);
     // await this.createSkybox(scene);
     await this.createFloor(scene);
 
@@ -127,7 +125,7 @@ export class App implements OnDestroy {
     scene.addEntity(sphere);
   }
 
-  private createFloor(scene: Scene) {
+  private async createFloor(scene: Scene) {
     const primitive = new PlanePrimitive(50);
     const material = new UnlitMaterial();
 
@@ -135,12 +133,7 @@ export class App implements OnDestroy {
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.name = "Renderer";
 
-    material.mainTex = EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
-    material.mainTex.bind()
-    material.mainTex.setWrapS(this.gl.REPEAT);
-    material.mainTex.setWrapT(this.gl.REPEAT);
-    material.mainTex.setTextureParameters();
-    material.mainTex.unBind();
+    material.mainTex = await EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
 
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;

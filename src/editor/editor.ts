@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Colors, GlEntity, JsonSerializedData} from '@engine';
+import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager} from '@engine';
 import { Subscription } from 'rxjs';
-import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
 import { EditorBoundingBoxBehaviour } from './behaviours/scene-editor/bounding-box-behaviour';
 import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
 import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
@@ -14,9 +13,6 @@ import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
-import { SceneManager } from '@editor/overrides/scenemanager';
-
-import { EditorScene as Scene  } from './overrides/scene';
 
 @Component({
   selector: 'app-editor',
@@ -32,7 +28,6 @@ export class Editor implements OnDestroy, OnInit {
   canvasVisible = true;
   fpsCounter: number = 0;
 
-  protected editorRenderBehaviour!: EditorRenderBehaviour;
 
   protected gl!: WebGL2RenderingContext;
   protected subs$: Subscription[] = [];

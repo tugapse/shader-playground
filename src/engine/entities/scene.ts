@@ -1,5 +1,5 @@
 import { vec3 } from "gl-matrix";
-import { Color, Colors } from "../core";
+import { Color, Colors, SceneFog, ShadowMapRenderer } from "../core";
 import { EntityType } from "../enums/entity-type.enum";
 import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
 import { SceneEntityBehaviour } from "../interfaces/scene-behaviour.interface";
@@ -16,24 +16,12 @@ import { CubemapTexture, Texture } from "../textures";
 export class Scene extends GlEntity {
 
   protected override _className = "Scene";
-  /**
-    The currently active scene instance.
-   * @protected
 
-   * @type {Scene}
-   */
-  protected static _currentScene: Scene;
+    protected _shadowmapRenderer!: ShadowMapRenderer;
+    public get shadowmapRenderer() { return this._shadowmapRenderer; }
+    public fog: SceneFog;
 
 
-  /**
-    Gets the currently active scene instance.
-   * @readonly
-
-   * @type {Scene}
-   */
-  public static get currentScene(): Scene {
-    return this._currentScene;
-  }
   /**
     A flag indicating whether the scene's update loop is running.
    * @type {boolean}
@@ -110,9 +98,8 @@ export class Scene extends GlEntity {
     super("Scene");
     this._objects = [];
     this.behaviours = [];
-    if (!Scene._currentScene) {
-      Scene._currentScene = this;
-    }
+    this.fog = new SceneFog(Colors.cornflowerBlue, 0, 0.002);
+
   }
 
   /**
@@ -154,18 +141,24 @@ export class Scene extends GlEntity {
     this.behaviours.forEach(behaviour => behaviour.afterUpdate());
   }
 
+
   /**
     Draws the scene, including clearing the buffer and rendering all visible entities.
    * @override
    * @returns {void}
    */
   public override draw(): void {
-    if (this.destroyed || !this.gl || !Camera.mainCamera) return;
+    if (this.destroyed || !this.gl || !Camera.mainCamera || !this.shadowmapRenderer) return;
+
+    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
+    if (lightEntity) {
+      this.shadowmapRenderer.drawShadowapTexture(lightEntity.transform);
+    }
 
     const activeObjects = this.objects.filter(ob => ob.active && ob.show).sort((a, b) => this.sortByRenderLayer(a, b));
+    const preObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.PRE_SCENE);
     const opaqueObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.OPAQUE);
     const transparentObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.TRANSPARENT);
-    const preObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.PRE_SCENE);
     const postObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.POST_SCENE);
     const skyboxObjects = activeObjects.filter(e => e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.SKYBOX);
 
@@ -176,9 +169,6 @@ export class Scene extends GlEntity {
     transparentObjects.sort((a, b) => this.sortByDistance(a, b));
     skyboxObjects.sort((a, b) => this.sortByDistance(a, b));
 
-
-    this.behaviours.filter(behaviour => behaviour.active).forEach(behaviour => behaviour.beforeDraw());
-
     this.gl.clearColor(this.clearColor.r, this.clearColor.g, this.clearColor.b, 1.0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT);
 
@@ -188,10 +178,9 @@ export class Scene extends GlEntity {
     for (const object of postObjects) { object.draw(); }
     for (const object of skyboxObjects) { object.draw(); }
 
-    super.draw();
 
-    this.behaviours.filter(behaviour => behaviour.active).forEach(behaviour => behaviour.afterDraw());
   }
+
 
   protected sortByRenderLayer(a: GlEntity, b: GlEntity) {
     const aBeh = a.getBehaviour(RendererBehaviour);
@@ -244,7 +233,12 @@ export class Scene extends GlEntity {
       if (behaviour['setGl'])
         behaviour["setGl"](gl);
     });
+      if (!this._shadowmapRenderer) {
+        this._shadowmapRenderer = new ShadowMapRenderer(this.gl, this);
+        this.shadowMap = this._shadowmapRenderer.shadowmapTexture;
+      }
   }
+
 
   /**
     Destroys the scene and all entities and behaviours within it.
@@ -316,13 +310,6 @@ export class Scene extends GlEntity {
     };
   }
 
-  /**
-    Sets this scene as the current active scene.
-   * @returns {void}
-   */
-  public setCurrent(): void {
-    Scene._currentScene = this;
-  }
 
   /**
     Retrieves an entity by its name.

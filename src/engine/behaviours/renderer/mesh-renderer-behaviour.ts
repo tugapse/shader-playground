@@ -1,6 +1,10 @@
-import { vec3, mat4 } from "gl-matrix";
-import { RendererBehaviour, GLPrimitiveType, Transform, ShaderUniformsEnum, LitMaterial, LitShader, EntityType, Light, DirectionalLight, PointLight, SpotLight, Camera } from "@engine";
-import { SceneFog } from "./scene-fog";
+import { mat4, vec3 } from "gl-matrix";
+import { SceneFog } from "../../core";
+import { Camera, DirectionalLight, Light, PointLight, SpotLight } from "../../entities";
+import { EntityType, GLPrimitiveType, ShaderUniformsEnum } from "../../enums";
+import { LitMaterial } from "../../materials";
+import { LitShader } from "../../shaders";
+import { RendererBehaviour } from "./renderer-behaviour";
 
 /**
  * A renderer for mesh-based objects that supports normal maps, lighting, and shadow mapping.
@@ -12,7 +16,7 @@ import { SceneFog } from "./scene-fog";
 export class MeshRendererBehaviour extends RendererBehaviour {
 
   /**
-    Creates a new instance of the TexturedRendererBehaviour.
+    Creates a new instance of the MeshRendererBehaviour.
    * @override
 
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
@@ -21,7 +25,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
   static override instanciate(gl: WebGL2RenderingContext): MeshRendererBehaviour {
     return new MeshRendererBehaviour(gl);
   }
-  protected override _className = "TexturedRendererBehaviour"
+  protected override _className = "MeshRendererBehaviour"
 
   /**
     The uniform location for the normal map texture.
@@ -58,7 +62,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
 
   public get fog(){ return this.parent.scene["fog"] as SceneFog;}
   /**
-    Creates an instance of TexturedRendererBehaviour.
+    Creates an instance of MeshRendererBehaviour.
    * @param {WebGL2RenderingContext} _gl - The WebGL2 rendering context.
    */
   constructor(public override _gl: WebGL2RenderingContext) {
@@ -79,6 +83,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
 
     if (this.shader instanceof LitShader) {
 
+      this.shader.setInt('u_useShadows', 0);
       if (this.shadowMapTexture && this.shadowMapTexture.glTexture) {
         // Get the Light entity (assuming there is only one directional light for shadows)
         const lightEntity = this.parent.scene.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);

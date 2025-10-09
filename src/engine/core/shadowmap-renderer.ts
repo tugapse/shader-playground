@@ -1,22 +1,22 @@
+import { Texture } from "../textures";
+import { Scene } from "../entities/scene";
 import { mat4, vec3 } from "gl-matrix";
-import { MeshData, Transform } from "../../core";
-import { Camera, GlEntity } from "../../entities";
-import { RenderLayer, CullFace, DephFunction, ShaderUniformsEnum } from "../../enums";
-import { ColorMaterial } from "../../materials";
-import { Shader } from "../../shaders";
-import { Texture } from "../../textures";
-import { RendererBehaviour } from "./renderer-behaviour";
-import { TexturedRendererBehaviour } from "./textured-renderer-behaviour";
+import { Transform } from "./transform";
+import { RendererBehaviour } from "../behaviours";
+import { CullFace, ShaderUniformsEnum } from "../enums";
+import { Camera, GlEntity } from "../entities";
+import { CanvasViewport } from "./canvas-viewport";
+import { Shader } from "../shaders";
+import { ColorMaterial } from "../materials";
 
 /**
  * A specialized renderer responsible for creating a shadow map.
  * This renderer performs a depth-only pass from the perspective of a light source,
  * rendering all shadow-casting objects in the scene to a depth texture.
  * This depth texture (the shadow map) is then used by other renderers to apply shadows.
- *
- * @augments {TexturedRendererBehaviour}
  */
-export class ShadowMapRenderer extends TexturedRendererBehaviour {
+export class ShadowMapRenderer {
+
 
   /**
    * The depth texture that stores the shadow map.
@@ -38,6 +38,7 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
    * @type {WebGLFramebuffer}
    */
   protected framebuffer!: WebGLFramebuffer;
+  public scene: Scene;
 
   /**
    * A dedicated shader used for the depth-only rendering pass.
@@ -46,36 +47,34 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
    */
   private depthShader: Shader;
 
+
   /**
    * Creates an instance of ShadowMapRenderer.
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    */
-  constructor(gl: WebGL2RenderingContext) {
-    super(gl);
-    this.renderLayer = RenderLayer.PRE_SCENE;
-    this.cullFace = CullFace.FRONT;
-    this.dephMode = DephFunction.Less;
+  constructor(public gl: WebGL2RenderingContext, scene: Scene) {
+    this.scene = scene;
 
     // Create the texture to be used as the shadow map
-    this.shadowmapTexture = Texture.createDepthTexture(this._gl, ShadowMapRenderer.shadowMapSize, ShadowMapRenderer.shadowMapSize);
-    this.shadowmapTexture.name = "Shadowmap Texture";
+    this.shadowmapTexture = Texture.createDepthTexture(this.gl, ShadowMapRenderer.shadowMapSize, ShadowMapRenderer.shadowMapSize);
+    this.shadowmapTexture.name = "ShadowmapTexture";
+
 
     // Configure the depth texture for shadow mapping (hardware PCF).
-    this._gl.bindTexture(this._gl.TEXTURE_2D, this.shadowmapTexture.glTexture);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_COMPARE_MODE, this._gl.COMPARE_REF_TO_TEXTURE);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_COMPARE_FUNC, this._gl.LEQUAL);
-    this._gl.bindTexture(this._gl.TEXTURE_2D, null);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.shadowmapTexture.glTexture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_COMPARE_MODE, this.gl.COMPARE_REF_TO_TEXTURE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_COMPARE_FUNC, this.gl.LEQUAL);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
 
     this.depthShader = new Shader(gl, new ColorMaterial(),
       "assets/shaders/frag/depth-only.frag",
       "assets/shaders/vertex/shadow-caster.vert"
     );
-    debugger
     this.depthShader.initialize();
 
-    // This renderer doesn't draw a mesh itself, so its mesh data is empty.
-    this.mesh.meshData = new MeshData([]);
   }
+
+
 
   /**
    * Renders all shadow-casting objects from the light's perspective into the shadow map.
@@ -83,11 +82,8 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
    * @override
    * @returns {void}
    */
-  override draw(): void {
+  drawShadowapTexture(lightTransform: Transform): void {
     if (!this.shadowmapTexture.glTexture || !this.depthShader._shaderProgram) return;
-
-    // Assign the generated shadow map to the scene to be used by other renderers.
-    this.parent.scene.shadowMap = this.shadowmapTexture;
 
     // Begin the off-screen render pass to the shadow map texture.
     this.startPass(this.shadowmapTexture.glTexture!, this.shadowmapTexture.width, this.shadowmapTexture.height);
@@ -95,58 +91,65 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
     // Use the dedicated depth shader for this pass.
     this.depthShader.use();
 
-    const shadowCasters = this.parent.scene.objects.filter(obj => (
+    const shadowCasters = this.scene.objects.filter(obj => (
       obj.active && obj.show &&
       obj.getBehaviour(RendererBehaviour)?.castShadows));
-    shadowCasters.sort(this.sortByDistance.bind(this));
 
     for (const entity of shadowCasters) {
       const renderer = entity.getBehaviour(RendererBehaviour);
       if (!renderer || !renderer.shader) continue;
-
+      const orgCulling = renderer.cullFace;
+      renderer.cullFace = CullFace.FRONT;
       // Bind the position buffer of the current object to the depth shader.
-      const positionAttributeLocation = this._gl.getAttribLocation(this.depthShader._shaderProgram, ShaderUniformsEnum.A_POSITION);
+      const positionAttributeLocation = this.gl.getAttribLocation(this.depthShader._shaderProgram, ShaderUniformsEnum.A_POSITION);
       if (positionAttributeLocation !== -1 && renderer.shader.buffers.position) {
-        this._gl.bindBuffer(this._gl.ARRAY_BUFFER, renderer.shader.buffers.position);
-        this._gl.vertexAttribPointer(positionAttributeLocation, 3, this._gl.FLOAT, false, 0, 0);
-        this._gl.enableVertexAttribArray(positionAttributeLocation);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, renderer.shader.buffers.position);
+        this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(positionAttributeLocation);
       }
 
       // Bind the index buffer for the current object.
-      this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, renderer.shader.buffers.indices);
+      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, renderer.shader.buffers.indices);
+
+      const { lightMvpMatrix } = renderer.createLightMatrices(Camera.mainCamera.transform, lightTransform);
 
       // Set the transformation matrices for the current object from the light's perspective.
-      this.setMatrices(entity.transform);
+      this.setMatrices(entity.transform, lightMvpMatrix);
 
       // Draw the object.
-      this._gl.drawElements(
+      this.gl.drawElements(
         WebGL2RenderingContext.TRIANGLES,
         renderer.mesh.meshData.indices.length,
-        this._gl.UNSIGNED_SHORT,
+        this.gl.UNSIGNED_SHORT,
         0
       );
 
       // It's good practice to disable the vertex attribute array after drawing.
       if (positionAttributeLocation !== -1) {
-        this._gl.disableVertexAttribArray(positionAttributeLocation);
+        this.gl.disableVertexAttribArray(positionAttributeLocation);
       }
+      renderer.cullFace = orgCulling;
     }
 
     // End the render pass, unbinding the framebuffer and restoring the default state.
     this.endPass();
   }
 
+  endPass() {
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    this.gl.viewport(0, 0, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight);
+      this.shadowmapTexture.unBind();
+
+  }
+
   /**
    * Sets the model-view-projection matrix for a given object from the light's perspective.
-   * @param {Transform} transform - The transform of the object to be rendered.
+   * @param {Transform} entityTransform - The transform of the object to be rendered.
    * @protected
    */
-  setMatrices(transform: Transform) {
+  setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
     if (this.depthShader) {
-      // Step 1: Calculate the light's view matrix
-      const { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, this.transform);
-      mat4.multiply(lightMvpMatrix, lightMvpMatrix, transform.modelMatrix); // Now it's LightProjection * LightView * Model
-
+      mat4.multiply(lightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix); // Now it's LightProjection * LightView * Model
       // Set the final combined matrix on the DEPTH shader.
       this.depthShader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, lightMvpMatrix);
     }
@@ -160,10 +163,10 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
    * @returns {number} The sort order.
    * @protected
    */
-  protected sortByDistance(a: GlEntity, b: GlEntity) {
-    const aD = vec3.distance(a.transform.worldPosition, this.transform.worldPosition);
-    const bD = vec3.distance(b.transform.worldPosition, this.transform.worldPosition);
-    return  bD-aD;
+  protected sortByDistance(a: GlEntity, b: GlEntity, lightTransform: Transform) {
+    const aD = vec3.distance(a.transform.worldPosition, lightTransform.worldPosition);
+    const bD = vec3.distance(b.transform.worldPosition, lightTransform.worldPosition);
+    return bD - aD;
   }
 
   /**
@@ -173,8 +176,8 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
    * @param {number} height - The height of the render target.
    * @override
    */
-  override startPass(texture: WebGLTexture, width: number, height: number): void {
-    const gl = this._gl;
+  startPass(texture: WebGLTexture, width: number, height: number): void {
+    const gl = this.gl;
     if (!this.framebuffer) {
       this.framebuffer = gl.createFramebuffer();
     }
@@ -195,5 +198,13 @@ export class ShadowMapRenderer extends TexturedRendererBehaviour {
     gl.clear(gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
+  }
+
+  destroy() {
+    this.shadowmapTexture.destroy();
+    this.depthShader.destroy();
+    if (this.framebuffer) {
+      this.gl.deleteFramebuffer(this.framebuffer);
+    }
   }
 }

@@ -1,8 +1,7 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
-import { Camera, CameraFlyBehaviour } from "@engine";
+import { Camera, CameraFlyBehaviour, Scene } from "@engine";
 import { BehaviorSubject } from "rxjs";
-import { EditorScene as Scene } from '@editor/overrides/scene';
 
 
 @Injectable({ providedIn: 'root' })
