@@ -10,6 +10,7 @@ import {
 } from "@engine";
 import { Raycast } from "./raycast";
 import { ConeHelper } from "./cone.helper";
+import { CubeHelper } from "./cube.helper";
 
 
 export class EditorBoundingBoxBehaviour extends RendererBehaviour {
@@ -20,21 +21,32 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
   private selectedEntity!: GlEntity;
 
   // --- Gizmo State ---
-  private activeHandle: 'x' | 'y' | 'z' | null = null;
-  private hoveredHandle: 'x' | 'y' | 'z' | null = null;
+  private gizmoMode: 'translate' | 'rotate' | 'scale' = 'translate'; // Default to 'scale' for testing
+  private activeHandle: string | null = null;
+  private hoveredHandle: string | null = null;
+
+  // Translate state
   private dragStartPoint = vec3.create();
   private dragStartEntityPosition = vec3.create();
+
+  // Scale state
+  private dragStartEntityScale = vec3.create();
+
   private gizmoSize = 1.0; // Visual size of the gizmo
   private gizmoScale = 1.5; // Scale factor for the cone handles to make them wider
   private handlePointSize = 30.0; // "Fatness" of handles for picking and visuals
   private coneHelper: ConeHelper;
+  private cubeHelper: CubeHelper;
 
   // --- GPU Picking for Gizmo ---
   private pickingTexture: Texture;
   private pickingShader: Shader;
-  private readonly HANDLE_ID_X = 1;
-  private readonly HANDLE_ID_Y = 2;
-  private readonly HANDLE_ID_Z = 3;
+  private readonly HANDLE_ID_TRANSLATE_X = 1;
+  private readonly HANDLE_ID_TRANSLATE_Y = 2;
+  private readonly HANDLE_ID_TRANSLATE_Z = 3;
+  private readonly HANDLE_ID_SCALE_X = 4;
+  private readonly HANDLE_ID_SCALE_Y = 5;
+  private readonly HANDLE_ID_SCALE_Z = 6;
 
   /** A flag to signal to other behaviours (like EntityPicker) that this behaviour has handled the mouse event. */
   public mouseClaimed = false;
@@ -51,7 +63,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     const material = new ColorMaterial();
     // Shader for visual rendering of bounding boxes and gizmo
     this.shader = new Shader(this._gl, material);
-    this.shader.initialize();
+    this.shader!.initialize();
 
     // Shader for GPU picking of gizmo handles
     this.pickingShader = new Shader(this._gl, new ColorMaterial(), "assets/shaders/frag/entity-picker.frag");
@@ -61,6 +73,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.pickingTexture = Texture.create(gl, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight, null);
 
     this.coneHelper = new ConeHelper(gl, this.shader, this.pickingShader);
+    this.cubeHelper = new CubeHelper(gl, this.shader, this.pickingShader);
     this.dephMode = DephFunction.LessOrEqual;
 
     this.createMesh();
@@ -113,13 +126,13 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     // Handle all gizmo logic: picking, dragging, and visual state updates.
     this.handleGizmoInteraction();
 
-    this.shader.use();
+    this.shader!.use();
     this.setShaderVariables();
 
     if (this.selectedBoundingBox && this.selectedEntity) {
       this._gl.lineWidth(this.selectedBoundingBoxLineWidth)
-      this.shader.material.color.set(...this.selectedBoundingBoxColor.toVec4())
-      this.shader.setMat4(ShaderUniformsEnum.U_MODEL_MATRIX, this.selectedEntity.transform.modelMatrix);
+      this.shader!.material.color.set(...this.selectedBoundingBoxColor.toVec4())
+      this.shader!.setMat4(ShaderUniformsEnum.U_MODEL_MATRIX, this.selectedEntity.transform.modelMatrix);
       this.setMatrices(this.selectedEntity.transform);
       this.drawBoundingBox(this.selectedBoundingBox);
     }
@@ -147,9 +160,24 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     // The gizmo should only be at the entity's position, not rotated or scaled by it.
     const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
 
+    switch (this.gizmoMode) {
+      case 'translate':
+        this.drawTranslateGizmo(gizmoTransform);
+        break;
+      case 'scale':
+        this.drawScaleGizmo(gizmoTransform);
+        break;
+    }
+
+    this.enableDephTest = true;
+    this._gl.lineWidth(1);
+  }
+
+  private drawTranslateGizmo(gizmoTransform: mat4) {
+    const origin = new Vector3();
     // X-Axis (Red)
     const xColor = (this.activeHandle === 'x' || this.hoveredHandle === 'x') ? Colors.yellow : Colors.red;
-    this.shader.material.color.set(...xColor.toVec4());
+    this.shader!.material.color.set(...xColor.toVec4());
     this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader);
     const xEndVec = vec3.fromValues(this.gizmoSize, 0, 0);
     const xEnd = new Vector3(...xEndVec);
@@ -164,7 +192,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
     // Y-Axis (Green)
     const yColor = (this.activeHandle === 'y' || this.hoveredHandle === 'y') ? Colors.yellow : Colors.green;
-    this.shader.material.color.set(...yColor.toVec4());
+    this.shader!.material.color.set(...yColor.toVec4());
     this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader);
     const yEndVec = vec3.fromValues(0, this.gizmoSize, 0);
     const yEnd = new Vector3(...yEndVec);
@@ -178,7 +206,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
     // Z-Axis (Blue)
     const zColor = (this.activeHandle === 'z' || this.hoveredHandle === 'z') ? Colors.yellow : Colors.blue;
-    this.shader.material.color.set(...zColor.toVec4());
+    this.shader!.material.color.set(...zColor.toVec4());
     this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader);
     const zEndVec = vec3.fromValues(0, 0, this.gizmoSize);
     const zEnd = new Vector3(...zEndVec);
@@ -190,9 +218,36 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     // mat4.scale(zConeMatrix, zConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
     // this.setMatrices(this.selectedEntity.transform, zConeMatrix, this.shader);
     // this.coneHelper.draw(zConeMatrix, zColor, this.shader);
+  }
 
-    this.enableDephTest = true;
-    this._gl.lineWidth(1);
+  private drawScaleGizmo(gizmoTransform: mat4) {
+    const origin = new Vector3();
+    // X-Axis (Red)
+    const xColor = (this.activeHandle === 'scaleX' || this.hoveredHandle === 'scaleX') ? Colors.yellow : Colors.red;
+    this.shader!.material.color.set(...xColor.toVec4());
+    this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader);
+    const xEndVec = vec3.fromValues(this.gizmoSize, 0, 0);
+    const xEnd = new Vector3(...xEndVec);
+    this.drawLine(origin, xEnd);
+    this.drawPoint(xEnd, this.handlePointSize, this.shader);
+
+    // Y-Axis (Green)
+    const yColor = (this.activeHandle === 'scaleY' || this.hoveredHandle === 'scaleY') ? Colors.yellow : Colors.green;
+    this.shader!.material.color.set(...yColor.toVec4());
+    this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader!);
+    const yEndVec = vec3.fromValues(0, this.gizmoSize, 0);
+    const yEnd = new Vector3(...yEndVec);
+    this.drawLine(origin, yEnd);
+    this.drawPoint(yEnd, this.handlePointSize, this.shader);
+
+    // Z-Axis (Blue)
+    const zColor = (this.activeHandle === 'scaleZ' || this.hoveredHandle === 'scaleZ') ? Colors.yellow : Colors.blue;
+    this.shader!.material.color.set(...zColor.toVec4());
+    this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.shader!);
+    const zEndVec = vec3.fromValues(0, 0, this.gizmoSize);
+    const zEnd = new Vector3(...zEndVec);
+    this.drawLine(origin, zEnd);
+    this.drawPoint(zEnd, this.handlePointSize, this.shader);
   }
 
   private handleGizmoInteraction() {
@@ -211,39 +266,24 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.pickingShader.use();
     const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
 
-    // Draw cones for each handle for easy picking
     this._gl.enable(this._gl.DEPTH_TEST);
     this._gl.depthFunc(this.dephMode);
 
-    this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.pickingShader);
-
-    // Draw X handle
-    this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_X);
-    this.drawPoint(new Vector3(this.gizmoSize, 0, 0), this.handlePointSize, this.pickingShader);
-
-
-    // Draw Y handle
-    this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_Y);
-    this.drawPoint(new Vector3(0, this.gizmoSize, 0), this.handlePointSize, this.pickingShader);
-
-
-    // Draw Z handle
-    this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_Z);
-    this.drawPoint(new Vector3(0, 0, this.gizmoSize), this.handlePointSize, this.pickingShader);
-
-    // --- 2. Read the pixel ---
-    const pixel = new Uint8Array(4);
-    this._gl.readPixels(Mouse.mousePosition.x, this.pickingTexture.height - Mouse.mousePosition.y, 1, 1, this._gl.RGBA, this._gl.UNSIGNED_BYTE, pixel);
-    const handleId = pixel[0];
+    const handleId = this.drawPickingGizmo(gizmoTransform);
 
     this.endPass(); // Return to normal drawing
 
     // --- 3. Update State ---
     if (!this.activeHandle) {
       this.hoveredHandle = null;
-      if (handleId === this.HANDLE_ID_X) this.hoveredHandle = 'x';
-      if (handleId === this.HANDLE_ID_Y) this.hoveredHandle = 'y';
-      if (handleId === this.HANDLE_ID_Z) this.hoveredHandle = 'z';
+      switch (handleId) {
+        case this.HANDLE_ID_TRANSLATE_X: this.hoveredHandle = 'translateX'; break;
+        case this.HANDLE_ID_TRANSLATE_Y: this.hoveredHandle = 'translateY'; break;
+        case this.HANDLE_ID_TRANSLATE_Z: this.hoveredHandle = 'translateZ'; break;
+        case this.HANDLE_ID_SCALE_X: this.hoveredHandle = 'scaleX'; break;
+        case this.HANDLE_ID_SCALE_Y: this.hoveredHandle = 'scaleY'; break;
+        case this.HANDLE_ID_SCALE_Z: this.hoveredHandle = 'scaleZ'; break;
+      }
     }
 
     // --- 4. Handle Click & Drag ---
@@ -251,22 +291,22 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       // START DRAG
       this.activeHandle = this.hoveredHandle;
       this.mouseClaimed = true;
-      vec3.copy(this.dragStartEntityPosition, this.selectedEntity.transform.worldPosition);
 
-      // Project mouse onto a plane to get a 3D starting point for the drag
-      const camera = Camera.mainCamera;
-      const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
-      const planeNormal = vec3.sub(vec3.create(), camera.transform.worldPosition, this.selectedEntity.transform.worldPosition);
-      vec3.normalize(planeNormal, planeNormal);
-
-      const intersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, this.selectedEntity.transform.worldPosition, planeNormal);
-      if (intersection) {
-        vec3.copy(this.dragStartPoint, intersection);
+      if (this.activeHandle.startsWith('translate')) {
+        vec3.copy(this.dragStartEntityPosition, this.selectedEntity.transform.worldPosition);
+      } else if (this.activeHandle.startsWith('scale')) {
+        vec3.copy(this.dragStartEntityScale, this.selectedEntity.transform.localScale);
       }
+
+      this.setDragStartPoint();
 
     } else if (Mouse.mouseButtonDown[0] && this.activeHandle) {
       // DRAGGING
-      this.dragEntity();
+      if (this.activeHandle.startsWith('translate')) {
+        this.dragTranslateEntity();
+      } else if (this.activeHandle.startsWith('scale')) {
+        this.dragScaleEntity();
+      }
       this.mouseClaimed = true;
 
     } else if (!Mouse.mouseButtonDown[0]) {
@@ -275,7 +315,47 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
   }
 
-  private dragEntity() {
+  private setDragStartPoint() {
+    // Project mouse onto a plane to get a 3D starting point for the drag
+    const camera = Camera.mainCamera;
+    const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
+    const planeNormal = vec3.sub(vec3.create(), camera.transform.worldPosition, this.selectedEntity.transform.worldPosition);
+    vec3.normalize(planeNormal, planeNormal);
+
+    const intersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, this.selectedEntity.transform.worldPosition, planeNormal);
+    if (intersection) {
+      vec3.copy(this.dragStartPoint, intersection);
+    }
+  }
+
+  private drawPickingGizmo(gizmoTransform: mat4): number {
+    switch (this.gizmoMode) {
+      case 'translate':
+        this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_X);
+        this.drawPoint(new Vector3(this.gizmoSize, 0, 0), this.handlePointSize, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_Y);
+        this.drawPoint(new Vector3(0, this.gizmoSize, 0), this.handlePointSize, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_Z);
+        this.drawPoint(new Vector3(0, 0, this.gizmoSize), this.handlePointSize, this.pickingShader);
+        break;
+      case 'scale':
+        this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_X);
+        this.drawPoint(new Vector3(this.gizmoSize, 0, 0), this.handlePointSize, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_Y);
+        this.drawPoint(new Vector3(0, this.gizmoSize, 0), this.handlePointSize, this.pickingShader);
+        this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_Z);
+        this.drawPoint(new Vector3(0, 0, this.gizmoSize), this.handlePointSize, this.pickingShader);
+        break;
+    }
+
+    const pixel = new Uint8Array(4);
+    this._gl.readPixels(Mouse.mousePosition.x, this.pickingTexture.height - Mouse.mousePosition.y, 1, 1, this._gl.RGBA, this._gl.UNSIGNED_BYTE, pixel);
+    return pixel[0];
+  }
+
+  private dragTranslateEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
     const camera = Camera.mainCamera;
@@ -283,9 +363,9 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
     // Define the axis we are dragging along
     const moveAxis = vec3.create();
-    if (this.activeHandle === 'x') vec3.set(moveAxis, 1, 0, 0);
-    if (this.activeHandle === 'y') vec3.set(moveAxis, 0, 1, 0);
-    if (this.activeHandle === 'z') vec3.set(moveAxis, 0, 0, 1);
+    if (this.activeHandle === 'translateX') vec3.set(moveAxis, 1, 0, 0);
+    if (this.activeHandle === 'translateY') vec3.set(moveAxis, 0, 1, 0);
+    if (this.activeHandle === 'translateZ') vec3.set(moveAxis, 0, 0, 1);
 
     // We cast a ray from the camera to a virtual plane that is facing the camera and contains the drag start point.
     // This gives us a 3D representation of the mouse's movement.
@@ -297,6 +377,36 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       const projectedLength = vec3.dot(moveVector, moveAxis);
       const newPosition = vec3.scaleAndAdd(vec3.create(), this.dragStartEntityPosition, moveAxis, projectedLength);
       this.selectedEntity.transform.setWorldPosition(newPosition[0], newPosition[1], newPosition[2]);
+    }
+  }
+
+  private dragScaleEntity() {
+    if (!this.activeHandle || !this.selectedEntity) return;
+
+    const camera = Camera.mainCamera;
+    const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
+
+    const scaleAxis = vec3.create();
+    if (this.activeHandle === 'scaleX') vec3.set(scaleAxis, 1, 0, 0);
+    if (this.activeHandle === 'scaleY') vec3.set(scaleAxis, 0, 1, 0);
+    if (this.activeHandle === 'scaleZ') vec3.set(scaleAxis, 0, 0, 1);
+
+    const planeNormal = camera.transform.forward;
+    const intersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, this.dragStartPoint, planeNormal);
+
+    if (intersection) {
+      const moveVector = vec3.sub(vec3.create(), intersection, this.dragStartPoint);
+
+      // Project the movement onto the drag axis to get a signed magnitude
+      const dragAmount = vec3.dot(moveVector, scaleAxis);
+
+      const scaleFactor = 1.0 + dragAmount * 0.5; // Sensitivity factor
+
+      const newScale = vec3.clone(this.dragStartEntityScale);
+      if (this.activeHandle === 'scaleX') newScale[0] *= scaleFactor;
+      if (this.activeHandle === 'scaleY') newScale[1] *= scaleFactor;
+      if (this.activeHandle === 'scaleZ') newScale[2] *= scaleFactor;
+      this.selectedEntity.transform.setLocalScale(newScale[0], newScale[1], newScale[2]);
     }
   }
 
