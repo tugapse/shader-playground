@@ -3,10 +3,10 @@ import { Camera, CanvasViewport, Mouse } from "@engine";
 
 export class Raycast {
 
-  public static screenPointToRay(camera: Camera, game: { webgl: WebGL2RenderingContext }): vec3 {
+  public static screenPointToRay(camera: Camera, game: { webgl: WebGL2RenderingContext }, position: { x: number, y: number } = Mouse.mousePosition): vec3 {
     const canvas = game.webgl.canvas;
-    const x = (Mouse.mousePosition.x / CanvasViewport.rendererWidth) * 2 - 1;
-    const y = 1 - (Mouse.mousePosition.y / CanvasViewport.rendererHeight) * 2;
+    const x = (position.x / CanvasViewport.rendererWidth) * 2 - 1;
+    const y = 1 - (position.y / CanvasViewport.rendererHeight) * 2;
 
     const clipCoords = vec4.fromValues(x, y, -1.0, 1.0);
 

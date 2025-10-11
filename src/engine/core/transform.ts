@@ -548,7 +548,7 @@ export class Transform extends JsonSerializable {
    * @returns {void}
    */
   public setLocalRotationQuat(newRotation: quat): void {
-    quat.copy(this.localRotationQuat, newRotation);
+    quat.copy(this._rotation, newRotation);
     this.updateEulerFromQuat();
     this._dirty = true;
   }
@@ -559,10 +559,22 @@ export class Transform extends JsonSerializable {
    */
   private updateEulerFromQuat(): void {
     const euler = vec3.create();
-    toEuler(euler, this.localRotationQuat);
-    vec3.scale(this.localRotation, euler, 180 / Math.PI);
+    toEuler(euler, this._rotation);
+    vec3.scale(this._rotationInDegrees, euler, 180 / Math.PI);
+  }
+  /**
+   * Converts a quaternion to Euler angles in degrees.
+   * @param {quat} q - The quaternion to convert.
+   * @returns {vec3} The resulting Euler angles in degrees.
+   */
+  public getEulerFromQuat(q: quat): vec3 {
+    const eulerRadians = vec3.create();
+    toEuler(eulerRadians, q);
+    vec3.scale(eulerRadians, eulerRadians, 180 / Math.PI);
+    return eulerRadians;
   }
 }
+
 
 // Legacy property names for backward compatibility
 Object.defineProperty(Transform.prototype, "position", { get: function() { return this.localPosition; } });
