@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { SceneFog } from "../../core";
+import { EngineCache, SceneFog } from "../../core";
 import { Camera, DirectionalLight, Light, PointLight, SpotLight } from "../../entities";
 import { EntityType, GLPrimitiveType, ShaderUniformsEnum } from "../../enums";
 import { LitMaterial } from "../../materials";

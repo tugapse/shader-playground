@@ -24,6 +24,9 @@ interface StorageSpaces {
    * @type {{ [key: string]: MeshData }}
    */
   meshs: { [key: string]: MeshData };
+  textureCounter: { [key: string]: number };
+
+  generic: { [key: string]: any };
 }
 
 /**
@@ -41,6 +44,8 @@ export abstract class EngineCache {
     shaderCode: {},
     textures: {},
     meshs: {},
+    textureCounter: {},
+    generic: {},
   };
   /**
     An instance of the OBJ parser used for loading mesh data.
@@ -49,6 +54,14 @@ export abstract class EngineCache {
    * @type {ObjParser}
    */
   private static objPArser: ObjParser = new ObjParser();
+
+  public static set(key: string, value: any): void {
+    EngineCache.__cache.generic[key] = value;
+  }
+
+  public static get<T>(key: string): T {
+    return EngineCache.__cache.generic[key] as T;
+  }
 
   /**
     Retrieves a 2D texture from the cache or loads and caches it if not present.
@@ -63,7 +76,10 @@ export abstract class EngineCache {
     if (!result) {
       result = new Texture(gl, uri);
       EngineCache.__cache.textures[uri] = result;
+      EngineCache.__cache.textureCounter[uri] = 1;
       result.load();
+    } else {
+      EngineCache.__cache.textureCounter[uri]++;
     }
     return result;
   }
@@ -84,8 +100,23 @@ export abstract class EngineCache {
       result = new CubemapTexture(gl, [right, left, up, bottom, front, back]);
       result.load();
       EngineCache.__cache.textures[key] = result;
+      EngineCache.__cache.textureCounter[key] = 1;
+    } else {
+      EngineCache.__cache.textureCounter[key]++;
     }
     return result as CubemapTexture;
+  }
+
+  public static releaseTexture(texture: Texture): void {
+    const uri = texture.textureUri!;
+    if (EngineCache.__cache.textureCounter[uri]) {
+      EngineCache.__cache.textureCounter[uri]--;
+      if (EngineCache.__cache.textureCounter[uri] === 0) {
+        texture.destroy();
+        delete EngineCache.__cache.textures[uri];
+        delete EngineCache.__cache.textureCounter[uri];
+      }
+    }
   }
 
   /**
@@ -141,6 +172,8 @@ export abstract class EngineCache {
       shaderCode: {},
       textures: {},
       meshs: {},
+      textureCounter: {},
+      generic: {},
     };
   }
 }

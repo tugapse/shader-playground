@@ -37,8 +37,8 @@ export class CubemapTexture extends Texture {
    * @returns {Promise<void>} - A Promise that resolves when all images are loaded.
    */
   public override async load(): Promise<void> {
-    if (this._isLoading || this.isImageLoaded) return;
-    this._isLoading = true;
+    if (this.isLoading || this.isImageLoaded) return;
+    this.isLoading = true;
     return new Promise((resolve, reject) => {
       if (!this.textureUris || this.textureUris.length !== 6) {
         reject(new Error("Cubemap requires exactly six texture URIs."));
@@ -91,8 +91,8 @@ export class CubemapTexture extends Texture {
     this.loadedImages[imageIndex] = wasLoaded;
     if (this.allImagesFetchedAndLoaded() && !this.isImageLoaded && this.gl) {
       this.createGLTexture(this.gl);
-      this._isLoaded = true;
-      this._isLoading = false;
+      this.isLoaded = true;
+      this.isLoading = false;
     } else if (this.allImagesFetched() && !this.allImagesFetchedAndLoaded()) {
       console.error("Was not possible to get all images!");
     }

@@ -61,6 +61,10 @@ export class LitShader extends Shader {
 
     this.setVec3(ShaderUniformsEnum.U_CAMERA_POSITION, Camera.mainCamera.transform.worldPosition);
 
+    if (EngineCache.get('shadowMapSize')) {
+      this.setVec2(ShaderUniformsEnum.U_SHADOW_MAP_SIZE, EngineCache.get('shadowMapSize'));
+    }
+
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
       this.material.mainTex.bind();
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);

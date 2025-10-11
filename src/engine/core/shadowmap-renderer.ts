@@ -149,9 +149,10 @@ export class ShadowMapRenderer {
    */
   setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
     if (this.depthShader) {
-      mat4.multiply(lightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix); // Now it's LightProjection * LightView * Model
+      const modelLightMvpMatrix = mat4.create();
+      mat4.multiply(modelLightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix); // Now it's LightProjection * LightView * Model
       // Set the final combined matrix on the DEPTH shader.
-      this.depthShader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, lightMvpMatrix);
+      this.depthShader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, modelLightMvpMatrix);
     }
   }
 

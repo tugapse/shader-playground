@@ -22,6 +22,12 @@ export enum ShaderUniformsEnum {
    */
   U_MVP_MATRIX = "u_mvpMatrix",
   /**
+   * The view matrix, which is used to transform vertices from world space to view space.
+   *
+   * @type {string}
+   */
+  U_VIEW_MATRIX = "u_viewMatrix",
+  /**
    * The model matrix, which is used to transform vertices from object space to world space.
    *
    * @type {string}
@@ -263,5 +269,11 @@ export enum ShaderUniformsEnum {
    *
    * @type {string}
    */
-  U_SHADOW_MAP = "u_shadow_map"
+  U_SHADOW_MAP = "u_shadow_map",
+  /**
+   * The size of the shadow map texture.
+   *
+   * @type {string}
+   */
+  U_SHADOW_MAP_SIZE = "u_shadowMapSize"
 }

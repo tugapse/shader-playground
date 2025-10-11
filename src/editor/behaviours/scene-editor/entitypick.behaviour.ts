@@ -30,6 +30,9 @@ export class EntityPicker extends RendererBehaviour {
 
   override draw(): void {
 
+    // If the gizmo has claimed the mouse, don't perform entity picking.
+    if (this.boundingBehaviour?.mouseClaimed) return;
+
     this.renderAndGetSelected();
     if (this.canSelectEntity()) {
       this.lastClickedId = this.selectedEntityId;

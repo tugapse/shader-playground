@@ -368,26 +368,28 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
    * This method temporarily uses a vertex buffer to upload the point's data and draws it using GL_POINTS.
    * @param {Vector3} point - The 3D coordinates of the point to draw`.
    * @returns {void}
+   * @param {number} [pointSize=10.0] - The size of the point to draw.
+   * @param {Shader} [shader=this.shader] - The shader to use for drawing.
    */
-  public drawPoint(point: Vector3): void {
-    if (!this._gl || !this.shader || !this.shader.buffers.position) {
+  public drawPoint(point: Vector3, pointSize: number = 10.0, shader: Shader = this.shader!): void {
+    if (!this._gl || !shader || !shader.buffers.position || !shader._shaderProgram) {
       console.warn("Renderer is not fully initialized. Cannot draw point.");
       return;
     }
 
     // Set the primitive type for a point
     this.drawPrimitiveType = GLPrimitiveType.POINTS;
-
     // Use the main shader and set uniforms
-    this.shader.use();
+    shader.use();
     this.setShaderVariables();
 
+    shader.setFloat('u_pointSize', pointSize);
     // Bind the vertex buffer and upload point data
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this.shader.buffers.position);
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, shader.buffers.position);
     this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(point.vector), this._gl.STATIC_DRAW);
 
     // Get the position attribute location and enable it
-    const positionAttributeLocation = this._gl.getAttribLocation(this.shader._shaderProgram!, ShaderUniformsEnum.A_POSITION);
+    const positionAttributeLocation = this._gl.getAttribLocation(shader._shaderProgram, ShaderUniformsEnum.A_POSITION);
     this._gl.enableVertexAttribArray(positionAttributeLocation);
 
     // Point the attribute to the buffer
