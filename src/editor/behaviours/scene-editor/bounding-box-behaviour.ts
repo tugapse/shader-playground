@@ -2,7 +2,7 @@
 import { mat4, quat, vec3 } from "gl-matrix";
 import {
   BoundingBox, Camera, CanvasViewport, Color,
-  ColorMaterial, Colors, DephFunction, GlEntity, Mesh, MeshData,
+  ColorMaterial, Colors, DephFunction, GlEntity, Keybord, Mesh, MeshData,
   Mouse,
   RendererBehaviour,
   Shader, ShaderUniformsEnum,
@@ -12,42 +12,70 @@ import { Raycast } from "./raycast";
 import { CubeHelper } from "./cube.helper"; // Assuming this will be created
 import { ConeHelper } from "./cone.helper"; // Assuming this will be created
 import { CircleHelper } from "./circle.helper";
+import { GizmoMode } from "./gizmo-mode.enum";
 
-
+/**
+ * A renderer behaviour responsible for drawing bounding boxes for hovered and selected entities,
+ * and for displaying and handling a 3D transformation gizmo (translate, rotate, scale) for the selected entity.
+ * It uses GPU-based picking for precise gizmo handle interaction.
+ */
 export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
+  /** The color of the bounding box for the selected entity. */
   public selectedBoundingBoxColor: Color = Colors.gray;
+  /** The line width for the selected entity's bounding box. */
   public selectedBoundingBoxLineWidth = 3.0;
+  /** The calculated BoundingBox for the selected entity. */
   public selectedBoundingBox!: BoundingBox | null;
+  /** The currently selected entity to which the gizmo is attached. */
   private selectedEntity!: GlEntity;
 
-  // --- Gizmo State ---
-  private gizmoMode: 'translate' | 'rotate' | 'scale' = 'rotate'; // Default to 'translate'
+  /** The current transformation mode for the gizmo (translate, rotate, or scale). */
+  private gizmoMode: GizmoMode = GizmoMode.Translate;
+  /** The handle currently being dragged by the user (e.g., 'translateX', 'rotateY'). */
   private activeHandle: string | null = null;
+  /** The handle currently being hovered over by the user. */
   private hoveredHandle: string | null = null;
-  private isDragging = false;
-  private readonly dragThreshold = 5; // pixels
 
-  // Translate state
+  /** The 3D world-space point where a drag operation started. */
   private dragStartPoint = vec3.create();
+  /** The world position of the entity when the drag started. */
   private dragStartEntityPosition = vec3.create();
 
-  // Scale state
+  /** The local scale of the entity when the drag started. */
   private dragStartEntityScale = vec3.create();
 
-  // Rotate state
+  /** The local rotation of the entity when the drag started. */
   private dragStartEntityRotation = quat.create();
+  /** The last recorded mouse position during a drag, used for calculating relative movement. */
+  private lastMousePosition = { x: 0, y: 0 };
+  /** A flag indicating if a drag operation is in progress. */
+  private isDragging = false;
+  /** The distance in pixels the mouse must move before a drag operation begins. */
+  private dragThreshold = 3;
 
-  private gizmoSize = 1.0; // Visual size of the gizmo
-  private gizmoScale = 1.5; // Scale factor for the cone handles to make them wider
-  private handlePointSize = 30.0; // "Fatness" of handles for picking and visuals
-  private coneHelper!: ConeHelper;
+  /** The base visual size of the gizmo in world units. */
+  private gizmoSize = 1.0;
+  /** A scale factor applied to the gizmo's cone and cube handles for better visibility. */
+  private gizmoScale = 1.5;
+  /** The size of the points used for picking the rotation gizmo handles, making them easier to click. */
+  private handlePointSize = 30.0;
+
+  /** Helper for drawing cone geometry (used for translation handles). */
+  private coneHelper: ConeHelper;
+  /** Helper for drawing cube geometry (used for scale handles). */
   private cubeHelper: CubeHelper;
+  /** Helper for drawing circle geometry (used for rotation handles). */
   private circleHelper: CircleHelper;
 
-  // --- GPU Picking for Gizmo ---
+  /** The off-screen texture used for GPU-based picking of gizmo handles. */
   private pickingTexture: Texture;
+  /** The shader used to render object IDs to the picking texture. */
   private pickingShader: Shader;
+
+  // --- Gizmo Handle IDs ---
+  // These constants are used as unique identifiers for each gizmo handle.
+  // They are rendered as colors into the picking texture.
   private readonly HANDLE_ID_TRANSLATE_X = 1;
   private readonly HANDLE_ID_TRANSLATE_Y = 2;
   private readonly HANDLE_ID_TRANSLATE_Z = 3;
@@ -58,15 +86,21 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
   private readonly HANDLE_ID_ROTATE_Y = 8;
   private readonly HANDLE_ID_ROTATE_Z = 9;
 
-
-  /** A flag to signal to other behaviours (like EntityPicker) that this behaviour has handled the mouse event. */
+  /**
+   * A flag to signal to other behaviours (like EntityPicker) that this behaviour
+   * has claimed the mouse input for the current frame, preventing other interactions.
+   */
   public mouseClaimed = false;
-  // -----------------------------
 
-
+  /** The shader used for rendering the visual representation of the bounding boxes and gizmo. */
+  override shader: Shader;
+  /** The color of the bounding box for the hovered entity. */
   public hoveredBoundingBoxColor: Color = Colors.grey;
+  /** The line width for the hovered entity's bounding box. */
   public hoveredBoundingBoxLineWidth = 1.0;
+  /** The calculated BoundingBox for the hovered entity. */
   public hoveredBoundingBox!: BoundingBox | null;
+  /** The currently hovered entity. */
   private hoveredEntity!: GlEntity;
 
   constructor(gl: WebGL2RenderingContext) {
@@ -83,7 +117,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     // Off-screen texture for picking
     this.pickingTexture = Texture.create(gl, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight, null);
 
-    this.coneHelper = new ConeHelper(gl, this.shader, this.pickingShader);
+    this.coneHelper = new ConeHelper(gl);
     this.cubeHelper = new CubeHelper(gl, this.shader, this.pickingShader);
     this.circleHelper = new CircleHelper(gl);
     this.dephMode = DephFunction.LessOrEqual;
@@ -91,16 +125,18 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.createMesh();
   }
 
+  /**
+   * @inheritdoc
+   */
   protected createMesh() {
     this.mesh = new Mesh();
     this.mesh.meshData = new MeshData([]);
   }
 
-  protected createGridVertices() {
-    const vertices: vec3[] = [];
-    return vertices;
-  }
-
+  /**
+   * Sets the target entity for which to display the bounding box and gizmo.
+   * @param entity The entity to select, or null to deselect.
+   */
   public setTargetEntity(entity: GlEntity | null) {
     if (entity == null) {
       this.selectedBoundingBox = null;
@@ -116,6 +152,10 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.selectedEntity = entity;
   }
 
+  /**
+   * Sets the entity currently being hovered over to display its bounding box.
+   * @param entity The entity to highlight, or null to remove the highlight.
+   */
   public setHoveredEntity(entity: GlEntity | null) {
     if (entity == null) {
       this.hoveredBoundingBox = null;
@@ -131,11 +171,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.hoveredEntity = entity;
   }
 
+  /**
+   * @inheritdoc
+   */
   public override draw(): void {
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
 
-    // Handle all gizmo logic: picking, dragging, and visual state updates.
+    this.handleKeyboardInput();
     this.handleGizmoInteraction();
 
     this.shader!.use();
@@ -163,15 +206,28 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this._gl.lineWidth(1)
   }
 
+  /**
+   * Handles keyboard input for switching between gizmo modes.
+   * '1' for Translate, '2' for Rotate, '3' for Scale.
+   */
+  private handleKeyboardInput() {
+    if (Keybord.keyDown["1"]) { this.gizmoMode = GizmoMode.Translate }
+    if (Keybord.keyDown["2"]) { this.gizmoMode = GizmoMode.Rotate }
+    if (Keybord.keyDown["3"]) { this.gizmoMode = GizmoMode.Scale }
+  }
+
+  /**
+   * Draws the currently active gizmo (translate, rotate, or scale) at the selected entity's position.
+   */
   private drawGizmo() {
-    if(!this.shader?._shaderProgram) return;
+    if (!this.shader?._shaderProgram) return;
     this._gl.lineWidth(3);
+    this._gl.disable(this._gl.DEPTH_TEST); // Draw gizmo on top of everything
 
     const origin = new Vector3();
     // The gizmo should only be at the entity's position, not rotated or scaled by it.
     const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
 
-    this._gl.disable(WebGL2RenderingContext.DEPTH_TEST);
     switch (this.gizmoMode) {
       case 'translate':
         this.drawTranslateGizmo(gizmoTransform);
@@ -186,10 +242,15 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
         this.drawTranslateGizmo(gizmoTransform);
         break;
     }
+    this._gl.enable(this._gl.DEPTH_TEST);
 
     this._gl.lineWidth(1);
   }
 
+  /**
+   * Draws the translation gizmo, consisting of three colored axes with cone-shaped arrowheads.
+   * @param gizmoTransform The base transformation matrix for the gizmo (position only).
+   */
   private drawTranslateGizmo(gizmoTransform: mat4) {
     const origin = new Vector3();
     // X-Axis (Red)
@@ -199,13 +260,12 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     const xEndVec = vec3.fromValues(this.gizmoSize, 0, 0);
     const xEnd = new Vector3(...xEndVec);
     this.drawLine(origin, xEnd);
-    this.drawPoint(xEnd, this.handlePointSize, this.shader);
-    // const xConeMatrix = mat4.clone(gizmoTransform);
-    // mat4.translate(xConeMatrix, xConeMatrix, xEndVec);
-    // mat4.rotateZ(xConeMatrix, xConeMatrix, -Math.PI / 2); // Rotate cone to point along X
-    // mat4.scale(xConeMatrix, xConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
-    // this.setMatrices(this.selectedEntity.transform, xConeMatrix, this.shader);
-    // this.coneHelper.draw(xConeMatrix, xColor, this.shader);
+    const xConeMatrix = mat4.clone(gizmoTransform);
+    mat4.translate(xConeMatrix, xConeMatrix, xEndVec);
+    mat4.rotateZ(xConeMatrix, xConeMatrix, -Math.PI / 2); // Rotate cone to point along X
+    mat4.scale(xConeMatrix, xConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+    this.setMatrices(this.selectedEntity.transform, xConeMatrix, this.shader);
+    this.coneHelper.draw(this.shader);
 
     // Y-Axis (Green)
     const yColor = (this.activeHandle === 'y' || this.hoveredHandle === 'y') ? Colors.yellow : Colors.green;
@@ -214,12 +274,11 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     const yEndVec = vec3.fromValues(0, this.gizmoSize, 0);
     const yEnd = new Vector3(...yEndVec);
     this.drawLine(origin, yEnd);
-    this.drawPoint(yEnd, this.handlePointSize, this.shader);
-    // const yConeMatrix = mat4.clone(gizmoTransform);
-    // mat4.translate(yConeMatrix, yConeMatrix, yEndVec);
-    // mat4.scale(yConeMatrix, yConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
-    // this.setMatrices(this.selectedEntity.transform, yConeMatrix, this.shader);
-    // this.coneHelper.draw(yConeMatrix, yColor, this.shader);
+    const yConeMatrix = mat4.clone(gizmoTransform);
+    mat4.translate(yConeMatrix, yConeMatrix, yEndVec);
+    mat4.scale(yConeMatrix, yConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+    this.setMatrices(this.selectedEntity.transform, yConeMatrix, this.shader);
+    this.coneHelper.draw(this.shader);
 
     // Z-Axis (Blue)
     const zColor = (this.activeHandle === 'z' || this.hoveredHandle === 'z') ? Colors.yellow : Colors.blue;
@@ -228,15 +287,18 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     const zEndVec = vec3.fromValues(0, 0, this.gizmoSize);
     const zEnd = new Vector3(...zEndVec);
     this.drawLine(origin, zEnd);
-    this.drawPoint(zEnd, this.handlePointSize, this.shader);
-    // const zConeMatrix = mat4.clone(gizmoTransform);
-    // mat4.translate(zConeMatrix, zConeMatrix, zEndVec);
-    // mat4.rotateX(zConeMatrix, zConeMatrix, Math.PI / 2); // Rotate cone to point along Z
-    // mat4.scale(zConeMatrix, zConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
-    // this.setMatrices(this.selectedEntity.transform, zConeMatrix, this.shader);
-    // this.coneHelper.draw(zConeMatrix, zColor, this.shader);
+    const zConeMatrix = mat4.clone(gizmoTransform);
+    mat4.translate(zConeMatrix, zConeMatrix, zEndVec);
+    mat4.rotateX(zConeMatrix, zConeMatrix, Math.PI / 2); // Rotate cone to point along Z
+    mat4.scale(zConeMatrix, zConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+    this.setMatrices(this.selectedEntity.transform, zConeMatrix, this.shader);
+    this.coneHelper.draw(this.shader);
   }
 
+  /**
+   * Draws the scale gizmo, consisting of three colored axes with cube-shaped handles.
+   * @param gizmoTransform The base transformation matrix for the gizmo (position only).
+   */
   private drawScaleGizmo(gizmoTransform: mat4) {
     const origin = new Vector3();
     // X-Axis (Red)
@@ -267,39 +329,47 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.drawPoint(zEnd, this.handlePointSize, this.shader);
   }
 
- private drawRotateGizmo(gizmoTransform: mat4) {
+  /**
+   * Draws the rotation gizmo, consisting of three colored rings aligned to the X, Y, and Z axes.
+   * @param gizmoTransform The base transformation matrix for the gizmo (position only).
+   */
+  private drawRotateGizmo(gizmoTransform: mat4) {
     const gizmoSize = this.gizmoSize * 1.2; // Make rings a bit larger
 
     // X-Axis Ring (Red) - Rotated around Y-axis to be on the YZ plane
     const xColor = (this.activeHandle === 'rotateX' || this.hoveredHandle === 'rotateX') ? Colors.yellow : Colors.red;
+    this.shader!.material.color.set(...xColor.toVec4());
     const xRingMatrix = mat4.clone(gizmoTransform);
     mat4.rotateY(xRingMatrix, xRingMatrix, Math.PI / 2);
     mat4.scale(xRingMatrix, xRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
     this.setMatrices(this.selectedEntity.transform, xRingMatrix, this.shader!);
-    (this.shader!.material as ColorMaterial).color = xColor;
     this.circleHelper.draw(this.shader!);
 
     // Y-Axis Ring (Green) - Rotated around X-axis to be on the XZ plane
     const yColor = (this.activeHandle === 'rotateY' || this.hoveredHandle === 'rotateY') ? Colors.yellow : Colors.green;
+    this.shader!.material.color.set(...yColor.toVec4());
     const yRingMatrix = mat4.clone(gizmoTransform);
     mat4.rotateX(yRingMatrix, yRingMatrix, Math.PI / 2);
     mat4.scale(yRingMatrix, yRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
     this.setMatrices(this.selectedEntity.transform, yRingMatrix, this.shader!);
-    (this.shader!.material as ColorMaterial).color = yColor;
     this.circleHelper.draw(this.shader!);
 
     // Z-Axis Ring (Blue) - No rotation needed, it's on the XY plane by default
     const zColor = (this.activeHandle === 'rotateZ' || this.hoveredHandle === 'rotateZ') ? Colors.yellow : Colors.blue;
+    this.shader!.material.color.set(...zColor.toVec4());
     const zRingMatrix = mat4.clone(gizmoTransform);
     mat4.scale(zRingMatrix, zRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
     this.setMatrices(this.selectedEntity.transform, zRingMatrix, this.shader!);
-    (this.shader!.material as ColorMaterial).color = zColor;
     this.circleHelper.draw(this.shader!);
   }
 
 
+  /**
+   * Manages the entire gizmo interaction lifecycle for a single frame.
+   * This includes rendering the gizmo for picking, detecting hovers and clicks, and handling drag operations.
+   */
   private handleGizmoInteraction() {
-    this.mouseClaimed = !!this.activeHandle;
+    this.mouseClaimed = !!this.activeHandle || this.isDragging;
 
     if (!this.selectedEntity) {
       this.activeHandle = null;
@@ -307,21 +377,19 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       return;
     }
 
-    // --- 1. Gizmo Picking Render Pass ---
+    // 1. Gizmo Picking Render Pass
     this.refreshTexture();
     this.startPass(this.pickingTexture.glTexture!, this.pickingTexture.width, this.pickingTexture.height);
 
     this.pickingShader.use();
     const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
 
-    this._gl.enable(this._gl.DEPTH_TEST);
-    this._gl.depthFunc(this.dephMode);
-
     const handleId = this.drawPickingGizmo(gizmoTransform);
 
-    this.endPass(); // Return to normal drawing
+    this.endPass();
 
-    // --- 3. Update State ---
+    // 2. Update Hover/Active State
+    // If we are not currently dragging, update the hovered handle based on the picking result.
     if (!this.activeHandle) {
       this.hoveredHandle = null;
       switch (handleId) {
@@ -337,102 +405,123 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       }
     }
 
-    // --- 4. Handle Click & Drag ---
+    // 3. Handle Click & Drag Logic
     if (Mouse.mouseButtonDown[0] && !this.activeHandle && this.hoveredHandle) {
-      // START DRAG
+      // MOUSE DOWN on a handle: Capture the initial state for a potential drag.
       this.activeHandle = this.hoveredHandle;
       this.mouseClaimed = true;
-      // We don't start the actual drag until the mouse moves past the threshold.
-      this.isDragging = false;
+      this.lastMousePosition.x = Mouse.mousePosition.x;
+      this.lastMousePosition.y = Mouse.mousePosition.y;
 
     } else if (Mouse.mouseButtonDown[0] && this.activeHandle) {
-      const mouseDeltaX = Math.abs(Mouse.mousePosition.x - Mouse.mouseClickPosition.x);
-      const mouseDeltaY = Math.abs(Mouse.mousePosition.y - Mouse.mouseClickPosition.y);
+      // HOLDING mouse down on a handle
+      const dx = Mouse.mousePosition.x - this.lastMousePosition.x;
+      const dy = Mouse.mousePosition.y - this.lastMousePosition.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // If not yet dragging, check if the threshold is met.
-      if (!this.isDragging && (mouseDeltaX > this.dragThreshold || mouseDeltaY > this.dragThreshold)) {
+      if (!this.isDragging && dist > this.dragThreshold) {
+        // START DRAG: The mouse has moved beyond the threshold, so begin the drag operation.
         this.isDragging = true;
-
-        // This is the true start of the drag. Record initial state now.
-        if (this.activeHandle.startsWith('translate')) {
+        if (this.activeHandle.startsWith(GizmoMode.Translate)) {
           vec3.copy(this.dragStartEntityPosition, this.selectedEntity.transform.worldPosition);
         } else if (this.activeHandle.startsWith('scale')) {
           vec3.copy(this.dragStartEntityScale, this.selectedEntity.transform.localScale);
         } else if (this.activeHandle.startsWith('rotate')) {
           quat.copy(this.dragStartEntityRotation, this.selectedEntity.transform.localRotationQuat);
         }
-        // Set the drag start point based on the CURRENT mouse position to avoid a jump.
-        this.setDragStartPoint(Mouse.mousePosition);
+        this.setDragStartPoint(); // Set the 3D start point for translation/scaling
       }
 
-      // If we are actively dragging, perform the entity manipulation.
       if (this.isDragging) {
-        if (this.activeHandle.startsWith('translate')) {
+        // DRAGGING: Apply the transformation for the current frame.
+        if (this.activeHandle.startsWith(GizmoMode.Translate)) {
           this.dragTranslateEntity();
-        } else if (this.activeHandle.startsWith('scale')) {
+        } else if (this.activeHandle.startsWith(GizmoMode.Scale)) {
           this.dragScaleEntity();
-        } else if (this.activeHandle.startsWith('rotate')) {
+        } else if (this.activeHandle.startsWith(GizmoMode.Rotate)) {
           this.dragRotateEntity();
         }
+        this.mouseClaimed = true;
       }
-      this.mouseClaimed = true;
+
+      this.lastMousePosition.x = Mouse.mousePosition.x;
+      this.lastMousePosition.y = Mouse.mousePosition.y;
 
     } else if (!Mouse.mouseButtonDown[0]) {
-      // END DRAG
+      // MOUSE UP: End the drag operation and reset state.
       this.activeHandle = null;
       this.isDragging = false;
     }
   }
 
-  private setDragStartPoint(position: { x: number, y: number } = Mouse.mousePosition) {
-    // Project mouse onto a plane to get a 3D starting point for the drag
+  /**
+   * Calculates the 3D world-space point where a drag operation begins.
+   * This is done by intersecting the mouse ray with a plane that is aligned with the camera and passes through the entity's origin.
+   */
+  private setDragStartPoint() {
     const camera = Camera.mainCamera;
-    const ray = Raycast.screenPointToRay(camera, { webgl: this._gl }, position);
-    let planeNormal = vec3.create();
+    const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
+    const planeNormal = vec3.sub(vec3.create(), camera.transform.worldPosition, this.selectedEntity.transform.worldPosition);
+    vec3.normalize(planeNormal, planeNormal);
 
-    if (this.activeHandle?.startsWith('rotate')) {
-      if (this.activeHandle === 'rotateX') vec3.set(planeNormal, 1, 0, 0); // YZ plane
-      else if (this.activeHandle === 'rotateY') vec3.set(planeNormal, 0, 1, 0); // XZ plane
-      else if (this.activeHandle === 'rotateZ') vec3.set(planeNormal, 0, 0, 1); // XY plane
-    } else {
-      // For translate and scale, use a plane facing the camera
-      vec3.sub(planeNormal, camera.transform.worldPosition, this.selectedEntity.transform.worldPosition);
-      vec3.normalize(planeNormal, planeNormal);
-    }
-
-    const intersection = Raycast.intersectRayWithPlane(
-      camera.transform.worldPosition,
-      ray,
-      this.selectedEntity.transform.worldPosition,
-      planeNormal
-    );
-
+    const intersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, this.selectedEntity.transform.worldPosition, planeNormal);
     if (intersection) {
       vec3.copy(this.dragStartPoint, intersection);
     }
   }
 
+  /**
+   * Renders the gizmo handles to an off-screen texture using unique colors for each handle.
+   * It then reads the pixel color at the mouse position to determine which handle (if any) is being hovered over.
+   * @param gizmoTransform The base transformation matrix for the gizmo (position only).
+   * @returns The ID of the handle under the mouse cursor, or 0 if none.
+   */
   private drawPickingGizmo(gizmoTransform: mat4): number {
     switch (this.gizmoMode) {
-      case 'translate':
-        this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.pickingShader);
+      case GizmoMode.Translate:
+        const xConeMatrix = mat4.translate(mat4.create(), gizmoTransform, [this.gizmoSize, 0, 0]);
+        mat4.rotateZ(xConeMatrix, xConeMatrix, -Math.PI / 2);
+        mat4.scale(xConeMatrix, xConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+        this.setMatrices(this.selectedEntity.transform, xConeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_X);
-        this.drawPoint(new Vector3(this.gizmoSize, 0, 0), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_TRANSLATE_X / 255, 0, 0);
+        this.coneHelper.draw(this.pickingShader);
+
+        const yConeMatrix = mat4.translate(mat4.create(), gizmoTransform, [0, this.gizmoSize, 0]);
+        mat4.scale(yConeMatrix, yConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+        this.setMatrices(this.selectedEntity.transform, yConeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_Y);
-        this.drawPoint(new Vector3(0, this.gizmoSize, 0), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_TRANSLATE_Y / 255, 0, 0);
+        this.coneHelper.draw(this.pickingShader);
+
+        const zConeMatrix = mat4.translate(mat4.create(), gizmoTransform, [0, 0, this.gizmoSize]);
+        mat4.rotateX(zConeMatrix, zConeMatrix, Math.PI / 2);
+        mat4.scale(zConeMatrix, zConeMatrix, [this.gizmoScale, this.gizmoScale, this.gizmoScale]);
+        this.setMatrices(this.selectedEntity.transform, zConeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_TRANSLATE_Z);
-        this.drawPoint(new Vector3(0, 0, this.gizmoSize), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_TRANSLATE_Z / 255, 0, 0);
+        this.coneHelper.draw(this.pickingShader);
         break;
-      case 'scale':
-        this.setMatrices(this.selectedEntity.transform, gizmoTransform, this.pickingShader);
+      case GizmoMode.Scale:
+        const xCubeMatrix = mat4.translate(mat4.create(), gizmoTransform, [this.gizmoSize, 0, 0]);
+        this.setMatrices(this.selectedEntity.transform, xCubeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_X);
-        this.drawPoint(new Vector3(this.gizmoSize, 0, 0), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_SCALE_X / 255, 0, 0, 1);
+        this.cubeHelper.draw(xCubeMatrix, (this.pickingShader.material as ColorMaterial).color, this.pickingShader);
+
+        const yCubeMatrix = mat4.translate(mat4.create(), gizmoTransform, [0, this.gizmoSize, 0]);
+        this.setMatrices(this.selectedEntity.transform, yCubeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_Y);
-        this.drawPoint(new Vector3(0, this.gizmoSize, 0), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_SCALE_Y / 255, 0, 0, 1);
+        this.cubeHelper.draw(yCubeMatrix, (this.pickingShader.material as ColorMaterial).color, this.pickingShader);
+
+        const zCubeMatrix = mat4.translate(mat4.create(), gizmoTransform, [0, 0, this.gizmoSize]);
+        this.setMatrices(this.selectedEntity.transform, zCubeMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_SCALE_Z);
-        this.drawPoint(new Vector3(0, 0, this.gizmoSize), this.handlePointSize, this.pickingShader);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_SCALE_Z / 255, 0, 0, 1);
+        this.cubeHelper.draw(zCubeMatrix, (this.pickingShader.material as ColorMaterial).color, this.pickingShader);
         break;
-      case 'rotate':
+      case GizmoMode.Rotate:
         const gizmoSize = this.gizmoSize * 1.2;
 
         // X-Axis Ring
@@ -441,7 +530,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
         mat4.scale(xRingMatrix, xRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
         this.setMatrices(this.selectedEntity.transform, xRingMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_ROTATE_X);
-        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_X / 255, 0, 0);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_X / 255, 0, 0, 1);
         this.circleHelper.draw(this.pickingShader, this.handlePointSize, true);
 
         // Y-Axis Ring
@@ -450,7 +539,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
         mat4.scale(yRingMatrix, yRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
         this.setMatrices(this.selectedEntity.transform, yRingMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_ROTATE_Y);
-        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_Y / 255, 0, 0);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_Y / 255, 0, 0, 1);
         this.circleHelper.draw(this.pickingShader, this.handlePointSize, true);
 
         // Z-Axis Ring
@@ -458,7 +547,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
         mat4.scale(zRingMatrix, zRingMatrix, [gizmoSize, gizmoSize, gizmoSize]);
         this.setMatrices(this.selectedEntity.transform, zRingMatrix, this.pickingShader);
         this.pickingShader.setFloat('u_entity_id', this.HANDLE_ID_ROTATE_Z);
-        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_Z / 255, 0, 0);
+        (this.pickingShader.material as ColorMaterial).color.set(this.HANDLE_ID_ROTATE_Z / 255, 0, 0, 1);
         this.circleHelper.draw(this.pickingShader, this.handlePointSize, true);
         break;
     }
@@ -468,15 +557,17 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     return pixel[0];
   }
 
+  /**
+   * Handles the logic for translating the entity along a single axis during a drag operation.
+   */
   private dragTranslateEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
     const camera = Camera.mainCamera;
     const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
 
-    // Define the axis we are dragging along
     const moveAxis = vec3.create();
-    if (this.activeHandle === 'translateX') vec3.set(moveAxis, 1, 0, 0);
+    if (this.activeHandle === 'translateX') vec3.set(moveAxis, 1, 0, 0); // TODO: Use world axes from transform
     if (this.activeHandle === 'translateY') vec3.set(moveAxis, 0, 1, 0);
     if (this.activeHandle === 'translateZ') vec3.set(moveAxis, 0, 0, 1);
 
@@ -493,6 +584,9 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
   }
 
+  /**
+   * Handles the logic for scaling the entity along a single axis during a drag operation.
+   */
   private dragScaleEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
@@ -523,7 +617,10 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
   }
 
- private dragRotateEntity() {
+  /**
+   * Handles the logic for rotating the entity around a single axis during a drag operation.
+   */
+  private dragRotateEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
     const camera = Camera.mainCamera;
@@ -545,31 +642,43 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
 
     // Find intersection of mouse ray with the rotation plane
+    const lastRay = Raycast.screenPointToRay(camera, { webgl: this._gl }, this.lastMousePosition);
+    const lastIntersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, lastRay, entityPosition, planeNormal);
     const currentIntersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, entityPosition, planeNormal);
 
-    if (currentIntersection) {
-      const startVector = vec3.sub(vec3.create(), this.dragStartPoint, entityPosition);
+    if (currentIntersection && lastIntersection) {
+      const lastVector = vec3.sub(vec3.create(), lastIntersection, entityPosition);
       const currentVector = vec3.sub(vec3.create(), currentIntersection, entityPosition);
-      vec3.normalize(startVector, startVector);
+      vec3.normalize(lastVector, lastVector);
       vec3.normalize(currentVector, currentVector);
 
       // Calculate the angle between the start and current vectors
-      let angle = vec3.angle(startVector, currentVector);
+      let angle = vec3.angle(lastVector, currentVector);
 
       // Determine the direction of rotation
-      const cross = vec3.cross(vec3.create(), startVector, currentVector);
+      const cross = vec3.cross(vec3.create(), lastVector, currentVector);
       if (vec3.dot(planeNormal, cross) < 0) {
         angle = -angle;
       }
 
       const deltaRotation = quat.setAxisAngle(quat.create(), rotationAxis, angle);
-      const newRotation = quat.multiply(quat.create(), deltaRotation, this.dragStartEntityRotation);
+      const currentRotation = this.selectedEntity.transform.localRotationQuat;
+      const newRotation = quat.multiply(quat.create(), deltaRotation, currentRotation);
       this.selectedEntity.transform.setLocalRotationQuat(newRotation);
     }
   }
 
+  /**
+   * Overridden to prevent default camera matrix setup, as this behaviour handles its own matrices.
+   */
   protected override setCameraMatrices(): void { }
 
+  /**
+   * Sets the Model-View-Projection (MVP) matrix uniform for a given shader.
+   * @param transform The transform of the object being drawn.
+   * @param modelMatrix An optional model matrix to use instead of the transform's matrix.
+   * @param shader The shader to set the uniform on. Defaults to the main `shader`.
+   */
   setMatrices(transform: Transform, modelMatrix?: mat4, shader: Shader = this.shader!) {
     if (shader) {
       shader.use();
@@ -582,6 +691,11 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     }
   }
 
+  /**
+   * Draws the wireframe of a bounding box.
+   * @param boundingBox The bounding box to draw.
+   * @param spacing An optional padding to add around the box.
+   */
   drawBoundingBox(boundingBox: BoundingBox, spacing = 0.1) {
 
     const { min_x, min_y, min_z, max_x, max_y, max_z } = boundingBox;
@@ -617,33 +731,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
   }
 
-  protected drawVerticalLines(count: number = 10) {
-    let fromV = new Vector3();
-    let toV = new Vector3();
-
-    for (let x = -count; x <= count; x++) {
-      fromV.set(x, 0, -count);
-      toV.set(x, 0, count);
-      this.drawLine(fromV, toV);
-    }
-  }
-
-  protected drawHorizontalLines(count: number = 10) {
-    let fromH = new Vector3();
-    let toH = new Vector3();
-    for (let z = -count; z <= count; z++) {
-      fromH.set(-count, 0, z);
-      toH.set(count, 0, z);
-      this.drawLine(fromH, toH);
-    }
-
-  }
-
+  /**
+   * Refreshes the picking texture if the canvas viewport has been resized.
+   * This ensures the picking buffer matches the display buffer dimensions.
+   */
   private refreshTexture() {
     if (this.pickingTexture.width !== CanvasViewport.rendererWidth || this.pickingTexture.height !== CanvasViewport.rendererHeight) {
       this.pickingTexture.destroy();
       this.pickingTexture = Texture.create(this._gl, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight, null);
     }
   }
-
 }
