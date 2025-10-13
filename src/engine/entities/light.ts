@@ -50,7 +50,7 @@ export class LightConeAngles {
 export class Light extends GlEntity {
 
   protected override _className = "Light";
-  
+
   /**
     The type of the entity, specifically set to LIGHT_AMBIENT.
    * @override
@@ -98,7 +98,7 @@ export class Light extends GlEntity {
 
   /**
     Creates a new Light instance.
-    
+
    * @override
    * @param {string} [name="Light"] - The name of the light.
    * @param {Transform} [transform] - The transform for the light.
@@ -115,7 +115,7 @@ export class Light extends GlEntity {
  */
 export class DirectionalLight extends Light {
 
-   protected override _className = "DirectionalLight"; 
+   protected override _className = "DirectionalLight";
 
   /**
     Gets the direction of the light, derived from the transform's rotation.
@@ -123,7 +123,7 @@ export class DirectionalLight extends Light {
    * @type {vec3}
    */
   public get direction(): vec3 {
-    return vec3.normalize(vec3.create(), this.transform.back);
+    return vec3.normalize(vec3.create(), this.transform.forward);
   }
   /**
     The type of the entity, specifically set to LIGHT_DIRECTIONAL.
@@ -164,7 +164,7 @@ export class DirectionalLight extends Light {
 
   /**
     Creates a new DirectionalLight instance.
-    
+
    * @override
    * @param {string} [name="Directional Light"] - The name of the directional light.
    * @param {Transform} [transform] - The transform for the directional light.
@@ -180,8 +180,8 @@ export class DirectionalLight extends Light {
  * @augments {Light}
  */
 export class PointLight extends Light {
-   protected override _className = "PointLight"; 
-  
+   protected override _className = "PointLight";
+
   /**
     The type of the entity, specifically set to LIGHT_POINT.
    * @override
@@ -229,7 +229,7 @@ export class PointLight extends Light {
 
   /**
     Creates a new PointLight instance.
-    
+
    * @override
    * @param {string} [name="Light"] - The name of the point light.
    * @param {Transform} [transform] - The transform for the point light.
@@ -245,8 +245,8 @@ export class PointLight extends Light {
  * @augments {Light}
  */
 export class SpotLight extends Light {
-  
-   protected override _className = "SpotLight"; 
+
+   protected override _className = "SpotLight";
 
   /**
     The type of the entity, specifically set to LIGHT_SPOT.
@@ -269,8 +269,8 @@ export class SpotLight extends Light {
    * @readonly
    * @type {vec3}
    */
-  public get direction(): vec3 {
-    return this.transform.worldRotation;
+  public get toLightDirection(): vec3 {
+    return this.transform.back;
   }
 
   /**
@@ -311,7 +311,7 @@ export class SpotLight extends Light {
 
   /**
     Creates a new SpotLight instance.
-    
+
    * @override
    * @param {string} [name="Light"] - The name of the spot light.
    * @param {Transform} [transform] - The transform for the spot light.

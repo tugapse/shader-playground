@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { JsonSerializable } from './json-serializable';
 import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
 import { GlEntity } from '../entities';
+import { Vector3 } from './vector';
 
 /**
  * A helper function to convert a quaternion to Euler angles in radians.
@@ -472,23 +473,29 @@ export class Transform extends JsonSerializable {
    * @param {vec3} [worldUp] - An optional vector indicating the world's up direction.
    * @returns {void}
    */
-  public lookAt(target: vec3, worldUp?: vec3): void {
-    const tempViewMatrix = mat4.create();
-    mat4.targetTo(tempViewMatrix, this.worldPosition, target, worldUp || vec3.fromValues(0, 1, 0));
-    this.worldRotationQuat = mat4.getRotation(quat.create(), tempViewMatrix);
-    /*
-    const tempModelMatrix = mat4.create();
-    mat4.invert(tempModelMatrix, tempViewMatrix);
-    mat4.getRotation(this._rotation, tempModelMatrix);
+  public lookAt(target: vec3, worldUp?: vec3): void;
+  public lookAt(target: Vector3, worldUp?: Vector3): void;
+  public lookAt(target: vec3 | Vector3, worldUp?: vec3 | Vector3): void {
+    const targetVec3 = target instanceof Vector3 ? target.vector : target;
+    const worldUpVec3 = worldUp instanceof Vector3 ? worldUp.vector : worldUp || vec3.fromValues(0, 1, 0);
 
-    const flipQuat = quat.create();
-    quat.fromEuler(flipQuat, 0, 180, 0);
-    quat.multiply(this._rotation, this._rotation, flipQuat);
+    const position = this.worldPosition;
 
-    const euler = vec3.create();
-    toEuler(euler, this._rotation);
-    vec3.scale(this._rotationInDegrees, euler, 180 / Math.PI);
-    */
+    const zAxis = vec3.normalize(vec3.create(), vec3.sub(vec3.create(), targetVec3, position)); // This should point from the object to the target
+    const xAxis = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), worldUpVec3, zAxis)); // Right vector
+    const yAxis = vec3.cross(vec3.create(), zAxis, xAxis); // Up vector
+
+    const lookAtMatrix = mat4.fromValues(
+      xAxis[0], xAxis[1], xAxis[2], 0,
+      yAxis[0], yAxis[1], yAxis[2], 0,
+      zAxis[0], zAxis[1], zAxis[2], 0,
+      position[0], position[1], position[2], 1
+    );
+
+    const worldRotation = quat.create();
+    mat4.getRotation(worldRotation, lookAtMatrix);
+
+    this.worldRotationQuat = worldRotation;
     this._dirty = true;
   }
 

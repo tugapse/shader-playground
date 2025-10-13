@@ -17,9 +17,9 @@ export class Scene extends GlEntity {
 
   protected override _className = "Scene";
 
-    protected _shadowmapRenderer!: ShadowMapRenderer;
-    public get shadowmapRenderer() { return this._shadowmapRenderer; }
-    public fog: SceneFog;
+  protected _shadowmapRenderer!: ShadowMapRenderer;
+  public get shadowmapRenderer() { return this._shadowmapRenderer; }
+  public fog: SceneFog;
 
 
   /**
@@ -89,7 +89,6 @@ export class Scene extends GlEntity {
     return this._objects.filter(o => o instanceof Light) as Light[];
   }
 
-  public shadowMap? :Texture;
 
   /**
     Creates an instance of Scene.
@@ -151,8 +150,10 @@ export class Scene extends GlEntity {
     if (this.destroyed || !this.gl || !Camera.mainCamera || !this.shadowmapRenderer) return;
 
     const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
-    if (lightEntity) {
+    if (this.shadowmapRenderer?.enabled && lightEntity) {
       this.shadowmapRenderer.drawShadowapTexture(lightEntity.transform);
+    } else {
+      this.shadowmapRenderer.clearShadowMap()
     }
 
     const activeObjects = this.objects.filter(ob => ob.active && ob.show).sort((a, b) => this.sortByRenderLayer(a, b));
@@ -233,10 +234,9 @@ export class Scene extends GlEntity {
       if (behaviour['setGl'])
         behaviour["setGl"](gl);
     });
-      if (!this._shadowmapRenderer) {
-        this._shadowmapRenderer = new ShadowMapRenderer(this.gl, this);
-        this.shadowMap = this._shadowmapRenderer.shadowmapTexture;
-      }
+    if (!this._shadowmapRenderer) {
+      this._shadowmapRenderer = new ShadowMapRenderer(this.gl, this);
+    }
   }
 
 

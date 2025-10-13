@@ -47,6 +47,12 @@ export class ShadowMapRenderer {
    */
   private depthShader: Shader;
 
+  /**
+   * Indicates whether shadow mapping is currently enabled.
+   * @public
+   * @type {boolean}
+   */
+  public enabled: boolean = true;
 
   /**
    * Creates an instance of ShadowMapRenderer.
@@ -138,7 +144,7 @@ export class ShadowMapRenderer {
   endPass() {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight);
-      this.shadowmapTexture.unBind();
+    this.shadowmapTexture.unBind();
 
   }
 
@@ -207,5 +213,10 @@ export class ShadowMapRenderer {
     if (this.framebuffer) {
       this.gl.deleteFramebuffer(this.framebuffer);
     }
+  }
+  clearShadowMap() {
+    if (!this.shadowmapTexture.glTexture) return;
+    this.startPass(this.shadowmapTexture.glTexture!, this.shadowmapTexture.width, this.shadowmapTexture.height);
+    this.endPass();
   }
 }

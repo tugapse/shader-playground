@@ -138,12 +138,12 @@ export class MeshData extends JsonSerializable implements IMeshData {
     }
   }
 
-    /**
-   * Calculates the bounding box for this mesh using its internal vertices.
-   *
-   * @returns A BoundingBox object, or null if the mesh has no vertices.
-   */
-  getBoundingBox(vertices: vec3[]): BoundingBox | null {
+  /**
+ * Calculates the bounding box for this mesh using its internal vertices.
+ *
+ * @returns A BoundingBox object, or null if the mesh has no vertices.
+ */
+  static getBoundingBox(vertices: vec3[]): BoundingBox | null {
     if (vertices.length === 0) {
       return null;
     }
@@ -180,7 +180,7 @@ export class MeshData extends JsonSerializable implements IMeshData {
    *
    * @returns A BoundingSphere object, or null if the mesh has no vertices.
    */
-  getBoundingSphere(vertices: vec3[]): BoundingSphere | null {
+  static getBoundingSphere(vertices: vec3[]): BoundingSphere | null {
     if (vertices.length === 0) {
       return null;
     }
@@ -361,9 +361,9 @@ export class Mesh extends JsonSerializable {
   public meshData!: MeshData;
 
   override toJsonObject(): JsonSerializedData {
-    return{
+    return {
       ...super.toJsonObject(),
-      meshData:this.meshData.toJsonObject()
+      meshData: this.meshData.toJsonObject()
     }
   }
 

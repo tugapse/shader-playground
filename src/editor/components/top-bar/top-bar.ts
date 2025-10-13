@@ -3,6 +3,9 @@ import { EditorService } from '@editor/services/editor.service';
 import { Scene } from '@engine';
 import { Icon } from 'src/app/components/icon/icon';
 
+import { GizmoMode } from '@editor/behaviours/scene-editor/gizmo-mode.enum';
+import { TransformSpace } from '@editor/behaviours/scene-editor/transform-space.enum';
+
 @Component({
   selector: 'editor-top-bar',
   imports: [Icon],
@@ -15,8 +18,20 @@ export class TopBar {
   @Input() scene!: Scene;
   @Input() isEditorPaused!: boolean;
 
-  constructor(private editorService: EditorService) {
+  public gizmoMode: GizmoMode = GizmoMode.Translate;
+  public GizmoMode = GizmoMode;
 
+  public transformSpace: TransformSpace = TransformSpace.World;
+  public TransformSpace = TransformSpace;
+
+  constructor(private editorService: EditorService) {
+    this.editorService.gizmoMode.subscribe(mode => {
+      this.gizmoMode = mode;
+    });
+
+    this.editorService.transformSpace.subscribe(space => {
+      this.transformSpace = space;
+    });
   }
 
   onPlay() {
@@ -31,6 +46,15 @@ export class TopBar {
   onStop() {
     this.editorService.requestSceneStop(this.scene);
 
+  }
+
+  setGizmoMode(mode: GizmoMode) {
+    this.editorService.setGizmoMode(mode);
+  }
+
+  toggleTransformSpace() {
+    const newSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
+    this.editorService.setTransformSpace(newSpace);
   }
 
 }

@@ -57,7 +57,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
    * @returns {Texture | null} The shadow map texture, or null if not available.
    */
   public get shadowMapTexture() {
-    return this.parent.scene.shadowMap;
+    return this.parent.scene.shadowmapRenderer?.shadowmapTexture;
   };
 
   public get fog(){ return this.parent.scene["fog"] as SceneFog;}
@@ -239,7 +239,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
 
     spotLights.forEach((light) => {
       spotPositionsFlat.push(...light.transform.worldPosition);
-      const normalizedDir = vec3.normalize(vec3.create(), light.direction);
+      const normalizedDir = vec3.normalize(vec3.create(), light.toLightDirection);
       spotDirectionsFlat.push(...normalizedDir);
       spotColorsFlat.push(...light.color.toVec3());
       spotInnerConeCosFlat.push(Math.cos(light.coneAngles.inner));

@@ -1,5 +1,5 @@
-import { quat2, vec3 } from "gl-matrix";
-import { EntityBehaviour, Vector3, ObjectInstanciator, Camera } from "@engine";
+import { Color, EntityBehaviour, Light, ObjectInstanciator, Vector3 } from "@engine";
+import { vec3 } from "gl-matrix";
 
 export class SunBehaviour extends EntityBehaviour {
 
@@ -7,56 +7,76 @@ export class SunBehaviour extends EntityBehaviour {
     return new SunBehaviour()
   }
 
-  protected override _className = "LightMoveBehaviour";
+  protected override _className = "SunBehaviour";
 
-  public rotationSpeed = 0.5;
-  private center = vec3.create();
-  private up = vec3.fromValues(0, 1, 0);
-  public distance = 1000000;
-  public height = 50;
-  public rotationAmount = 0;
+  public speed = 0.01;
+  public timeOfDay = 0.0; // 0 to 1, 0 is sunrise, 0.5 is noon, 1 is sunset
+  public arcHeight = 0.5; // 0 to 1, max height of the sun arc
+  public cycleOvershoot = 0.2; // How much time the sun travels "underground" before reset
 
-  _rotation = new Vector3();
-  _timeString = "";
+  // Color palette for the day/night cycle
+  public sunriseColor = new Color(255 / 255, 215 / 255, 180 / 255);
+  public noonColor = new Color(255 / 255, 255 / 255, 240 / 255);
+  public sunsetColor = new Color(255 / 255, 180 / 255, 120 / 255);
+  public nightColor = new Color(10 / 255, 20 / 255, 40 / 255);
 
-  public isNight = false;
+  public override update(elapsed: number): void {
+    // 1. Update time of day
+    this.timeOfDay += elapsed * this.speed * 0.01;
+    this.timeOfDay = this.timeOfDay % (1.0 + this.cycleOvershoot); // Loop time
 
-  _t = 10;
+    // 2. Calculate sun position on a tilted 3D arc
+    const sunDistance = 1.0;
 
-  constructor() {
-    super();
+    // Clamp arcHeight to the valid range [0, 1] to avoid acos errors
+    this.arcHeight = Math.max(0.001, Math.min(0.9999, this.arcHeight));
+
+    // The tilt of the sun's path, based on arcHeight.
+    const tiltAngle = Math.acos(this.arcHeight);
+
+    // Position on a simple 2D arc in the XY plane
+    const dailyAngle = this.timeOfDay * Math.PI;
+    const x2d = Math.cos(dailyAngle) * sunDistance;
+    const y2d = Math.sin(dailyAngle) * sunDistance;
+
+    // Rotate the 2D position around the X-axis to apply the tilt
+    const x = x2d;
+    const y = y2d * Math.cos(tiltAngle);
+    const z = -y2d * Math.sin(tiltAngle);
+
+    this.transform.setWorldPosition(x, y, z);
+    this.transform.lookAt(new Vector3(0, 0, 0));
+
+    // 3. Update light color based on time of day
+    this.updateLightColor();
   }
 
-  override initialize(): boolean {
-    super.initialize();
-    this.update(this._t);
-    return true;
+  private updateLightColor(): void {
+    const light = this.parent as Light;
+    if (!light) return;
+
+    let fromColor: Color;
+    let toColor: Color;
+    let t: number;
+
+    if (this.timeOfDay >= 0 && this.timeOfDay < 0.5) { // Sunrise to Noon
+      fromColor = this.sunriseColor;
+      toColor = this.noonColor;
+      t = this.timeOfDay / 0.5;
+    } else if (this.timeOfDay >= 0.5 && this.timeOfDay <= 1.0) { // Noon to Sunset
+      fromColor = this.noonColor;
+      toColor = this.sunsetColor;
+      t = (this.timeOfDay - 0.5) / 0.5;
+    } else { // Night
+      // Blend from sunset to night, and then hold night color
+      fromColor = this.sunsetColor;
+      toColor = this.nightColor;
+      t = (this.timeOfDay - 1.0) / (this.cycleOvershoot / 2);
+      t = Math.min(1, t); // Clamp at 1, so it holds the night color
+    }
+
+    light.color = Color.lerp(fromColor, toColor, t);
   }
-
-  public override update(ellapsed: number): void {
-    this.rotationAmount += ellapsed * this.rotationSpeed;
-
-    if (this.height > 190) this.height = 190;
-    if (this.height < -190) this.height = -190;
-    this.rotationAmount = this.rotationAmount % 360;
-
-
-    const x = Math.cos(this.rotationAmount);
-    const z = Math.sin(this.rotationAmount);
-
-    const mappedHeight = (-this.height + 180) / 360 * this.distance * 2 - this.distance;
-
-    this.transform.worldPosition = [x * this.distance, mappedHeight, z * this.distance];
-
-    this.isNight = this.height <= 0;
-
-    this.transform.lookAt(this.center, this.up)
-  }
-
-
-
 }
 
-
-
-ObjectInstanciator.addDependency("LightMoveBehaviour", SunBehaviour.instanciate);
+ObjectInstanciator.addDependency("SunBehaviour", SunBehaviour.instanciate);

@@ -164,4 +164,17 @@ export class Color extends JsonSerializable {
     this.vector[2] = b;
     this.vector[3] = a;
   }
+
+  /**
+   * Linearly interpolates between two colors.
+   * @param {Color} a - The starting color.
+   * @param {Color} b - The ending color.
+   * @param {number} t - The interpolation factor (0 to 1).
+   * @returns {Color} - The new, interpolated color.
+   */
+  public static lerp(a: Color, b: Color, t: number): Color {
+    const out = new Color();
+    vec4.lerp(out.vector, a.vector, b.vector, t);
+    return out;
+  }
 }

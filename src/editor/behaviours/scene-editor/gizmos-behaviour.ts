@@ -2,7 +2,7 @@
 import { mat4, quat, vec3 } from "gl-matrix";
 import {
   BoundingBox, Camera, CanvasViewport, Color,
-  ColorMaterial, Colors, DephFunction, GlEntity, Keybord, Mesh, MeshData,
+  ColorMaterial, Colors, CubePrimitive, DephFunction, GlEntity, Keybord, Mesh, MeshData,
   Mouse,
   RendererBehaviour,
   Shader, ShaderUniformsEnum,
@@ -14,12 +14,15 @@ import { ConeHelper } from "./cone.helper"; // Assuming this will be created
 import { CircleHelper } from "./circle.helper";
 import { GizmoMode } from "./gizmo-mode.enum";
 
+import { EditorService } from "../../services/editor.service";
+import { TransformSpace } from "./transform-space.enum";
+
 /**
  * A renderer behaviour responsible for drawing bounding boxes for hovered and selected entities,
  * and for displaying and handling a 3D transformation gizmo (translate, rotate, scale) for the selected entity.
  * It uses GPU-based picking for precise gizmo handle interaction.
  */
-export class EditorBoundingBoxBehaviour extends RendererBehaviour {
+export class GizmosBoxBehaviour extends RendererBehaviour {
 
   /** The color of the bounding box for the selected entity. */
   public selectedBoundingBoxColor: Color = Colors.gray;
@@ -32,6 +35,8 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
   /** The current transformation mode for the gizmo (translate, rotate, or scale). */
   private gizmoMode: GizmoMode = GizmoMode.Translate;
+  private transformSpace: TransformSpace = TransformSpace.World;
+
   /** The handle currently being dragged by the user (e.g., 'translateX', 'rotateY'). */
   private activeHandle: string | null = null;
   /** The handle currently being hovered over by the user. */
@@ -103,7 +108,7 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
   /** The currently hovered entity. */
   private hoveredEntity!: GlEntity;
 
-  constructor(gl: WebGL2RenderingContext) {
+  constructor(gl: WebGL2RenderingContext, private editorService: EditorService) {
     super(gl);
     const material = new ColorMaterial();
     // Shader for visual rendering of bounding boxes and gizmo
@@ -123,6 +128,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.dephMode = DephFunction.LessOrEqual;
 
     this.createMesh();
+
+    this.editorService.gizmoMode.subscribe(mode => {
+      this.gizmoMode = mode;
+    });
+
+    this.editorService.transformSpace.subscribe(space => {
+      this.transformSpace = space;
+    });
   }
 
   /**
@@ -143,11 +156,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       return;
     }
     const renderer = entity.getBehaviour(RendererBehaviour);
+    let vertices: vec3[] = [];
     if (!renderer) {
       console.debug("no renderer found!", entity.name);
-      return;
+      vertices = new CubePrimitive().vertices
+    } else {
+      vertices = renderer.mesh.meshData.vertices;
     }
-    const box = renderer.mesh.meshData.getBoundingBox(renderer.mesh.meshData.vertices);
+    const box = MeshData.getBoundingBox(vertices);
     this.selectedBoundingBox = box;
     this.selectedEntity = entity;
   }
@@ -162,11 +178,15 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
       return;
     }
     const renderer = entity.getBehaviour(RendererBehaviour);
+
+    let vertices: vec3[] = [];
     if (!renderer) {
       console.debug("no renderer found!", entity.name);
-      return;
+      vertices = new CubePrimitive().vertices
+    } else {
+      vertices = renderer.mesh.meshData.vertices;
     }
-    const box = renderer.mesh.meshData.getBoundingBox(renderer.mesh.meshData.vertices);
+    const box = MeshData.getBoundingBox(vertices);
     this.hoveredBoundingBox = box;
     this.hoveredEntity = entity;
   }
@@ -178,7 +198,6 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     if (!this.shader?._shaderProgram) return;
     if (!this._initialized) super.initialize();
 
-    this.handleKeyboardInput();
     this.handleGizmoInteraction();
 
     this.shader!.use();
@@ -206,6 +225,10 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this._gl.lineWidth(1)
   }
 
+  public override update(elapsed: number): void {
+    this.handleKeyboardInput();
+  }
+
   /**
    * Handles keyboard input for switching between gizmo modes.
    * '1' for Translate, '2' for Rotate, '3' for Scale.
@@ -214,6 +237,11 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     if (Keybord.keyDown["1"]) { this.gizmoMode = GizmoMode.Translate }
     if (Keybord.keyDown["2"]) { this.gizmoMode = GizmoMode.Rotate }
     if (Keybord.keyDown["3"]) { this.gizmoMode = GizmoMode.Scale }
+
+    if( Keybord.keyDown["t"]){
+      this.transformSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
+      this.editorService.setTransformSpace(this.transformSpace);
+    }
   }
 
   /**
@@ -222,11 +250,16 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
   private drawGizmo() {
     if (!this.shader?._shaderProgram) return;
     this._gl.lineWidth(3);
-    this._gl.disable(this._gl.DEPTH_TEST); // Draw gizmo on top of everything
+    this._gl.clear(this._gl.DEPTH_BUFFER_BIT);
 
     const origin = new Vector3();
     // The gizmo should only be at the entity's position, not rotated or scaled by it.
-    const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
+    const gizmoTransform = mat4.create();
+    if (this.transformSpace === TransformSpace.World) {
+      mat4.fromTranslation(gizmoTransform, this.selectedEntity.transform.worldPosition);
+    } else {
+      mat4.fromRotationTranslation(gizmoTransform, this.selectedEntity.transform.worldRotationQuat, this.selectedEntity.transform.worldPosition);
+    }
 
     switch (this.gizmoMode) {
       case 'translate':
@@ -242,7 +275,6 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
         this.drawTranslateGizmo(gizmoTransform);
         break;
     }
-    this._gl.enable(this._gl.DEPTH_TEST);
 
     this._gl.lineWidth(1);
   }
@@ -382,7 +414,12 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     this.startPass(this.pickingTexture.glTexture!, this.pickingTexture.width, this.pickingTexture.height);
 
     this.pickingShader.use();
-    const gizmoTransform = mat4.fromTranslation(mat4.create(), this.selectedEntity.transform.worldPosition);
+    const gizmoTransform = mat4.create();
+    if (this.transformSpace === TransformSpace.World) {
+      mat4.fromTranslation(gizmoTransform, this.selectedEntity.transform.worldPosition);
+    } else {
+      mat4.fromRotationTranslation(gizmoTransform, this.selectedEntity.transform.worldRotationQuat, this.selectedEntity.transform.worldPosition);
+    }
 
     const handleId = this.drawPickingGizmo(gizmoTransform);
 
@@ -567,9 +604,15 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
     const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
 
     const moveAxis = vec3.create();
-    if (this.activeHandle === 'translateX') vec3.set(moveAxis, 1, 0, 0); // TODO: Use world axes from transform
-    if (this.activeHandle === 'translateY') vec3.set(moveAxis, 0, 1, 0);
-    if (this.activeHandle === 'translateZ') vec3.set(moveAxis, 0, 0, 1);
+    if (this.transformSpace === TransformSpace.World) {
+      if (this.activeHandle === 'translateX') vec3.set(moveAxis, 1, 0, 0);
+      if (this.activeHandle === 'translateY') vec3.set(moveAxis, 0, 1, 0);
+      if (this.activeHandle === 'translateZ') vec3.set(moveAxis, 0, 0, 1);
+    } else {
+      if (this.activeHandle === 'translateX') vec3.copy(moveAxis, this.selectedEntity.transform.right);
+      if (this.activeHandle === 'translateY') vec3.copy(moveAxis, this.selectedEntity.transform.up);
+      if (this.activeHandle === 'translateZ') vec3.copy(moveAxis, this.selectedEntity.transform.forward);
+    }
 
     // We cast a ray from the camera to a virtual plane that is facing the camera and contains the drag start point.
     // This gives us a 3D representation of the mouse's movement.
@@ -663,7 +706,14 @@ export class EditorBoundingBoxBehaviour extends RendererBehaviour {
 
       const deltaRotation = quat.setAxisAngle(quat.create(), rotationAxis, angle);
       const currentRotation = this.selectedEntity.transform.localRotationQuat;
-      const newRotation = quat.multiply(quat.create(), deltaRotation, currentRotation);
+
+      const newRotation = quat.create();
+      if (this.transformSpace === TransformSpace.Local) {
+        quat.multiply(newRotation, deltaRotation, currentRotation);
+      } else {
+        quat.multiply(newRotation, currentRotation, deltaRotation);
+      }
+
       this.selectedEntity.transform.setLocalRotationQuat(newRotation);
     }
   }

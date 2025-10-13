@@ -1,6 +1,6 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
 import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "@engine";
-import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
+import { GizmosBoxBehaviour } from "./gizmos-behaviour";
 import { mat4 } from "gl-matrix";
 
 
@@ -10,7 +10,7 @@ export class EntityPicker extends RendererBehaviour {
   selectedEntityId = -1;
   width = 0;
   height = 0;
-  boundingBehaviour!: EditorBoundingBoxBehaviour;
+  boundingBehaviour!: GizmosBoxBehaviour;
   mousePressed = false;
   lastClickedId = 0;
   dontNeedControlToSelect = true;

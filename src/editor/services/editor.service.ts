@@ -2,6 +2,8 @@ import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
 import { Camera, CameraFlyBehaviour, Scene } from "@engine";
 import { BehaviorSubject } from "rxjs";
+import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
+import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
 
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +23,9 @@ export class EditorService {
 
   onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(null);
   onUpdateFrame = new BehaviorSubject<number>(0);
+
+  public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
+  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
 
   private camera!: Camera;
   constructor() {
@@ -47,6 +52,14 @@ export class EditorService {
 
   requestSceneStop(scene?: Scene) {
     this.onSceneStop.emit(scene);
+  }
+
+  public setGizmoMode(mode: GizmoMode) {
+    this.gizmoMode.next(mode);
+  }
+
+  public setTransformSpace(space: TransformSpace) {
+    this.transformSpace.next(space);
   }
 
 
