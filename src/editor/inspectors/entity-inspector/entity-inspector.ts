@@ -9,7 +9,7 @@ import { BehaviourInspector } from "../behaviour-inspector/behaviour-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { TransformInspector } from "../transform-inspector/transform-inspector";
-import { GlEntity, Color } from 'omega-game-engine';
+import { GlEntity, Color } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 
 @Component({

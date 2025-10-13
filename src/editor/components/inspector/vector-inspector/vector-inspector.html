@@ -1,5 +1,9 @@
 @if (vector) {
+  <span>{{label}}</span>
 @for (vectorComponent of vector.vector; track $index) {
-<editor-text-input-inspector [label]="vectorKeys[$index]"[isNumber]="true" [value]="vectorComponent" (change)="vector.vector[$index] = +$event"></editor-text-input-inspector>
+<editor-text-input-inspector [label]="vectorKeys[$index]"
+[isNumber]="true" [value]="vectorComponent"
+[dragScale]="scale" [numberDecimals]="4"
+(change)="onVectorChanged($index, $event)"></editor-text-input-inspector>
 }
 }

@@ -1,7 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Scene } from 'omega-game-engine';
+import { Scene } from '@engine';
 import { Icon } from 'src/app/components/icon/icon';
+
+import { GizmoMode } from '@editor/behaviours/scene-editor/gizmo-mode.enum';
+import { TransformSpace } from '@editor/behaviours/scene-editor/transform-space.enum';
 
 @Component({
   selector: 'editor-top-bar',
@@ -11,11 +14,24 @@ import { Icon } from 'src/app/components/icon/icon';
 })
 export class TopBar {
 
+
   @Input() scene!: Scene;
-  @Input() isEditorPaused!:boolean;
+  @Input() isEditorPaused!: boolean;
+
+  public gizmoMode: GizmoMode = GizmoMode.Translate;
+  public GizmoMode = GizmoMode;
+
+  public transformSpace: TransformSpace = TransformSpace.World;
+  public TransformSpace = TransformSpace;
 
   constructor(private editorService: EditorService) {
+    this.editorService.gizmoMode.subscribe(mode => {
+      this.gizmoMode = mode;
+    });
 
+    this.editorService.transformSpace.subscribe(space => {
+      this.transformSpace = space;
+    });
   }
 
   onPlay() {
@@ -31,4 +47,14 @@ export class TopBar {
     this.editorService.requestSceneStop(this.scene);
 
   }
+
+  setGizmoMode(mode: GizmoMode) {
+    this.editorService.setGizmoMode(mode);
+  }
+
+  toggleTransformSpace() {
+    const newSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
+    this.editorService.setTransformSpace(newSpace);
+  }
+
 }

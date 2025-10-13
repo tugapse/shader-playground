@@ -1,7 +1,9 @@
 import { EventEmitter, Injectable } from "@angular/core";
-import { EditorCameraBehaviour } from "@editor/behaviours/editor.camera";
-import { Camera, Scene } from "omega-game-engine";
+import { vec3 } from "gl-matrix";
+import { Camera, CameraFlyBehaviour, Scene } from "@engine";
 import { BehaviorSubject } from "rxjs";
+import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
+import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
 
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +23,9 @@ export class EditorService {
 
   onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(null);
   onUpdateFrame = new BehaviorSubject<number>(0);
+
+  public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
+  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
 
   private camera!: Camera;
   constructor() {
@@ -49,17 +54,25 @@ export class EditorService {
     this.onSceneStop.emit(scene);
   }
 
+  public setGizmoMode(mode: GizmoMode) {
+    this.gizmoMode.next(mode);
+  }
+
+  public setTransformSpace(space: TransformSpace) {
+    this.transformSpace.next(space);
+  }
+
 
   protected initializeEditorCamera() {
     this.camera = new Camera();
     this.camera.name = "Editor Camera"
-    this.camera.updateInEditor = true;
-    Camera.setMainCamera(this.camera);
-    Camera.mainCamera.addBehaviour(new EditorCameraBehaviour());
-    this.camera.initialize();
-    this.camera.update(1);
-    this.camera.transform.translate(2, 3, 10);
     this.camera.fieldOfView = 65;
+    this.camera.transform.translate(2, 3, 10);
+    this.camera.transform.rotate(0, 180, 0);
+    this.camera.initialize();
+    this.camera.addBehaviour(new CameraFlyBehaviour())
+    Camera.setMainCamera(this.camera);
+    this.camera.updateInEditor = true;
   }
 
 

@@ -7,7 +7,7 @@
     color: #e6edf3;
     display: flex;
     align-content: center;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
 
   }
@@ -36,5 +36,26 @@
   .top-bar .center-menu {
     flex-grow: 1;
     text-align: center;
+  }
+
+  .top-bar .right-menu {
+    padding-right: 24px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .item {
+      transition: all 0.3s;
+      padding: 4px 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+
+      &:hover{
+        color: #5baed4;
+        background-color: #263142;
+      }
+    }
   }
 }

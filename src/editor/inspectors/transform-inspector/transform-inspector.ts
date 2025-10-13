@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { DragEventData, DragHandleDirective } from "@editor/directives/mouse-drag.directive";
 import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
-import { GlEntity, Transform } from 'omega-game-engine';
+import { GlEntity, Transform } from '@engine';
 
 @Component({
   selector: 'editor-transform-inspector',
@@ -43,7 +43,7 @@ export class TransformInspector {
         this.scaleX += x;
         this.scaleY += y;
         this.scaleZ += z;
-        this.transform.setScale(this.scaleX, this.scaleY, this.scaleZ);
+        this.transform.setLocalScale(this.scaleX, this.scaleY, this.scaleZ);
         break;
     }
     this.transform.updateMatrices();
@@ -59,20 +59,20 @@ export class TransformInspector {
   }
 
   onPositionChanged(index: number, event: Event) {
-    const value = this.transform.position;
+    const value = this.transform.worldPosition;
     value[index] = (event.target as any).value;
-    this.transform.setPosition(...value);
+    this.transform.setWorldPosition(...value);
   }
 
   onRotationChanged(index: number, event: Event) {
-    const value = this.transform.rotation;
+    const value = this.transform.worldRotation;
     value[index] = (event.target as any).value;
-    this.transform.setRotation(...value);
+    this.transform.setWorldRotation(...value);
   }
 
   onScaleChanged(index: number, event: Event) {
-    const value = this.transform.localScale;
+    const value = this.transform.worldScale;
     value[index] = (event.target as any).value;
-    this.transform.setScale(...value);
+    this.transform.setWorldScale(...value);
   }
 }

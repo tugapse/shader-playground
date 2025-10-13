@@ -25,8 +25,8 @@
   @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="item.value"
     (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
 
-  @case ("vector234") { <editor-vector-inspector [vectorKeys]="['x','y','z','w']" [vector]="item.value"
-    (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
+  @case ("vector234") { <editor-vector-inspector [label]="item.key" [vectorKeys]="['x','y','z','w']" [vector]="item.value"
+    (vectorChanged)="onVectorChanged(item, $event)"  [scale]="0.1"></editor-vector-inspector>}
 
   @case ("enum") {<editor-enum-inspector [label]="item.key.capitalize()"></editor-enum-inspector> }
 

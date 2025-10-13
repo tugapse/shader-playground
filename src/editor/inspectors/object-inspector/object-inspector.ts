@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from 'omega-game-engine';
+import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from '@engine';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
@@ -77,7 +77,6 @@ export class ObjectInspector {
 
   protected loadProperties() {
     if (!this._selectedObject?.property) {
-      // console.debug("Error: ", !this._selectedObject);
       return
     };
 
@@ -86,6 +85,7 @@ export class ObjectInspector {
     const keys = Object.keys(object).filter(this.isPropertyValid.bind(this));
     for (const key of keys) {
       const newValue = (object)[key];
+      if(!newValue) continue;
       let newObType: string = typeof newValue;
       let name = "";
       // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);

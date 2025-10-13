@@ -1,7 +1,8 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
-import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "omega-game-engine";
-import { EditorBoundingBoxBehaviour } from "./bounding-box-behaviour";
+import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform, UnlitMaterial } from "@engine";
+import { GizmosBoxBehaviour } from "./gizmos-behaviour";
 import { mat4 } from "gl-matrix";
+
 
 export class EntityPicker extends RendererBehaviour {
 
@@ -9,7 +10,7 @@ export class EntityPicker extends RendererBehaviour {
   selectedEntityId = -1;
   width = 0;
   height = 0;
-  boundingBehaviour!: EditorBoundingBoxBehaviour;
+  boundingBehaviour!: GizmosBoxBehaviour;
   mousePressed = false;
   lastClickedId = 0;
   dontNeedControlToSelect = true;
@@ -19,7 +20,7 @@ export class EntityPicker extends RendererBehaviour {
   constructor(gl: WebGL2RenderingContext, private sceneTreeService: SceneTreeService) {
     super(gl);
     this.renderTexture = Texture.create(gl, 1024, 1024, null);
-    (window as any)['testTexture'] = this.renderTexture;
+    // (window as any)['testTexture'] = this.renderTexture;
     this.shader = new Shader(gl, new ColorMaterial(),
       "assets/shaders/frag/entity-picker.frag");
     this.shader.initialize();
@@ -28,6 +29,9 @@ export class EntityPicker extends RendererBehaviour {
 
 
   override draw(): void {
+
+    // If the gizmo has claimed the mouse, don't perform entity picking.
+    if (this.boundingBehaviour?.mouseClaimed) return;
 
     this.renderAndGetSelected();
     if (this.canSelectEntity()) {

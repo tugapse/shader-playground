@@ -1,4 +1,4 @@
-import { EntityBehaviour, ObjectInstanciator } from "omega-game-engine";
+import { EntityBehaviour, ObjectInstanciator } from "@engine";
 
 
 

@@ -1,4 +1,4 @@
-import { EntityBehaviour, ObjectInstanciator } from "omega-game-engine";
+import { EntityBehaviour, ObjectInstanciator } from "@engine";
 
 
 
@@ -17,7 +17,7 @@ export class MoveBehaviour extends EntityBehaviour {
     const x = Math.sin(this.t) * this.speed;
     const z = Math.cos(this.t) * this.speed;
 
-    this.transform.setPosition(this.distance * x,
+    this.transform.setWorldPosition(this.distance * x,
       0,
       this.distance * z);
     // this.parent.transform.updateModelMatrix();

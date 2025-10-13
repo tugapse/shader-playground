@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 
 import { Icon } from "../../../app/components/icon/icon";
 import { SceneTreeService } from '../../services/scene-tree.service';
-import { Scene, GlEntity, EntityType } from 'omega-game-engine';
+import { GlEntity, EntityType, Scene } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { TreeNode } from './scene-node';
 import { TreeNodeComponent } from './tree-node/tree-node';

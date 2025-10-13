@@ -1,4 +1,4 @@
-import { Colors } from "omega-game-engine/dist/core/colors";
+import { Colors } from "@engine/core/colors";
 
 export const EditorSettings = {
 

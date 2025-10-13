@@ -1,4 +1,4 @@
-import { CubemapMaterial, Colors, JsonSerializedData, Color, SkyboxShader } from "omega-game-engine";
+import { CubemapMaterial, Colors, JsonSerializedData, Color, SkyboxShader } from "@engine";
 
 
 export enum EditorUniforms {

@@ -14,6 +14,7 @@ uniform vec3 u_cameraPosition;
 uniform float u_normalMapStrength;
 uniform vec4 u_ambientLight;
 
+uniform int u_useShadows;
 uniform highp sampler2DShadow u_shadowMap; // Added precision qualifier
 uniform vec2 u_shadowMapSize;
 
@@ -48,7 +49,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal,
   projCoords = projCoords * 0.5 + 0.5;
 
   // Check bounds
-  if (projCoords.z > 1.0) {
+  if (projCoords.z > 1.0 || u_useShadows == 0) {
     return 1.0;
   }
 
@@ -61,7 +62,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal,
       shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
     }
   }
-  return shadow / 9.0;
+  return max(0.1, shadow / 9.0);
 }
 
 // This function calculates the final lit color, including shadows

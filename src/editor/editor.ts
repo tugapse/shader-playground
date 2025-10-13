@@ -1,20 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager } from '@engine';
 import { Subscription } from 'rxjs';
-import { EditorRenderBehaviour } from 'src/app/extra/editor-render-behaviour';
+import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
+import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
+import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { Canvas } from './components/canvas/canvas';
-import { SceneTreeService } from './services/scene-tree.service';
 import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
 import { Inpector } from './inspectors/inpector/inpector';
-import { Scene, GlEntity, JsonSerializedData, SceneManager, Color, Colors, Shader, Vector3 } from 'omega-game-engine';
-import { EditorService } from './services/editor.service';
-import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
-import { EditorSettingsService } from './services/editor.settings';
 import { IEditorSettings } from './interfaces/editor-settings';
-import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
-import { EditorBoundingBoxBehaviour } from './behaviours/scene-editor/bounding-box-behaviour';
-
+import { EditorService } from './services/editor.service';
+import { EditorSettingsService } from './services/editor.settings';
+import { SceneTreeService } from './services/scene-tree.service';
 
 @Component({
   selector: 'app-editor',
@@ -30,14 +28,13 @@ export class Editor implements OnDestroy, OnInit {
   canvasVisible = true;
   fpsCounter: number = 0;
 
-  protected editorRenderBehaviour!: EditorRenderBehaviour;
 
   protected gl!: WebGL2RenderingContext;
   protected subs$: Subscription[] = [];
 
   protected sceneState?: JsonSerializedData | null = null;
   protected editorGridBehaviour!: EditorGridBehaviour;
-  protected editorBoundingBoxBehaviour!: EditorBoundingBoxBehaviour;
+  protected editorBoundingBoxBehaviour!: GizmosBoxBehaviour;
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
@@ -51,6 +48,21 @@ export class Editor implements OnDestroy, OnInit {
 
   ngOnInit(): void {
     this.loadFromStorage();
+
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'p') {
+        event.preventDefault();
+        if (this.scene.isRunning) {
+          this.onScenePause(this.scene);
+        } else {
+          this.onScenePlay(this.scene);
+        }
+      }
+      if (event.ctrlKey && event.key === 'o') {
+        event.preventDefault();
+        this.onSceneStop(this.scene);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -131,8 +143,9 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   private onUpdateFrame(ellapsed: number) {
-    //   this.editorGridBehaviour?.update(ellapsed);
-    //   this.editorBoundingBoxBehaviour?.update(ellapsed);
+    this.editorBoundingBoxBehaviour.update(ellapsed);
+    this.editorPickerBehaviour.update(ellapsed);
+    this.editorGridBehaviour.update(ellapsed);
   }
 
   onEditorSaveInStorage(): void {
@@ -157,7 +170,7 @@ export class Editor implements OnDestroy, OnInit {
 
   createEditorBehaviours() {
     this.editorGridBehaviour = new EditorGridBehaviour(this.gl);
-    this.editorBoundingBoxBehaviour = new EditorBoundingBoxBehaviour(this.gl);
+    this.editorBoundingBoxBehaviour = new GizmosBoxBehaviour(this.gl, this.editorService);
     this.editorPickerBehaviour = new EditorEntityPicker(this.gl, this.sceneTreeService);
     this.editorPickerBehaviour.boundingBehaviour = this.editorBoundingBoxBehaviour;
 

@@ -18,6 +18,13 @@
     "paths": {
       "@editor/*": [
         "src/editor/*"
+      ],
+      "@engine": [
+        "src/engine",
+        "src/engine/index.ts"
+      ],
+      "@engine/*": [
+        "src/engine/*"
       ]
     }
   },

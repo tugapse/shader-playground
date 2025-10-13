@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { GlEntity } from 'omega-game-engine';
+import { GlEntity } from '@engine';
 import { Icon } from "src/app/components/icon/icon";
 import { TreeNode } from '../scene-node';
 
