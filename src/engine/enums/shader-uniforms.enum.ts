@@ -265,15 +265,49 @@ export enum ShaderUniformsEnum {
    */
   U_LIGHT_MVP_MATRIX = "u_lightMVPMatrix",
   /**
+   * A flag to enable or disable shadows.
+   *
+   * @type {string}
+   */
+  U_USE_SHADOWS = "u_useShadows",
+  /**
    * The shadow map texture, which stores information about the shadows cast by objects in a scene.
    *
    * @type {string}
    */
-  U_SHADOW_MAP = "u_shadow_map",
+  U_SHADOW_MAP = "u_shadowMap",
   /**
    * The size of the shadow map texture.
    *
    * @type {string}
    */
-  U_SHADOW_MAP_SIZE = "u_shadowMapSize"
+  U_SHADOW_MAP_SIZE = "u_shadowMapSize",
+
+  /**
+   * --- Fog ---
+   */
+  /**
+   * A flag to enable or disable fog.
+   *
+   * @type {string}
+   */
+  U_FOG_ENABLED = "u_fogEnabled",
+  /**
+   * The color of the fog.
+   *
+   * @type {string}
+   */
+  U_FOG_COLOR = "u_FogColor",
+  /**
+   * The density of the fog.
+   *
+   * @type {string}
+   */
+  U_FOG_DENSITY = "u_FogDensity",
+  /**
+   * The distance of the fog.
+   *
+   * @type {string}
+   */
+  U_FOG_DISTANCE = "u_fogDistance"
 }

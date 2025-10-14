@@ -83,20 +83,19 @@ export class MeshRendererBehaviour extends RendererBehaviour {
 
     if (this.shader instanceof LitShader) {
 
-      this.shader.setInt('u_useShadows', 0);
+      this.shader.setInt(ShaderUniformsEnum.U_USE_SHADOWS, 0);
       if (this.shadowMapTexture && this.shadowMapTexture.glTexture) {
         // Get the Light entity (assuming there is only one directional light for shadows)
         const lightEntity = this.parent.scene.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL && obj.active &&obj.show);
-        const textureUnit = 2;
-        this.shader.setTexture('u_shadowMap', this.shadowMapTexture, textureUnit);
-        this.shader.setVec2('u_shadowMapSize', [this.shadowMapTexture.width, this.shadowMapTexture.height]);
+        this.shader.setTexture(ShaderUniformsEnum.U_SHADOW_MAP, this.shadowMapTexture, 2);
+        this.shader.setVec2(ShaderUniformsEnum.U_SHADOW_MAP_SIZE, [this.shadowMapTexture.width, this.shadowMapTexture.height]);
         this.shadowMapTexture.bind();
 
         if (lightEntity) {
           let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
           mat4.multiply(lightMvpMatrix, lightMvpMatrix, this.transform.modelMatrix);
-          this.shader.setMat4('u_lightMVPMatrix', lightMvpMatrix);
-          this.shader.setInt('u_useShadows', 1);
+          this.shader.setMat4(ShaderUniformsEnum.U_LIGHT_MVP_MATRIX, lightMvpMatrix);
+          this.shader.setInt(ShaderUniformsEnum.U_USE_SHADOWS, 1);
         }
       }
 
@@ -107,14 +106,14 @@ export class MeshRendererBehaviour extends RendererBehaviour {
 
     // Set the View Matrix (required for v_fogDistance calculation in vertex shader)
     const viewMatrix = Camera.mainCamera.viewMatrix;
-    this.shader.setMat4('u_viewMatrix', viewMatrix);
+    this.shader.setMat4(ShaderUniformsEnum.U_VIEW_MATRIX, viewMatrix);
 
     // Pass the fog uniform values
-    this.shader.setInt('u_fogEnabled', this.fog.enabled ? 1 : 0);
+    this.shader.setInt(ShaderUniformsEnum.U_FOG_ENABLED, this.fog.enabled ? 1 : 0);
     if(this.fog.enabled){
-      this.shader.setVec3('u_FogColor', this.fog.color.toVec3());
-      this.shader.setFloat('u_FogDensity', this.fog.density);
-      this.shader.setFloat('u_fogDistance', this.fog.distance);
+      this.shader.setVec3(ShaderUniformsEnum.U_FOG_COLOR, this.fog.color.toVec3());
+      this.shader.setFloat(ShaderUniformsEnum.U_FOG_DENSITY, this.fog.density);
+      this.shader.setFloat(ShaderUniformsEnum.U_FOG_DISTANCE, this.fog.distance);
     }
     super.setShaderVariables();
     super.draw();

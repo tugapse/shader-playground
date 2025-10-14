@@ -24,7 +24,7 @@ export class LitMaterial extends UnlitMaterial {
     The intensity of the normal map effect.
    * @type {number}
    */
-  public normalMapStrength: number = 0.0;
+  public normalMapStrength: number = 0.1;
   /**
     The normal map texture object.
    * @type {Texture}

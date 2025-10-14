@@ -10,7 +10,7 @@ export class SunBehaviour extends EntityBehaviour {
   protected override _className = "SunBehaviour";
 
   public speed = 0.01;
-  public timeOfDay = 0.0; // 0 to 1, 0 is sunrise, 0.5 is noon, 1 is sunset
+  public timeOfDay = 0.5; // 0 to 1, 0 is sunrise, 0.5 is noon, 1 is sunset
   public arcHeight = 0.5; // 0 to 1, max height of the sun arc
   public cycleOvershoot = 0.2; // How much time the sun travels "underground" before reset
 

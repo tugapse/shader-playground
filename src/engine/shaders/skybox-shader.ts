@@ -14,7 +14,7 @@ export class SkyboxShader extends Shader {
 
   /**
     Creates a new instance of SkyboxShader.
-    
+
    * @override
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @param {CubemapMaterial} material - The cubemap material associated with this shader.
@@ -38,9 +38,6 @@ export class SkyboxShader extends Shader {
   public override initialize(): Promise<void> {
     this.fragUri = "assets/shaders/frag/skybox.frag";
     this.vertexUri = "assets/shaders/vertex/skybox.vert";
-    if (!this.material.mainTex) {
-      this.material.mainTex = new CubemapTexture(this.gl);
-    }
     return super.initialize();
   }
 
@@ -53,18 +50,18 @@ export class SkyboxShader extends Shader {
   public override loadDataIntoShader(): void {
     if (!this.material) return;
 
-    if (!this.material.mainTex.isImageLoaded) {
-      this.material.mainTex.setGL(this.gl);
-      this.material.mainTex.load();
-    }
+    if (this.material.mainTex) {
 
+      if (!this.material.mainTex.isImageLoaded) {
+        this.material.mainTex.setGL(this.gl);
+        this.material.mainTex.load();
+      }else{
+        this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex as CubemapTexture, 0);
+        this.material.mainTex.bind();
+      }
+
+    }
     super.loadDataIntoShader();
-    this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color.toVec4());
-
-    if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
-      this.material.mainTex.bind();
-      this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex as CubemapTexture, 0);
-    }
   }
 
 

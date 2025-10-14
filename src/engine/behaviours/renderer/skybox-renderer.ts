@@ -54,26 +54,6 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this._gl.depthFunc(this._gl.LEQUAL);
   }
 
-  /**
-   * Draws the skybox mesh.
-   * This method binds the shader and buffers, sets the shader variables, and draws the skybox.
-   * @override
-   */
-  override draw(): void {
-    if (!this.shader?._shaderProgram || !this.mesh) {
-      return;
-    }
-
-    this.shader.bindBuffers();
-    this.shader.use();
-    this.setShaderVariables();
-    this._gl.drawElements(
-      this._gl.TRIANGLES,
-      this.mesh.meshData.indices.length,
-      this._gl.UNSIGNED_SHORT,
-      0,
-    );
-  }
 
   /**
    * Sets the camera matrices for the skybox, ensuring the skybox remains centered on the camera.
@@ -116,13 +96,4 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this.shader.loadDataIntoShader();
   }
 
-  /**
-   * Populates the renderer's properties from a JSON object.
-   * This method is a placeholder and does not add any additional functionality beyond the base class.
-   * @param {JsonSerializedData} jsonObject - The JSON object containing the data.
-   * @override
-   */
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-  }
 }

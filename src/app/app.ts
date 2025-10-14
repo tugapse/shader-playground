@@ -81,8 +81,8 @@ export class App implements OnDestroy {
   private async loadAssets(scene: Scene) {
     await this.createLights(scene);
     await this.otherObjetcs(scene);
-    // await this.addMonkeyObj(scene);
-    // await this.createSkybox(scene);
+    await this.addMonkeyObj(scene);
+    await this.createSkybox(scene);
     await this.createFloor(scene);
 
   }
@@ -162,8 +162,8 @@ export class App implements OnDestroy {
     spotLight.color = Colors.azure;
 
     // scene.addEntity(new Light("Ambient light"));
-    // scene.addEntity(plight);
-    // scene.addEntity(spotLight);
+    scene.addEntity(plight);
+    scene.addEntity(spotLight);
     scene.addEntity(dlight);
 
 

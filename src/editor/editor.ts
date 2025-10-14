@@ -34,7 +34,7 @@ export class Editor implements OnDestroy, OnInit {
 
   protected sceneState?: JsonSerializedData | null = null;
   protected editorGridBehaviour!: EditorGridBehaviour;
-  protected editorBoundingBoxBehaviour!: GizmosBoxBehaviour;
+  protected gizmosBehaviour!: GizmosBoxBehaviour;
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
@@ -120,7 +120,7 @@ export class Editor implements OnDestroy, OnInit {
 
   protected onSceneTreeEntitySelected(entity: GlEntity): void {
     this.inspectorSelectedEntity = entity;
-    this.editorBoundingBoxBehaviour.setTargetEntity(entity);
+    this.gizmosBehaviour.setTargetEntity(entity);
   }
 
   protected subscribeEvents(): void {
@@ -138,14 +138,14 @@ export class Editor implements OnDestroy, OnInit {
 
   private onRenderFrame() {
     this.editorGridBehaviour?.draw();
-    this.editorBoundingBoxBehaviour?.draw();
+    this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
   }
 
   private onUpdateFrame(ellapsed: number) {
-    this.editorBoundingBoxBehaviour.updateEditor(ellapsed);
-    this.editorPickerBehaviour.update(ellapsed);
-    this.editorGridBehaviour.update(ellapsed);
+    this.gizmosBehaviour?.updateEditor(ellapsed);
+    this.editorPickerBehaviour?.update(ellapsed);
+    this.editorGridBehaviour?.update(ellapsed);
   }
 
   onEditorSaveInStorage(): void {
@@ -170,16 +170,16 @@ export class Editor implements OnDestroy, OnInit {
 
   createEditorBehaviours() {
     this.editorGridBehaviour = new EditorGridBehaviour(this.gl);
-    this.editorBoundingBoxBehaviour = new GizmosBoxBehaviour(this.gl, this.editorService);
+    this.gizmosBehaviour = new GizmosBoxBehaviour(this.gl, this.editorService);
     this.editorPickerBehaviour = new EditorEntityPicker(this.gl, this.sceneTreeService);
-    this.editorPickerBehaviour.boundingBehaviour = this.editorBoundingBoxBehaviour;
+    this.editorPickerBehaviour.boundingBehaviour = this.gizmosBehaviour;
 
     this.updateEditorSettings(this.settings);
   }
 
   addEditorBehaviours() {
     this.editorGridBehaviour.parent = this.scene;
-    this.editorBoundingBoxBehaviour.parent = this.scene;
+    this.gizmosBehaviour.parent = this.scene;
     this.editorPickerBehaviour.parent = this.scene;
   }
 
@@ -187,10 +187,10 @@ export class Editor implements OnDestroy, OnInit {
     this.settings = newSettings;
     if (this.editorGridBehaviour)
       this.editorGridBehaviour.gridColor = this.settings.sceneEditor.gridColor;
-    if (this.editorBoundingBoxBehaviour) {
+    if (this.gizmosBehaviour) {
 
-      this.editorBoundingBoxBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
-      this.editorBoundingBoxBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
+      this.gizmosBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
+      this.gizmosBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
     }
   }
 

@@ -104,7 +104,7 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
 
   // Point Light Contributions
   for (int i = 0; i < u_numPointLights; ++i) {
-    vec3 lightVecPoint = v_position - u_pointLightPositions[i] ;
+    vec3 lightVecPoint = u_pointLightPositions[i] - v_position; ;
     float distancePoint = length(lightVecPoint);
     vec3 pointLightDir = normalize(lightVecPoint);
 
