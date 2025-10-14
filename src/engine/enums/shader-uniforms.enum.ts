@@ -94,7 +94,7 @@ export enum ShaderUniformsEnum {
    *
    * @type {string}
    */
-  U_NORMAL_MAP = "u_normalMap",
+  U_NORMAL_TEX = "u_normalMap",
   /**
    * The strength value for the normal map, which can be used to control the amount of detail in a texture.
    *

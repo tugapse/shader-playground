@@ -1,5 +1,4 @@
 import { EngineCache } from "../core";
-import { Engine } from "../engine";
 import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
 import { Texture } from "../textures/texture";
 import { UnlitMaterial } from "./unlit-material";
@@ -15,22 +14,27 @@ export class LitMaterial extends UnlitMaterial {
     The strength of specular highlights.
    * @type {number}
    */
-  public specularStrength: number = 1.0;
+  public specularStrength: number = 0.5;
   /**
     The roughness of the material's surface, affecting the size of specular highlights.
    * @type {number}
    */
-  public roughness: number = 0.2;
+  public roughness: number = 0.01;
   /**
     The intensity of the normal map effect.
    * @type {number}
    */
-  public normalMapStrength: number = 0.2;
+  public normalMapStrength: number = 0.0;
   /**
     The normal map texture object.
    * @type {Texture}
    */
   public normalTex!: Texture;
+
+  constructor() {
+    super();
+  }
+
 
   /**
     Serializes the material's state to a JSON object.
@@ -71,5 +75,12 @@ export class LitMaterial extends UnlitMaterial {
    */
   static override instanciate(): LitMaterial {
     return new LitMaterial();
+  }
+
+  public override destroy(): void {
+    super.destroy();
+    if (this.normalTex) {
+      this.normalTex.destroy();
+    }
   }
 }

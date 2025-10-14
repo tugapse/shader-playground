@@ -246,9 +246,7 @@ export class Scene extends GlEntity {
    * @returns {void}
    */
   public override destroy(): void {
-    for (const child of this.lights) {
-      child.destroy();
-    }
+
     for (const child of this.objects) {
       child.destroy();
     }

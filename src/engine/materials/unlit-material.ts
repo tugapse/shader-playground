@@ -67,4 +67,10 @@ export class UnlitMaterial extends ColorMaterial {
   static override instanciate(): UnlitMaterial {
     return new UnlitMaterial();
   }
+
+  public destroy(): void {
+    if (this.mainTex) {
+      this.mainTex.destroy();
+    }
+  }
 }

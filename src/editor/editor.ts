@@ -143,7 +143,7 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   private onUpdateFrame(ellapsed: number) {
-    this.editorBoundingBoxBehaviour.update(ellapsed);
+    this.editorBoundingBoxBehaviour.updateEditor(ellapsed);
     this.editorPickerBehaviour.update(ellapsed);
     this.editorGridBehaviour.update(ellapsed);
   }

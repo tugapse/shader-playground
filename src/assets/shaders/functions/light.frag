@@ -43,8 +43,7 @@ uniform float u_spotLightConstantAtts[MAX_SPOT_LIGHTS];
 uniform float u_spotLightLinearAtts[MAX_SPOT_LIGHTS];
 uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 
-float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal,
-                       vec3 lightDir) {
+float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir) {
   vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
   projCoords = projCoords * 0.5 + 0.5;
 
@@ -105,13 +104,16 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
 
   // Point Light Contributions
   for (int i = 0; i < u_numPointLights; ++i) {
-    vec3 lightVecPoint = u_pointLightPositions[i] - v_position;
+    vec3 lightVecPoint = v_position - u_pointLightPositions[i] ;
     float distancePoint = length(lightVecPoint);
     vec3 pointLightDir = normalize(lightVecPoint);
+
     float attenuationPoint =
         1.0 / (u_pointLightConstantAtts[i] +
                u_pointLightLinearAtts[i] * distancePoint +
                u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
+
+
     float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
     vec3 halfVec = normalize(pointLightDir + viewDir);
     float pointSpecularIntensity =
@@ -119,8 +121,7 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
         u_specularStrength;
     totalLitColorRGB +=
         (baseColor * u_pointLightColors[i] *
-         (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint) *
-        shadowFactor;
+         (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint);
   }
 
   // Spot Light Contributions
@@ -145,8 +146,7 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
         u_specularStrength;
     totalLitColorRGB += (baseColor * u_spotLightColors[i] *
                          (spotDiffuseIntensity + spotSpecularIntensity) *
-                         attenuationSpot * coneFactor) *
-                        shadowFactor;
+                         attenuationSpot * coneFactor);
   }
   return totalLitColorRGB;
 }

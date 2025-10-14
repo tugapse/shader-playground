@@ -86,10 +86,11 @@ export class MeshRendererBehaviour extends RendererBehaviour {
       this.shader.setInt('u_useShadows', 0);
       if (this.shadowMapTexture && this.shadowMapTexture.glTexture) {
         // Get the Light entity (assuming there is only one directional light for shadows)
-        const lightEntity = this.parent.scene.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
+        const lightEntity = this.parent.scene.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL && obj.active &&obj.show);
         const textureUnit = 2;
         this.shader.setTexture('u_shadowMap', this.shadowMapTexture, textureUnit);
         this.shader.setVec2('u_shadowMapSize', [this.shadowMapTexture.width, this.shadowMapTexture.height]);
+        this.shadowMapTexture.bind();
 
         if (lightEntity) {
           let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
@@ -117,6 +118,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
     }
     super.setShaderVariables();
     super.draw();
+    this.shadowMapTexture?.unBind();
   }
 
 
@@ -151,7 +153,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
    */
   protected getNormalMapLocations(): void {
     if (this.shader?._shaderProgram) {
-      this._normalMapUniformLocation = this._gl.getUniformLocation(this.shader._shaderProgram, ShaderUniformsEnum.U_NORMAL_MAP);
+      this._normalMapUniformLocation = this._gl.getUniformLocation(this.shader._shaderProgram, ShaderUniformsEnum.U_NORMAL_TEX);
       this._worldMatrixUniformLocation = this._gl.getUniformLocation(this.shader._shaderProgram, ShaderUniformsEnum.U_WORLD_MATRIX);
       this._worldInverseTransposeMatrixUniformLocation = this._gl.getUniformLocation(this.shader._shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
       this._tangentAttributeLocation = this._gl.getAttribLocation(this.shader._shaderProgram, ShaderUniformsEnum.A_TANGENT);

@@ -42,9 +42,7 @@ export class App implements OnDestroy {
     this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
     Shader.SHADER_FUNCTIONS = {
       "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
-      "@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
       "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
-      "@INCLUDE_PCF_FUNC": "assets/shaders/functions/pcf.frag"
     };
 
     ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate);
@@ -83,8 +81,8 @@ export class App implements OnDestroy {
   private async loadAssets(scene: Scene) {
     await this.createLights(scene);
     await this.otherObjetcs(scene);
-    await this.addMonkeyObj(scene);
-    await this.createSkybox(scene);
+    // await this.addMonkeyObj(scene);
+    // await this.createSkybox(scene);
     await this.createFloor(scene);
 
   }
@@ -134,14 +132,13 @@ export class App implements OnDestroy {
     renderer.name = "Renderer";
 
     material.mainTex = await EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
-    material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal.jpg", this.gl);
+    material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal1.jpg", this.gl);
 
 
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
 
     const planeEntity = new GlEntity("Floor");
-    planeEntity.transform.translate(0, -2, 0);
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
 
@@ -164,7 +161,7 @@ export class App implements OnDestroy {
     spotLight.coneAngles = { inner: 15, outer: 20 }
     spotLight.color = Colors.azure;
 
-    scene.addEntity(new Light("Ambient light"));
+    // scene.addEntity(new Light("Ambient light"));
     // scene.addEntity(plight);
     // scene.addEntity(spotLight);
     scene.addEntity(dlight);

@@ -15,7 +15,7 @@ export class LitShader extends Shader {
 
   /**
     Creates a new instance of LitShader.
-    
+
    * @override
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @param {LitMaterial} material - The lit material associated with this shader.
@@ -50,7 +50,7 @@ export class LitShader extends Shader {
 
     this.checkAndLoadTextures();
     super.loadDataIntoShader();
-    
+
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color.toVec4());
     this.setVec2(ShaderUniformsEnum.U_UV_SCALE, this.material.uvScale.vector);
     this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, this.material.uvOffset.vector);
@@ -61,14 +61,7 @@ export class LitShader extends Shader {
 
     this.setVec3(ShaderUniformsEnum.U_CAMERA_POSITION, Camera.mainCamera.transform.worldPosition);
 
-    if (EngineCache.get('shadowMapSize')) {
-      this.setVec2(ShaderUniformsEnum.U_SHADOW_MAP_SIZE, EngineCache.get('shadowMapSize'));
-    }
 
-    if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
-      this.material.mainTex.bind();
-      this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
-    }
   }
 
   /**
@@ -76,15 +69,31 @@ export class LitShader extends Shader {
    * @private
    * @returns {void}
    */
-  private checkAndLoadTextures(): void {
-    if (this.material.normalTex && !this.material.normalTex.isImageLoaded) {
-      this.material.normalTex.setGL(this.gl);
-      this.material.normalTex.load();
-    } 
+  protected  checkAndLoadTextures(): void {
+    if (this.material.mainTex) {
+      if (!this.material.mainTex.isImageLoaded) {
+        this.material.mainTex.setGL(this.gl);
+        this.material.mainTex.load();
+      } else {
+        this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
+        this.material.mainTex.bind();
+      }
+    }
+
+    if (this.material.normalTex) {
+      if (!this.material.normalTex.isImageLoaded) {
+        this.material.normalTex.setGL(this.gl);
+        this.material.normalTex.load();
+      } else {
+        this.setTexture(ShaderUniformsEnum.U_NORMAL_TEX, this.material.normalTex, 1);
+        this.material.normalTex.bind();
+      }
+    }
   }
 
   override release(): void {
     super.release();
-    if(this.material.normalTex) this.material.normalTex.unBind();
+    if (this.material.mainTex) this.material.mainTex.unBind();
+    if (this.material.normalTex) this.material.normalTex.unBind();
   }
 }

@@ -225,7 +225,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     this._gl.lineWidth(1)
   }
 
-  public override update(elapsed: number): void {
+  public override updateEditor(elapsed: number): void {
     this.handleKeyboardInput();
   }
 
@@ -238,7 +238,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     if (Keybord.keyDown["2"]) { this.gizmoMode = GizmoMode.Rotate }
     if (Keybord.keyDown["3"]) { this.gizmoMode = GizmoMode.Scale }
 
-    if( Keybord.keyDown["t"]){
+    if (Keybord.keyDown["t"]) {
       this.transformSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
       this.editorService.setTransformSpace(this.transformSpace);
     }
@@ -624,6 +624,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
       const projectedLength = vec3.dot(moveVector, moveAxis);
       const newPosition = vec3.scaleAndAdd(vec3.create(), this.dragStartEntityPosition, moveAxis, projectedLength);
       this.selectedEntity.transform.setWorldPosition(newPosition[0], newPosition[1], newPosition[2]);
+      this.selectedEntity.transform.updateMatrices();
     }
   }
 

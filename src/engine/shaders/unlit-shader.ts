@@ -13,7 +13,7 @@ export class UnlitShader extends Shader {
 
   /**
     Creates a new instance of UnlitShader.
-    
+
    * @override
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @param {UnlitMaterial} material - The unlit material associated with this shader.
@@ -39,22 +39,40 @@ export class UnlitShader extends Shader {
    * @returns {void}
    */
   public override loadDataIntoShader(): void {
-    
+
     if (!this.material) return;
-    
+    super.loadDataIntoShader();
+
     if (this.material.mainTex && !this.material.mainTex.isImageLoaded) {
       this.material.mainTex.setGL(this.gl);
       this.material.mainTex.load();
     }
-    
-    super.loadDataIntoShader();
+    this.checkAndLoadTextures();
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color.toVec4());
     this.setVec2(ShaderUniformsEnum.U_UV_SCALE, this.material.uvScale.vector);
     this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, this.material.uvOffset.vector);
 
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
-      this.material.mainTex.bind();
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
+      this.material.mainTex.bind();
+    }
+  }
+
+
+   /**
+    Checks if textures are loaded and retrieves them from the cache. If not found or if the URL is not provided, it uses a default white texture.
+   * @private
+   * @returns {void}
+   */
+  protected  checkAndLoadTextures(): void {
+    if (this.material.mainTex) {
+      if (!this.material.mainTex.isImageLoaded) {
+        this.material.mainTex.setGL(this.gl);
+        this.material.mainTex.load();
+      } else {
+        this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
+        this.material.mainTex.bind();
+      }
     }
   }
 
