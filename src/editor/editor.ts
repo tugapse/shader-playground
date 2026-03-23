@@ -12,11 +12,14 @@ import { Inpector } from './inspectors/inpector/inpector';
 import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
+import { CodeEditorLogic } from './components/code-editor/editor/editor.component';
+import { FileExplorerLogic } from './components/asset-explorer/assets-explorer.component';
+import { EditorStateService } from './services/editor-state.service';
 import { SceneTreeService } from './services/scene-tree.service';
 
 @Component({
   selector: 'app-editor',
-  imports: [Canvas, Sidebar, CommonModule, Inpector, TopBar],
+  imports: [Canvas, Sidebar, CommonModule, Inpector, TopBar, FileExplorerLogic, CodeEditorLogic],
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })
@@ -41,12 +44,15 @@ export class Editor implements OnDestroy, OnInit {
   constructor(
     protected editorService: EditorService,
     protected sceneTreeService: SceneTreeService,
-    protected editorSettings: EditorSettingsService) {
+    protected editorSettings: EditorSettingsService,
+    protected editorState: EditorStateService
+  ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
   }
 
   ngOnInit(): void {
+    this.editorState.setActiveProject({ id: '1', name: 'Default Project', config: {} });
     this.loadFromStorage();
 
     document.addEventListener('keydown', (event) => {

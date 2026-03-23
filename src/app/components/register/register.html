@@ -16,6 +16,9 @@
     <div *ngIf="registerError()" class="error-message">
       {{ registerError() }}
     </div>
+    <div *ngIf="registerSuccess()" class="success-message">
+      {{ registerSuccess() }}
+    </div>
     <button type="submit" [disabled]="registerForm.invalid">Sign Up</button>
     <div class="login-link">
         Already have an account? <a routerLink="/login">Log in</a>

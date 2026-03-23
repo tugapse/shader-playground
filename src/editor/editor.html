@@ -2,12 +2,23 @@
 
 <div class="container">
   <editor-sidebar [scene]="scene"></editor-sidebar>
-  <div class="canvas-info">
-    <span>{{fpsCounter}}</span>
-  </div>
-  @if(canvasVisible){ <editor-canvas tabindex="0" class="canvas" [scene]="scene"
-    (fps)="onFpsUpdated($event)"
-    (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>}
+
+  @switch (editorState.centralView()) {
+    @case ('canvas') {
+      <div class="canvas-info">
+        <span>{{fpsCounter}}</span>
+      </div>
+      <editor-canvas tabindex="0" class="canvas" [scene]="scene"
+        (fps)="onFpsUpdated($event)"
+        (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>
+    }
+    @case ('assets') {
+      <app-assets-exporer></app-assets-exporer>
+    }
+    @case ('code-editor') {
+      <editor-code-editor></editor-code-editor>
+    }
+  }
 </div>
 
 <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>

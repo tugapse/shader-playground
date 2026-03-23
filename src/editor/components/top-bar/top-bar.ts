@@ -5,6 +5,7 @@ import { Icon } from 'src/app/components/icon/icon';
 
 import { GizmoMode } from '@editor/behaviours/scene-editor/gizmo-mode.enum';
 import { TransformSpace } from '@editor/behaviours/scene-editor/transform-space.enum';
+import { EditorStateService } from '@editor/services/editor-state.service';
 
 @Component({
   selector: 'editor-top-bar',
@@ -24,7 +25,10 @@ export class TopBar {
   public transformSpace: TransformSpace = TransformSpace.World;
   public TransformSpace = TransformSpace;
 
-  constructor(private editorService: EditorService) {
+  constructor(
+    private editorService: EditorService,
+    public editorState: EditorStateService
+    ) {
     this.editorService.gizmoMode.subscribe(mode => {
       this.gizmoMode = mode;
     });
@@ -32,6 +36,14 @@ export class TopBar {
     this.editorService.transformSpace.subscribe(space => {
       this.transformSpace = space;
     });
+  }
+
+  showAssets() {
+    this.editorState.setCentralView('assets');
+  }
+
+  isAssetsActive() {
+    return this.editorState.centralView() === 'assets';
   }
 
   onPlay() {
@@ -55,6 +67,10 @@ export class TopBar {
   toggleTransformSpace() {
     const newSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
     this.editorService.setTransformSpace(newSpace);
+  }
+
+  onCodeEditor() {
+    this.editorState.setCentralView('code-editor');
   }
 
 }

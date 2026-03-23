@@ -18,6 +18,7 @@ export class RegisterComponent {
 
   registerForm: FormGroup;
   registerError = signal<string | null>(null);
+  registerSuccess = signal<string | null>(null);
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -30,7 +31,10 @@ export class RegisterComponent {
   register() {
     if (this.registerForm.valid) {
       this.authService.register(this.registerForm.value).subscribe({
-        next: () => this.router.navigate(['/login']),
+        next: () => {
+          this.registerSuccess.set('Registration successful! Redirecting to login...');
+          setTimeout(() => this.router.navigate(['/login']), 2000);
+        },
         error: (err) => {
           this.registerError.set(err.error?.message || 'Registration failed');
         }

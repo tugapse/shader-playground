@@ -10,6 +10,11 @@ export class EditorStateService {
   public selectedAsset = signal<IAsset | null>(null);
   public openedFiles = signal<IAsset[]>([]);
   public isDirty = signal<boolean>(false);
+  public centralView = signal<'canvas' | 'assets' | 'code-editor'>('canvas');
+
+  public setCentralView(view: 'canvas' | 'assets' | 'code-editor'): void {
+    this.centralView.set(view);
+  }
 
   public setActiveProject(project: IProject | null): void {
     this.activeProject.set(project);
@@ -17,8 +22,13 @@ export class EditorStateService {
 
   public setSelectedAsset(asset: IAsset | null): void {
     this.selectedAsset.set(asset);
-    if (asset && asset.type !== 'folder' && !this.openedFiles().find(f => f.id === asset.id)) {
+    if (asset && asset.type !== 'folder') {
+      if (!this.openedFiles().find(f => f.id === asset.id)) {
         this.addOpenedFile(asset);
+      }
+      this.setCentralView('code-editor');
+    } else if (!asset) {
+      this.setCentralView('canvas');
     }
   }
 

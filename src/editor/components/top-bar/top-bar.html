@@ -3,7 +3,7 @@
      <!-- <app-icon class="play-icon" iconName="fa-burger" [iconSize]="18" ></app-icon> -->
     <span class="item" >Scene</span>
     <span class="item">Objects</span>
-    <span class="item">Assets</span>
+    <span class="item" (click)="showAssets()" [class.selected]="isAssetsActive()">Assets</span>
   </div>
   <div class="center-menu">
     <app-icon class="play-icon" iconName="fa-play" (click)="onPlay()" [isButton]="true"
@@ -12,6 +12,9 @@
       [isSelected]="isEditorPaused" title="Pause Scene (Ctrl + P)"></app-icon>
     <app-icon class="play-icon" iconName="fa-stop" (click)="onStop()" [isButton]="true"
       [isSelected]="scene && !scene.isRunning && !isEditorPaused" title="Stop Scene (Ctrl + O)"></app-icon>
+
+    <app-icon class="play-icon" iconName="fa-code" (click)="onCodeEditor()" [isButton]="true"
+      title="Code Editor"></app-icon>
   </div>
   <div class="right-menu">
     <app-icon class="play-icon" iconName="fa-arrows-alt" (click)="setGizmoMode(GizmoMode.Translate)" [isButton]="true"

@@ -25,7 +25,7 @@ export class FileExplorerLogic {
   constructor() {
     effect(() => {
       const project = this.projectId();
-      if (project) {
+      if (project && this.editorState.centralView() === 'assets') {
         this.refreshTree();
       }
     });
