@@ -1,0 +1,44 @@
+.file-explorer-container {
+  @apply flex flex-col h-full bg-[#1e1e1e] text-[#cccccc] font-sans text-sm select-none border-r border-[#333];
+}
+
+.explorer-header {
+  @apply flex items-center justify-between px-4 py-2 border-b border-[#333] bg-[#252526];
+}
+
+.header-title {
+  @apply uppercase font-bold text-[10px] tracking-widest opacity-60;
+}
+
+.tree-viewport {
+  @apply flex-1 overflow-y-auto pt-2 scrollbar-thin scrollbar-thumb-[#333];
+}
+
+.node-item {
+  @apply flex items-center py-1 pr-2 cursor-pointer transition-colors relative hover:bg-[#2a2d2e];
+}
+
+.node-item.active {
+  @apply bg-[#37373d];
+}
+
+.node-item.active::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-[2px] bg-blue-500;
+}
+
+.chevron-box svg {
+  @apply w-3 h-3 transition-transform duration-150 opacity-50;
+}
+
+.chevron-box svg.expanded {
+  @apply rotate-90;
+}
+
+.node-name {
+  @apply truncate flex-1;
+}
+
+.context-trigger {
+  @apply opacity-0 group-hover:opacity-100 p-1 hover:bg-[#444] rounded;
+}

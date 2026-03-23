@@ -19,11 +19,14 @@ import {
 
 import { SunBehaviour } from '../editor/behaviours/light-move';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
-  imports: [Editor]
+  standalone: true,
+  imports: [RouterModule]
 })
 export class App implements OnDestroy {
 

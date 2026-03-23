@@ -1,0 +1,59 @@
+<div class="file-explorer-container">
+  <!-- Cabeçalho de Controlo -->
+  <div class="explorer-header">
+    <span class="header-title">Explorador</span>
+    <div class="header-actions">
+      <button (click)="refreshTree()" title="Atualizar">
+        <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contentor da Árvore -->
+  <div class="tree-viewport">
+    @if (treeData()) {
+      <ng-container *ngTemplateOutlet="treeNode; context: { $implicit: treeData(), level: 0 }"></ng-container>
+    } @else {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>A carregar projeto...</p>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Template Recursivo para os Nós -->
+<ng-template #treeNode let-node let-level="level">
+  <div class="node-item"
+       [style.padding-left.px]="level * 12 + 10"
+       [class.active]="selectedNodeId() === node.id"
+       (click)="handleNodeClick(node)">
+
+    <!-- Seta de Expansão -->
+    <div class="chevron-box">
+      @if (node.type === 'folder' || node.type === 'project') {
+        <svg [class.expanded]="isExpanded(node)" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+      }
+    </div>
+
+    <!-- Ícone do Tipo -->
+    <div class="type-icon">
+       <!-- SVGs dinâmicos baseados em node.type (Project, Folder, Script, Image) -->
+    </div>
+
+    <span class="node-name">{{ node.name }}</span>
+
+    <!-- Ações -->
+    <div class="node-actions">
+      <button (click)="renameAsset(node); $event.stopPropagation()">Rename</button>
+      <button (click)="deleteAsset(node); $event.stopPropagation()">Delete</button>
+    </div>
+  </div>
+
+  <!-- Recursão para Filhos -->
+  @if (isExpanded(node) && node.children) {
+    @for (child of node.children; track child.id) {
+      <ng-container *ngTemplateOutlet="treeNode; context: { $implicit: child, level: level + 1 }"></ng-container>
+    }
+  }
+</ng-template>

@@ -1,0 +1,20 @@
+<div class="login-container">
+  <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+    <h2>Omega Editor</h2>
+    <div class="form-field">
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="user@example.com">
+    </div>
+    <div class="form-field">
+      <label for="password">Password</label>
+      <input id="password" type="password" formControlName="password" placeholder="********">
+    </div>
+    <div *ngIf="loginError()" class="error-message">
+      {{ loginError() }}
+    </div>
+    <button type="submit" [disabled]="loginForm.invalid">Log In</button>
+    <div class="register-link">
+        Don't have an account? <a routerLink="/register">Sign up</a>
+    </div>
+  </form>
+</div>
