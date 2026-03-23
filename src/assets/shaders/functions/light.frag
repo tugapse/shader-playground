@@ -52,16 +52,19 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
     return 1.0;
   }
 
+  float cells = 2.0;
+  float total = cells * 2.0 + 1.0;
+
   float shadow = 0.0;
   vec2 texelSize = 1.0 / u_shadowMapSize;
-  float bias = max(0.005 * (1.0 - dot(finalNormal, lightDir)), 0.0005);
+  float bias = max(0.001 * (1.0 - dot(finalNormal, lightDir)), 0.0005);
 
-  for (int x = -1; x <= 1; ++x) {
-    for (int y = -1; y <= 1; ++y) {
+  for (float x = -cells; x <= cells; ++x) {
+    for (float y = -cells; y <= cells; ++y) {
       shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
     }
   }
-  return max(0.1, shadow / 9.0);
+  return max(0.05, shadow / (total*total));
 }
 
 // This function calculates the final lit color, including shadows

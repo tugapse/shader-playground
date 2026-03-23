@@ -7,17 +7,14 @@ import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/services/editor.service';
 import {
   Camera, CanvasViewport,
-  Color,
   Colors, CubemapMaterial,
   CubePrimitive,
   DirectionalLight,
-  EngineCache, GlEntity, Light, LitMaterial, LitShader, Mesh, MeshData, MeshRendererBehaviour, ObjectInstanciator,
+  EngineCache, GlEntity,
+  LitMaterial, LitShader, Mesh, MeshData, MeshRendererBehaviour, ObjectInstanciator,
   PlanePrimitive, PointLight,
   Scene,
-  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
-  UnlitMaterial,
-  UnlitShader,
-
+  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight
 } from '@engine';
 
 import { SunBehaviour } from '../editor/behaviours/light-move';
@@ -82,9 +79,8 @@ export class App implements OnDestroy {
     await this.createLights(scene);
     await this.otherObjetcs(scene);
     await this.addMonkeyObj(scene);
-    await this.createSkybox(scene);
+    // await this.createSkybox(scene);
     await this.createFloor(scene);
-
   }
 
   private initializeScene(scene: Scene): any {

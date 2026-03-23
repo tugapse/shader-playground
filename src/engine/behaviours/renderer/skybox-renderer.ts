@@ -90,10 +90,14 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
 
       return;
     }
-
+    super.setShaderVariables();
     this.setGlSettings();
     this.setCameraMatrices();
-    this.shader.loadDataIntoShader();
+    // this.shader.loadDataIntoShader();
   }
 
+  override fromJson(jsonObject: JsonSerializedData): void {
+    debugger
+    super.fromJson(jsonObject);
+  }
 }

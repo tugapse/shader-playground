@@ -35,7 +35,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
 
   /** The current transformation mode for the gizmo (translate, rotate, or scale). */
   private gizmoMode: GizmoMode = GizmoMode.Translate;
-  private transformSpace: TransformSpace = TransformSpace.World;
+  private transformSpace: TransformSpace = TransformSpace.Local;
 
   /** The handle currently being dragged by the user (e.g., 'translateX', 'rotateY'). */
   private activeHandle: string | null = null;
@@ -238,7 +238,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     if (Keybord.keyDown["2"]) { this.gizmoMode = GizmoMode.Rotate }
     if (Keybord.keyDown["3"]) { this.gizmoMode = GizmoMode.Scale }
 
-    if (Keybord.keyDown["t"]) {
+    if (Keybord.keyUp["t"]) {
       this.transformSpace = this.transformSpace === TransformSpace.World ? TransformSpace.Local : TransformSpace.World;
       this.editorService.setTransformSpace(this.transformSpace);
     }

@@ -35,7 +35,7 @@ export interface ICameraMouseButtons {
 }
 /**
    CameraFlyBehaviour
-  
+
  * Implements a free-look camera controller, often referred to as "flycam" or "FPS camera."
  * It allows movement with W/A/S/D/Q/E keys and rotation with mouse input.
  * The movement includes smooth acceleration and deceleration, and rotation is smoothly dampened.
@@ -66,7 +66,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 0.8
    */
-  public rotationSpeed = 0.35;
+  public rotationSpeed = 0.25;
 
   /**
    * The dampening factor for rotation. A higher value means rotation snaps faster.
@@ -89,14 +89,14 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 1.0
    */
-  public scrollSpeed = 1.0;
+  public scrollSpeed = 0.3;
 
   /**
    * The multiplier applied to `moveSpeed` when the boost key is held down.
    * @type {number}
    * @default 2.0
    */
-  public boostMultiplier = 2.0;
+  public boostMultiplier = 4.0;
 
   /**
    * The key mappings for movement controls.

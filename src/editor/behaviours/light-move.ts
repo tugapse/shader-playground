@@ -1,4 +1,4 @@
-import { Color, EntityBehaviour, Light, ObjectInstanciator, Vector3 } from "@engine";
+import { Color, EntityBehaviour, Light, ObjectInstanciator, RendererBehaviour, Vector3 } from "@engine";
 import { vec3 } from "gl-matrix";
 
 export class SunBehaviour extends EntityBehaviour {
@@ -8,6 +8,7 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   protected override _className = "SunBehaviour";
+  private renderer!:RendererBehaviour;
 
   public speed = 0.01;
   public timeOfDay = 0.5; // 0 to 1, 0 is sunrise, 0.5 is noon, 1 is sunset
@@ -20,10 +21,21 @@ export class SunBehaviour extends EntityBehaviour {
   public sunsetColor = new Color(255 / 255, 180 / 255, 120 / 255);
   public nightColor = new Color(10 / 255, 20 / 255, 40 / 255);
 
+  override initialize(): boolean {
+    this.update(1);
+    return super.initialize();
+  }
   public override update(elapsed: number): void {
     // 1. Update time of day
     this.timeOfDay += elapsed * this.speed * 0.01;
-    this.timeOfDay = this.timeOfDay % (1.0 + this.cycleOvershoot); // Loop time
+    // this need to be 0 - cicleovershoot and 1+ clicle overshoot
+    if (this.timeOfDay > 1.0 + this.cycleOvershoot) {
+      this.timeOfDay = 0 - this.cycleOvershoot;
+    }
+    if (this.timeOfDay < 0 - this.cycleOvershoot) {
+      this.timeOfDay = 1.0 + this.cycleOvershoot;
+    }
+
 
     // 2. Calculate sun position on a tilted 3D arc
     const sunDistance = 1.0;
@@ -59,15 +71,21 @@ export class SunBehaviour extends EntityBehaviour {
     let toColor: Color;
     let t: number;
 
-    if (this.timeOfDay >= 0 && this.timeOfDay < 0.5) { // Sunrise to Noon
+
+    this.parent.scene?.shadowmapRenderer && (this.parent.scene.shadowmapRenderer.enabled = true);
+    if (this.timeOfDay >= -this.cycleOvershoot && this.timeOfDay < 0.5) { // Sunrise to Noon
       fromColor = this.sunriseColor;
       toColor = this.noonColor;
-      t = this.timeOfDay / 0.5;
+      t = Math.abs(this.timeOfDay) / 0.5;
+      t = Math.min(1, t); // Clamp at 1, so it holds the noon color
     } else if (this.timeOfDay >= 0.5 && this.timeOfDay <= 1.0) { // Noon to Sunset
       fromColor = this.noonColor;
       toColor = this.sunsetColor;
       t = (this.timeOfDay - 0.5) / 0.5;
+      t = Math.min(1, t); // Clamp at 1, so it holds the sunset color
     } else { // Night
+    this.parent.scene?.shadowmapRenderer && (this.parent.scene.shadowmapRenderer.enabled = false)  ;
+
       // Blend from sunset to night, and then hold night color
       fromColor = this.sunsetColor;
       toColor = this.nightColor;

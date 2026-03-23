@@ -9,7 +9,6 @@ uniform float u_horizonStart;
 uniform float u_horizonHeight;
 uniform float u_gradient;
 uniform float u_exposure;
-uniform float u_id;
 
 in vec3 v_viewDirection;
 
@@ -21,7 +20,4 @@ void main() {
   vec4 finalColor = textColor * u_matColor;
   finalColor = finalColor * u_matColor;
   fragColor = clamp(finalColor, 0.0, 1.0);
-  if (u_id > 0.0) {
-    fragColor = vec4(u_id / 255.0, 0.0, 0.0, 1.0);
-  }
 }
