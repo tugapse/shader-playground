@@ -1,9 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthApiService } from '../../../editor/api/auth.service';
-import { CommonModule } from '@angular/common';
 
+/**
+ * Component responsible for handling user authentication via the login form.
+ */
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
@@ -12,12 +15,12 @@ import { CommonModule } from '@angular/common';
   imports: [ReactiveFormsModule, RouterModule, CommonModule]
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthApiService);
-  private router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthApiService);
+  private readonly router = inject(Router);
 
-  loginForm: FormGroup;
-  loginError = signal<string | null>(null);
+  public loginForm: FormGroup;
+  public loginError = signal<string | null>(null);
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -26,10 +29,18 @@ export class LoginComponent {
     });
   }
 
-  login() {
+  /**
+   * Submits the login form.
+   * If valid, attempts to authenticate the user and redirects to the editor upon success.
+   * Displays an error message if the authentication fails.
+   */
+  public login(): void {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        next: () => this.router.navigate(['/editor']),
+        next: () => {
+          this.loginError.set(null);
+          this.router.navigate(['/editor']);
+        },
         error: (err) => {
             this.loginError.set(err.error?.message || 'Login failed');
         }

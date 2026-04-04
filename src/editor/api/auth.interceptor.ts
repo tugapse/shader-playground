@@ -8,32 +8,33 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthApiService } from './auth.service';
 import { Router } from '@angular/router';
+import { AuthApiService } from './auth.service';
 
+/**
+ * Intercepts HTTP requests to automatically include credentials (HttpOnly cookies)
+ * and handles global unauthorized (401) errors by redirecting to the login page.
+ */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
   constructor(private authApi: AuthApiService, private router: Router) {}
 
+  /**
+   * Intercepts outgoing HTTP requests.
+   * @param request The outgoing HTTP request.
+   * @param next The next interceptor in the chain, or the backend if no interceptors remain.
+   * @returns An observable of the HTTP event stream.
+   */
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = this.authApi.getToken();
+    const clonedRequest = request.clone({
+      withCredentials: true
+    });
 
-    // 1. Clone the request and add the Bearer token if it exists
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-
-    // 2. Pass the request to the next handler and handle global errors
-    return next.handle(request).pipe(
+    return next.handle(clonedRequest).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // Token is invalid or expired
-          this.authApi.logout();
+          this.authApi.clearLocalSession();
           this.router.navigate(['/login']);
         }
 
