@@ -8,3 +8,9 @@ export const EditorSettings = {
   },
 
 };
+
+export const APISettings = {
+  apiHost:"http://localhost:5000/api/",
+  apiVersion:"v1"
+
+};

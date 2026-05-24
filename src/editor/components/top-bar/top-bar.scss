@@ -1,60 +1,83 @@
 :host {
-
-  .top-bar {
+  .top-bar-container {
+    display: flex;
+    flex-direction: column;
     width: 100vw;
-    height: 32px;
     background: #0d1117;
     color: #e6edf3;
+  }
+
+  .user-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 4px 24px;
+    gap: 16px;
+    height: 32px;
+    background-color: #161b22;
+    border-bottom: 1px solid #30363d;
+
+    .username {
+      font-weight: 600;
+    }
+
+    app-icon {
+      cursor: pointer;
+    }
+  }
+
+  .top-bar {
+    height: 32px;
     display: flex;
     align-content: center;
     justify-content: space-between;
     align-items: center;
 
-  }
+    .center-menu .play-icon.play {
+      color: green;
+    }
 
-  .top-bar .center-menu .play-icon.play {
-    color: green;
-  }
+    .left-menu {
+      padding-left: 24px;
 
-  .top-bar .left-menu {
-    padding-left: 24px;
-    .item {
-      transition: all 0.3s;
-      padding: 4px 8px;
-      margin-left: 8px;
-      font-weight: 600;
-      cursor: pointer;
+      .item {
+        transition: all 0.3s;
+        padding: 4px 8px;
+        margin-left: 8px;
+        font-weight: 600;
+        cursor: pointer;
 
-      &:hover{
-        color: #5baed4;
-        background-color: #263142;
+        &.selected,
+        &:hover {
+          color: #5baed4;
+          background-color: #263142;
+        }
       }
     }
 
-  }
+    .center-menu {
+      flex-grow: 1;
+      text-align: center;
+    }
 
-  .top-bar .center-menu {
-    flex-grow: 1;
-    text-align: center;
-  }
+    .right-menu {
+      padding-right: 24px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
 
-  .top-bar .right-menu {
-    padding-right: 24px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
+      .item {
+        transition: all 0.3s;
+        padding: 4px 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #30363d;
+        border-radius: 6px;
 
-    .item {
-      transition: all 0.3s;
-      padding: 4px 8px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-
-      &:hover{
-        color: #5baed4;
-        background-color: #263142;
+        &:hover {
+          color: #5baed4;
+          background-color: #263142;
+        }
       }
     }
   }

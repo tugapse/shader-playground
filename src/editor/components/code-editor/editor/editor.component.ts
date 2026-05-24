@@ -1,7 +1,8 @@
 import { Component, signal, effect, inject, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { AssetApiService } from '../../../api/assets.service';
+import { AssetService } from '../../../../app/api/services/asset.service';
 import { EditorStateService } from '../../../services/editor-state.service';
 import { IAsset } from '../../../interfaces/asset.interface';
+import { from, switchMap } from 'rxjs';
 
 @Component({
   selector: 'editor-code-editor',
@@ -12,7 +13,7 @@ import { IAsset } from '../../../interfaces/asset.interface';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeEditorLogic {
-  private assetApi = inject(AssetApiService);
+  private assetApi = inject(AssetService);
   private editorState = inject(EditorStateService);
 
   activeAsset = this.editorState.selectedAsset;
@@ -28,7 +29,7 @@ export class CodeEditorLogic {
     effect(() => {
       const asset = this.activeAsset();
       if (asset && asset.type !== 'folder') {
-        this.loadScript(asset.id);
+        this.loadScript(asset);
       } else {
         this.content.set('');
         this.updateEditorValue('');
@@ -36,12 +37,14 @@ export class CodeEditorLogic {
     });
   }
 
-  async loadScript(id: string) {
+  async loadScript(asset: IAsset) {
     this.isLoading.set(true);
-    this.assetApi.getScriptContent(id).subscribe({
-      next: (res) => {
-        this.content.set(res.content);
-        this.updateEditorValue(res.content);
+    this.assetApi.getRawAssetContent(asset.projectId, asset.id).pipe(
+      switchMap(blob => from(blob.text()))
+    ).subscribe({
+      next: (textContent) => {
+        this.content.set(textContent);
+        this.updateEditorValue(textContent);
         this.editorState.setDirty(false);
         this.isLoading.set(false);
       },
@@ -53,7 +56,7 @@ export class CodeEditorLogic {
     const asset = this.activeAsset();
     if (!asset || !this.editorState.isDirty()) return;
 
-    this.assetApi.updateScriptContent(asset.id, this.content()).subscribe(() => {
+    this.assetApi.updateRawAssetContent(asset.projectId, asset.id, this.content()).subscribe(() => {
       this.editorState.setDirty(false);
       console.log('File saved successfully!');
     });

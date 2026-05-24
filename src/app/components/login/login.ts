@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthApiService } from '../../../editor/api/auth.service';
+import { AuthService } from '../../api/services/auth.service';
 
 /**
  * Component responsible for handling user authentication via the login form.
@@ -16,7 +16,7 @@ import { AuthApiService } from '../../../editor/api/auth.service';
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthApiService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   public loginForm: FormGroup;
@@ -24,7 +24,7 @@ export class LoginComponent {
 
   constructor() {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', Validators.required]
     });
   }
@@ -39,9 +39,9 @@ export class LoginComponent {
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
           this.loginError.set(null);
-          this.router.navigate(['/editor']);
+          this.router.navigate(['/home']);
         },
-        error: (err) => {
+        error: (err: any) => {
             this.loginError.set(err.error?.message || 'Login failed');
         }
       });

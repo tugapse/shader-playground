@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthApiService } from '../../../editor/api/auth.service';
+import { AuthService } from '../../api/services/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private authService = inject(AuthApiService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   registerForm: FormGroup;
@@ -35,7 +35,7 @@ export class RegisterComponent {
           this.registerSuccess.set('Registration successful! Redirecting to login...');
           setTimeout(() => this.router.navigate(['/login']), 2000);
         },
-        error: (err) => {
+        error: (err: any) => {
           this.registerError.set(err.error?.message || 'Registration failed');
         }
       });

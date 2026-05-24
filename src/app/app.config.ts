@@ -3,7 +3,9 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { AuthInterceptor } from '../editor/api/auth.interceptor';
+import { AuthInterceptor } from './api/auth.interceptor';
+import { environment } from '../environment';
+import { API_URL } from './api/api-url.token';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +20,11 @@ export const appConfig: ApplicationConfig = {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
+    },
+    // Provide the API_URL token from the environment
+    {
+      provide: API_URL,
+      useValue: environment.apiUrl+"/api/v1"
     }
   ]
 };

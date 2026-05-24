@@ -1,0 +1,32 @@
+<div class="home-container">
+  <aside class="project-list">
+    <h2>Projects</h2>
+    <ul>
+      <li
+        *ngFor="let project of projects"
+        (click)="selectProject(project)"
+        [class.selected]="project === selectedProject">
+        {{ project.name }}
+      </li>
+    </ul>
+  </aside>
+  <main class="main-content">
+    <!-- Show project details if a project is selected -->
+    <div *ngIf="selectedProject; else noProjectSelected" class="project-details">
+      <h2>{{ selectedProject.name }}</h2>
+      <p class="description">{{ selectedProject.description }}</p>
+
+      <div class="metadata">
+        <span class="last-modified">Last Modified: {{ selectedProject.updated_at | date: 'mediumDate' }}</span>
+      </div>
+    </div>
+
+    <!-- Show a placeholder if no project is selected -->
+    <ng-template #noProjectSelected>
+      <div class="placeholder">
+        <h1>Welcome</h1>
+        <p>Please select a project from the list on the left to view its details.</p>
+      </div>
+    </ng-template>
+  </main>
+</div>

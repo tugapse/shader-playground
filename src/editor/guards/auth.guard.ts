@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { AuthApiService } from '../api/auth.service';
+import { AuthService } from '../../app/api/services/auth.service';
 
 /**
  * Route guard that checks if a user is authenticated.
@@ -11,7 +11,7 @@ import { AuthApiService } from '../api/auth.service';
  * @returns True if authenticated, or a UrlTree redirecting to the login page.
  */
 export const authGuard: CanActivateFn = (route, state): boolean | UrlTree => {
-  const authService = inject(AuthApiService);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
   if (authService.isLoggedIn()) {

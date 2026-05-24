@@ -9,16 +9,16 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { AuthApiService } from './auth.service';
+import { AuthService } from './services/auth.service';
 
 /**
- * Intercepts HTTP requests to automatically include credentials (HttpOnly cookies)
+ * Intercepts HTTP requests to automatically include the authentication token
  * and handles global unauthorized (401) errors by redirecting to the login page.
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private authApi: AuthApiService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   /**
    * Intercepts outgoing HTTP requests.
@@ -27,14 +27,21 @@ export class AuthInterceptor implements HttpInterceptor {
    * @returns An observable of the HTTP event stream.
    */
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const clonedRequest = request.clone({
-      withCredentials: true
-    });
+    let clonedRequest = request;
+    const token = this.authService.getToken();
+
+    if (token) {
+      clonedRequest = request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    }
 
     return next.handle(clonedRequest).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          this.authApi.clearLocalSession();
+          this.authService.clearLocalSession();
           this.router.navigate(['/login']);
         }
 
