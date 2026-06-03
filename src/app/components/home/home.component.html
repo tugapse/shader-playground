@@ -1,17 +1,23 @@
 <div class="home-container">
   <aside class="project-list">
-    <h2>Projects</h2>
-    <ul>
+    <div class="sidebar-header">
+      <h2>Projects</h2>
+      <button class="btn-icon" title="New Project">+</button>
+    </div>
+    
+    <ul class="list-wrapper">
       <li
         *ngFor="let project of projects"
         (click)="selectProject(project)"
-        [class.selected]="project === selectedProject">
-        {{ project.name }}
+        [class.selected]="project === selectedProject"
+        class="project-item">
+        <span class="project-icon">📦</span>
+        <span class="project-name">{{ project.name }}</span>
       </li>
     </ul>
   </aside>
+
   <main class="main-content">
-    <!-- Show project details if a project is selected -->
     <div *ngIf="selectedProject; else noProjectSelected" class="project-details">
       <h2>{{ selectedProject.name }}</h2>
       <p class="description">{{ selectedProject.description }}</p>
@@ -21,11 +27,35 @@
       </div>
     </div>
 
-    <!-- Show a placeholder if no project is selected -->
     <ng-template #noProjectSelected>
-      <div class="placeholder">
-        <h1>Welcome</h1>
-        <p>Please select a project from the list on the left to view its details.</p>
+      <div class="dashboard-welcome">
+        <div class="top-content">
+          <div class="hero-section">
+            <h1>Welcome to the Engine</h1>
+            <p>Select a project from the sidebar to start building, or choose an action below.</p>
+          </div>
+
+          <div class="quick-actions-grid">
+            <div class="action-card">
+              <div class="card-icon">✨</div>
+              <h3>Create New Project</h3>
+              <p>Start a fresh game template with initialized physics and core loops.</p>
+            </div>
+
+            <div class="action-card">
+              <div class="card-icon">📥</div>
+              <h3>Import Project</h3>
+              <p>Load an existing project directory or compile from a source bundle.</p>
+            </div>
+
+            <div class="action-card">
+              <div class="card-icon">📚</div>
+              <h3>Documentation</h3>
+              <p>Explore API references, custom script logic, and engine components.</p>
+            </div>
+          </div>
+        </div>
+        <app-background-visualization></app-background-visualization>
       </div>
     </ng-template>
   </main>

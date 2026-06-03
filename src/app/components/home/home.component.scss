@@ -1,43 +1,307 @@
+/* ==========================================================================
+   1. ROOT LAYOUT & CONTAINERS
+   ========================================================================== */
 .home-container {
   display: flex;
-  height: calc(100vh - 55px);
+  width: 100vw;
+  height: 100vh;
+  background-color: #1a1f26 !important;
   color: var(--editor-panel-color);
-  background-color: var(--editor-panel-background);
-}
-
-.project-list {
-  width: 250px;
-  border-right: var(--editor-panel-border);
-  padding: 20px;
-  background-color: var(--editor-panel-background);
-
-  h2 {
-    margin-top: 0;
-    color: var(--editor-panel-H-color);
-  }
-
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-
-  li {
-    padding: 8px 0;
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
-
-    &:hover {
-      color: var(--editor-icon-button-hover-color);
-    }
-
-    &.selected {
-      color: var(--editor-icon-button-hover-color);
-      font-weight: 600;
-    }
-  }
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .main-content {
-  flex-grow: 1;
-  padding: 20px;
+  flex: 1;
+  padding: 48px 48px 0 48px;
+  background-color: #141920;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.dashboard-welcome {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   2. SIDEBAR & HIERARCHY TREE (Matches "Scene Tree")
+   ========================================================================== */
+.project-list {
+  width: 280px;
+  min-width: 280px;
+  background-color: var(--editor-panel-background);
+  border-right: var(--editor-panel-border);
+  box-shadow: var(--editor-panel-box-shadow);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 14px;
+  border-bottom: var(--editor-panel-border);
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-header h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  color: var(--editor-panel-header-title-color);
+  margin: 0;
+  font-weight: 600;
+}
+
+.btn-icon {
+  background-color: var(--editor-icon-button-background);
+  color: var(--editor-panel-color);
+  border: var(--editor-panel-text-input-border);
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  background-color: var(--editor-icon-button-hover-background);
+  color: var(--editor-icon-button-hover-color);
+}
+
+.list-wrapper {
+  list-style: none;
+  padding: var(--editor-panel-outer-padding);
+  margin: 0;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+  color: var(--editor-panel-color);
+}
+
+.project-item:hover {
+  background-color: var(--editor-icon-button-hover-background);
+  color: #ffffff;
+}
+
+.project-item.selected {
+  background-color: var(--editor-icon-button-selected-background);
+  color: var(--editor-panel-text-input-color);
+  font-weight: 500;
+}
+
+.project-icon {
+  font-size: 1.1rem;
+}
+
+.project-name {
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   3. HERO HEADER & QUICK ACTION CARDS
+   ========================================================================== */
+.hero-section {
+  margin-bottom: 36px;
+  border-left: 3px solid var(--editor-icon-button-selected-background);
+  padding-left: 20px;
+}
+
+.hero-section h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--editor-panel-H-color);
+  margin: 0 0 8px 0;
+}
+
+.hero-section p {
+  color: var(--editor-panel-color);
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.action-card {
+  background-color: var(--editor-panel-background);
+  border: var(--editor-panel-border);
+  border-radius: 6px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.action-card:hover {
+  border-color: var(--editor-icon-button-hover-color);
+  background-color: var(--editor-panel-text-input-background);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.action-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--editor-panel-H-color);
+}
+
+.action-card p {
+  font-size: 0.88rem;
+  color: var(--editor-panel-color);
+  opacity: 0.75;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4. FIXED VISUALIZATION CANVAS (No-Stretch Aspect Ratio)
+   ========================================================================== */
+.visualization-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+/* Multi-directional vignette fade to make the grid drop cleanly into the viewport darkness */
+.svg-fade-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Fades top, left, and right bounds simultaneously */
+  background: 
+    linear-gradient(to bottom, #141920 5%, transparent 40%),
+    linear-gradient(to right, #141920 0%, transparent 15%, transparent 85%, #141920 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.engine-matrix-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 380px;
+  object-fit: cover; /* Ensures scaling without changing standard axis geometry */
+}
+
+.engine-status-text {
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: var(--editor-icon-button-color);
+  letter-spacing: 0.3rem;
+  position: absolute;
+  bottom: 20px;
+  z-index: 3;
+  animation: textGlitch 6s linear infinite;
+  background-color: #141920;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* --- Fixed Circle Animation Origin-Points --- */
+.pulse-dot {
+  animation: corePulse 3s ease-in-out infinite;
+}
+
+.pulse-ring {
+  transform-origin: 600px 150px; /* Aligned cleanly with updated view coordinates */
+  animation: radarScan 3s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+/* ==========================================================================
+   5. KEYFRAME LOOPS
+   ========================================================================== */
+@keyframes corePulse {
+  0%, 100% { fill: #2c70cf; opacity: 0.7; r: 4; }
+  50% { fill: #d5e8f5; opacity: 1; r: 6; }
+}
+
+@keyframes radarScan {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  80%, 100% { transform: scale(2.0); opacity: 0; }
+}
+
+@keyframes textGlitch {
+  0%, 93%, 98%, 100% { opacity: 0.6; }
+  95% { opacity: 0.1; }
+  97% { opacity: 0.9; }
+}
+
+/* ==========================================================================
+   6. SELECTED PROJECT VIEW DETAILS
+   ========================================================================== */
+.project-details {
+  max-width: 800px;
+}
+
+.project-details h2 {
+  font-size: 1.8rem;
+  color: var(--editor-panel-H-color);
+  margin: 0 0 16px 0;
+}
+
+.project-details .description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--editor-panel-color);
+  margin: 0 0 24px 0;
+  opacity: 0.9;
+}
+
+.metadata {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--editor-icon-button-color);
+  border-top: 1px solid var(--editor-panel-border);
+  padding-top: 16px;
 }

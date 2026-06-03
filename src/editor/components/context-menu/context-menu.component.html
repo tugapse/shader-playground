@@ -1,0 +1,21 @@
+@if (state().isVisible) {
+  <div
+    class="context-menu-container"
+    [style.left.px]="state().x"
+    [style.top.px]="state().y"
+  >
+    <ul class="context-menu-list">
+      @for (action of state().actions; track action.id) {
+        <li
+          class="context-menu-item"
+          (click)="onActionClick($event, action)"
+        >
+          @if (action.icon) {
+            <span class="menu-item-icon material-icons">{{ action.icon }}</span>
+          }
+          <span class="menu-item-label">{{ action.label }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+}

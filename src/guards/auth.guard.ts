@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
-import { AuthService } from '../../app/api/services/auth.service';
+import { AuthService } from '../app/api/services/auth.service';
 
 /**
  * Route guard that checks if a user is authenticated.

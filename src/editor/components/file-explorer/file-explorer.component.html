@@ -1,0 +1,18 @@
+<div class="file-explorer-container">
+  <div
+    *ngFor="let node of directoryListing$ | async"
+    class="file-item"
+    [class.active]="activeFile === node"
+    (click)="onNodeClick(node)"
+    (dblclick)="onNodeDoubleClick(node)"
+    (contextmenu)="onContextMenu($event, node)"
+  >
+    <span class="file-icon">{{ node.type === 'directory' ? '&#128193;' : '&#128196;' }}</span>
+    <span class="file-name">{{ node.name }}</span>
+  </div>
+</div>
+
+<app-context-menu
+  [(state)]="contextMenuState"
+  (actionExecuted)="handleContextMenuAction($event)"
+></app-context-menu>

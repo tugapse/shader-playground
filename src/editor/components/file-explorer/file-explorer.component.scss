@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background-color: var(--editor-panel-background);
+  color: var(--editor-panel-color);
+  border-right: var(--editor-panel-border);
+  box-shadow: var(--editor-panel-box-shadow);
+  overflow-y: auto;
+}
+
+.file-explorer-container {
+  padding: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  transition: background-color 0.15s ease-in-out;
+
+  .file-icon {
+    margin-right: 8px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+  }
+
+  .file-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-background);
+  }
+
+  &.active {
+    background-color: var(--editor-icon-button-selected-background);
+    color: white;
+  }
+}

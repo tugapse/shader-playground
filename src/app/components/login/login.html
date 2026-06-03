@@ -1,20 +1,23 @@
-<div class="login-container">
-  <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
-    <h2>Omega Editor</h2>
-    <div class="form-field">
-      <label for="username">Username</label>
-      <input id="username" type="text" formControlName="username" placeholder="Your username">
-    </div>
-    <div class="form-field">
-      <label for="password">Password</label>
-      <input id="password" type="password" formControlName="password" placeholder="********">
-    </div>
-    <div *ngIf="loginError()" class="error-message">
-      {{ loginError() }}
-    </div>
-    <button type="submit" [disabled]="loginForm.invalid">Log In</button>
-    <div class="register-link">
-        Don't have an account? <a routerLink="/register">Sign up</a>
-    </div>
-  </form>
+<div class="login-page-container">
+  <div class="login-content">
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+      <h2>Omega Editor</h2>
+      <div class="form-field">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" placeholder="Your username">
+      </div>
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="********">
+      </div>
+      <div *ngIf="loginError()" class="error-message">
+        {{ loginError() }}
+      </div>
+      <button type="submit" [disabled]="loginForm.invalid">Log In</button>
+      <div class="register-link">
+          Don't have an account? <a routerLink="/register">Sign up</a>
+      </div>
+    </form>
+  </div>
+  <app-background-visualization></app-background-visualization>
 </div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../api/services/auth.service';
+import { BackgroundVisualizationComponent } from "../background-visualization/background-visualization.component";
 
 /**
  * Component responsible for handling user authentication via the login form.
@@ -12,7 +13,7 @@ import { AuthService } from '../../api/services/auth.service';
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, RouterModule, CommonModule]
+  imports: [ReactiveFormsModule, RouterModule, CommonModule, BackgroundVisualizationComponent]
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);

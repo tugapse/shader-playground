@@ -1,65 +1,46 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators,
-} from '@angular/forms';
-import { ProjectService } from '../../api/services/project.service';
-import { ProjectResponse } from '../../api/models/omega-api.models';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common'; // Import CommonModule for ngIf / ngFor
+import { BackgroundVisualizationComponent } from '../background-visualization/background-visualization.component';
+
+interface Project {
+  name: string;
+  description: string;
+  updated_at: Date;
+}
 
 @Component({
   selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true, // Mark it explicitly if it's standalone
+  imports: [CommonModule, BackgroundVisualizationComponent], // Injects structural directives into the template template scope
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  styleUrls: ['./home.component.scss'] // Adjust extension to .scss if necessary
 })
 export class HomeComponent implements OnInit {
-  private readonly projectService = inject(ProjectService);
-
-  projects: ProjectResponse[] = [];
-  selectedProject: ProjectResponse | null = null;
-  isCreatingProject = false;
-
-  projectForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
-    description: new FormControl(''),
-  });
-
-  ngOnInit(): void {
-    this.loadProjects();
-  }
-
-  loadProjects(): void {
-    this.projectService.listProjects().subscribe((projects) => {
-      this.projects = projects;
-    });
-  }
-
-  selectProject(project: ProjectResponse): void {
-    this.selectedProject = project;
-    this.isCreatingProject = false;
-  }
-
-  showCreateProjectForm(): void {
-    this.selectedProject = null;
-    this.isCreatingProject = true;
-    this.projectForm.reset();
-  }
-
-  cancelCreateProject(): void {
-    this.isCreatingProject = false;
-  }
-
-  saveProject(): void {
-    if (this.projectForm.valid) {
-      // TODO: Implement the actual save logic with the service
-      console.log('Saving project:', this.projectForm.value);
-      this.isCreatingProject = false;
-      // For now, just log and reload projects
-      this.loadProjects();
+  selectedProject: Project | null = null;
+  
+  projects: Project[] = [
+    { 
+      name: 'Project_Sentinel_Rpg', 
+      description: 'An open-world isometric tactical game using a custom behavioral tree logic engine.', 
+      updated_at: new Date('2026-05-24') 
+    },
+    { 
+      name: 'Cyber_Sandbox_3D', 
+      description: 'A physically-based rendering sandbox featuring custom rigid body dynamics and lit shaders.', 
+      updated_at: new Date('2026-05-19') 
+    },
+    { 
+      name: 'Retro_Platformer_Demo', 
+      description: 'A pixel-perfect retro framework showcasing fast tilemap rendering and localized collision matrices.', 
+      updated_at: new Date('2026-04-12') 
     }
+  ];
+
+  constructor() {}
+
+  ngOnInit(): void {}
+
+  selectProject(project: Project): void {
+    this.selectedProject = project;
   }
 }
