@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  color: #f0f0f0;
+}
+
+.user-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.username {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.play-icon {
+  cursor: pointer;
+  &:hover {
+    color: #ffffff;
+  }
+}

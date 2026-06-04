@@ -1,0 +1,37 @@
+@if (editableProject) {
+  <div class="project-details">
+    <div class="project-header">
+      <h2>{{ editableProject.name }}</h2>
+      <button [routerLink]="['/editor', editableProject.id]" class="btn btn-secondary">Go to Editor</button>
+    </div>
+
+    <div class="details-content-grid">
+      <!-- Left Column: Metadata -->
+      <div class="metadata-panel">
+        <div class="metadata">
+          <div class="meta-item"><strong>ID:</strong> <span>{{ editableProject.id }}</span></div>
+          <div class="meta-item"><strong>Slug:</strong> <span>{{ editableProject.slug }}</span></div>
+          <div class="meta-item"><strong>Status:</strong> <span class="status-badge status-{{ editableProject.status }}">{{ editableProject.status }}</span></div>
+          <div class="meta-item"><strong>Last Modified:</strong> <span>{{ editableProject.updated_at | date: 'medium' }}</span></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Editable Fields -->
+      <div class="editing-panel">
+        <div class="form-group">
+          <label for="projectName">Project Name</label>
+          <input type="text" id="projectName" [(ngModel)]="editableProject.name" name="projectName" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="projectDescription">Description</label>
+          <textarea id="projectDescription" [(ngModel)]="editableProject.description" name="projectDescription" class="form-input" rows="4"></textarea>
+        </div>
+
+        <div class="actions">
+          <button (click)="onSave()" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

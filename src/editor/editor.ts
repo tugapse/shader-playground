@@ -6,7 +6,6 @@ import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
 import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
 import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { Canvas } from './components/canvas/canvas';
-import { Sidebar } from './components/sidebar/sidebar';
 import { TopBar } from './components/top-bar/top-bar';
 import { Inpector } from './inspectors/inpector/inpector';
 import { IEditorSettings } from './interfaces/editor-settings';
@@ -16,10 +15,11 @@ import { CodeEditorLogic } from './components/code-editor/editor/editor.componen
 import { FileExplorerLogic } from './components/asset-explorer/assets-explorer.component';
 import { EditorStateService } from './services/editor-state.service';
 import { SceneTreeService } from './services/scene-tree.service';
+import { SceneTree } from './components/scene-tree/scene-tree';
 
 @Component({
   selector: 'app-editor',
-  imports: [Canvas, Sidebar, CommonModule, Inpector, TopBar, FileExplorerLogic, CodeEditorLogic],
+  imports: [Canvas, CommonModule, Inpector, TopBar, FileExplorerLogic, CodeEditorLogic, SceneTree],
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })

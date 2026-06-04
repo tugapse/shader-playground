@@ -1,23 +1,24 @@
 <editor-top-bar [scene]="scene" [isEditorPaused]="isPaused"></editor-top-bar>
 
 <div class="container">
-  <editor-sidebar [scene]="scene"></editor-sidebar>
+  <aside class="sidebar">
+    <app-scene-tree [targetScene]="scene"></app-scene-tree>
+  </aside>
 
   @switch (editorState.centralView()) {
-    @case ('canvas') {
-      <div class="canvas-info">
-        <span>{{fpsCounter}}</span>
-      </div>
-      <editor-canvas tabindex="0" class="canvas" [scene]="scene"
-        (fps)="onFpsUpdated($event)"
-        (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>
-    }
-    @case ('assets') {
-      <app-assets-exporer></app-assets-exporer>
-    }
-    @case ('code-editor') {
-      <editor-code-editor></editor-code-editor>
-    }
+  @case ('canvas') {
+  <div class="canvas-info">
+    <span>{{fpsCounter}}</span>
+  </div>
+  <editor-canvas tabindex="0" class="canvas" [scene]="scene" (fps)="onFpsUpdated($event)"
+    (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>
+  }
+  @case ('assets') {
+  <app-assets-exporer></app-assets-exporer>
+  }
+  @case ('code-editor') {
+  <editor-code-editor></editor-code-editor>
+  }
   }
 </div>
 

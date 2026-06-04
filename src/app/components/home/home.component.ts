@@ -1,46 +1,107 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Import CommonModule for ngIf / ngFor
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { BackgroundVisualizationComponent } from '../background-visualization/background-visualization.component';
-
-interface Project {
-  name: string;
-  description: string;
-  updated_at: Date;
-}
+import { UserBarComponent } from '../user-bar/user-bar.component';
+import { ProjectDetails } from '../project-details/project-details';
+import { ProjectService } from '../../api/services/project.service';
+import { ProjectResponse, CreateProjectRequest, UpdateProjectRequest } from '../../api/models/omega-api.models';
 
 @Component({
   selector: 'app-home',
-  standalone: true, // Mark it explicitly if it's standalone
-  imports: [CommonModule, BackgroundVisualizationComponent], // Injects structural directives into the template template scope
+  standalone: true,
+  imports: [CommonModule, FormsModule, BackgroundVisualizationComponent, UserBarComponent, ProjectDetails],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'] // Adjust extension to .scss if necessary
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  selectedProject: Project | null = null;
+  private readonly projectService = inject(ProjectService);
+
+  selectedProject: ProjectResponse | null = null;
+  projects: ProjectResponse[] = [];
   
-  projects: Project[] = [
-    { 
-      name: 'Project_Sentinel_Rpg', 
-      description: 'An open-world isometric tactical game using a custom behavioral tree logic engine.', 
-      updated_at: new Date('2026-05-24') 
-    },
-    { 
-      name: 'Cyber_Sandbox_3D', 
-      description: 'A physically-based rendering sandbox featuring custom rigid body dynamics and lit shaders.', 
-      updated_at: new Date('2026-05-19') 
-    },
-    { 
-      name: 'Retro_Platformer_Demo', 
-      description: 'A pixel-perfect retro framework showcasing fast tilemap rendering and localized collision matrices.', 
-      updated_at: new Date('2026-04-12') 
-    }
-  ];
+  isModalOpen = false;
+  newProjectName = '';
 
-  constructor() {}
+  ngOnInit(): void {
+    this.loadProjects();
+  }
 
-  ngOnInit(): void {}
+  
 
-  selectProject(project: Project): void {
+  private loadProjects(): void {
+    this.projectService.listProjects().subscribe({
+      next: (projects) => {
+        this.projects = projects;
+      },
+      error: (err) => console.error('Failed to load projects', err)
+    });
+  }
+
+  selectProject(project: ProjectResponse): void {
     this.selectedProject = project;
+  }
+
+  openNewProjectModal(): void {
+    this.isModalOpen = true;
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.newProjectName = '';
+  }
+
+  createProject(): void {
+    if (!this.newProjectName.trim()) {
+      return; // Or show a validation message
+    }
+
+    const payload: CreateProjectRequest = {
+      name: this.newProjectName.trim(),
+    };
+
+    this.projectService.createProject(payload).subscribe({
+      next: () => {
+        this.closeModal();
+        this.loadProjects(); // Refresh the list
+      },
+      error: (err) => {
+        console.error('Failed to create project', err);
+        // Optionally, show an error message in the UI
+      }
+    });
+  }
+
+  handleProjectUpdate(updatedProjectData: ProjectResponse): void {
+    if (!updatedProjectData || !updatedProjectData.id) {
+      console.error('Invalid project data received for update.');
+      return;
+    }
+
+    const payload: UpdateProjectRequest = {
+      name: updatedProjectData.name,
+      description: updatedProjectData.description ?? undefined
+    };
+
+    this.projectService.updateProject(updatedProjectData.id, payload).subscribe({
+      next: (savedProject) => {
+        // Update the project in the main list
+        const index = this.projects.findIndex(p => p.id === savedProject.id);
+        if (index !== -1) {
+          this.projects[index] = savedProject;
+        }
+        
+        // If the updated project is the currently selected one, update it
+        if (this.selectedProject && this.selectedProject.id === savedProject.id) {
+          this.selectedProject = { ...this.selectedProject, ...savedProject };
+        }
+        
+        console.log('Project updated successfully', savedProject);
+      },
+      error: (err) => {
+        console.error('Failed to update project', err);
+        // Optionally, revert optimistic updates or show an error toast
+      }
+    });
   }
 }

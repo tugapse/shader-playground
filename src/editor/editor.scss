@@ -28,3 +28,12 @@
 }
 
 // Left Sidebar styling
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background-color: var(--editor-panel-background);
+  border-right: var(--editor-panel-border);
+  box-shadow: var(--editor-panel-box-shadow);
+  flex-direction: column;
+  height: 100%;
+}
