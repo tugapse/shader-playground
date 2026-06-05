@@ -36,6 +36,7 @@ export class App implements OnDestroy {
   torus!: GlEntity;
   needToResetCamera: boolean = false;
   shadowMapTexture: any;
+  sun!: DirectionalLight;
 
   constructor(private editorService: EditorService) {
     this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
@@ -82,7 +83,7 @@ export class App implements OnDestroy {
     await this.createLights(scene);
     await this.otherObjetcs(scene);
     await this.addMonkeyObj(scene);
-    // await this.createSkybox(scene);
+    await this.createSkybox(scene);
     await this.createFloor(scene);
   }
 
@@ -149,7 +150,8 @@ export class App implements OnDestroy {
     const dlight = new DirectionalLight("Directional light");
     dlight.color = Colors.white;
     dlight.addBehaviour(new SunBehaviour())
-
+    dlight.updateInEditor = true;
+    this.sun = dlight;
 
     const plight = new PointLight("Point light");
     plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
@@ -161,8 +163,8 @@ export class App implements OnDestroy {
     spotLight.color = Colors.azure;
 
     // scene.addEntity(new Light("Ambient light"));
-    scene.addEntity(plight);
-    scene.addEntity(spotLight);
+    // scene.addEntity(plight);
+    // scene.addEntity(spotLight);
     scene.addEntity(dlight);
 
 
@@ -238,8 +240,10 @@ export class App implements OnDestroy {
     renderer.writeToDephBuffer = false;
     renderer.shader = shader;
     renderer.mesh.meshData = cubePrimitive;
+    renderer.sunLight = this.sun;
 
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
+    
 
     const skyboxTextures = {
       right: "assets/images/skybox/blue/right.jpeg",

@@ -1,5 +1,5 @@
 export interface IProject {
   id: string;
-  name: string;
+  scene: string;
   config: any;
 }

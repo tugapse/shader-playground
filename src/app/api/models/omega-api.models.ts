@@ -112,10 +112,11 @@ export interface AssetResponse {
   id: string; // UUID
   filename: string;
   virtual_path: string;
-  asset_type: "code" | "image" | "audio" | "text" | "raw";
+  asset_type: "code" | "image" | "audio" | "text" | "raw" | "scene";
   mime_type: string;
   size_bytes: number;
   sha256: string;
+  preview_url?: string;
   created_at: string; // ISO-8601
   updated_at: string; // ISO-8601
 }

@@ -1,8 +1,11 @@
+import { vec3, vec4 } from "gl-matrix";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
 import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
 import { CubemapMaterial } from "../materials/cubemap-material";
 import { CubemapTexture } from "../textures/cubemap-texture";
 import { Shader } from "./shader";
+import { Vector3, Vector4 } from "@engine/core/vector";
+import { Color } from "@engine/core/color";
 
 /**
   A shader designed specifically for rendering skyboxes using a cubemap texture.
@@ -29,6 +32,19 @@ export class SkyboxShader extends Shader {
    * @type {CubemapMaterial}
    */
   public declare material: CubemapMaterial;
+
+  // Sun properties to be passed as uniforms
+  public _sunDirection: Vector3 = new Vector3(0, 1, 0);
+  public _sunColor: Color = new Color(1, 1, 1, 1);
+  public _sunSize: number = 0.999;
+  public _sunFalloff: number = 0.01;
+  public _useSun: number = 0;
+
+  // Procedural sky properties
+  public skyColor: Color = new Color(0.35, 0.53, 0.7, 1.0);
+  public horizonColor: Color = new Color(0.7, 0.75, 0.8, 1.0); 
+  public groundColor: Color = new Color(0.2, 0.2, 0.2, 1.0);
+  public exponent: number = 0.6;
 
   /**
     Initializes the shader by setting the correct file paths for the vertex and fragment shaders before calling the parent initialize method.
@@ -62,6 +78,18 @@ export class SkyboxShader extends Shader {
 
     }
     super.loadDataIntoShader();
+
+    // Set sun uniforms from the shader's properties
+    this.setVec3(ShaderUniformsEnum.U_SUN_DIRECTION, this._sunDirection.vector);
+    this.setVec4(ShaderUniformsEnum.U_SUN_COLOR, this._sunColor.toVec4());
+    this.setFloat(ShaderUniformsEnum.U_SUN_SIZE, this._sunSize);
+    this.setFloat(ShaderUniformsEnum.U_SUN_FALLOFF, this._sunFalloff);
+    this.setInt(ShaderUniformsEnum.U_USE_SUN, this._useSun);
+
+    this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.skyColor.toVec4());
+    this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.horizonColor.toVec4());
+    this.setVec4(ShaderUniformsEnum.U_GROUND_COLOR, this.groundColor.toVec4());
+    this.setFloat(ShaderUniformsEnum.U_EXPONENT, this.exponent);
   }
 
 

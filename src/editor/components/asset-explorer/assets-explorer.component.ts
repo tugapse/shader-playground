@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { signal, inject, ChangeDetectionStrategy, Component, effect } from '@angular/core';
+import { signal, inject, ChangeDetectionStrategy, Component, effect, HostListener } from '@angular/core';
 import { EditorStateService } from '../../services/editor-state.service';
 import { IAsset } from '../../interfaces/asset.interface';
 import { AssetService } from '../../../app/api/services/asset.service';
@@ -7,14 +7,14 @@ import { map } from 'rxjs';
 import { AssetResponse } from '../../../app/api/models/omega-api.models';
 
 @Component({
-  selector: 'app-assets-exporer',
+  selector: 'app-assets-explorer',
   standalone: true,
   imports: [NgTemplateOutlet],
   templateUrl: './assets-explorer.component.html',
   styleUrl: './assets-explorer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FileExplorerLogic {
+export class AssetsExplorerComponent {
   private assetService = inject(AssetService);
   private editorState = inject(EditorStateService);
 
@@ -23,6 +23,19 @@ export class FileExplorerLogic {
   treeData = signal<IAsset | null>(null);
   selectedNodeId = signal<string | null>(null);
   expandedNodes = signal<Set<string>>(new Set<string>());
+  contextMenu = signal({
+    visible: false,
+    x: 0,
+    y: 0,
+    targetNode: null as IAsset | null
+  });
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.contextMenu().visible) {
+      this.closeContextMenu();
+    }
+  }
 
   constructor() {
     effect(() => {
@@ -37,7 +50,7 @@ export class FileExplorerLogic {
     const project = this.projectId();
     if (!project) return;
     this.assetService.listAssets(project.id).pipe(
-      map(response => this.buildAssetTree(response.assets, { id: project.id, name: project.name }))
+      map(response => this.buildAssetTree(response.assets, { id: project.id, name: 'project.name' }))
     ).subscribe(tree => {
       this.treeData.set(tree);
       // Ensure root is expanded
@@ -60,8 +73,27 @@ export class FileExplorerLogic {
     }
   }
 
-  renameAsset(node: IAsset) {
+  onContextMenu(event: MouseEvent, node: IAsset) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenu.set({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      targetNode: node
+    });
+  }
+
+  closeContextMenu() {
+    this.contextMenu.set({ visible: false, x: 0, y: 0, targetNode: null });
+  }
+
+  renameAsset() {
+    const node = this.contextMenu().targetNode;
+    if (!node) return;
+
     const newName = prompt('Enter new name:', node.name);
+    this.closeContextMenu();
     if (!newName || newName === node.name) return;
 
     const pathParts = node.virtualPath.split('/');
@@ -76,7 +108,10 @@ export class FileExplorerLogic {
     });
   }
 
-  deleteAsset(node: IAsset) {
+  deleteAsset() {
+    const node = this.contextMenu().targetNode;
+    if (!node) return;
+
     if (confirm(`Are you sure you want to delete ${node.name}?`)) {
       const project = this.projectId();
       if (!project) return;
@@ -88,6 +123,7 @@ export class FileExplorerLogic {
         this.refreshTree();
       });
     }
+    this.closeContextMenu();
   }
 
   createScene() {

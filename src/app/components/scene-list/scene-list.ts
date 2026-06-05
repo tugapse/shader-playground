@@ -47,7 +47,7 @@ export class SceneList implements OnChanges {
 
   navigateToEditor(scene: AssetResponse): void {
     if (this.project?.id) {
-      this.router.navigate(['/editor', this.project.id, 'scene', scene.id]);
+      this.router.navigate(['/editor', this.project.id, scene.id]);
     }
   }
 

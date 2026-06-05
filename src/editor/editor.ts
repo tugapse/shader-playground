@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager } from '@engine';
 import { Subscription } from 'rxjs';
 import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
@@ -12,14 +13,14 @@ import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { CodeEditorLogic } from './components/code-editor/editor/editor.component';
-import { FileExplorerLogic } from './components/asset-explorer/assets-explorer.component';
+import { AssetsExplorerComponent } from './components/asset-explorer/assets-explorer.component';
 import { EditorStateService } from './services/editor-state.service';
 import { SceneTreeService } from './services/scene-tree.service';
 import { SceneTree } from './components/scene-tree/scene-tree';
 
 @Component({
   selector: 'app-editor',
-  imports: [Canvas, CommonModule, Inpector, TopBar, FileExplorerLogic, CodeEditorLogic, SceneTree],
+  imports: [Canvas, CommonModule, Inpector, TopBar, AssetsExplorerComponent, CodeEditorLogic, SceneTree],
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })
@@ -45,30 +46,42 @@ export class Editor implements OnDestroy, OnInit {
     protected editorService: EditorService,
     protected sceneTreeService: SceneTreeService,
     protected editorSettings: EditorSettingsService,
-    protected editorState: EditorStateService
+    protected editorState: EditorStateService,
+    protected route: ActivatedRoute,
+    protected router: Router
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
   }
 
   ngOnInit(): void {
-    this.editorState.setActiveProject({ id: '1', name: 'Default Project', config: {} });
+
+    const projectId = this.route.snapshot.paramMap.get('project');
+    const sceneId = this.route.snapshot.paramMap.get('scene');
+
+    if (projectId && sceneId) {
+      this.editorState.setActiveProject({ id: projectId, scene:sceneId, config: {} });
+      // TODO: Fetch project details and download the scene using the project/scene IDs
+    } else {
+      this.router.navigate(['/invalid-project']);
+    }
+
     this.loadFromStorage();
 
-    document.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.key === 'p') {
-        event.preventDefault();
-        if (this.scene.isRunning) {
-          this.onScenePause(this.scene);
-        } else {
-          this.onScenePlay(this.scene);
-        }
-      }
-      if (event.ctrlKey && event.key === 'o') {
-        event.preventDefault();
-        this.onSceneStop(this.scene);
-      }
-    });
+    // document.addEventListener('keydown', (event) => {
+    //   if (event.ctrlKey && event.key === 'p') {
+    //     event.preventDefault();
+    //     if (this.scene.isRunning) {
+    //       this.onScenePause(this.scene);
+    //     } else {
+    //       this.onScenePlay(this.scene);
+    //     }
+    //   }
+    //   if (event.ctrlKey && event.key === 'o') {
+    //     event.preventDefault();
+    //     this.onSceneStop(this.scene);
+    //   }
+    // });
   }
 
   ngOnDestroy(): void {

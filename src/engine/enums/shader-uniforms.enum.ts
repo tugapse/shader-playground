@@ -309,5 +309,54 @@ export enum ShaderUniformsEnum {
    *
    * @type {string}
    */
-  U_FOG_DISTANCE = "u_fogDistance"
+  U_FOG_DISTANCE = "u_fogDistance",
+
+  /**
+   * --- Skybox / Sun ---
+   */
+  /**
+   * The direction vector pointing towards the sun.
+   * @type {string}
+   */
+  U_SUN_DIRECTION = "u_sunDirection",
+  /**
+   * The color of the sun disk in the skybox.
+   * @type {string}
+   */
+  U_SUN_COLOR = "u_sunColor",
+  /**
+   * The size of the solid core of the sun.
+   * @type {string}
+   */
+  U_SUN_SIZE = "u_sunSize",
+  /**
+   * The falloff gradient size around the sun's edge.
+   * @type {string}
+   */
+  U_SUN_FALLOFF = "u_sunFalloff",
+  /**
+   * Flag to determine if sun should be computed.
+   * @type {string}
+   */
+  U_USE_SUN = "u_useSun",
+  /**
+   * The color of the sky at the zenith.
+   * @type {string}
+   */
+  U_SKY_COLOR = "u_skyColor",
+  /**
+   * The color of the sky at the horizon.
+   * @type {string}
+   */
+  U_HORIZON_COLOR = "u_horizonColor",
+  /**
+   * The color of the ground.
+   * @type {string}
+   */
+  U_GROUND_COLOR = "u_groundColor",
+  /**
+   * The exponent controlling the gradient transition.
+   * @type {string}
+   */
+  U_EXPONENT = "u_exponent"
 }

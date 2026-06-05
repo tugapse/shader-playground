@@ -1,7 +1,10 @@
-import { mat4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import { Camera } from "../../entities/camera";
+import { Light } from "../../entities/light";
 import { ShaderUniformsEnum } from "../../enums/shader-uniforms.enum";
 import { JsonSerializedData } from "../../interfaces/json-serialized-data.interface";
+import { SkyboxShader } from "../../shaders";
+import { SunBehaviour } from "../../../editor/behaviours/light-move";
 import { MeshRendererBehaviour } from "./mesh-renderer-behaviour";
 
 /**
@@ -10,6 +13,12 @@ import { MeshRendererBehaviour } from "./mesh-renderer-behaviour";
  * @augments {MeshRendererBehaviour}
  */
 export class SkyboxRenderer extends MeshRendererBehaviour {
+  /**
+   * An optional specific light to use for the sun and atmospheric tinting.
+   * @type {Light}
+   */
+  public sunLight?: Light;
+
   /**
    * Creates a new instance of the SkyboxRenderer.
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
@@ -80,6 +89,16 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this.shader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, mvpMatrix);
   }
 
+  override draw(): void {
+    if (!this.shader?._shaderProgram) {
+      return;
+    }
+    this.setGlSettings();
+    this.setCameraMatrices();
+    this.setShaderVariables();
+    super.draw();
+  }
+
   /**
    * Sets all shader variables required for rendering the skybox.
    * This method sets the GL settings, camera matrices, and loads the shader data.
@@ -87,17 +106,36 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
    */
   override setShaderVariables(): void {
     if (!this.shader?._shaderProgram) {
-
       return;
     }
+
+    // Use the explicitly provided sunlight, or try to find one with SunBehaviour automatically.
+    let lightToUse = this.sunLight;
+    if (!lightToUse) {
+      const sunEntity = this.parent.scene?.lights.find(o => o.getBehaviour(SunBehaviour));
+      if (sunEntity) lightToUse = sunEntity as Light;
+    }
+
+    if (this.shader instanceof SkyboxShader) {
+      if (lightToUse) {
+        // Extract the vector and normalize it for the shader's dot product
+        const normalizedDir = vec3.normalize(vec3.create(), lightToUse.transform.worldPosition );
+
+        this.shader._useSun = 1;
+        this.shader._sunDirection.set( normalizedDir[0], normalizedDir[1], normalizedDir[2] );
+        this.shader._sunColor = lightToUse.color;
+      } else {
+        // Disable sun and atmospheric tinting if no light is present
+        this.shader._useSun = 0;
+      }
+    }
+
     super.setShaderVariables();
     this.setGlSettings();
     this.setCameraMatrices();
-    // this.shader.loadDataIntoShader();
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
-    debugger
     super.fromJson(jsonObject);
   }
 }
