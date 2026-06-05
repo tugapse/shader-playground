@@ -32,6 +32,48 @@ export class CubemapTexture extends Texture {
   }
 
   /**
+   * Creates a 1x1 cubemap texture filled with white pixels for each face.
+   * This is useful as a default or fallback cubemap.
+   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
+   * @returns {CubemapTexture} A new CubemapTexture instance containing the white pixels.
+   */
+  public static createWhiteCubemap(gl: WebGL2RenderingContext): CubemapTexture {
+    const texture = gl.createTexture();
+    if (!texture) {
+      console.error("Failed to create WebGL texture for white cubemap.");
+      return new CubemapTexture(gl);
+    }
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+    const whitePixel = new Uint8Array([255, 255, 255, 255]);
+    const targets = [
+      gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+      gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
+    ];
+
+    for (const target of targets) {
+      gl.texImage2D(target, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, whitePixel);
+    }
+
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+
+    const result = new CubemapTexture(gl);
+    result._glTexture = texture;
+    result.isLoaded = true;
+    result._width = 1;
+    result._height = 1;
+    return result;
+  }
+
+  /**
     Loads all six images from their respective URLs.
    * @override
    * @returns {Promise<void>} - A Promise that resolves when all images are loaded.

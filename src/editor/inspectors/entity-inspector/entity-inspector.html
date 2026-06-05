@@ -1,6 +1,6 @@
 @if (entity) {
 
-<editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
+<editor-inpector-toggle-panel [title]="entity.name" [collapsed]="true">
   <section> <span>Update in Editor</span><app-toggle [active]="entity.updateInEditor"
       (change)="entity.updateInEditor = !entity.updateInEditor"></app-toggle>
   </section>
@@ -35,7 +35,7 @@
 
 @case ("transform") {<editor-transform-inspector [entity]="entity"></editor-transform-inspector> }
 
-@case ("color") {<editor-color-inspector [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
+@case ("color") {<editor-color-inspector  [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
   (colorChange)="onColorChanged(entityProperty,$event)"></editor-color-inspector>}
 
 @case ("object") {<editor-object-inspector [label]="entityProperty.key.capitalize()"

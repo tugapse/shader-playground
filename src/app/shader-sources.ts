@@ -125,6 +125,14 @@ uniform vec4 u_sunColor;
 uniform float u_sunSize;
 uniform float u_sunFalloff;
 
+// Moon uniforms
+uniform int u_useMoon;
+uniform vec3 u_moonDirection;
+uniform vec4 u_moonColor;
+uniform float u_moonSize;
+uniform float u_moonFalloff;
+uniform float u_moonPhase;
+
 in vec3 v_viewDirection;
 out vec4 fragColor;
 void main() {
@@ -150,10 +158,30 @@ void main() {
     // Calculate sun
     vec3 sunDir = normalize(u_sunDirection);
     float sunDot = max(0.0, dot(viewDir, sunDir));
-    float sunFactor = smoothstep(u_sunSize - u_sunFalloff, u_sunSize, sunDot);
+    float sunCore = smoothstep(u_sunSize - u_sunFalloff, u_sunSize, sunDot);
+    float sunGlow = pow(sunDot, 120.0) * 0.5; // Wide atmospheric glow
 
     // Additive blending for the sun
-    finalColor.rgb += u_sunColor.rgb * sunFactor;
+    finalColor.rgb += u_sunColor.rgb * (sunCore + sunGlow);
+
+    // Calculate moon
+    if (u_useMoon == 1) {
+      vec3 moonDir = normalize(u_moonDirection);
+      float moonDot = max(0.0, dot(viewDir, moonDir));
+      float moonCore = smoothstep(u_moonSize - u_moonFalloff, u_moonSize, moonDot);
+      float d2 = 1.0 - moonDot * moonDot;
+      float R2 = 1.0 - u_moonSize * u_moonSize;
+      float z = sqrt(max(0.0, R2 - d2));
+      vec3 N = normalize(viewDir + moonDir * (z - moonDot));
+      float phaseAngle = u_moonPhase * 6.2831853;
+      vec3 moonRight = normalize(cross(vec3(0.0, 1.0, 0.0001), moonDir));
+      vec3 L = normalize(moonDir * cos(phaseAngle) + moonRight * sin(phaseAngle));
+      float moonLighting = smoothstep(-0.5, 0.5, dot(N, L));
+      float earthshine = 0.02;
+      vec3 moonBodyColor = u_moonColor.rgb * mix(earthshine, 1.0, moonLighting);
+      float moonGlow = pow(moonDot, 200.0) * 0.05 * (0.5 + 0.5 * cos(phaseAngle));
+      finalColor.rgb = mix(finalColor.rgb, moonBodyColor, moonCore) + u_moonColor.rgb * moonGlow;
+    }
   }
 
   fragColor = clamp(finalColor, 0.0, 1.0);

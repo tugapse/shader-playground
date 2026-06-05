@@ -8,6 +8,7 @@ import { EditorService } from '@editor/services/editor.service';
 import {
   Camera, CanvasViewport,
   Colors, CubemapMaterial,
+  CubemapTexture,
   CubePrimitive,
   DirectionalLight,
   EngineCache, GlEntity,
@@ -17,7 +18,7 @@ import {
   Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight
 } from '@engine';
 
-import { SunBehaviour } from '../editor/behaviours/light-move';
+import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { RouterModule } from '@angular/router';
 
@@ -240,22 +241,21 @@ export class App implements OnDestroy {
     renderer.writeToDephBuffer = false;
     renderer.shader = shader;
     renderer.mesh.meshData = cubePrimitive;
-    renderer.sunLight = this.sun;
 
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
     
 
-    const skyboxTextures = {
-      right: "assets/images/skybox/blue/right.jpeg",
-      left: "assets/images/skybox/blue/left.jpeg",
-      up: "assets/images/skybox/blue/top.jpeg",
-      bottom: "assets/images/skybox/blue/bottom.jpeg",
-      front: "assets/images/skybox/blue/front.jpeg",
-      back: "assets/images/skybox/blue/back.jpeg"
+    // const skyboxTextures = {
+    //   right: "assets/images/skybox/blue/right.jpeg",
+    //   left: "assets/images/skybox/blue/left.jpeg",
+    //   up: "assets/images/skybox/blue/top.jpeg",
+    //   bottom: "assets/images/skybox/blue/bottom.jpeg",
+    //   front: "assets/images/skybox/blue/front.jpeg",
+    //   back: "assets/images/skybox/blue/back.jpeg"
 
-    }
-    const texture = EngineCache.getTextureCube(skyboxTextures, this.gl);
-    material.mainTex = texture;
+    // }
+    // const texture = EngineCache.getTextureCube(skyboxTextures, this.gl);
+    material.mainTex = CubemapTexture.createWhiteCubemap(this.gl);
     const skyboxEntity = new GlEntity(material.name);
 
     skyboxEntity.addBehaviour(renderer);

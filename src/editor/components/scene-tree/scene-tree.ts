@@ -69,9 +69,9 @@ export class SceneTree {
 
   prepareObjects() {
     if (!this.scene) return;
-    const sceneObjects = this.scene.objects;
+    const sceneObjects = [this.scene, ...this.scene.objects];
     this.treeNodeMap = sceneObjects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = [...this.scene.objects.filter(e => !e.transform.parent?.parentEntity)];
+    const rootObjects = [ ...sceneObjects.filter(e => !e.transform.parent?.parentEntity)];
     const childObjects: { [key: string]: GlEntity[] } = {};
 
     sceneObjects.forEach(ob => {

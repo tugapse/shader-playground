@@ -358,5 +358,35 @@ export enum ShaderUniformsEnum {
    * The exponent controlling the gradient transition.
    * @type {string}
    */
-  U_EXPONENT = "u_exponent"
+  U_EXPONENT = "u_exponent",
+  /**
+   * The direction vector pointing towards the moon.
+   * @type {string}
+   */
+  U_MOON_DIRECTION = "u_moonDirection",
+  /**
+   * The color of the moon disk in the skybox.
+   * @type {string}
+   */
+  U_MOON_COLOR = "u_moonColor",
+  /**
+   * The size of the solid core of the moon.
+   * @type {string}
+   */
+  U_MOON_SIZE = "u_moonSize",
+  /**
+   * The falloff gradient size around the moon's edge.
+   * @type {string}
+   */
+  U_MOON_FALLOFF = "u_moonFalloff",
+  /**
+   * The current phase of the moon to rotate the crescent shadow.
+   * @type {string}
+   */
+  U_MOON_PHASE = "u_moonPhase",
+  /**
+   * Flag to determine if moon should be computed.
+   * @type {string}
+   */
+  U_USE_MOON = "u_useMoon"
 }
