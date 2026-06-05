@@ -130,6 +130,11 @@
   letter-spacing: 0.02em;
 }
 
+/* This is a child component, and its spacing is managed by the parent container */
+app-scene-list {
+  margin-top: 24px;
+}
+
 /* ==========================================================================
    3. HERO HEADER & QUICK ACTION CARDS
    ========================================================================== */

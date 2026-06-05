@@ -28,7 +28,7 @@ export class AssetService {
    */
   listAssets(
     projectId: string,
-    type?: 'code' | 'image' | 'audio' | 'text' | 'raw',
+    type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene',
     dir?: string
   ): Observable<ProjectAssetIndexResponse> {
     let params = new HttpParams();
@@ -80,7 +80,7 @@ export class AssetService {
     assetId: string,
     payload: {
       virtual_path?: string;
-      asset_type?: 'code' | 'image' | 'audio' | 'text' | 'raw';
+      asset_type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene';
     }
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;

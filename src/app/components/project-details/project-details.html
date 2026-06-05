@@ -5,9 +5,9 @@
       <button [routerLink]="['/editor', editableProject.id]" class="btn btn-secondary">Go to Editor</button>
     </div>
 
-    <div class="details-content-grid">
+    <div class="details-grid">
       <!-- Left Column: Metadata -->
-      <div class="metadata-panel">
+      <div class="details-metadata">
         <div class="metadata">
           <div class="meta-item"><strong>ID:</strong> <span>{{ editableProject.id }}</span></div>
           <div class="meta-item"><strong>Slug:</strong> <span>{{ editableProject.slug }}</span></div>
@@ -17,7 +17,7 @@
       </div>
 
       <!-- Right Column: Editable Fields -->
-      <div class="editing-panel">
+      <div class="details-form">
         <div class="form-group">
           <label for="projectName">Project Name</label>
           <input type="text" id="projectName" [(ngModel)]="editableProject.name" name="projectName" class="form-input">

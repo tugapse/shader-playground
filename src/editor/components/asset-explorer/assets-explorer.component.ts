@@ -90,6 +90,28 @@ export class FileExplorerLogic {
     }
   }
 
+  createScene() {
+    const project = this.projectId();
+    if (!project) return;
+
+    const sceneName = prompt('Enter scene name:');
+    if (!sceneName) return;
+
+    const fileName = sceneName.endsWith('.scene') ? sceneName : `${sceneName}.scene`;
+    const sceneContent = JSON.stringify({ entities: [] }, null, 2);
+    const sceneFile = new File([sceneContent], fileName, { type: 'application/json' });
+
+    this.assetService.uploadAsset(project.id, sceneFile, fileName, 'scene').subscribe({
+      next: () => {
+        this.refreshTree();
+      },
+      error: (err) => {
+        console.error('Error creating scene:', err);
+        alert('Failed to create scene. See console for details.');
+      }
+    });
+  }
+
   private toggleExpand(node: IAsset) {
     const key = node.id || node.name;
     const current = new Set(this.expandedNodes());
@@ -171,8 +193,8 @@ export class FileExplorerLogic {
     return root;
   }
 
-  private mapAssetType(type: 'code' | 'image' | 'audio' | 'text' | 'raw'): 'file' | string {
+  private mapAssetType(type: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene'): string {
     // This can be expanded if specific icons/logic are needed per type
-    return 'file';
+    return type;
   }
 }

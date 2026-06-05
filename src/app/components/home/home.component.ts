@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { BackgroundVisualizationComponent } from '../background-visualization/background-visualization.component';
 import { UserBarComponent } from '../user-bar/user-bar.component';
 import { ProjectDetails } from '../project-details/project-details';
+import { SceneList } from '../scene-list/scene-list';
 import { ProjectService } from '../../api/services/project.service';
 import { ProjectResponse, CreateProjectRequest, UpdateProjectRequest } from '../../api/models/omega-api.models';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, BackgroundVisualizationComponent, UserBarComponent, ProjectDetails],
+  imports: [CommonModule, FormsModule, BackgroundVisualizationComponent, UserBarComponent, ProjectDetails, SceneList],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })

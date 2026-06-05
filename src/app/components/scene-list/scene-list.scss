@@ -1,0 +1,223 @@
+/* ==========================================================================
+   1. SCENE LIST
+   ========================================================================== */
+.scene-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--editor-panel-background);
+  /* This component sits below project-details, so a top border is correct */
+  border-top: var(--editor-panel-border);
+}
+
+.scene-list-header {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--editor-panel-border);
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--editor-panel-H-color);
+  }
+}
+
+.btn-icon {
+  background-color: transparent;
+  border: none;
+  color: var(--editor-panel-color);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-background);
+  }
+}
+
+.list-wrapper {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.scene-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  gap: 12px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-background);
+  }
+
+  &.selected {
+    background-color: var(--editor-icon-button-selected-background);
+    color: var(--editor-panel-text-input-color);
+  }
+}
+
+.scene-icon {
+  // Placeholder for an icon, e.g., using a background image or font icon
+  width: 16px;
+  height: 16px;
+  background-color: var(--editor-placeholder-icon-color);
+}
+
+.scene-name {
+  font-size: 0.9rem;
+  color: var(--editor-panel-color);
+}
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--editor-panel-color);
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   2. NEW SCENE MODAL
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--editor-modal-backdrop-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background-color: var(--editor-panel-background);
+  border: var(--editor-panel-border);
+  border-radius: 8px;
+  box-shadow: var(--editor-modal-shadow);
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  position: fixed; // To make it appear on top of backdrop
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001; /* Ensure content is on top of the backdrop */
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: var(--editor-panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--editor-panel-H-color);
+  }
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Spacing between label and input */
+  width: 100%;
+}
+
+.modal-body label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--editor-panel-color);
+  opacity: 0.8;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--editor-panel-text-input-background);
+  border: var(--editor-panel-text-input-border);
+  border-radius: 4px;
+  color: var(--editor-panel-text-input-color);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--editor-icon-button-selected-background);
+  box-shadow: var(--editor-focus-shadow);
+}
+
+.error-text {
+  color: var(--editor-error-color);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: var(--editor-panel-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.btn-secondary {
+  background-color: var(--editor-icon-button-background);
+  color: var(--editor-panel-color);
+  border-color: var(--editor-panel-text-input-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--editor-icon-button-hover-background);
+}
+
+.btn-primary {
+  background-color: var(--editor-icon-button-selected-background);
+  color: var(--editor-primary-button-text-color);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

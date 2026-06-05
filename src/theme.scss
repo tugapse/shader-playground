@@ -1,4 +1,7 @@
 :root { /* It's good practice to define global variables in :root */
+  /* global */
+  --global-background-color: #f9fafb;
+
   --editor-panel-outer-padding: 4px;
   --editor-panel-background: #273244;
   --editor-panel-color: #c9cdd1;
@@ -20,6 +23,19 @@
   --editor-icon-button-hover-color: #2c70cf;
   --editor-icon-button-selected-background: #2c70cf;
   --editor-icon-button-selected-color: #323841;
+  --editor-placeholder-icon-color: #c9cdd1;
+
+  /* buttons */
+  --editor-primary-button-text-color: #ffffff;
+
+  /* modal */
+  --editor-modal-backdrop-background: rgba(0, 0, 0, 0.7);
+  --editor-modal-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* states & feedback */
+  --editor-error-color: #f44336;
+  --editor-focus-shadow: 0 0 0 2px rgba(44, 112, 207, 0.3);
+
 
   /* --- New Scrollbar Variables --- */
   --scrollbar-track-background: var(--editor-panel-background); /* Using editor-panel-background for the track */

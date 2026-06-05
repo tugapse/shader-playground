@@ -56,6 +56,7 @@
     <app-user-bar></app-user-bar>
     @if (selectedProject) {
       <app-project-details [project]="selectedProject" (save)="handleProjectUpdate($event)"></app-project-details>
+      <app-scene-list [project]="selectedProject"></app-scene-list>
     } @else {
       <div class="dashboard-welcome">
         <div class="top-content">

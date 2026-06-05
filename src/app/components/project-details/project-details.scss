@@ -1,52 +1,97 @@
 /* Using variables defined in home.component.scss for consistency */
 
 .project-details {
-  max-width: 800px;
+  background-color: var(--editor-panel-background);
+  border: 1px solid var(--editor-panel-border);
+  border-radius: 8px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* Creates space between form groups and other elements */
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
 .project-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 16px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--editor-panel-border);
 }
 
 h2 {
-  font-size: 2.2rem; /* Increased font size */
+  font-size: 2rem;
   color: var(--editor-panel-H-color);
   margin: 0;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
+}
+
+.details-metadata {
+  padding-right: 32px;
+  border-right: 1px solid var(--editor-panel-border);
+}
+
+.metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 1em;
+  color: var(--editor-panel-color);
+
+  .meta-item {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Key change: grid on the item itself */
+    gap: 12px;
+    align-items: baseline;
+
+    strong {
+      font-weight: 600;
+      color: var(--editor-panel-H-color);
+    }
+
+    span {
+      text-align: right;
+      word-break: break-all;
+      color: var(--editor-panel-text-input-color);
+    }
+  }
+}
+
+.details-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
 }
 
 label {
-  font-size: 1rem; /* Increased font size */
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--editor-panel-color);
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .form-input {
   width: 100%;
   padding: 10px 12px;
   background-color: var(--editor-panel-text-input-background);
-  border: var(--editor-panel-text-input-border);
+  border: 1px solid var(--editor-panel-text-input-border);
   border-radius: 4px;
   color: var(--editor-panel-text-input-color);
-  font-size: 1.1rem; /* Increased font size */
-  font-family: inherit; /* Ensure textarea inherits font */
-  line-height: 1.4; /* Improve readability */
-  resize: vertical; /* Allow vertical resizing, prevent horizontal */
-  min-height: 80px; /* Provide a decent default size */
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.4;
   transition: all 0.2s ease;
   box-sizing: border-box;
 
@@ -57,39 +102,22 @@ label {
   }
 }
 
-/* Styles adapted from the original project-details.scss */
-.metadata {
+textarea.form-input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.actions {
   display: flex;
-  flex-direction: column; /* Stack items vertically */
-  gap: 12px; /* Adjust gap for vertical stacking */
-  font-size: 1em;
-  color: var(--editor-panel-color);
-  opacity: 0.9; /* Slightly increase opacity for readability */
-
-  .meta-item {
-    display: flex;
-    align-items: baseline; /* Align by baseline for better text alignment */
-    justify-content: space-between; /* Push value to the right */
-    width: 100%;
-
-    strong {
-      font-weight: 600;
-      color: var(--editor-panel-H-color);
-      flex-shrink: 0; /* Prevent label from shrinking */
-      margin-right: 16px;
-    }
-
-    span {
-      text-align: right;
-      word-break: break-all; /* Break long strings like IDs */
-      color: var(--editor-panel-text-input-color); /* Use a slightly brighter color for value */
-    }
-  }
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid var(--editor-panel-border);
+  margin-top: auto;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 4px 8px;
   font-size: 0.8em;
   font-weight: 700;
   line-height: 1;
@@ -98,29 +126,13 @@ label {
   vertical-align: baseline;
   border-radius: 0.25rem;
   color: #fff;
-  background-color: #6c757d; // Default/inactive color
+  background-color: #6c757d;
 
-  &.status-published {
-    background-color: #28a745; // Green
-  }
-
-  &.status-draft {
-    background-color: #007bff; // Blue
-  }
-
-  &.status-archived {
-    background-color: #6c757d; // Gray
-  }
+  &.status-published { background-color: #28a745; }
+  &.status-draft { background-color: #007bff; }
+  &.status-archived { background-color: #6c757d; }
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-start; /* Align button to the left */
-  padding-top: 16px;
-  border-top: 1px solid var(--editor-panel-border);
-}
-
-/* Generic button styles from home.component.scss */
 .btn {
   padding: 8px 16px;
   border-radius: 4px;
@@ -134,48 +146,18 @@ label {
 .btn-primary {
   background-color: var(--editor-icon-button-selected-background);
   color: #fff;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .btn-secondary {
   background-color: var(--editor-panel-text-input-background);
   color: var(--editor-panel-H-color);
   border: 1px solid var(--editor-panel-border);
-  font-weight: 700; /* Bolder font */
-
+  font-weight: 700;
   &:hover {
     background-color: var(--editor-icon-button-selected-background);
-    color: #fff; /* White text on hover for contrast */
+    color: #fff;
     border-color: var(--editor-icon-button-selected-background);
   }
-}
-
-/* New two-column layout styles */
-.details-grid {
-  display: grid;
-  grid-template-columns: 1fr 2fr; /* Metadata on left, form on right */
-  gap: 32px;
-  padding-top: 16px;
-}
-
-.details-metadata {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  border-right: 1px solid var(--editor-panel-border); /* Separator line */
-  padding-right: 32px;
-}
-
-.details-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* Consistent gap between form elements */
 }

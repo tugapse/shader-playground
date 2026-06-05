@@ -1,0 +1,57 @@
+<div class="scene-list-container">
+  <div class="scene-list-header">
+    <h3>Scenes</h3>
+    <button class="btn-icon" title="New Scene" (click)="openNewSceneModal()">+</button>
+  </div>
+
+  @if (scenes.length > 0) {
+    <ul class="list-wrapper">
+      @for (scene of scenes; track scene.id) {
+        <li class="scene-item" (click)="navigateToEditor(scene)">
+          <span class="scene-icon"></span>
+          <span class="scene-name">{{ scene.filename }}</span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="empty-state">
+      <p>No scenes found. Create a new one to get started.</p>
+    </div>
+  }
+</div>
+
+@if (isModalOpen) {
+  <div class="modal-backdrop" (click)="closeModal()"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Create New Scene</h2>
+      <button class="btn-icon" (click)="closeModal()">X</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="createScene()">
+        <div class="form-group">
+          <label for="sceneName">Scene Name</label>
+          <input
+            type="text"
+            id="sceneName"
+            class="form-control"
+            [(ngModel)]="newSceneName"
+            name="sceneName"
+            placeholder="Enter scene name"
+            required
+            #nameInput="ngModel"
+          />
+          @if (nameInput.invalid && (nameInput.dirty || nameInput.touched)) {
+            <div class="error-text">
+              Scene name is required.
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="!newSceneName">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
