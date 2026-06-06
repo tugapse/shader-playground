@@ -1,13 +1,13 @@
 <div class="top-bar-container">
   <div class="user-bar">
-    <span class="username" *ngIf="isLoggedIn()">{{ user?.username }}</span>
-    <app-icon *ngIf="isLoggedIn()" class="play-icon" iconName="fa-sign-out-alt" (click)="onLogout()" [isButton]="true"
+    <span class="username" >{{ user?.username }}</span>
+    <app-icon  class="play-icon" iconName="fa-sign-out-alt" (click)="onLogout()" [isButton]="true"
       title="Logout"></app-icon>
   </div>
   <div class="top-bar">
     <div class="left-menu">
       <!-- <app-icon class="play-icon" iconName="fa-burger" [iconSize]="18" ></app-icon> -->
-      <span class="item" >Scene</span>
+      <span class="item" (cancel)="goHome()">Home</span>
       <span class="item">Objects</span>
       <span class="item" (click)="showAssets()" [class.selected]="isAssetsActive()">Assets</span>
     </div>

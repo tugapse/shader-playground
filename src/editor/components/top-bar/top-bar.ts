@@ -20,6 +20,7 @@ import { UserResponse } from '../../../app/api/models/omega-api.models';
 })
 export class TopBar implements OnInit {
 
+
   @Input() scene!: Scene;
   @Input() isEditorPaused!: boolean;
 
@@ -97,5 +98,9 @@ export class TopBar implements OnInit {
       this.user = undefined;
       this.router.navigate(['/login']);
     });
+  }  
+  
+  goHome() {
+    this.router.navigate(['/']);
   }
 }

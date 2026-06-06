@@ -143,7 +143,7 @@ export class SunBehaviour extends EntityBehaviour {
     light.color = Color.lerp(fromColor, toColor, t);
     if (scene) {
       scene.clearColor = light.color;
-
+      scene.fog.color = light.color;
       const skyboxEntity = scene.objects.find(o => o.getBehaviour(SkyboxRenderer));
       if (skyboxEntity) {
         const skyboxRenderer = skyboxEntity.getBehaviour(SkyboxRenderer) as SkyboxRenderer;
