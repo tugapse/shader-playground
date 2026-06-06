@@ -1,3 +1,6 @@
+import { ClassMetadata } from "@engine/interfaces/class-metadata";
+import { ClassType } from "@engine/enums/class-type.enum";
+
 export class ObjectInstanciator {
   /**
     A map that stores dependency injection functions for instantiating classes.
@@ -6,6 +9,7 @@ export class ObjectInstanciator {
    * @type {{ [key: string]: Function }}
    */
   private static dependecies: { [key: string]: Function } = {};
+  private static metadata: { [key: string]: ClassMetadata } = {};
 
   /**
     Adds a class constructor or factory function as a dependency for instantiation.
@@ -14,8 +18,11 @@ export class ObjectInstanciator {
    * @param {Function} func - The constructor or factory function to be called for instantiation.
    * @returns {void}
    */
-  public static addDependency(className: string, func: Function): void {
+  public static addDependency(className: string, func: Function, metadata?: ClassMetadata): void {
     ObjectInstanciator.dependecies[className] = func;
+    if (metadata) {
+      ObjectInstanciator.metadata[className] = metadata;
+    }
   }
 
   /**
@@ -49,4 +56,18 @@ export class ObjectInstanciator {
     return undefined;
   }
 
+  /**
+   * Retrieves metadata for classes, optionally filtered by one or more class types.
+   * 
+   * @param {ClassType | ClassType[]} [types] - A single class type or an array of class types to filter by.
+   * @returns {ClassMetadata[]} - An array of metadata objects matching the specified types.
+   */
+  public static getMetadata(types?: ClassType | ClassType[]): ClassMetadata[] {
+    const allMetadata = Object.values(ObjectInstanciator.metadata);
+    if (!types) {
+      return allMetadata;
+    }
+    const typesArray = Array.isArray(types) ? types : [types];
+    return allMetadata.filter(meta => typesArray.includes(meta.type));
+  }
 }

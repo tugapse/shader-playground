@@ -17,6 +17,7 @@ import { AssetsExplorerComponent } from './components/asset-explorer/assets-expl
 import { EditorStateService } from './services/editor-state.service';
 import { SceneTreeService } from './services/scene-tree.service';
 import { SceneTree } from './components/scene-tree/scene-tree';
+import { AssetService } from 'src/app/api/services/asset.service';
 
 @Component({
   selector: 'app-editor',
@@ -42,11 +43,14 @@ export class Editor implements OnDestroy, OnInit {
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
+
   constructor(
     protected editorService: EditorService,
     protected sceneTreeService: SceneTreeService,
     protected editorSettings: EditorSettingsService,
     protected editorState: EditorStateService,
+
+    protected assetService: AssetService,
     protected route: ActivatedRoute,
     protected router: Router
   ) {
@@ -60,6 +64,17 @@ export class Editor implements OnDestroy, OnInit {
     const sceneId = this.route.snapshot.paramMap.get('scene');
 
     if (projectId && sceneId) {
+      this.assetService.getRawAssetContent(projectId, sceneId).subscribe(blob => {
+        const reader = new FileReader();  
+        reader.onload = () => {
+          const sceneDataString = reader.result as string;
+          const sceneData = JSON.parse(sceneDataString);
+          const scene = SceneManager.loadScene(this.gl, sceneData);
+          this.editorService.loadScene(scene);
+        };
+        reader.readAsText(blob);
+      });
+
       this.editorState.setActiveProject({ id: projectId, scene:sceneId, config: {} });
       // TODO: Fetch project details and download the scene using the project/scene IDs
     } else {
@@ -95,6 +110,7 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   protected onSceneLoaded(scene: Scene) {
+    debugger
     if (this.scene) {
       this.scene.destroy();
     }
@@ -141,9 +157,19 @@ export class Editor implements OnDestroy, OnInit {
     this.inspectorSelectedEntity = entity;
     this.gizmosBehaviour.setTargetEntity(entity);
   }
+  
+  protected onSceneTreeAddNewRequested(): void {
+    debugger
+    const newEntity = new GlEntity("New Entity");
+    this.scene.addEntity(newEntity);
+    this.sceneTreeService.onSceneUpdated.emit(this.scene)
+    this.sceneTreeService.onEntitySelected.emit(newEntity);
+  }
 
   protected subscribeEvents(): void {
     this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
+    this.subs$.push(this.sceneTreeService.onAddNewRequested.subscribe(this.onSceneTreeAddNewRequested.bind(this)));
+
     this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));
     this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));

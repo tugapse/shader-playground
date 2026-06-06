@@ -1,4 +1,5 @@
 import { EntityBehaviour, ObjectInstanciator } from "@engine";
+import { ClassType } from "@engine/enums/class-type.enum";
 
 
 
@@ -25,4 +26,9 @@ export class MoveBehaviour extends EntityBehaviour {
   }
 }
 
-ObjectInstanciator.addDependency("MoveBehaviour", MoveBehaviour.instanciate);
+ObjectInstanciator.addDependency("MoveBehaviour", MoveBehaviour.instanciate, {
+  name: "MoveBehaviour",
+  type: ClassType.EntityBehaviour,
+  path: "Behaviours/MoveBehaviour",
+  description: "Continuously moves the entity in a circular path over time."
+});

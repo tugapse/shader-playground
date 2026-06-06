@@ -17,6 +17,7 @@ import {
   Scene,
   Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight
 } from '@engine';
+import { ClassType } from "@engine/enums/class-type.enum";
 
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
@@ -47,8 +48,18 @@ export class App implements OnDestroy {
       "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
     };
 
-    ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate);
-    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial);
+    ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate, {
+      name: "EditorSkyboxShader",
+      type: ClassType.Shader,
+      path: "Editor/Shaders/EditorSkyboxShader",
+      description: "A specialized skybox shader used specifically within the editor environment."
+    });
+    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial, {
+      name: "EditorSkyboxMaterial",
+      type: ClassType.Material,
+      path: "Editor/Materials/EditorSkyboxMaterial",
+      description: "A specialized skybox material used specifically within the editor environment."
+    });
 
   }
 
@@ -245,16 +256,17 @@ export class App implements OnDestroy {
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
     
 
-    // const skyboxTextures = {
-    //   right: "assets/images/skybox/blue/right.jpeg",
-    //   left: "assets/images/skybox/blue/left.jpeg",
-    //   up: "assets/images/skybox/blue/top.jpeg",
-    //   bottom: "assets/images/skybox/blue/bottom.jpeg",
-    //   front: "assets/images/skybox/blue/front.jpeg",
-    //   back: "assets/images/skybox/blue/back.jpeg"
+    const skyboxTextures = {
+      right: "assets/images/skybox/blue/right.jpeg",
+      left: "assets/images/skybox/blue/left.jpeg",
+      up: "assets/images/skybox/blue/top.jpeg",
+      bottom: "assets/images/skybox/blue/bottom.jpeg",
+      front: "assets/images/skybox/blue/front.jpeg",
+      back: "assets/images/skybox/blue/back.jpeg"
 
-    // }
+    }
     // const texture = EngineCache.getTextureCube(skyboxTextures, this.gl);
+    // material.mainTex = texture;
     material.mainTex = CubemapTexture.createWhiteCubemap(this.gl);
     const skyboxEntity = new GlEntity(material.name);
 

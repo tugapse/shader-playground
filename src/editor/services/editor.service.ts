@@ -26,15 +26,21 @@ export class EditorService {
 
   public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
   public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
+  public get scene(): Scene {
+    return this.currentScene;
+  }
 
+  
+  private currentScene!: Scene;
   private camera!: Camera;
   constructor() {
     this.initializeEditorCamera();
   }
-
+  
 
 
   loadScene(scene: Scene) {
+    this.currentScene = scene;
     this.onSceneLoaded.emit(scene);
   }
 

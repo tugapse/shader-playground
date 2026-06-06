@@ -39,18 +39,19 @@ export class EntityInspector extends ObjectInspector {
 
   entity?: GlEntity | null;
 
-  constructor(private editorService: EditorService) {
+  constructor() {
     super();
   }
 
   onNameChanged($event: any): void {
     if (!this.entity) return;
     this.entity.name = $event.target.value;
+    this.updateScene();
   }
-
+  
   onTagChanged($event: any): void {
     if (!this.entity) return;
-    this.entity.name = $event.target.value;
+    this.entity.tag = $event.target.value;
   }
 
   override onValueChanged(entityProperty: any, value: string | number | boolean): void {

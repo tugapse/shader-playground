@@ -1,4 +1,5 @@
 import { EntityBehaviour, ObjectInstanciator } from "@engine";
+import { ClassType } from "@engine/enums/class-type.enum";
 
 
 
@@ -19,4 +20,10 @@ export class RotateBehaviour extends EntityBehaviour {
     );
   }
 }
-ObjectInstanciator.addDependency("RotateBehaviour", RotateBehaviour.instanciate);
+
+ObjectInstanciator.addDependency("RotateBehaviour", RotateBehaviour.instanciate, {
+  name: "RotateBehaviour",
+  type: ClassType.EntityBehaviour,
+  path: "Behaviours/RotateBehaviour",
+  description: "Continuously rotates the entity along its axis over time."
+});

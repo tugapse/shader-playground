@@ -19,16 +19,21 @@ export class SceneTree {
 
 
 
+
   @Input() public set targetScene(scene: Scene) {
-    this.scene = scene;
-    this.prepareObjects();
+      this.scene = scene;
+      this.prepareObjects();
   };
 
 
 
   constructor(public sceneTreeService: SceneTreeService, private editorService: EditorService) {
+    this.sceneTreeService.onSceneUpdated.subscribe(scene => {
+      this.targetScene = scene;
+    });
     this.editorService.onSceneLoaded.subscribe(scene => {
       this.targetScene = scene;
+
       const entity = scene.getEntitieByUuid(this.selectedUuid);
       this.sceneTreeService.onEntitySelected.emit(entity);
     });
@@ -69,9 +74,9 @@ export class SceneTree {
 
   prepareObjects() {
     if (!this.scene) return;
-    const sceneObjects = [this.scene, ...this.scene.objects];
+    const sceneObjects = this.scene.objects;
     this.treeNodeMap = sceneObjects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = [ ...sceneObjects.filter(e => !e.transform.parent?.parentEntity)];
+    const rootObjects = [...sceneObjects.filter(e => !e.transform.parent?.parentEntity)];
     const childObjects: { [key: string]: GlEntity[] } = {};
 
     sceneObjects.forEach(ob => {
@@ -177,11 +182,15 @@ export class SceneTree {
     console.debug("Scene tree selected ", node);
     this.selectedUuid = node.id;
     const entity = this.treeNodeMap[this.selectedUuid];
-    if(entity){
+    if (entity) {
       this.sceneTreeService.onEntitySelected.emit(entity);
       setTimeout(() => this.editorService.requestCanvasResize(), 30);
-    }else{
+    } else {
       debugger
     }
+  }
+
+  onSceneTreeAddNewRequested() {
+    this.sceneTreeService.onAddNewRequested.emit();
   }
 }

@@ -1,4 +1,5 @@
 import { EntityBehaviour, GlEntity, JsonSerializedData, ObjectInstanciator } from "@engine";
+import { ClassType } from "@engine/enums/class-type.enum";
 
 
 export class LookAtFollowBehaviour extends EntityBehaviour {
@@ -53,4 +54,9 @@ export class LookAtFollowBehaviour extends EntityBehaviour {
   }
 }
 
-ObjectInstanciator.addDependency("LookAtFollowBehaviour", LookAtFollowBehaviour.instanciate);
+ObjectInstanciator.addDependency("LookAtFollowBehaviour", LookAtFollowBehaviour.instanciate, {
+  name: "LookAtFollowBehaviour",
+  type: ClassType.EntityBehaviour,
+  path: "Behaviours/LookAtFollowBehaviour",
+  description: "Makes the entity automatically look at and optionally follow a target entity."
+});

@@ -1,4 +1,5 @@
 import { Color, EntityBehaviour, JsonSerializedData, Light, ObjectInstanciator, RendererBehaviour, SkyboxRenderer, SkyboxShader, Vector3 } from "@engine";
+import { ClassType } from "@engine/enums/class-type.enum";
 import { vec3 } from "gl-matrix";
 
 export class SunBehaviour extends EntityBehaviour {
@@ -224,4 +225,9 @@ export class SunBehaviour extends EntityBehaviour {
   }
 }
 
-ObjectInstanciator.addDependency("SunBehaviour", SunBehaviour.instanciate);
+ObjectInstanciator.addDependency("SunBehaviour", SunBehaviour.instanciate,{
+  name: "SunBehaviour",
+  type: ClassType.EntityBehaviour,
+  path: "Behaviours/SunBehaviour",
+  description: "Controls the sun's position, color, and the day/night cycle in the scene. It simulates the sun's movement across the sky based on a time of day system, allowing for dynamic lighting changes throughout the day. The behaviour also includes an optional moon simulation that can be enabled for night scenes."
+});

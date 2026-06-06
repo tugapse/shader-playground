@@ -57,6 +57,7 @@ export class TransformInspector {
     this.scaleY = this.transform.localScale[1];
     this.scaleZ = this.transform.localScale[2];
   }
+  @Input() collapsed = false;
 
   onPositionChanged(index: number, event: Event) {
     const value = this.transform.worldPosition;

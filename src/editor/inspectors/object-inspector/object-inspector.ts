@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
 import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from '@engine';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
@@ -6,6 +6,8 @@ import { TextInputInspector } from "../../components/inspector/text-input-inspec
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { EnumInspector } from "../enum-inspector/enum-inspector";
+import { SceneTreeService } from '@editor/services/scene-tree.service';
+import { EditorService } from '@editor/services/editor.service';
 
 
 export interface ITargetObject {
@@ -26,7 +28,9 @@ export interface ITargetProperty extends ITargetObject {
   styleUrl: './object-inspector.scss'
 })
 export class ObjectInspector {
-
+ // inject SceneTreeService
+  protected sceneTreeService = inject(SceneTreeService);
+  protected editorService = inject(EditorService);
 
   @Input() allowProperties: string[] = [];
   @Input() denyProperties: string[] = ["meshData", "gl", "mesh"];
@@ -46,7 +50,14 @@ export class ObjectInspector {
 
   _selectedObject?: ITargetObject;
   _properties: ITargetProperty[] = [];
-
+ 
+  /**
+   * This method is used to update the scene after a property has been changed. It emits the onSceneUpdated event from the SceneTreeService to notify all subscribers that the scene has been updated and they should refresh their data if needed.
+   */
+  protected updateScene(){
+    const scene = this.editorService.scene;
+    this.sceneTreeService.onSceneUpdated.emit(scene);
+  }
 
   onValueChanged(property: ITargetObject, value: string | number | boolean) {
     if (!this._selectedObject || (value as any) instanceof Event) return;
