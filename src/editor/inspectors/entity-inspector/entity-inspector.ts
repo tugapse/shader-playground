@@ -9,16 +9,20 @@ import { BehaviourInspector } from "../behaviour-inspector/behaviour-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { TransformInspector } from "../transform-inspector/transform-inspector";
-import { GlEntity, Color } from '@engine';
+import { GlEntity, Color, ObjectInstanciator } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
+import { Icon } from "src/app/components/icon/icon";
+import { ClassType } from '@engine/enums/class-type.enum';
+import { AddBehaviourMenuComponent, BehaviourMetadata } from '../../components/add-behaviour-menu/add-behaviour-menu';
 
 @Component({
   selector: 'editor-entity-inspector',
-  imports: [InpectorTogglePanel, TransformInspector, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, ObjectInspector, BehaviourInspector, Toggle],
+  imports: [InpectorTogglePanel, TransformInspector, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, ObjectInspector, BehaviourInspector, Toggle, Icon, AddBehaviourMenuComponent],
   templateUrl: './entity-inspector.html',
   styleUrl: './entity-inspector.scss'
 })
 export class EntityInspector extends ObjectInspector {
+
 
   @Input() excludeProperties = ["name", "active", "updateInEditor", "entityType", "show", "tag", "destroyed", "behaviours", "scene"];
   objectsToshow: ITargetObject[] = []
@@ -38,6 +42,10 @@ export class EntityInspector extends ObjectInspector {
   };
 
   entity?: GlEntity | null;
+  isAddBehaviourMenuOpen = false;
+  availableBehaviours: BehaviourMetadata[] = [];
+  menuX = 0;
+  menuY = 0;
 
   constructor() {
     super();
@@ -48,7 +56,7 @@ export class EntityInspector extends ObjectInspector {
     this.entity.name = $event.target.value;
     this.updateScene();
   }
-  
+
   onTagChanged($event: any): void {
     if (!this.entity) return;
     this.entity.tag = $event.target.value;
@@ -75,5 +83,27 @@ export class EntityInspector extends ObjectInspector {
 
   protected override isPropertyValid(key: string): boolean {
     return (this.isNotPrivate(key) && this.excludeProperties.includes(key) == false);
+  }
+
+  onAddBehaviourRequested(event: MouseEvent) {
+    event.stopPropagation();
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    
+    // Position slightly below and right-aligned with the button
+    this.menuY = rect.top -100;
+    this.menuX = rect.right - 320; // 320px is the menu width
+    
+    this.availableBehaviours = ObjectInstanciator.getMetadata([ClassType.EntityBehaviour, ClassType.RenderBehaviour])
+      .filter(b => b.name !== "EntityBehaviour" && b.name !== "RenderBehaviour") as BehaviourMetadata[];
+    this.isAddBehaviourMenuOpen = true;
+  }
+
+  onBehaviourSelected(behaviour: BehaviourMetadata) {
+    if (!this.entity) return;
+    const instance = ObjectInstanciator.instanciateObjectFromJsonData(behaviour.name);
+    if (instance) {
+      this.entity.addBehaviour(instance as any);
+    }
   }
 }

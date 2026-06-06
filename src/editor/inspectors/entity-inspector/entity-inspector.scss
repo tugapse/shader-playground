@@ -29,4 +29,13 @@
 
     color:rgb(57, 148, 190)
   }
+  .behaviours-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .icon {
+    cursor: pointer;
+    color: var(--editor-panel-text-input-color);
+  }
 }

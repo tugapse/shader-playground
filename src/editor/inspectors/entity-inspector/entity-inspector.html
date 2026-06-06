@@ -44,9 +44,20 @@
 }
 }
 
+<div class="behaviours-header-container" style="position: relative;">
+  <h4 class="behaviours-header">Behaviours</h4>
+  <app-icon class="icon" iconName="fa-add" (click)="onAddBehaviourRequested($event)"></app-icon>
+  <editor-add-behaviour-menu
+    [isOpen]="isAddBehaviourMenuOpen"
+    [behaviours]="availableBehaviours"
+    [menuX]="menuX"
+    [menuY]="menuY"
+    (behaviourSelected)="onBehaviourSelected($event)"
+    (closeMenu)="isAddBehaviourMenuOpen = false">
+  </editor-add-behaviour-menu>
+</div>
 @if(entity.behaviours.length >0){
 
-<h4 class="behaviours-header">Behaviours</h4>
 
 
 @for (behaviour of entity.behaviours ; track $index) {

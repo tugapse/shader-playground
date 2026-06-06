@@ -1,0 +1,87 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--editor-modal-backdrop-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background-color: var(--editor-panel-background);
+  color: var(--editor-panel-color);
+  border: var(--editor-panel-border);
+  box-shadow: var(--editor-modal-shadow);
+  border-radius: 4px;
+  width: 400px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 16px;
+  border-bottom: var(--editor-panel-border);
+
+  .modal-title {
+    margin: 0;
+    color: var(--editor-panel-header-title-color);
+    font-size: 1.1em;
+    font-weight: 500;
+  }
+}
+
+.modal-body {
+  padding: 16px;
+  font-size: 0.95em;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+  }
+}
+
+.modal-footer {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: var(--editor-panel-border);
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  
+  &:focus {
+    outline: none;
+    box-shadow: var(--editor-focus-shadow);
+  }
+}
+
+.btn-cancel {
+  background-color: var(--editor-icon-button-background);
+  color: var(--editor-panel-color);
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-background);
+  }
+}
+
+.btn-confirm {
+  background-color: var(--editor-icon-button-selected-background);
+  color: var(--editor-primary-button-text-color);
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-color, #1a5bb0);
+  }
+}

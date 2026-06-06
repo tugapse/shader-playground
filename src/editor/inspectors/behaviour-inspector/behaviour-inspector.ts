@@ -8,18 +8,24 @@ import { ITargetObject, ITargetProperty, ObjectInspector } from '../object-inspe
 import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from '@engine';
 import { EnumInspector } from "../enum-inspector/enum-inspector";
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
+import { Icon } from "src/app/components/icon/icon";
+import { ConfirmationService } from 'src/app/services/confirmation.service';
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector],
+  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon],
   templateUrl: './behaviour-inspector.html',
   styleUrl: './behaviour-inspector.scss'
 })
 export class BehaviourInspector extends ObjectInspector {
 
+
   _renderProperties: ITargetProperty[] = [];
   _renderEnable: ITargetProperty[] = [];
 
+  constructor(private confirmationService: ConfirmationService) {
+    super();
+  }
 
   // prepare enums related to rendering
   protected drawingEnums: { [key: string]: { key: string, value: number }[] } = {
@@ -38,7 +44,7 @@ export class BehaviourInspector extends ObjectInspector {
   protected renderBooleans = ["enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer"];
 
 
-  override denyProperties: string[] = ["active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
+  override denyProperties: string[] = ["shader", "active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
     ...Object.keys(this.drawingEnums), "blendMode", // inner emuns
     ...this.renderBooleans,
   ]
@@ -99,5 +105,18 @@ export class BehaviourInspector extends ObjectInspector {
   onEnumChanged(item: ITargetProperty, $event: DropdownItem) {
     this._selectedObject!.property[item.key] = $event.value
 
+  }
+
+  onRemoveBehaviourRequested() {
+    this.confirmationService.confirm({
+      title: 'Remove Behaviour',
+      message: `Are you sure you want to remove the ${this.behaviour.className} behaviour?`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        this.behaviour.parent.removeBehaviour(this.behaviour);
+      }
+    });
   }
 }

@@ -22,13 +22,14 @@ import { ClassType } from "@engine/enums/class-type.enum";
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { RouterModule } from '@angular/router';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
   standalone: true,
-  imports: [RouterModule]
+  imports: [RouterModule, ConfirmationModalComponent]
 })
 export class App implements OnDestroy {
 

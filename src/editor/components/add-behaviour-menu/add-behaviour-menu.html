@@ -1,0 +1,24 @@
+@if(isOpen) {
+<div class="menu-container" [style.left.px]="menuX" [style.top.px]="menuY">
+  <div class="menu-search">
+    <input type="text" placeholder="Search behaviour..." [value]="searchQuery" (input)="onSearch($event)">
+  </div>
+  <div class="menu-scroll-area">
+    @for (behaviour of filteredBehaviours; track behaviour.name) {
+    <div class="menu-item" (click)="selectBehaviour(behaviour, $event)">
+      <div class="menu-item-header">
+        <span class="menu-item-name">{{ behaviour.name }}</span>
+        <span class="menu-item-type">{{ behaviour.type }}</span>
+      </div>
+      <div class="menu-item-path">{{ behaviour.path }}</div>
+      <div class="menu-item-description" [title]="behaviour.description">
+        {{ behaviour.description }}
+      </div>
+    </div>
+    }
+    @if(filteredBehaviours.length === 0) {
+    <div class="menu-empty">No behaviours found.</div>
+    }
+  </div>
+</div>
+}

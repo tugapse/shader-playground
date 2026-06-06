@@ -1,0 +1,123 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+.menu-container {
+  position: fixed;
+  width: 320px;
+  max-height: 400px;
+  background-color: var(--editor-panel-background);
+  border: var(--editor-panel-border);
+  box-shadow: var(--editor-panel-box-shadow);
+  border-radius: 4px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.menu-search {
+  padding: 8px;
+  border-bottom: 1px solid rgba(105, 108, 112, 0.3);
+
+  input {
+    width: 100%;
+    padding: 6px 8px;
+    background-color: var(--editor-panel-text-input-background);
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border, 1px solid rgba(105, 108, 112, 0.5));
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+
+    &:focus {
+      outline: none;
+      box-shadow: var(--editor-focus-shadow);
+    }
+  }
+}
+
+.menu-scroll-area {
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.menu-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(105, 108, 112, 0.3);
+  transition: background-color 0.2s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: var(--editor-icon-button-hover-background);
+  }
+}
+
+.menu-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.menu-item-name {
+  font-weight: bold;
+  color: var(--editor-panel-header-title-color);
+  font-size: 1.05em;
+}
+
+.menu-item-type {
+  font-size: 0.8em;
+  color: var(--editor-icon-button-color);
+  background-color: var(--editor-icon-button-background);
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+.menu-item-path {
+  font-size: 0.8em;
+  color: var(--editor-icon-button-hover-color);
+  margin-bottom: 4px;
+  font-family: monospace;
+}
+
+.menu-item-description {
+  font-size: 0.9em;
+  color: var(--editor-panel-color);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--editor-placeholder-icon-color);
+  font-size: 0.95em;
+}
+
+/* Custom Scrollbar specifically for the menu */
+.menu-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-scroll-area::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-background);
+}
+
+.menu-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-background);
+  border-radius: 3px;
+}
+
+.menu-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-background);
+}

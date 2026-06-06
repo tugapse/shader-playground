@@ -1,9 +1,11 @@
 @if (behaviour) {
 <editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
 
-
-  <app-boolean-inspector align="right" header-content [active]="behaviour.active"
+<div class="header-content" header-content >
+  <app-boolean-inspector align="right"[active]="behaviour.active"
     (change)="behaviour.active = !behaviour.active"></app-boolean-inspector>
+  <app-icon class="icon" iconName="fa-trash" (click)="onRemoveBehaviourRequested()"></app-icon>
+</div>
 
 
 
@@ -38,7 +40,7 @@
 
 
   @if (_renderEnable.length>0) {
-  <editor-inpector-toggle-panel [title]="'Enable Functions'" [isChild]="true">
+  <editor-inpector-toggle-panel [title]="'Enable Functions'" [isChild]="true" [collapsed]="true">
     @for (item of _renderEnable; track $index) {
     <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
       (change)="onValueChanged(item,$event)"></app-boolean-inspector>
@@ -47,7 +49,7 @@
   }
   @if (_renderProperties.length>0) {
 
-  <editor-inpector-toggle-panel [title]="'Render Settings'" [isChild]="true">
+  <editor-inpector-toggle-panel [title]="'Render Settings'" [isChild]="true" [collapsed]="true">
     @for (item of _renderProperties; track $index) {
     <editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
       (change)="onEnumChanged(item, $event)"></editor-enum-inspector>

@@ -1,0 +1,19 @@
+:host{
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        row-gap: 4px;
+        padding-top: 4px;
+    }
+
+    .icon {
+    padding: 4px;
+        cursor: pointer;
+        color: var(--editor-panel-text-input-color);
+    }
+
+    .icon:hover {
+        color: var(--editor-panel-text-input-hover-color);
+    }
+}
