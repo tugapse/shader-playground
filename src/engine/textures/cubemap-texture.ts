@@ -9,6 +9,13 @@ import { Texture } from "./texture";
 export class CubemapTexture extends Texture {
 
   protected override _className = "CubemapTexture";
+
+  /**
+   * Flag indicating if this texture is a procedurally generated white fallback cubemap.
+   * @type {boolean}
+   */
+  public isWhiteCubemap: boolean = false;
+
   /**
     An array to hold the HTML image elements for each of the six faces.
    * @protected
@@ -38,13 +45,25 @@ export class CubemapTexture extends Texture {
    * @returns {CubemapTexture} A new CubemapTexture instance containing the white pixels.
    */
   public static createWhiteCubemap(gl: WebGL2RenderingContext): CubemapTexture {
-    const texture = gl.createTexture();
-    if (!texture) {
+    const result = new CubemapTexture(gl);
+    result.isWhiteCubemap = true;
+    result.generateWhiteCubemap(gl);
+    result.isLoaded = true;
+    return result;
+  }
+
+  /**
+   * Generates a 1x1 white pixel for each face and assigns the GL texture.
+   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
+   */
+  private generateWhiteCubemap(gl: WebGL2RenderingContext): void {
+    this._glTexture = gl.createTexture();
+    if (!this._glTexture) {
       console.error("Failed to create WebGL texture for white cubemap.");
-      return new CubemapTexture(gl);
+      return;
     }
 
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glTexture);
 
     const whitePixel = new Uint8Array([255, 255, 255, 255]);
     const targets = [
@@ -57,20 +76,21 @@ export class CubemapTexture extends Texture {
       gl.texImage2D(target, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, whitePixel);
     }
 
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+    this.minFilter = gl.NEAREST;
+    this.magFilter = gl.NEAREST;
+    this.wrapS = gl.CLAMP_TO_EDGE;
+    this.wrapT = gl.CLAMP_TO_EDGE;
+
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, this.wrapT);
 
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 
-    const result = new CubemapTexture(gl);
-    result._glTexture = texture;
-    result.isLoaded = true;
-    result._width = 1;
-    result._height = 1;
-    return result;
+    this._width = 1;
+    this._height = 1;
   }
 
   /**
@@ -82,6 +102,19 @@ export class CubemapTexture extends Texture {
     if (this.isLoading || this.isImageLoaded) return;
     this.isLoading = true;
     return new Promise((resolve, reject) => {
+      // Check if this is a procedurally generated fallback
+      if (this.isWhiteCubemap) {
+        if (this.gl) {
+          this.generateWhiteCubemap(this.gl);
+          this.isLoaded = true;
+          this.isLoading = false;
+          resolve();
+        } else {
+          reject(new Error("GL context missing for white cubemap."));
+        }
+        return;
+      }
+
       if (!this.textureUris || this.textureUris.length !== 6) {
         reject(new Error("Cubemap requires exactly six texture URIs."));
         return;
@@ -167,11 +200,12 @@ export class CubemapTexture extends Texture {
 
     this.bind();
 
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+    // Use the filter properties loaded from JSON or defaults
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, this.minFilter);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, this.magFilter);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this.wrapS);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this.wrapT);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, this.wrapT);
 
     const faces = [
       { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, image: this.imagesData[0] },
@@ -209,12 +243,20 @@ export class CubemapTexture extends Texture {
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
-      uris: this.textureUris
+      uris: this.textureUris,
+      isWhiteCubemap: this.isWhiteCubemap
     }
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
     this.textureUris = jsonObject["uris"];
+    this.isWhiteCubemap = jsonObject["isWhiteCubemap"] ?? false;
+
+    // Reset load states so the texture is re-fetched and the WebGL resource is recreated
+    this.isLoaded = false;
+    this.isLoading = false;
+    this.loadedImages = [null, null, null, null, null, null];
+    this.imagesData = [];
   }
 }
