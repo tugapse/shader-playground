@@ -321,54 +321,62 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
   vec3 lightDir = normalize(u_directionalLightDirections[0]);
-  float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
-  vec3 halfVec = normalize(lightDir + viewDir);
-  float shadowFactor =
-      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, -lightDir);
-  float specularIntensity =
-      pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
-  totalLitColorRGB += (baseColor * u_directionalLightColors[0] *
-                       (diffuseIntensity + specularIntensity)) *
-                      shadowFactor;
+  float nDotL = dot(finalNormal, lightDir);
+  if (nDotL > 0.0) {
+    float diffuseIntensity = nDotL;
+    vec3 halfVec = normalize(lightDir + viewDir);
+    float shadowFactor =
+        is_in_shadow_pcf(v_lightSpacePosition, finalNormal, -lightDir);
+    float specularIntensity =
+        pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
+    totalLitColorRGB += (baseColor * u_directionalLightColors[0] *
+                         (diffuseIntensity + specularIntensity)) *
+                        shadowFactor;
+  }
   for (int i = 0; i < u_numPointLights; ++i) {
-    vec3 lightVecPoint = u_pointLightPositions[i] - v_position; ;
-    float distancePoint = length(lightVecPoint);
+    vec3 lightVecPoint = u_pointLightPositions[i] - v_position;
     vec3 pointLightDir = normalize(lightVecPoint);
-    float attenuationPoint =
-        1.0 / (u_pointLightConstantAtts[i] +
-               u_pointLightLinearAtts[i] * distancePoint +
-               u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
-    float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
-    vec3 halfVec = normalize(pointLightDir + viewDir);
-    float pointSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB +=
-        (baseColor * u_pointLightColors[i] *
-         (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint);
+    float pointNDotL = dot(finalNormal, pointLightDir);
+    if (pointNDotL > 0.0) {
+      float distancePoint = length(lightVecPoint);
+      float attenuationPoint =
+          1.0 / (u_pointLightConstantAtts[i] +
+                 u_pointLightLinearAtts[i] * distancePoint +
+                 u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
+      float pointDiffuseIntensity = pointNDotL;
+      vec3 halfVec = normalize(pointLightDir + viewDir);
+      float pointSpecularIntensity =
+          pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
+          u_specularStrength;
+      totalLitColorRGB +=
+          (baseColor * u_pointLightColors[i] *
+           (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint);
+    }
   }
   for (int i = 0; i < u_numSpotLights; ++i) {
     vec3 lightVecSpot = u_spotLightPositions[i] - v_position;
-    float distanceSpot = length(lightVecSpot);
-    float attenuationSpot =
-        1.0 /
-        (u_spotLightConstantAtts[i] + u_spotLightLinearAtts[i] * distanceSpot +
-         u_spotLightQuadraticAtts[i] * (distanceSpot * distanceSpot));
-    attenuationSpot = clamp(attenuationSpot, 0.0, 1.0);
     vec3 spotLightDirFromFrag = normalize(lightVecSpot);
-    float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
-    float coneFactor = smoothstep(u_spotLightOuterConeCos[i],
-                                  u_spotLightInnerConeCos[i], angleCos);
-    coneFactor = clamp(coneFactor, 0.0, 1.0);
-    float spotDiffuseIntensity =
-        max(dot(finalNormal, spotLightDirFromFrag), 0.0);
-    vec3 halfVec = normalize(spotLightDirFromFrag + viewDir);
-    float spotSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB += (baseColor * u_spotLightColors[i] *
-                         (spotDiffuseIntensity + spotSpecularIntensity) *
-                         attenuationSpot * coneFactor);
+    float spotNDotL = dot(finalNormal, spotLightDirFromFrag);
+    if (spotNDotL > 0.0) {
+      float distanceSpot = length(lightVecSpot);
+      float attenuationSpot =
+          1.0 /
+          (u_spotLightConstantAtts[i] + u_spotLightLinearAtts[i] * distanceSpot +
+           u_spotLightQuadraticAtts[i] * (distanceSpot * distanceSpot));
+      attenuationSpot = clamp(attenuationSpot, 0.0, 1.0);
+      float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
+      float coneFactor = smoothstep(u_spotLightOuterConeCos[i],
+                                    u_spotLightInnerConeCos[i], angleCos);
+      coneFactor = clamp(coneFactor, 0.0, 1.0);
+      float spotDiffuseIntensity = spotNDotL;
+      vec3 halfVec = normalize(spotLightDirFromFrag + viewDir);
+      float spotSpecularIntensity =
+          pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
+          u_specularStrength;
+      totalLitColorRGB += (baseColor * u_spotLightColors[i] *
+                           (spotDiffuseIntensity + spotSpecularIntensity) *
+                           attenuationSpot * coneFactor);
+    }
   }
   return totalLitColorRGB;
 }

@@ -5,6 +5,14 @@ import { JsonSerializedData } from "../interfaces/json-serialized-data.interface
 import { GlEntity } from "./entity";
 
 /**
+ * Defines the type of projection the camera uses.
+ */
+export enum CameraType {
+  PERSPECTIVE = 0,
+  ORTHOGRAPHIC = 1
+}
+
+/**
  * Represents a camera in the 3D scene, responsible for generating the view and projection matrices.
  * @augments {GlEntity}
  */
@@ -26,6 +34,21 @@ export class Camera extends GlEntity {
     return this._mainCamera;
   }
   /**
+   * The type of projection this camera uses.
+   * @type {CameraType}
+   */
+  public cameraType: CameraType = CameraType.PERSPECTIVE;
+  /**
+   * The size of the orthographic projection (half the vertical size of the viewing volume).
+   * @type {number}
+   */
+  public orthoSize: number = 10.0;
+  /**
+   * Flag indicating if the camera is a 2D camera. This locks its rotation in the CameraFlyBehaviour.
+   * @type {boolean}
+   */
+  public is2D: boolean = false;
+  /**
    * The camera's field of view in DEGREES.
    * @type {number}
    */
@@ -34,7 +57,7 @@ export class Camera extends GlEntity {
    * The distance to the near clipping plane.
    * @type {number}
    */
-  public nearPlane: number = 0.1;
+  public nearPlane: number = 0.01;
   /**
    * The distance to the far clipping plane.
    * @type {number}
@@ -116,13 +139,29 @@ export class Camera extends GlEntity {
    * @returns {void}
    */
   public updateProjectionMatrix(): void {
-    mat4.perspective(
-      this._projectionMatrix,
-      (this.fieldOfView * Math.PI) / 180,
-      this.aspectRatio,
-      this.nearPlane,
-      this.farPlane
-    );
+    if (this.cameraType === CameraType.PERSPECTIVE) {
+      mat4.perspective(
+        this._projectionMatrix,
+        (this.fieldOfView * Math.PI) / 180,
+        this.aspectRatio,
+        this.nearPlane,
+        this.farPlane
+      );
+    } else {
+      const orthoLeft = -this.orthoSize * this.aspectRatio;
+      const orthoRight = this.orthoSize * this.aspectRatio;
+      const orthoBottom = -this.orthoSize;
+      const orthoTop = this.orthoSize;
+      mat4.ortho(
+        this._projectionMatrix,
+        orthoLeft,
+        orthoRight,
+        orthoBottom,
+        orthoTop,
+        -this.farPlane,
+        this.farPlane
+      );
+    }
   }
 
   /**
@@ -274,11 +313,31 @@ export class Camera extends GlEntity {
   override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
+      cameraType: this.cameraType,
+      orthoSize: this.orthoSize,
+      is2D: this.is2D,
       fieldOfView: this.fieldOfView,
       nearPlane: this.nearPlane,
       farPlane: this.farPlane,
       aspectRatio: this.aspectRatio,
     };
+  }
+  
+  /**
+   * Deserializes the camera's state from a JSON object.
+   * @override
+   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
+   * @returns {void}
+   */
+  override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    if (jsonObject['cameraType'] !== undefined) this.cameraType = jsonObject['cameraType'];
+    if (jsonObject['orthoSize'] !== undefined) this.orthoSize = jsonObject['orthoSize'];
+    if (jsonObject['is2D'] !== undefined) this.is2D = jsonObject['is2D'];
+    if (jsonObject['fieldOfView'] !== undefined) this.fieldOfView = jsonObject['fieldOfView'];
+    if (jsonObject['nearPlane'] !== undefined) this.nearPlane = jsonObject['nearPlane'];
+    if (jsonObject['farPlane'] !== undefined) this.farPlane = jsonObject['farPlane'];
+    if (jsonObject['aspectRatio'] !== undefined) this.aspectRatio = jsonObject['aspectRatio'];
   }
 
   /**

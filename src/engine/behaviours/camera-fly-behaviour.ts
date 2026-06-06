@@ -3,6 +3,7 @@ import { Keybord, Mouse } from "../core/input";
 import { EntityBehaviour } from "./entity-behaviour";
 import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
 import { Transform } from '../core/transform';
+import { Camera, CameraType } from '../entities/camera';
 
 
 /**
@@ -266,16 +267,36 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    */
   protected applyMovementVelocity(transform: Transform, ellapsed: number) {
     const movementVector = vec3.create();
+    const isOrthographic = this.parent instanceof Camera && this.parent.cameraType === CameraType.ORTHOGRAPHIC;
 
-    // Scale and add movement components based on current velocities
-    if (Math.abs(this._forwardVelocity) > 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.forward, this._forwardVelocity);
-    }
-    if (Math.abs(this._strafeVelocity) > 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.right, this._strafeVelocity);
-    }
-    if (Math.abs(this._upVelocity) > 0) {
-      vec3.scaleAndAdd(movementVector, movementVector, transform.up, this._upVelocity);
+    if (isOrthographic) {
+      const camera = this.parent as Camera;
+      // In orthographic mode, moving forward/backward scales the orthoSize (zoom)
+      if (Math.abs(this._forwardVelocity) > 0) {
+        camera.orthoSize -= this._forwardVelocity * ellapsed;
+        camera.orthoSize = Math.max(0.1, camera.orthoSize); // Prevent zero or negative size
+        camera.updateProjectionMatrix();
+      }
+      
+      // Scale pan velocity proportionally to how zoomed out we are
+      const orthoPanModifier = camera.orthoSize / 10.0;
+      if (Math.abs(this._strafeVelocity) > 0) {
+        vec3.scaleAndAdd(movementVector, movementVector, transform.right, this._strafeVelocity * orthoPanModifier);
+      }
+      if (Math.abs(this._upVelocity) > 0) {
+        vec3.scaleAndAdd(movementVector, movementVector, transform.up, this._upVelocity * orthoPanModifier);
+      }
+    } else {
+      // Scale and add movement components based on current velocities
+      if (Math.abs(this._forwardVelocity) > 0) {
+        vec3.scaleAndAdd(movementVector, movementVector, transform.forward, this._forwardVelocity);
+      }
+      if (Math.abs(this._strafeVelocity) > 0) {
+        vec3.scaleAndAdd(movementVector, movementVector, transform.right, this._strafeVelocity);
+      }
+      if (Math.abs(this._upVelocity) > 0) {
+        vec3.scaleAndAdd(movementVector, movementVector, transform.up, this._upVelocity);
+      }
     }
 
 
@@ -290,9 +311,16 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @protected
    */
   protected applyRotationVelocity(transform: Transform, ellapsed: number) {
+    let is2D = false;
+    if (this.parent instanceof Camera) {
+      is2D = (this.parent as Camera).is2D;
+    }
+
     if (Mouse.mouseButtonDown[this.lookMouseButtons.look]) {
-      this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed;
-      this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed;
+      if (!is2D) {
+        this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed;
+        this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed;
+      }
     }
 
     this._currentPitch = Math.max(-90, Math.min(90, this._currentPitch));
@@ -378,4 +406,10 @@ export class CameraFlyBehaviour extends EntityBehaviour {
       this.lookMouseButtons = jsonObject['lookMouseButtons'];
     }
   }
+
+  override clone(): EntityBehaviour | null {
+    const clone = new CameraFlyBehaviour();
+    clone.fromJson(this.toJsonObject());
+    return clone;
+  } 
 }

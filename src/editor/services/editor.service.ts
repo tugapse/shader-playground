@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
-import { Camera, CameraFlyBehaviour, Scene } from "@engine";
+import { Camera, CameraFlyBehaviour, CameraType, Scene } from "@engine";
 import { BehaviorSubject } from "rxjs";
 import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
 import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
