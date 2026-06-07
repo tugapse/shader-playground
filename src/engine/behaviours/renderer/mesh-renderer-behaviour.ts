@@ -50,7 +50,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
     A flag to enable or disable lighting calculations.
    * @type {boolean}
    */
-  public enableLights = true;
+  public receiveShadows = true;
 
   /**
    * Gets the shadow map texture from the parent scene.
@@ -91,11 +91,11 @@ export class MeshRendererBehaviour extends RendererBehaviour {
         this.shader.setVec2(ShaderUniformsEnum.U_SHADOW_MAP_SIZE, [this.shadowMapTexture.width, this.shadowMapTexture.height]);
         this.shadowMapTexture.bind();
 
-        if (lightEntity) {
+        if (lightEntity ) {
           let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
           mat4.multiply(lightMvpMatrix, lightMvpMatrix, this.transform.modelMatrix);
           this.shader.setMat4(ShaderUniformsEnum.U_LIGHT_MVP_MATRIX, lightMvpMatrix);
-          this.shader.setInt(ShaderUniformsEnum.U_USE_SHADOWS, 1);
+          this.receiveShadows && this.shader.setInt(ShaderUniformsEnum.U_USE_SHADOWS, 1);
         }
       }
 
@@ -181,10 +181,10 @@ export class MeshRendererBehaviour extends RendererBehaviour {
    * @protected
    */
   protected setLightInformation(): void {
-    if (this.shader instanceof LitShader && this.enableLights) {
+    if (this.shader instanceof LitShader) {
       const lights = this.parent.scene.lights.filter((light) => light.active && light.show);
-
       const ambientLight = lights.find((l) => l.entityType === EntityType.LIGHT_AMBIENT);
+
       if (ambientLight) {
         this.shader.setVec4(ShaderUniformsEnum.U_AMBIENT_LIGHT, ambientLight.color.toVec4());
       } else {
@@ -201,7 +201,6 @@ export class MeshRendererBehaviour extends RendererBehaviour {
    * @param {Light[]} sceneLights - An array of all lights in the scene.
    */
   protected createLightObjectInfo(sceneLights: Light[]): void {
-    if (this.enableLights === false) return;
     const directionalLights: DirectionalLight[] = sceneLights.filter((e) => e.entityType === EntityType.LIGHT_DIRECTIONAL) as DirectionalLight[];
     const pointLights: PointLight[] = sceneLights.filter((e) => e.entityType === EntityType.LIGHT_POINT) as PointLight[];
     const spotLights: SpotLight[] = sceneLights.filter((e) => e.entityType === EntityType.LIGHT_SPOT) as SpotLight[];

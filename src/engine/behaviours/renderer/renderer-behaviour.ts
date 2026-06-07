@@ -135,8 +135,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
   public override renderLayer: RenderLayer = RenderLayer.OPAQUE;
 
   public castShadows = true;
-  public receiveShadows = true;
-
+ 
   /**
    * Creates an instance of RendererBehaviour.
    * @param {WebGL2RenderingContext} _gl - The WebGL2 rendering context.
