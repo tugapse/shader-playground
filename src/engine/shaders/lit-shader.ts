@@ -1,3 +1,4 @@
+import { JsonSerializedData } from "@engine";
 import { EngineCache } from "../core/engineCache";
 import { Camera } from "../entities/camera";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
@@ -57,6 +58,7 @@ export class LitShader extends Shader {
 
     this.setFloat(ShaderUniformsEnum.U_SPECULAR_STRENGTH, this.material.specularStrength);
     this.setFloat(ShaderUniformsEnum.U_ROUGHNESS, Math.max(this.material.roughness, 0.01));
+    this.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.material.shadowStrength);
     this.setFloat(ShaderUniformsEnum.U_NORMAL_MAP_STRENGTH, this.material.normalMapStrength);
 
     this.setVec3(ShaderUniformsEnum.U_CAMERA_POSITION, Camera.mainCamera.transform.worldPosition);
@@ -70,6 +72,7 @@ export class LitShader extends Shader {
    * @returns {void}
    */
   protected  checkAndLoadTextures(): void {
+    debugger
     if (this.material.mainTex) {
       if (!this.material.mainTex.isImageLoaded) {
         this.material.mainTex.setGL(this.gl);
@@ -78,6 +81,10 @@ export class LitShader extends Shader {
         this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
         this.material.mainTex.bind();
       }
+    } else {
+      const defaultTex = EngineCache.getWhiteTexture(this.gl);
+      this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, defaultTex, 0);
+      defaultTex.bind();
     }
 
     if (this.material.normalTex) {
@@ -88,6 +95,10 @@ export class LitShader extends Shader {
         this.setTexture(ShaderUniformsEnum.U_NORMAL_TEX, this.material.normalTex, 1);
         this.material.normalTex.bind();
       }
+    } else {
+      const defaultNormalTex = EngineCache.getNormalTexture(this.gl);
+      this.setTexture(ShaderUniformsEnum.U_NORMAL_TEX, defaultNormalTex, 1);
+      defaultNormalTex.bind();
     }
   }
 
@@ -95,5 +106,20 @@ export class LitShader extends Shader {
     super.release();
     if (this.material.mainTex) this.material.mainTex.unBind();
     if (this.material.normalTex) this.material.normalTex.unBind();
+  }
+
+
+  override toJsonObject(): JsonSerializedData {
+    return {
+      ...super.toJsonObject(),
+      mainTex: this.material.mainTex?.toJsonObject(),
+      normalTex: this.material.normalTex?.toJsonObject(),
+    }
+  }
+
+  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
+    await super.fromJson(jsonObject);
+    this.material.fromJson(jsonObject['material']);
+    debugger
   }
 }

@@ -66,10 +66,10 @@ export class Editor implements OnDestroy, OnInit {
     if (projectId && sceneId) {
       this.assetService.getRawAssetContent(projectId, sceneId).subscribe(blob => {
         const reader = new FileReader();  
-        reader.onload = () => {
+        reader.onload = async () => {
           const sceneDataString = reader.result as string;
           const sceneData = JSON.parse(sceneDataString);
-          const scene = SceneManager.loadScene(this.gl, sceneData);
+          const scene = await SceneManager.loadScene(this.gl, sceneData);
           this.editorService.loadScene(scene);
         };
         reader.readAsText(blob);
@@ -110,7 +110,7 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   protected onSceneLoaded(scene: Scene) {
-    debugger
+    
     if (this.scene) {
       this.scene.destroy();
     }
@@ -141,12 +141,12 @@ export class Editor implements OnDestroy, OnInit {
     this.isPaused = true;
   }
 
-  protected onSceneStop(scene: Scene) {
+  protected async onSceneStop(scene: Scene) {
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;
     scene.destroy();
-    const newScene = SceneManager.loadScene(this.gl, this.sceneState!);
+    const newScene = await SceneManager.loadScene(this.gl, this.sceneState!);
 
     this.editorService.loadScene(newScene);
     this.sceneState = null;
@@ -159,7 +159,7 @@ export class Editor implements OnDestroy, OnInit {
   }
   
   protected onSceneTreeAddNewRequested(): void {
-    debugger
+    
     const newEntity = new GlEntity("New Entity");
     this.scene.addEntity(newEntity);
     this.sceneTreeService.onSceneUpdated.emit(this.scene)

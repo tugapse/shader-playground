@@ -250,6 +250,7 @@ uniform vec3 u_cameraPosition;
 uniform float u_normalMapStrength;
 uniform vec4 u_ambientLight;
 uniform int u_useShadows;
+uniform float u_shadowStrength;
 uniform highp sampler2DShadow u_shadowMap; 
 uniform vec2 u_shadowMapSize;
 uniform int u_numDirectionalLights;
@@ -276,7 +277,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   if (projCoords.z > 1.0 || u_useShadows == 0) {
     return 1.0;
   }
-  float cells = 2.0;
+  float cells = 1.0;
   float total = cells * 2.0 + 1.0;
   float shadow = 0.0;
   vec2 texelSize = 1.0 / u_shadowMapSize;
@@ -286,7 +287,8 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
       shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
     }
   }
-  return max(0.05, shadow / (total*total));
+  float shadowFactor = max(0.05, shadow / (total*total));
+  return mix(1.0, shadowFactor, u_shadowStrength);
 }
 vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   vec3 finalNormal;
@@ -305,16 +307,16 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   float clampedRoughness = clamp(u_roughness, 0.001, 0.999);
   float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
-  vec3 lightDir = normalize(u_directionalLightDirections[0]);
+  vec3 lightDir = normalize(-u_directionalLightDirections[0]);
   float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
   vec3 halfVec = normalize(lightDir + viewDir);
   float shadowFactor =
-      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, -lightDir);
+      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
   float specularIntensity =
       pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
-  totalLitColorRGB += (baseColor * u_directionalLightColors[0] *
-                       (diffuseIntensity + specularIntensity)) *
-                      shadowFactor;
+  vec3 diffuse = baseColor * diffuseIntensity;
+  vec3 specular = vec3(1.0) * specularIntensity; 
+  totalLitColorRGB += (diffuse + specular) * u_directionalLightColors[0] * shadowFactor;
   for (int i = 0; i < u_numPointLights; ++i) {
     vec3 lightVecPoint = u_pointLightPositions[i] - v_position; ;
     float distancePoint = length(lightVecPoint);

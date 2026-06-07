@@ -70,17 +70,19 @@ export abstract class EngineCache {
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @returns {Texture} - The cached or newly loaded Texture instance.
    */
-  public static getTexture2D(uri: string, gl?: WebGL2RenderingContext): Texture {
-
-    let result = EngineCache.__cache.textures[uri];
+  public static async getTexture2D(
+    uri: string,
+    gl?: WebGL2RenderingContext
+  ): Promise<Texture> {
+    let result = EngineCache.__cache.textures[uri] as Texture;
     if (!result) {
       result = new Texture(gl, uri);
       EngineCache.__cache.textures[uri] = result;
       EngineCache.__cache.textureCounter[uri] = 1;
-      result.load();
     } else {
       EngineCache.__cache.textureCounter[uri]++;
     }
+    await result.load();
     return result;
   }
 
@@ -89,22 +91,47 @@ export abstract class EngineCache {
 
  * @param {string} uri - The URI of the texture.
  * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
- * @returns {Texture} - The cached or newly loaded Texture instance.
+ * @returns {Promise<CubemapTexture>} - A promise that resolves with the cached or newly loaded CubemapTexture instance.
  */
-  public static getTextureCube(uris: ICubemapSides, gl?: WebGL2RenderingContext): CubemapTexture {
+  public static async getTextureCube(
+    uris: ICubemapSides,
+    gl?: WebGL2RenderingContext
+  ): Promise<CubemapTexture> {
     const { right, left, up, bottom, front, back } = uris;
     const key = [right, left, up, bottom, front, back].join("|");
 
-    let result = EngineCache.__cache.textures[key];
+    let result = EngineCache.__cache.textures[key] as CubemapTexture;
     if (!result) {
       result = new CubemapTexture(gl, [right, left, up, bottom, front, back]);
-      result.load();
       EngineCache.__cache.textures[key] = result;
       EngineCache.__cache.textureCounter[key] = 1;
     } else {
       EngineCache.__cache.textureCounter[key]++;
     }
-    return result as CubemapTexture;
+    await result.load();
+    return result;
+  }
+
+  public static getWhiteTexture(gl: WebGL2RenderingContext): Texture {
+    const key = "__white_texture__";
+    let result = EngineCache.__cache.textures[key];
+    if (!result) {
+      result = Texture.create(gl, 1, 1, new Uint8Array([255, 255, 255, 255]));
+      EngineCache.__cache.textures[key] = result;
+      EngineCache.__cache.textureCounter[key] = 1;
+    }
+    return result as Texture;
+  }
+
+  public static getNormalTexture(gl: WebGL2RenderingContext): Texture {
+    const key = "__normal_texture__";
+    let result = EngineCache.__cache.textures[key];
+    if (!result) {
+      result = Texture.create(gl, 1, 1, new Uint8Array([128, 128, 255, 255]));
+      EngineCache.__cache.textures[key] = result;
+      EngineCache.__cache.textureCounter[key] = 1;
+    }
+    return result as Texture;
   }
 
   public static releaseTexture(texture: Texture): void {
@@ -161,12 +188,12 @@ export abstract class EngineCache {
     Clears all cached data, including textures, meshes, and shader code.
    */
   public static clear(): void {
-    for (const key in EngineCache.__cache.textures) {
-      const texture = EngineCache.__cache.textures[key];
-      if (texture) {
-        texture.destroy();
-      }
-    }
+    // for (const key in EngineCache.__cache.textures) {
+    //   const texture = EngineCache.__cache.textures[key];
+    //   if (texture) {
+    //     texture.destroy();
+    //   }
+    // }
 
     EngineCache.__cache = {
       shaderCode: {},

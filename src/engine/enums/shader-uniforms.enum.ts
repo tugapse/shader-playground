@@ -282,6 +282,12 @@ export enum ShaderUniformsEnum {
    * @type {string}
    */
   U_SHADOW_MAP_SIZE = "u_shadowMapSize",
+  /**
+   * The strength of the shadows.
+   *
+   * @type {string}
+   */
+  U_SHADOW_STRENGTH = "u_shadowStrength",
 
   /**
    * --- Fog ---

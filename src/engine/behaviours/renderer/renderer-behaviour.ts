@@ -135,6 +135,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
   public override renderLayer: RenderLayer = RenderLayer.OPAQUE;
 
   public castShadows = true;
+  public receiveShadows = true;
 
   /**
    * Creates an instance of RendererBehaviour.

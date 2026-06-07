@@ -25,7 +25,7 @@ export class SceneManager {
    * @param {Scene} [scene] - An optional existing Scene instance to load into.
    * @returns {Scene} - The loaded or newly created Scene instance.
    */
-  public static loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Scene {
+  public static async loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Promise<Scene> {
 
     EngineCache.clear();
     scene = scene || new Scene();
@@ -33,7 +33,7 @@ export class SceneManager {
 
     const { meshMaps, objects, textureMaps } = jsonData;
     const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
-    SceneManager.instaciateAndLoadSceneTextures(textureMaps, gl);
+    await SceneManager.instaciateAndLoadSceneTextures(textureMaps, gl);
 
     jsonData['objects'] = SceneManager.instaciateSceneObjects(scene, objects, meshes, gl);
     scene.fromJson(jsonData);
@@ -98,7 +98,7 @@ export class SceneManager {
       this.instanciateBehaviours(ob, scene, meshes, gl);
     }
     );
-    debugger
+    
     return objects.map((e: any) => e.entity);
   }
 

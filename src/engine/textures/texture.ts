@@ -115,6 +115,13 @@ export class Texture extends JsonSerializable {
   protected _height: number = 0;
 
   /**
+   * A promise that resolves when the texture is fully loaded.
+   * @protected
+   * @type {Promise<void> | null}
+   */
+  protected _loadPromise: Promise<void> | null = null;
+
+  /**
    * Creates an instance of Texture.
    * @param {WebGL2RenderingContext} [gl] - The WebGL2 rendering context.
    * @param {string} [textureUri] - The URI of the image to load.
@@ -222,37 +229,49 @@ export class Texture extends JsonSerializable {
    * Loads an image from the provided URI and creates the WebGL texture.
    * @returns {Promise<void>} A Promise that resolves when the image is fully loaded and the WebGL texture is created.
    */
-  public async load(): Promise<void> {
-    if (!this.gl || this.isLoading || this.isImageLoaded) return;
-    this.isLoading = true;
-    return new Promise((resolve, reject) => {
+  public load(): Promise<void> {
+    if (this._loadPromise) {
+      return this._loadPromise;
+    }
+
+    if (this.isLoaded) {
+      return Promise.resolve();
+    }
+
+    if (!this.gl) {
+      return Promise.reject(new Error("WebGL context not available."));
+    }
+
+    this._loadPromise = new Promise((resolve, reject) => {
       if (!this.textureUri) {
-        reject(new Error("Failed to load image. Please provide a texture URL!"));
+        return reject(new Error("Failed to load image. Please provide a texture URL!"));
       }
 
+      this.isLoading = true;
       this.image = new Image();
       this.image.onload = () => {
-        if(!this.image){
-          debugger;
-          return;
+        if (!this.image || !this.gl) {
+          this.isLoading = false;
+          return reject(new Error("Image or WebGL context is null after loading."));
         }
         this.isLoaded = true;
-        this._width = this.image!.width;
-        this._height = this.image!.height;
-        if (this.gl) {
-          this.createGLTexture(this.gl);
-        }
         this.isLoading = false;
+        this._width = this.image.width;
+        this._height = this.image.height;
+        this.createGLTexture(this.gl);
         resolve();
       };
       this.image.onerror = (error) => {
         this.isLoading = false;
         this.isLoaded = false;
         this.image = null;
+        this._loadPromise = null; // Allow retrying
         reject(new Error(`Failed to load image: ${this.textureUri!}. Error: ${error}`));
       };
-      this.image.src = this.textureUri!;
+      this.image.src = this.textureUri;
     });
+
+    return this._loadPromise;
   }
 
   /**

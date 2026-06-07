@@ -44,7 +44,7 @@ export class DropdownComponent implements OnInit, OnDestroy {
   }
 
   selectItem(item: DropdownItem): void {
-    debugger
+    
     this.selectedItem = item;
     this.itemSelected.emit(item);
     this.isOpen = false;

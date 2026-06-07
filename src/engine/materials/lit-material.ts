@@ -21,6 +21,11 @@ export class LitMaterial extends UnlitMaterial {
    */
   public roughness: number = 0.01;
   /**
+    The strength of the shadows cast onto this material.
+   * @type {number}
+   */
+  public shadowStrength: number = 0.5;
+  /**
     The intensity of the normal map effect.
    * @type {number}
    */
@@ -47,6 +52,7 @@ export class LitMaterial extends UnlitMaterial {
       normalTex: this.normalTex?.toJsonObject(),
       specularStrength: this.specularStrength,
       roughness: this.roughness,
+      shadowStrength: this.shadowStrength,
       normalMapStrength: this.normalMapStrength,
     };
   }
@@ -57,14 +63,16 @@ export class LitMaterial extends UnlitMaterial {
    * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
    * @returns {void}
    */
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
+  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
+    await super.fromJson(jsonObject);
     if(jsonObject["normalTex"]?.url){
-      this.normalTex = EngineCache.getTexture2D(jsonObject["normalTex"].url);
+      this.normalTex = await EngineCache.getTexture2D(jsonObject["normalTex"].url);
       this.normalTex.fromJson(jsonObject['normalTex']);
     }
     this.roughness = jsonObject['roughness'];
+    this.shadowStrength = jsonObject['shadowStrength'] ?? 0.5;
     this.normalMapStrength = jsonObject['normalMapStrength'];
+    debugger
   }
 
   /**

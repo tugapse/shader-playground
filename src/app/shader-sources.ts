@@ -320,13 +320,13 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   float clampedRoughness = clamp(u_roughness, 0.001, 0.999);
   float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
-  vec3 lightDir = normalize(u_directionalLightDirections[0]);
+  vec3 lightDir = normalize(-u_directionalLightDirections[0]);
   float nDotL = dot(finalNormal, lightDir);
   if (nDotL > 0.0) {
     float diffuseIntensity = nDotL;
     vec3 halfVec = normalize(lightDir + viewDir);
     float shadowFactor =
-        is_in_shadow_pcf(v_lightSpacePosition, finalNormal, -lightDir);
+        is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
     float specularIntensity =
         pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
     totalLitColorRGB += (baseColor * u_directionalLightColors[0] *
@@ -448,7 +448,7 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv, float shadowFactor) {
     float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
     vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
     for (int i = 0; i < u_numDirectionalLights; ++i) {
-        vec3 lightDir = normalize(u_directionalLightDirections[i]);
+        vec3 lightDir = normalize(-u_directionalLightDirections[i]);
         float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
         vec3 halfVec = normalize(lightDir + viewDir);
         float specularIntensity = pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;

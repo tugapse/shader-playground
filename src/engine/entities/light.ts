@@ -123,7 +123,7 @@ export class DirectionalLight extends Light {
    * @type {vec3}
    */
   public get direction(): vec3 {
-    return vec3.normalize(vec3.create(), this.transform.back);
+    return vec3.normalize(vec3.create(), this.transform.forward);
   }
   /**
     The type of the entity, specifically set to LIGHT_DIRECTIONAL.
@@ -270,7 +270,7 @@ export class SpotLight extends Light {
    * @type {vec3}
    */
   public get toLightDirection(): vec3 {
-    return this.transform.back;
+    return this.transform.forward;
   }
 
   /**

@@ -116,7 +116,7 @@ export class SceneTree {
 
   handleNodeDropped(event: { draggedNode: TreeNode<string>, targetNode: TreeNode<string>, dropPosition: 'above' | 'below' | 'inside' }) {
 
-    debugger
+    
     const { draggedNode, targetNode, dropPosition } = event;
 
     const { node: foundDraggedNode, parent: draggedParent } = this.findNodeAndParent(this.sceneTreeNodes, draggedNode.name);
@@ -186,7 +186,7 @@ export class SceneTree {
       this.sceneTreeService.onEntitySelected.emit(entity);
       setTimeout(() => this.editorService.requestCanvasResize(), 30);
     } else {
-      debugger
+      
     }
   }
 

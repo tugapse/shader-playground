@@ -62,7 +62,7 @@ export class TreeNodeComponent<T> {
     if (event.dataTransfer) {
       const draggedNode = JSON.parse(event.dataTransfer.getData('application/json'));
       if (draggedNode && draggedNode.name !== this.node.name) {
-        debugger
+        
         const dropPosition = this.isDropAbove ? 'above' : (this.isDropBelow ? 'below' : 'inside');
         this.nodeDropped.emit({ draggedNode, targetNode: this.node, dropPosition });
       }

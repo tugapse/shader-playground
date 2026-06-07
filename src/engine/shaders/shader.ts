@@ -337,6 +337,7 @@ export class Shader extends JsonSerializable {
   public setMat4(name: string, value: mat4): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
+      this.use();
       this.gl.uniformMatrix4fv(location, false, Float32Array.from(value));
     }
   }
@@ -558,7 +559,5 @@ export class Shader extends JsonSerializable {
     this.fragUri = jsonObject['fragUri'];
     this.vertexUri = jsonObject['vertexUri'];
     this.material = ObjectInstanciator.instanciateObjectFromJsonData(jsonObject["material"].className) || new ColorMaterial();
-    debugger
-    this.material.fromJson(jsonObject['material']);
   }
 }

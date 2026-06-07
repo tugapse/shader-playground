@@ -33,17 +33,13 @@ void main() {
   vec4 sampledTexColor = texture(u_mainTex, uv);
   vec4 baseColor = vec4(sampledTexColor.rgb * u_matColor.rgb, (u_matColor.a * sampledTexColor.a));
 
-  // 1. Calculate the final lit color (un-fogged)
   vec3 totalLitColorRGB = calculateTotalLitColor(baseColor.rgb, uv);
 
-  // 2. Clamp the color and keep the alpha
   vec4 finalColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
   vec3 foggedRGB = finalColor.rgb;
 
   if (u_fogEnabled == 1) {
-    // 3. Apply the fog using the new function and uniforms
     foggedRGB = applyExponentialFog(finalColor.rgb, u_FogColor, v_fogDistance, u_FogDensity);
   }
-  // 4. Set the final fragment color
   fragColor = vec4(foggedRGB, finalColor.a);
 }

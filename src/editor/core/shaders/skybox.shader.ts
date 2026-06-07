@@ -35,8 +35,8 @@ export class EditorSkyboxMaterial extends CubemapMaterial {
     }
   }
 
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
+  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
+    await super.fromJson(jsonObject);
     this.horizonColor = Color.createFromJsonData(jsonObject['horizonColor']);
     this.horizonStart = jsonObject['horizonStart'];
     this.horizonFade = jsonObject['horizonFade'];

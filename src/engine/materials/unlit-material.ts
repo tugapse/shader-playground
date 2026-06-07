@@ -48,11 +48,10 @@ export class UnlitMaterial extends ColorMaterial {
    * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
    * @returns {void}
    */
-  override fromJson(jsonObject: JsonSerializedData): void {
+  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
     super.fromJson(jsonObject);
     if (jsonObject["mainTex"]?.url) {
-      this.mainTex = EngineCache.getTexture2D(jsonObject["mainTex"].url);
-      this.mainTex.fromJson(jsonObject['mainTex']);
+      this.mainTex = await EngineCache.getTexture2D(jsonObject["mainTex"].url);
     }
     jsonObject['uvScale'] && this.uvScale.set(...jsonObject['uvScale']);
     jsonObject['uvOffset'] && this.uvOffset.set(...jsonObject['uvOffset']);

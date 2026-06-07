@@ -15,7 +15,9 @@ import {
   LitMaterial, LitShader, Mesh, MeshData, MeshRendererBehaviour, ObjectInstanciator,
   PlanePrimitive, PointLight,
   Scene,
-  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight
+  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  UnlitMaterial,
+  UnlitShader
 } from '@engine';
 import { ClassType } from "@engine/enums/class-type.enum";
 
@@ -55,12 +57,12 @@ export class App implements OnDestroy {
       path: "Editor/Shaders/EditorSkyboxShader",
       description: "A specialized skybox shader used specifically within the editor environment."
     });
-    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial, {
-      name: "EditorSkyboxMaterial",
-      type: ClassType.Material,
-      path: "Editor/Materials/EditorSkyboxMaterial",
-      description: "A specialized skybox material used specifically within the editor environment."
-    });
+    // ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial, {
+    //   name: "EditorSkyboxMaterial",
+    //   type: ClassType.Material,
+    //   path: "Editor/Materials/EditorSkyboxMaterial",
+    //   description: "A specialized skybox material used specifically within the editor environment."
+    // });
 
   }
 
@@ -118,13 +120,13 @@ export class App implements OnDestroy {
   private async otherObjetcs(scene: Scene) {
 
     const torusPrimitive = await EngineCache.getMeshDataFromObj("assets/primitives/torus.obj");
-    const torus = this.createEntity("torus", torusPrimitive, new MeshRendererBehaviour(this.gl));
+    const torus = await this.createEntity("torus", torusPrimitive, new MeshRendererBehaviour(this.gl));
     torus.transform.scale(2, 2, 2);
     torus.transform.translate(0, 2, 0);
     torus.addBehaviour(new RotateBehaviour());
     scene.addEntity(torus);
 
-    const cube = this.createEntity("cube", new CubePrimitive(), new MeshRendererBehaviour(this.gl));
+    const cube = await this.createEntity("cube", new CubePrimitive(), new MeshRendererBehaviour(this.gl));
     const cubePos = vec3.create();
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.left, 2.5);
     vec3.scaleAndAdd(cubePos, cubePos, cube.transform.up, 2.5);
@@ -132,7 +134,7 @@ export class App implements OnDestroy {
     scene.addEntity(cube);
 
     const primitive = new SpherePrimitive();
-    const sphere = this.createEntity("sphere", primitive, new MeshRendererBehaviour(this.gl), new LitShader(this.gl, new LitMaterial()));
+    const sphere = await this.createEntity("sphere", primitive, new MeshRendererBehaviour(this.gl), new LitShader(this.gl, new LitMaterial()));
     scene.addEntity(sphere);
   }
 
@@ -141,9 +143,10 @@ export class App implements OnDestroy {
     const material = new LitMaterial();
 
     const shader = new LitShader(this.gl, material);
+    
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.name = "Renderer";
-
+    renderer.castShadows = false;
     material.mainTex = await EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
     material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal1.jpg", this.gl);
 
@@ -188,27 +191,27 @@ export class App implements OnDestroy {
 
 
     const monkeyObj = await EngineCache.getMeshDataFromObj("assets/objs/monkey.obj");
-    const monkeyEntity = this.createEntity(
+    const monkeyEntity = await this.createEntity(
       "Monkey", monkeyObj, new MeshRendererBehaviour(this.gl),
-      new LitShader(this.gl, new LitMaterial()));
+      new UnlitShader(this.gl, new UnlitMaterial()));
 
     monkeyEntity.transform.translate(3.5, 0, 0);
     scene.addEntity(monkeyEntity);
 
 
 
-    const movingMokeyEntity = this.createEntity("MovingMonkey", monkeyObj, new MeshRendererBehaviour(this.gl));
+    const movingMokeyEntity = await this.createEntity("MovingMonkey", monkeyObj, new MeshRendererBehaviour(this.gl));
     scene.addEntity(movingMokeyEntity);
 
     // movingMokeyEntity.transform.setParent(this.light.transform)
   }
 
-  private createEntity(
+  private async createEntity(
     name: string, meshData: MeshData,
     meshRenderer: MeshRendererBehaviour,
     shader?: Shader,
     material?: LitMaterial
-  ): GlEntity {
+  ): Promise<GlEntity> {
 
     const entity = new GlEntity(name);
     const mesh = new Mesh()
@@ -223,8 +226,8 @@ export class App implements OnDestroy {
 
 
     if (material) {
-      const wallstoneTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg", this.gl);
-      const wallNormalTexture = EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
+      const wallstoneTexture = await EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg", this.gl);
+      const wallNormalTexture = await EngineCache.getTexture2D("assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg", this.gl);
 
       material.name = "Lit Material";
       material.mainTex = wallstoneTexture;
@@ -257,16 +260,16 @@ export class App implements OnDestroy {
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");
     
 
-    const skyboxTextures = {
-      right: "assets/images/skybox/blue/right.jpeg",
-      left: "assets/images/skybox/blue/left.jpeg",
-      up: "assets/images/skybox/blue/top.jpeg",
-      bottom: "assets/images/skybox/blue/bottom.jpeg",
-      front: "assets/images/skybox/blue/front.jpeg",
-      back: "assets/images/skybox/blue/back.jpeg"
+    // const skyboxTextures = {
+    //   right: "assets/images/skybox/blue/right.jpeg",
+    //   left: "assets/images/skybox/blue/left.jpeg",
+    //   up: "assets/images/skybox/blue/top.jpeg",
+    //   bottom: "assets/images/skybox/blue/bottom.jpeg",
+    //   front: "assets/images/skybox/blue/front.jpeg",
+    //   back: "assets/images/skybox/blue/back.jpeg"
 
-    }
-    // const texture = EngineCache.getTextureCube(skyboxTextures, this.gl);
+    // }
+    // const texture = await EngineCache.getTextureCube(skyboxTextures, this.gl);
     // material.mainTex = texture;
     material.mainTex = CubemapTexture.createWhiteCubemap(this.gl);
     const skyboxEntity = new GlEntity(material.name);
