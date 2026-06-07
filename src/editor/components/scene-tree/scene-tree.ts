@@ -3,15 +3,18 @@ import { Component, Input } from '@angular/core';
 
 import { Icon } from "../../../app/components/icon/icon";
 import { SceneTreeService } from '../../services/scene-tree.service';
-import { GlEntity, EntityType, Scene } from '@engine';
+import { GlEntity, EntityType, Scene, ObjectInstanciator } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { TreeNode } from './scene-node';
 import { TreeNodeComponent } from './tree-node/tree-node';
+import { AddBehaviourMenuComponent } from '../../components/add-behaviour-menu/add-behaviour-menu';
+import { ClassType } from '@engine/enums/class-type.enum';
+import { ClassMetadata } from '@engine/interfaces/class-metadata';
 
 
 @Component({
   selector: 'app-scene-tree',
-  imports: [CommonModule, Icon, TreeNodeComponent],
+  imports: [CommonModule, Icon, TreeNodeComponent, AddBehaviourMenuComponent],
   templateUrl: './scene-tree.html',
   styleUrl: './scene-tree.scss'
 })
@@ -21,8 +24,8 @@ export class SceneTree {
 
 
   @Input() public set targetScene(scene: Scene) {
-      this.scene = scene;
-      this.prepareObjects();
+    this.scene = scene;
+    this.prepareObjects();
   };
 
 
@@ -116,7 +119,7 @@ export class SceneTree {
 
   handleNodeDropped(event: { draggedNode: TreeNode<string>, targetNode: TreeNode<string>, dropPosition: 'above' | 'below' | 'inside' }) {
 
-    
+
     const { draggedNode, targetNode, dropPosition } = event;
 
     const { node: foundDraggedNode, parent: draggedParent } = this.findNodeAndParent(this.sceneTreeNodes, draggedNode.name);
@@ -186,11 +189,35 @@ export class SceneTree {
       this.sceneTreeService.onEntitySelected.emit(entity);
       setTimeout(() => this.editorService.requestCanvasResize(), 30);
     } else {
-      
+
     }
   }
 
-  onSceneTreeAddNewRequested() {
-    this.sceneTreeService.onAddNewRequested.emit();
+  isAddEntityMenuOpen = false;
+  availableEntities: ClassMetadata[] = [];
+  menuX = 0;
+  menuY = 0;
+
+  onSceneTreeAddNewRequested(event: MouseEvent) {
+    event.stopPropagation();
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+
+    // Position slightly below the button
+    this.menuY = rect.bottom + 5;
+    this.menuX = rect.left;
+    const hiddenentities = ['GLEntity', 'Scene'];
+    this.availableEntities = ObjectInstanciator.getMetadata([ClassType.Entity, ClassType.Light]).filter(meta => !hiddenentities.includes(meta.name));
+    this.isAddEntityMenuOpen = true;
+  }
+
+  onEntitySelected(entityMetadata: ClassMetadata) {
+    if (!this.scene) return;
+    const instance = ObjectInstanciator.instanciateObjectFromJsonData(entityMetadata.name, ["New " + entityMetadata.name]);
+    if (instance) {
+      this.scene.addEntity(instance as GlEntity);
+      this.sceneTreeService.onSceneUpdated.emit(this.scene);
+      this.sceneTreeService.onEntitySelected.emit(instance as GlEntity);
+    }
   }
 }

@@ -13,7 +13,8 @@ import { GlEntity, Color, ObjectInstanciator } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { Icon } from "src/app/components/icon/icon";
 import { ClassType } from '@engine/enums/class-type.enum';
-import { AddBehaviourMenuComponent, BehaviourMetadata } from '../../components/add-behaviour-menu/add-behaviour-menu';
+import { AddBehaviourMenuComponent } from '../../components/add-behaviour-menu/add-behaviour-menu';
+import { ClassMetadata } from '@engine/interfaces/class-metadata';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -43,7 +44,7 @@ export class EntityInspector extends ObjectInspector {
 
   entity?: GlEntity | null;
   isAddBehaviourMenuOpen = false;
-  availableBehaviours: BehaviourMetadata[] = [];
+  availableBehaviours: ClassMetadata[] = [];
   menuX = 0;
   menuY = 0;
 
@@ -95,11 +96,11 @@ export class EntityInspector extends ObjectInspector {
     this.menuX = rect.right - 320; // 320px is the menu width
     
     this.availableBehaviours = ObjectInstanciator.getMetadata([ClassType.EntityBehaviour, ClassType.RenderBehaviour])
-      .filter(b => b.name !== "EntityBehaviour" && b.name !== "RenderBehaviour") as BehaviourMetadata[];
+      .filter(b => b.name !== "EntityBehaviour" && b.name !== "RenderBehaviour") as ClassMetadata[];
     this.isAddBehaviourMenuOpen = true;
   }
 
-  onBehaviourSelected(behaviour: BehaviourMetadata) {
+  onBehaviourSelected(behaviour: ClassMetadata) {
     if (!this.entity) return;
     const instance = ObjectInstanciator.instanciateObjectFromJsonData(behaviour.name);
     if (instance) {

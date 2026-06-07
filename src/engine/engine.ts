@@ -145,7 +145,7 @@ export class Engine {
       name: "GlEntity",
       type: ClassType.Entity,
       path: "Entities/GlEntity",
-      description: "Base class for all entities in the scene."
+      description: "Base Entity for all entities in the scene."
     });
 
     ObjectInstanciator.addDependency("Camera", Camera.instanciate, {
@@ -159,7 +159,7 @@ export class Engine {
       name: "Light",
       type: ClassType.Light,
       path: "Entities/Light",
-      description: "Base class for all light sources in the scene."
+      description: "Ambient light source providing general illumination to the scene without a specific direction or position."
     });
 
     ObjectInstanciator.addDependency("PointLight", PointLight.instanciate, {

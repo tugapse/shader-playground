@@ -14,17 +14,17 @@ export class LightAttenuation {
     The constant component of attenuation.
    * @type {number}
    */
-  public constant!: number;
+  public constant: number = 1.0;
   /**
     The linear component of attenuation.
    * @type {number}
    */
-  public linear!: number;
+  public linear: number = 0.09;
   /**
     The quadratic component of attenuation.
    * @type {number}
    */
-  public quadratic!: number;
+  public quadratic: number = 0.032;
 }
 
 /**
@@ -35,12 +35,12 @@ export class LightConeAngles {
     The inner cone angle in degrees.
    * @type {number}
    */
-  public inner!: number;
+  public inner: number = 15.0;
   /**
     The outer cone angle in degrees.
    * @type {number}
    */
-  public outer!: number;
+  public outer: number = 20.0;
 }
 
 /**

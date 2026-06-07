@@ -1,12 +1,7 @@
 import { Component, EventEmitter, Input, Output, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ClassMetadata } from '@engine/interfaces/class-metadata';
 
-export interface BehaviourMetadata {
-  name: string;
-  type: string;
-  path: string;
-  description: string;
-}
 
 @Component({
   selector: 'editor-add-behaviour-menu',
@@ -16,24 +11,24 @@ export interface BehaviourMetadata {
   styleUrls: ['./add-behaviour-menu.scss']
 })
 export class AddBehaviourMenuComponent {
-  @Input() behaviours: BehaviourMetadata[] = [];
+  @Input() behaviours: ClassMetadata[] = [];
   @Input() isOpen = false;
   @Input() menuX = 0;
   @Input() menuY = 0;
   
-  @Output() behaviourSelected = new EventEmitter<BehaviourMetadata>();
+  @Output() behaviourSelected = new EventEmitter<ClassMetadata>();
   @Output() closeMenu = new EventEmitter<void>();
 
   searchQuery = '';
 
   constructor(private elementRef: ElementRef) {}
 
-  get filteredBehaviours(): BehaviourMetadata[] {
+  get filteredBehaviours(): ClassMetadata[] {
     if (!this.searchQuery) return this.behaviours;
     const lowerQuery = this.searchQuery.toLowerCase();
     return this.behaviours.filter(b => 
       b.name.toLowerCase().includes(lowerQuery) || 
-      b.description.toLowerCase().includes(lowerQuery) ||
+      (b.description!||"").toLowerCase().includes(lowerQuery) ||
       b.type.toLowerCase().includes(lowerQuery)
     );
   }
@@ -53,7 +48,7 @@ export class AddBehaviourMenuComponent {
     }
   }
 
-  selectBehaviour(behaviour: BehaviourMetadata, event: MouseEvent): void {
+  selectBehaviour(behaviour: ClassMetadata, event: MouseEvent): void {
     event.stopPropagation();
     this.behaviourSelected.emit(behaviour);
     this.closeMenu.emit();

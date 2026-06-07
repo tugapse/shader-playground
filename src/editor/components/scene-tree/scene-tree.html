@@ -1,12 +1,15 @@
 <div class="tree-header">
   <h4>Scene Tree</h4>
   <div>
-    <app-icon class="icon" iconName="fa-add" (click)="onSceneTreeAddNewRequested()"></app-icon>
-    <div class="dropdown">
-      <div>Emdivty Game Object</div>
-      <div>Light</div>
-      <div>Camera</div>
-    </div>
+    <app-icon class="icon" iconName="fa-add" (click)="onSceneTreeAddNewRequested($event)"></app-icon>
+    <editor-add-behaviour-menu
+      [isOpen]="isAddEntityMenuOpen"
+      [behaviours]="availableEntities"
+      [menuX]="menuX"
+      [menuY]="menuY"
+      (behaviourSelected)="onEntitySelected($event)"
+      (closeMenu)="isAddEntityMenuOpen = false">
+    </editor-add-behaviour-menu>
     <!-- <app-icon class="icon" iconName="fa-filter"></app-icon> -->
   </div>
 </div>

@@ -157,21 +157,11 @@ export class Editor implements OnDestroy, OnInit {
     this.inspectorSelectedEntity = entity;
     this.gizmosBehaviour.setTargetEntity(entity);
   }
-  
-  protected onSceneTreeAddNewRequested(): void {
-    
-    const newEntity = new GlEntity("New Entity");
-    this.scene.addEntity(newEntity);
-    this.sceneTreeService.onSceneUpdated.emit(this.scene)
-    this.sceneTreeService.onEntitySelected.emit(newEntity);
-  }
 
   protected subscribeEvents(): void {
     this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
-    this.subs$.push(this.sceneTreeService.onAddNewRequested.subscribe(this.onSceneTreeAddNewRequested.bind(this)));
 
-    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));
-    this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
+    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));    this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
     this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));
