@@ -22,6 +22,7 @@ import { Shader } from "./shaders/shader";
 import { SkyboxShader } from "./shaders/skybox-shader";
 import { UnlitShader } from "./shaders/unlit-shader";
 import { ClassType } from "./enums/class-type.enum";
+import { SkyboxMaterial } from "@engine";
 
 /**
   The main entry point for the engine. This class handles the initialization of core components and dependency registration.
@@ -305,6 +306,12 @@ export class Engine {
       type: ClassType.Material,
       path: "Materials/Cubemap",
       description: "A material used specifically for skyboxes and reflections, mapping a cubemap texture."
+    });
+    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new SkyboxMaterial, {
+      name: "EditorSkyboxMaterial",
+      type: ClassType.Material,
+      path: "Editor/Materials/EditorSkyboxMaterial",
+      description: "A specialized skybox material used specifically within the editor environment."
     });
 
     // Other Behaviours

@@ -44,7 +44,7 @@ export class BehaviourInspector extends ObjectInspector {
   protected renderBooleans = ["enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer"];
 
 
-  override denyProperties: string[] = ["shader", "active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
+  override denyProperties: string[] = [ "active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
     ...Object.keys(this.drawingEnums), "blendMode", // inner emuns
     ...this.renderBooleans,
   ]

@@ -151,7 +151,7 @@ export class SunBehaviour extends EntityBehaviour {
         if (skyboxRenderer.shader && skyboxRenderer.shader instanceof SkyboxShader) {
           const shader = skyboxRenderer.shader as SkyboxShader;
           shader._useSun = 1;
-          const normalizedDir = vec3.normalize(vec3.create(), this.transform.worldPosition as any);
+          const normalizedDir = vec3.normalize(vec3.create(), this.transform.worldPosition);
           shader._sunDirection.set(normalizedDir[0], normalizedDir[1], normalizedDir[2]);
           shader._sunColor = light.color;
           // Place the moon exactly opposite to the sun

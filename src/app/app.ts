@@ -2,8 +2,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { vec3 } from 'gl-matrix';
 
-import { EditorSkyboxMaterial, EditorSkyboxShader } from '@editor/core/shaders/skybox.shader';
-import { Editor } from '@editor/editor';
 import { EditorService } from '@editor/services/editor.service';
 import {
   Camera, CanvasViewport,
@@ -15,11 +13,10 @@ import {
   LitMaterial, LitShader, Mesh, MeshData, MeshRendererBehaviour, ObjectInstanciator,
   PlanePrimitive, PointLight,
   Scene,
-  Shader, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
+  Shader, SkyboxMaterial, SkyboxRenderer, SkyboxShader, SpherePrimitive, SpotLight,
   UnlitMaterial,
   UnlitShader
 } from '@engine';
-import { ClassType } from "@engine/enums/class-type.enum";
 
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
@@ -51,18 +48,13 @@ export class App implements OnDestroy {
       "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
     };
 
-    ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate, {
-      name: "EditorSkyboxShader",
-      type: ClassType.Shader,
-      path: "Editor/Shaders/EditorSkyboxShader",
-      description: "A specialized skybox shader used specifically within the editor environment."
-    });
-    // ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new EditorSkyboxMaterial, {
-    //   name: "EditorSkyboxMaterial",
-    //   type: ClassType.Material,
-    //   path: "Editor/Materials/EditorSkyboxMaterial",
-    //   description: "A specialized skybox material used specifically within the editor environment."
+    // ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate, {
+    //   name: "EditorSkyboxShader",
+    //   type: ClassType.Shader,
+    //   path: "Editor/Shaders/EditorSkyboxShader",
+    //   description: "A specialized skybox shader used specifically within the editor environment."
     // });
+
 
   }
 
@@ -250,7 +242,7 @@ export class App implements OnDestroy {
   private async createSkybox(scene: Scene, useWhiteTexture = true) {
 
     const renderer = new SkyboxRenderer(this.gl);
-    const material = new CubemapMaterial();
+    const material = new SkyboxMaterial();
     const shader = new SkyboxShader(this.gl, material);
     const cubePrimitive = new SpherePrimitive();
     renderer.writeToDephBuffer = false;

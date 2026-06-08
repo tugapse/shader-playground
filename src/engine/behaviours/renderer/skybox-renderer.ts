@@ -3,6 +3,7 @@ import { Camera } from "../../entities/camera";
 import { ShaderUniformsEnum } from "../../enums/shader-uniforms.enum";
 import { JsonSerializedData } from "../../interfaces/json-serialized-data.interface";
 import { MeshRendererBehaviour } from "./mesh-renderer-behaviour";
+import { SkyboxMaterial } from "@engine";
 
 /**
  * A specialized renderer for drawing a skybox.
@@ -41,6 +42,10 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
       return true;
     }
     return false;
+  }
+  
+  public get material():SkyboxMaterial {
+    return this.shader?.material as SkyboxMaterial;
   }
 
   /**

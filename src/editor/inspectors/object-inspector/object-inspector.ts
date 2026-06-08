@@ -94,6 +94,7 @@ export class ObjectInspector {
     this._properties = [];
     const object = this._selectedObject.property;
     const keys = Object.keys(object).filter(this.isPropertyValid.bind(this));
+
     for (const key of keys) {
       const newValue = (object)[key];
       if(newValue===undefined) continue;

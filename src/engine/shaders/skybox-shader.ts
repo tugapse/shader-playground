@@ -6,6 +6,7 @@ import { CubemapTexture } from "../textures/cubemap-texture";
 import { Shader } from "./shader";
 import { Vector3, Vector4 } from "@engine/core/vector";
 import { Color } from "@engine/core/color";
+import { SkyboxMaterial } from "@engine/materials/skybox-material";
 
 /**
   A shader designed specifically for rendering skyboxes using a cubemap texture.
@@ -31,7 +32,7 @@ export class SkyboxShader extends Shader {
     The cubemap material associated with this shader.
    * @type {CubemapMaterial}
    */
-  public declare material: CubemapMaterial;
+  public declare material: SkyboxMaterial;
 
   // Sun properties to be passed as uniforms
   public _sunDirection: Vector3 = new Vector3(0, 1, 0);
@@ -48,11 +49,7 @@ export class SkyboxShader extends Shader {
   public _moonPhase: number = 0.0;
   public _useMoon: number = 1;
 
-  // Procedural sky properties
-  public skyColor: Color = new Color(0.35, 0.53, 0.7, 1.0);
-  public horizonColor: Color = new Color(0.7, 0.75, 0.8, 1.0); 
-  public groundColor: Color = new Color(0.2, 0.2, 0.2, 1.0);
-  public exponent: number = 0.6;
+
 
   /**
     Initializes the shader by setting the correct file paths for the vertex and fragment shaders before calling the parent initialize method.
@@ -101,10 +98,10 @@ export class SkyboxShader extends Shader {
     this.setFloat(ShaderUniformsEnum.U_MOON_PHASE, this._moonPhase);
     this.setInt(ShaderUniformsEnum.U_USE_MOON, this._useMoon);
 
-    this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.skyColor.toVec4());
-    this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.horizonColor.toVec4());
-    this.setVec4(ShaderUniformsEnum.U_GROUND_COLOR, this.groundColor.toVec4());
-    this.setFloat(ShaderUniformsEnum.U_EXPONENT, this.exponent);
+    this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.material.skyColor.toVec4());
+    this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.material.horizonColor.toVec4());
+    this.setVec4(ShaderUniformsEnum.U_GROUND_COLOR, this.material.groundColor.toVec4());
+    this.setFloat(ShaderUniformsEnum.U_EXPONENT, this.material.exponent);
   }
 
 
