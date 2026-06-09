@@ -20,7 +20,7 @@ import {
 
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @Component({
@@ -40,22 +40,13 @@ export class App implements OnDestroy {
   shadowMapTexture: any;
   sun!: DirectionalLight;
 
-  constructor(private editorService: EditorService) {
+  constructor(private editorService: EditorService, private route: ActivatedRoute) {
     this.editorService.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
     this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
     Shader.SHADER_FUNCTIONS = {
       "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
       "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
     };
-
-    // ObjectInstanciator.addDependency("EditorSkyboxShader", EditorSkyboxShader.instanciate, {
-    //   name: "EditorSkyboxShader",
-    //   type: ClassType.Shader,
-    //   path: "Editor/Shaders/EditorSkyboxShader",
-    //   description: "A specialized skybox shader used specifically within the editor environment."
-    // });
-
-
   }
 
   onEditorLoadScene(scene: Scene): any {
@@ -70,7 +61,8 @@ export class App implements OnDestroy {
 
   private async onGlContextCreated(gl: WebGL2RenderingContext) {
     this.gl = gl
-    if (!this.scene) {
+    const writeScene = this.route.snapshot.queryParamMap.get('write-scene');
+    if (writeScene === 'true' && !this.scene) {
       await this.createNewScene();
     }
   }
@@ -263,7 +255,8 @@ export class App implements OnDestroy {
     // }
     // const texture = await EngineCache.getTextureCube(skyboxTextures, this.gl);
     // material.mainTex = texture;
-    material.mainTex = CubemapTexture.createWhiteCubemap(this.gl);
+
+    material.mainTex = await EngineCache.getWhiteTextureCube(this.gl);
     const skyboxEntity = new GlEntity(material.name);
 
     skyboxEntity.addBehaviour(renderer);

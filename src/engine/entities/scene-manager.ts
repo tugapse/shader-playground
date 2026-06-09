@@ -52,8 +52,8 @@ export class SceneManager {
       for (const textureJsonData of Object.values(texturesMaps) as any[]) {
         if (textureJsonData.url) {
           await EngineCache.getTexture2D(textureJsonData.url, gl);
-        } else if (textureJsonData.urls) {
-          const keys = textureJsonData.urls.split("|");
+        } else if (textureJsonData.uris) {
+          const keys = textureJsonData.uris;
           await EngineCache.getTextureCube({
             right: keys[0], left: keys[1],
             up: keys[2], bottom: keys[3],

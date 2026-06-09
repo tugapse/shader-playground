@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager } from '@engine';
 import { Subscription } from 'rxjs';
@@ -32,6 +32,8 @@ export class Editor implements OnDestroy, OnInit {
   isPaused = false;
   canvasVisible = true;
   fpsCounter: number = 0;
+  toastMessage: string | null = null;
+  private toastTimeout: any;
 
 
   protected gl!: WebGL2RenderingContext;
@@ -52,7 +54,8 @@ export class Editor implements OnDestroy, OnInit {
 
     protected assetService: AssetService,
     protected route: ActivatedRoute,
-    protected router: Router
+    protected router: Router,
+    protected cdr: ChangeDetectorRef
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
@@ -64,18 +67,14 @@ export class Editor implements OnDestroy, OnInit {
     const sceneId = this.route.snapshot.paramMap.get('scene');
 
     if (projectId && sceneId) {
-      this.assetService.getRawAssetContent(projectId, sceneId).subscribe(blob => {
-        const reader = new FileReader();  
-        reader.onload = async () => {
-          const sceneDataString = reader.result as string;
-          const sceneData = JSON.parse(sceneDataString);
-          const scene = await SceneManager.loadScene(this.gl, sceneData);
-          this.editorService.loadScene(scene);
-        };
-        reader.readAsText(blob);
+      this.assetService.getTextAssetContent(projectId, sceneId).subscribe(textContent => {
+        const sceneData = JSON.parse(textContent) as JsonSerializedData;
+        SceneManager.loadScene(this.gl, sceneData).then(scene => {
+          this.onSceneLoaded(scene);
+        });
       });
 
-      this.editorState.setActiveProject({ id: projectId, scene:sceneId, config: {} });
+      this.editorState.setActiveProject({ id: projectId, scene: sceneId, config: {} });
       // TODO: Fetch project details and download the scene using the project/scene IDs
     } else {
       this.router.navigate(['/invalid-project']);
@@ -110,7 +109,7 @@ export class Editor implements OnDestroy, OnInit {
   }
 
   protected onSceneLoaded(scene: Scene) {
-    
+
     if (this.scene) {
       this.scene.destroy();
     }
@@ -161,7 +160,7 @@ export class Editor implements OnDestroy, OnInit {
   protected subscribeEvents(): void {
     this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
 
-    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)));    this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
+    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this))); this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
     this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));
@@ -231,5 +230,55 @@ export class Editor implements OnDestroy, OnInit {
 
   onFpsUpdated(fps: number) {
     this.fpsCounter = fps;
+  }
+
+  @HostListener('document:keydown.control.s', ['$event'])
+  onKeydownHandler(event: Event) {
+    event.preventDefault();
+    this.saveSceneToApi();
+  }
+
+  saveSceneToApi(): void {
+    const project = this.editorState.activeProject();
+    if (!project || !project.id || !project.scene) {
+      console.error('No active project or scene to save.');
+      return;
+    }
+
+    if (!this.scene) {
+      console.error('Scene is not loaded, cannot save.');
+      return;
+    }
+
+    this.toastMessage = 'Saving scene...';
+    this.cdr.detectChanges(); // Force the UI to update immediately
+
+    const sceneData = this.scene.toJsonObject();
+
+    this.assetService.saveSceneAsset(project.id, project.scene, sceneData)
+      .subscribe({
+        next: (response) => {
+          console.log('Scene saved successfully', response);
+          this.showToast('Scene saved successfully!');
+        },
+        error: (err) => {
+          console.error('Failed to save scene', err);
+          this.showToast('Failed to save scene!');
+        }
+      });
+  }
+
+  private showToast(message: string): void {
+    this.toastMessage = message;
+    this.cdr.detectChanges(); // Force the UI to update immediately
+    
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+
+    this.toastTimeout = setTimeout(() => {
+      this.toastMessage = null;
+      this.cdr.detectChanges(); // Update when the toast disappears
+    }, 3000);
   }
 }

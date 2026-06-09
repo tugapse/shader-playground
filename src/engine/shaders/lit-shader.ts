@@ -71,8 +71,7 @@ export class LitShader extends Shader {
    * @private
    * @returns {void}
    */
-  protected  checkAndLoadTextures(): void {
-    debugger
+  protected async checkAndLoadTextures(): Promise<void> {
     if (this.material.mainTex) {
       if (!this.material.mainTex.isImageLoaded) {
         this.material.mainTex.setGL(this.gl);
@@ -82,7 +81,7 @@ export class LitShader extends Shader {
         this.material.mainTex.bind();
       }
     } else {
-      const defaultTex = EngineCache.getWhiteTexture(this.gl);
+      const defaultTex = await EngineCache.getWhiteTexture(this.gl);
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, defaultTex, 0);
       defaultTex.bind();
     }
@@ -120,6 +119,5 @@ export class LitShader extends Shader {
   override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
     await super.fromJson(jsonObject);
     this.material.fromJson(jsonObject['material']);
-    debugger
   }
 }

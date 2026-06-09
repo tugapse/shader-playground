@@ -12,10 +12,8 @@ in vec3 v_position;
 
 out vec4 fragColor;
 
+
 void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
   fragColor = texture(u_mainTex, uv) * u_matColor;
-  if (u_id > 0.0) {
-    fragColor = vec4(u_id / 255.0, 0.0, 0.0, 1.0);
-  }
 }

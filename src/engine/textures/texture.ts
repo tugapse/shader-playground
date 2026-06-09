@@ -87,13 +87,13 @@ export class Texture extends JsonSerializable {
    * @public
    * @type {TextureWrapMode}
    */
-  public wrapS: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
+  public wrapS: TextureWrapMode = TextureWrapMode.MIRRORED_REPEAT;
   /**
    * The texture wrap mode for the T (vertical) axis.
    * @public
    * @type {TextureWrapMode}
    */
-  public wrapT: TextureWrapMode = TextureWrapMode.CLAMP_TO_EDGE;
+  public wrapT: TextureWrapMode = TextureWrapMode.MIRRORED_REPEAT;
   /**
    * A flag to indicate if the texture is currently in a bound state.
    * @protected

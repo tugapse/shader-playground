@@ -25,14 +25,13 @@ export class CubemapMaterial extends ColorMaterial {
    */
   override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
     super.fromJson(jsonObject);
-    if (jsonObject["mainTex"].uris) {
+    if (jsonObject["mainTex"]?.uris) {
       const keys = jsonObject["mainTex"].uris;
       this.mainTex = await EngineCache.getTextureCube({
         right: keys[0], left: keys[1],
         up: keys[2], bottom: keys[3],
         front: keys[4], back: keys[5],
       }) as CubemapTexture;
-      this.mainTex.fromJson(jsonObject["mainTex"]);
     }
   }
 

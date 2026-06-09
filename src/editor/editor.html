@@ -23,3 +23,9 @@
 </div>
 
 <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
+
+@if(toastMessage) {
+<div class="toast-notification">
+  {{ toastMessage }}
+</div>
+}

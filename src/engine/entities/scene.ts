@@ -284,11 +284,10 @@ export class Scene extends GlEntity {
       if (renderer.shader?.material) {
         for (const key of Object.keys(renderer.shader.material)) {
           const property = (renderer.shader.material as any)[key];
-          if (property instanceof Texture) {
+          if  (property instanceof CubemapTexture){
+            textureMaps[property.textureUris?.join("|") || property.name] = property.toJsonObject();
+          } else if (property instanceof Texture) {
             textureMaps[property.textureUri || property.name] = property.toJsonObject();
-          } else if (property instanceof CubemapTexture) {
-            let uris = property.textureUris?.join("|");
-            textureMaps[uris || property.name] = property.toJsonObject();
           }
         }
       }

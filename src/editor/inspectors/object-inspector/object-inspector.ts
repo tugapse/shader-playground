@@ -97,7 +97,7 @@ export class ObjectInspector {
 
     for (const key of keys) {
       const newValue = (object)[key];
-      if(newValue===undefined) continue;
+      if(newValue===undefined || newValue===null) continue;
       let newObType: string = typeof newValue;
       let name = "";
       // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);

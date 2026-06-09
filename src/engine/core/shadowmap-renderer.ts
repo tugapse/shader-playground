@@ -31,7 +31,7 @@ export class ShadowMapRenderer {
    * @static
    * @type {number}
    */
-  public static shadowMapSize = 4096;
+  public static shadowMapSize = 8192;
   /**
    * The framebuffer object used for rendering to the shadow map texture.
    * @protected

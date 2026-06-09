@@ -39,10 +39,8 @@ export class CodeEditorLogic {
 
   async loadScript(asset: IAsset) {
     this.isLoading.set(true);
-    this.assetApi.getRawAssetContent(asset.projectId, asset.id).pipe(
-      switchMap(blob => from(blob.text()))
-    ).subscribe({
-      next: (textContent) => {
+    this.assetApi.getTextAssetContent(asset.projectId, asset.id).subscribe({
+      next: (textContent:string) => {
         this.content.set(textContent);
         this.updateEditorValue(textContent);
         this.editorState.setDirty(false);

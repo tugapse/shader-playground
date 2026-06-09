@@ -19,12 +19,12 @@ export class LightAttenuation {
     The linear component of attenuation.
    * @type {number}
    */
-  public linear: number = 0.09;
+  public linear: number = 0.0; // 0.0 for strict physical inverse square law falloff
   /**
     The quadratic component of attenuation.
    * @type {number}
    */
-  public quadratic: number = 0.032;
+  public quadratic: number = 1.0; // 1.0 for strict physical inverse square law falloff
 }
 
 /**
@@ -35,12 +35,12 @@ export class LightConeAngles {
     The inner cone angle in degrees.
    * @type {number}
    */
-  public inner: number = 15.0;
+  public inner: number = 20.0; // Typical physical flashlight inner beam
   /**
     The outer cone angle in degrees.
    * @type {number}
    */
-  public outer: number = 20.0;
+  public outer: number = 30.0; // Typical physical flashlight outer beam
 }
 
 /**
@@ -139,6 +139,8 @@ export class DirectionalLight extends Light {
   constructor(name: string) {
     super(name);
     this.entityType = EntityType.LIGHT_DIRECTIONAL;
+    // Realistic Sunlight Color (approx 5500K)
+    this.color = new Color(1.0, 0.98, 0.95, 1.0);
   }
 
   /**
@@ -201,6 +203,8 @@ export class PointLight extends Light {
   constructor(name: string) {
     super(name);
     this.entityType = EntityType.LIGHT_POINT;
+    // Incandescent light bulb (approx 2800K)
+    this.color = new Color(1.0, 0.85, 0.57, 1.0);
     this.attenuation = new LightAttenuation();
   }
 
@@ -280,6 +284,8 @@ export class SpotLight extends Light {
   constructor(name: string) {
     super(name);
     this.entityType = EntityType.LIGHT_SPOT;
+    // LED/Halogen flashlight (approx 5000K)
+    this.color = new Color(1.0, 0.96, 0.89, 1.0);
     this.coneAngles = new LightConeAngles();
     this.attenuation = new LightAttenuation();
   }

@@ -68,14 +68,14 @@ export class SkyboxShader extends Shader {
    * @override
    * @returns {void}
    */
-  public override loadDataIntoShader(): void {
-    if (!this.material) return;
+  public override async loadDataIntoShader(): Promise<void> {
+    if (!this.material) return; // Material must be present
 
+    // Await texture loading
     if (this.material.mainTex) {
-
       if (!this.material.mainTex.isImageLoaded) {
         this.material.mainTex.setGL(this.gl);
-        this.material.mainTex.load();
+        await this.material.mainTex.load();
       }else{
         this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex as CubemapTexture, 0);
         this.material.mainTex.bind();

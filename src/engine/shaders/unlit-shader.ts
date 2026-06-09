@@ -38,37 +38,37 @@ export class UnlitShader extends Shader {
    * @override
    * @returns {void}
    */
-  public override loadDataIntoShader(): void {
-
+  public override async loadDataIntoShader(): Promise<void> {
     if (!this.material) return;
     super.loadDataIntoShader();
 
-    if (this.material.mainTex && !this.material.mainTex.isImageLoaded) {
-      this.material.mainTex.setGL(this.gl);
-      this.material.mainTex.load();
-    }
-    this.checkAndLoadTextures();
+    await this.checkAndLoadTextures();
     this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, this.material.color.toVec4());
     this.setVec2(ShaderUniformsEnum.U_UV_SCALE, this.material.uvScale.vector);
     this.setVec2(ShaderUniformsEnum.U_UV_OFFSET, this.material.uvOffset.vector);
 
     if (this.material.mainTex && this.material.mainTex.isImageLoaded) {
       this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
-      this.material.mainTex.bind();
+      this.material.mainTex.bind(); // Ensure texture is bound after loading
     }
   }
 
-
+  /**
+   * Checks if textures are loaded and retrieves them from the cache.
+   * If not found or if the URL is not provided, it uses a default white texture.
+   * @private
+   * @returns {Promise<void>}
+   */
    /**
     Checks if textures are loaded and retrieves them from the cache. If not found or if the URL is not provided, it uses a default white texture.
    * @private
    * @returns {void}
    */
-  protected  checkAndLoadTextures(): void {
+  protected async checkAndLoadTextures(): Promise<void> {
     if (this.material.mainTex) {
       if (!this.material.mainTex.isImageLoaded) {
         this.material.mainTex.setGL(this.gl);
-        this.material.mainTex.load();
+        await this.material.mainTex.load();
       } else {
         this.setTexture(ShaderUniformsEnum.U_MAIN_TEX, this.material.mainTex, 0);
         this.material.mainTex.bind();

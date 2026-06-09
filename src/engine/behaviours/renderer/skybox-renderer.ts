@@ -3,7 +3,7 @@ import { Camera } from "../../entities/camera";
 import { ShaderUniformsEnum } from "../../enums/shader-uniforms.enum";
 import { JsonSerializedData } from "../../interfaces/json-serialized-data.interface";
 import { MeshRendererBehaviour } from "./mesh-renderer-behaviour";
-import { SkyboxMaterial } from "@engine";
+import { CubePrimitive, EngineCache, Mesh, MeshData, ShaderSources, SkyboxMaterial, SkyboxShader } from "@engine";
 
 /**
  * A specialized renderer for drawing a skybox.
@@ -28,7 +28,24 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
   constructor(gl:WebGL2RenderingContext){
     super(gl);
     this._className = "SkyboxRenderer";
+    this.loadDefaultSkybox().then(()=>this.initialize());
   }
+
+protected async loadDefaultSkybox(): Promise<void> {
+    this.mesh = new Mesh();
+    this.mesh.meshData = new CubePrimitive();
+    const material = new SkyboxMaterial();
+
+
+    this.shader = SkyboxShader.instanciate(this._gl, material);
+    this.shader.fragUri = "assets/shaders/frag/skybox.frag";
+    this.shader.vertexUri = "assets/shaders/vertex/skybox.vert";
+    this.shader.initialize();
+    material.mainTex = await EngineCache.getWhiteTextureCube(this._gl);
+    debugger
+
+}
+
   /**
    * Initializes the skybox renderer.
    * This method sets the initial transform of the skybox to be large enough to encompass the entire scene.
@@ -36,6 +53,7 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
    * @returns {boolean} - True if initialization is successful, otherwise false.
    */
   override initialize(): boolean {
+    debugger
     if (super.initialize()) {
       this.transform.setLocalPosition(0, 0, 0);
       this.transform.setLocalScale(1000, 1000, 1000);
@@ -110,7 +128,7 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this.setCameraMatrices();
   }
 
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
+  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
+    await super.fromJson(jsonObject);
   }
 }

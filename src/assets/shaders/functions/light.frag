@@ -53,7 +53,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
     return 1.0;
   }
 
-  float cells = 1.0;
+  float cells = 1.0; // Reduced from 2.0 (5x5) to 1.0 (3x3) for performance (9 vs 25 samples)
   float total = cells * 2.0 + 1.0;
 
   float shadow = 0.0;
@@ -72,6 +72,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
 // This function calculates the final lit color, including shadows
 vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
 
+  vec3 n = normalize(v_normal);
   // Apply normal mapping if a normal map is provided
   vec3 finalNormal;
   if (u_normalMapStrength > 0.0) {
@@ -80,10 +81,9 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
     mat3 tbnMatrix =
         mat3(normalize(v_tangent), normalize(v_bitangent), normalize(v_normal));
     vec3 perturbedNormal = tbnMatrix * normalFromMap;
-    finalNormal = normalize(mix(normalize(v_normal), normalize(perturbedNormal),
-                                u_normalMapStrength));
+    finalNormal = normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
   } else {
-    finalNormal = normalize(v_normal);
+    finalNormal = n;
   }
 
   vec3 viewDir = normalize(u_cameraPosition - v_position);
@@ -96,7 +96,8 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   // Directional Lighting
 
   vec3 lightDir = normalize(-u_directionalLightDirections[0]);
-  float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
+  float ndotl = dot(finalNormal, lightDir);
+  float diffuseIntensity = max(ndotl, 0.0);
   vec3 halfVec = normalize(lightDir + viewDir);
   float shadowFactor =
       is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
@@ -120,9 +121,9 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
 
 
     float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
-    vec3 halfVec = normalize(pointLightDir + viewDir);
-    float pointSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
+    vec3 h = normalize(pointLightDir + viewDir);
+    float pointSpecularIntensity = (pointDiffuseIntensity <= 0.0) ? 0.0 : 
+        pow(max(0.0, dot(finalNormal, h)), shininess) *
         u_specularStrength;
     totalLitColorRGB +=
         (baseColor * u_pointLightColors[i] *
@@ -145,9 +146,9 @@ vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
     coneFactor = clamp(coneFactor, 0.0, 1.0);
     float spotDiffuseIntensity =
         max(dot(finalNormal, spotLightDirFromFrag), 0.0);
-    vec3 halfVec = normalize(spotLightDirFromFrag + viewDir);
-    float spotSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
+    vec3 hSpot = normalize(spotLightDirFromFrag + viewDir);
+    float spotSpecularIntensity = (spotDiffuseIntensity <= 0.0) ? 0.0 :
+        pow(max(0.0, dot(finalNormal, hSpot)), shininess) *
         u_specularStrength;
     totalLitColorRGB += (baseColor * u_spotLightColors[i] *
                          (spotDiffuseIntensity + spotSpecularIntensity) *
