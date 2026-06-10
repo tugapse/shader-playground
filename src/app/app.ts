@@ -45,7 +45,7 @@ export class App implements OnDestroy {
     this.editorService.onSceneLoaded.subscribe(this.onEditorLoadScene.bind(this));
     Shader.SHADER_FUNCTIONS = {
       "@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
-      "@INCLUD_FUNC": "assets/shaders/functions/functions.frag",
+      "@INCLUDE_FUNC": "assets/shaders/functions/functions.frag",
     };
   }
 
@@ -238,7 +238,7 @@ export class App implements OnDestroy {
     const shader = new SkyboxShader(this.gl, material);
     const cubePrimitive = new SpherePrimitive();
     renderer.writeToDephBuffer = false;
-    renderer.shader = shader;
+    renderer.shader   = shader;
     renderer.mesh.meshData = cubePrimitive;
 
     material.name = "Skybox" + (useWhiteTexture ? "_white" : "");

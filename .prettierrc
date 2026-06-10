@@ -1,0 +1,12 @@
+{
+  "parser": "html",
+  "plugins": ["prettier-plugin-angular"],
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
+}

@@ -6,26 +6,31 @@
   </aside>
 
   @switch (editorState.centralView()) {
-  @case ('canvas') {
-  <div class="canvas-info">
-    <span>{{fpsCounter}}</span>
-  </div>
-  <editor-canvas tabindex="0" class="canvas" [scene]="scene" (fps)="onFpsUpdated($event)"
-    (onGlContextCreated)="onGlContextCreated($event)"></editor-canvas>
-  }
-  @case ('assets') {
-  <app-assets-explorer></app-assets-explorer>
-  }
-  @case ('code-editor') {
-  <editor-code-editor></editor-code-editor>
-  }
+    @case ("canvas") {
+      <div class="canvas-info">
+        <span>{{ fpsCounter }}</span>
+      </div>
+      <editor-canvas
+        tabindex="0"
+        class="canvas"
+        [scene]="scene"
+        (fps)="onFpsUpdated($event)"
+        (onGlContextCreated)="onGlContextCreated($event)"
+      ></editor-canvas>
+    }
+    @case ("assets") {
+      <app-assets-explorer></app-assets-explorer>
+    }
+    @case ("code-editor") {
+      <editor-code-editor></editor-code-editor>
+    }
   }
 </div>
 
 <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
 
-@if(toastMessage) {
-<div class="toast-notification">
-  {{ toastMessage }}
-</div>
+@if (toastMessage) {
+  <div class="toast-notification">
+    {{ toastMessage }}
+  </div>
 }

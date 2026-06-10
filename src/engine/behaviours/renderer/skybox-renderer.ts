@@ -28,23 +28,17 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
   constructor(gl:WebGL2RenderingContext){
     super(gl);
     this._className = "SkyboxRenderer";
-    this.loadDefaultSkybox().then(()=>this.initialize());
+    this.createDefaultSkybox();
   }
 
-protected async loadDefaultSkybox(): Promise<void> {
-    this.mesh = new Mesh();
+protected async createDefaultSkybox(): Promise<void> {
     this.mesh.meshData = new CubePrimitive();
     const material = new SkyboxMaterial();
-
-
-    this.shader = SkyboxShader.instanciate(this._gl, material);
-    this.shader.fragUri = "assets/shaders/frag/skybox.frag";
-    this.shader.vertexUri = "assets/shaders/vertex/skybox.vert";
+    this.shader = new SkyboxShader(this._gl, material);
+    debugger
     this.shader.initialize();
     material.mainTex = await EngineCache.getWhiteTextureCube(this._gl);
-    debugger
-
-}
+  }
 
   /**
    * Initializes the skybox renderer.
@@ -53,13 +47,9 @@ protected async loadDefaultSkybox(): Promise<void> {
    * @returns {boolean} - True if initialization is successful, otherwise false.
    */
   override initialize(): boolean {
-    debugger
-    if (super.initialize()) {
-      this.transform.setLocalPosition(0, 0, 0);
-      this.transform.setLocalScale(1000, 1000, 1000);
-      return true;
-    }
-    return false;
+    this.transform.setLocalPosition(0, 0, 0);
+    this.transform.setLocalScale(1000, 1000, 1000);
+    return super.initialize()
   }
   
   public get material():SkyboxMaterial {

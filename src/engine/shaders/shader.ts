@@ -322,6 +322,7 @@ export class Shader extends JsonSerializable {
    */
   public loadDataIntoShader(): void {
     if (!this.material) return;
+    this.use();
     const material = this.material as ColorMaterial;
     if (material)
       this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color.toVec4());

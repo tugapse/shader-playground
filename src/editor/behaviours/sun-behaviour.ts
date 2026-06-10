@@ -15,7 +15,7 @@ export class SunBehaviour extends EntityBehaviour {
 
   public sun = {
     speed: 0.01,
-    timeOfDay: 10.0, // 0 to 24, maps to 00:00 to 23:59
+    timeOfDay: 21.0, // 0 to 24, maps to 00:00 to 23:59
     arcHeight: 0.5, // 0 to 1, max height of the sun arc
   };
 
@@ -150,12 +150,12 @@ export class SunBehaviour extends EntityBehaviour {
         const skyboxRenderer = skyboxEntity.getBehaviour(SkyboxRenderer) as SkyboxRenderer;
         if (skyboxRenderer.shader && skyboxRenderer.shader instanceof SkyboxShader) {
           const shader = skyboxRenderer.shader as SkyboxShader;
-          shader._useSun = 1;
+          shader.useSun = 1;
           const normalizedDir = vec3.normalize(vec3.create(), this.transform.worldPosition);
           shader._sunDirection.set(normalizedDir[0], normalizedDir[1], normalizedDir[2]);
           shader._sunColor = light.color;
           // Place the moon exactly opposite to the sun
-          shader._useMoon = this.moon.enabled ? 1 : 0;
+          shader.useMoon = 1;
           shader._moonDirection.set(-normalizedDir[0], -normalizedDir[1], -normalizedDir[2]);
           shader._moonPhase = this.moon.phase;
 

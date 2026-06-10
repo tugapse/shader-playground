@@ -26,7 +26,7 @@ out vec4 fragColor;
 
 // All lighting uniforms and functions;
 @INCLUDE_LIGHT_FUNC
-@INCLUD_FUNC
+@INCLUDE_FUNC
 
 void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;

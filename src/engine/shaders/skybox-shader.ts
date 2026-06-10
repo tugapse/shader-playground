@@ -39,7 +39,7 @@ export class SkyboxShader extends Shader {
   public _sunColor: Color = new Color(1, 1, 1, 1);
   public _sunSize: number = 0.999;
   public _sunFalloff: number = 0.01;
-  public _useSun: number = 0;
+  public useSun: number = 1;
 
   // Moon properties
   public _moonDirection: Vector3 = new Vector3(0, -1, 0);
@@ -47,7 +47,7 @@ export class SkyboxShader extends Shader {
   public _moonSize: number = 0.998;     // Slightly smaller than the sun
   public _moonFalloff: number = 0.002;  // Crisper edge than the sun
   public _moonPhase: number = 0.0;
-  public _useMoon: number = 1;
+  public useMoon: number = 1;
 
 
 
@@ -82,6 +82,7 @@ export class SkyboxShader extends Shader {
       }
 
     }
+
     super.loadDataIntoShader();
 
     // Set sun uniforms from the shader's properties
@@ -89,14 +90,14 @@ export class SkyboxShader extends Shader {
     this.setVec4(ShaderUniformsEnum.U_SUN_COLOR, this._sunColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_SUN_SIZE, this._sunSize);
     this.setFloat(ShaderUniformsEnum.U_SUN_FALLOFF, this._sunFalloff);
-    this.setInt(ShaderUniformsEnum.U_USE_SUN, this._useSun);
+    this.setInt(ShaderUniformsEnum.U_USE_SUN, this.useSun);
 
     this.setVec3(ShaderUniformsEnum.U_MOON_DIRECTION, this._moonDirection.vector);
     this.setVec4(ShaderUniformsEnum.U_MOON_COLOR, this._moonColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_MOON_SIZE, this._moonSize);
     this.setFloat(ShaderUniformsEnum.U_MOON_FALLOFF, this._moonFalloff);
     this.setFloat(ShaderUniformsEnum.U_MOON_PHASE, this._moonPhase);
-    this.setInt(ShaderUniformsEnum.U_USE_MOON, this._useMoon);
+    this.setInt(ShaderUniformsEnum.U_USE_MOON, this.useMoon);
 
     this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.material.skyColor.toVec4());
     this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.material.horizonColor.toVec4());

@@ -15,6 +15,7 @@ import { Icon } from "src/app/components/icon/icon";
 import { ClassType } from '@engine/enums/class-type.enum';
 import { AddBehaviourMenuComponent } from '../../components/add-behaviour-menu/add-behaviour-menu';
 import { ClassMetadata } from '@engine/interfaces/class-metadata';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -93,7 +94,7 @@ export class EntityInspector extends ObjectInspector {
     
     // Position slightly below and right-aligned with the button
     this.menuY = rect.top -100;
-    this.menuX = rect.right - 320; // 320px is the menu width
+    this.menuX =  24; // 320px is the menu width
     
     this.availableBehaviours = ObjectInstanciator.getMetadata([ClassType.EntityBehaviour, ClassType.RenderBehaviour])
       .filter(b => b.name !== "EntityBehaviour" && b.name !== "RenderBehaviour") as ClassMetadata[];
@@ -102,7 +103,7 @@ export class EntityInspector extends ObjectInspector {
 
   onBehaviourSelected(behaviour: ClassMetadata) {
     if (!this.entity) return;
-    const instance = ObjectInstanciator.instanciateObjectFromJsonData(behaviour.name);
+    const instance = ObjectInstanciator.instanciateObjectFromJsonData( behaviour.name, [this.editorService.gl]);
     if (instance) {
       this.entity.addBehaviour(instance as any);
     }

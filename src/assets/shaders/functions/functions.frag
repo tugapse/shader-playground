@@ -30,41 +30,44 @@ vec3 applyExponentialFog(vec3 originalColor, vec3 fogColor, float distance, floa
     return mix(originalColor, fogColor, fogFactor);
 }
 
-
 float rand(vec2 c){
-	return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+    return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-// float noise(vec2 p, float freq ){
-// 	float unit = screenWidth/freq;
-// 	vec2 ij = floor(p/unit);
-// 	vec2 xy = mod(p,unit)/unit;
-// 	//xy = 3.*xy*xy-2.*xy*xy*xy;
-// 	xy = .5*(1.-cos(PI*xy));
-// 	float a = rand((ij+vec2(0.,0.)));
-// 	float b = rand((ij+vec2(1.,0.)));
-// 	float c = rand((ij+vec2(0.,1.)));
-// 	float d = rand((ij+vec2(1.,1.)));
-// 	float x1 = mix(a, b, xy.x);
-// 	float x2 = mix(c, d, xy.x);
-// 	return mix(x1, x2, xy.y);
-// }
+// --- NEW PROCEDURAL 3D LUNAR TEXTURE FUNCTIONS ---
 
-// float pNoise(vec2 p, int res){
-// 	float persistance = .5;
-// 	float n = 0.;
-// 	float normK = 0.;
-// 	float f = 4.;
-// 	float amp = 1.;
-// 	int iCount = 0;
-// 	for (int i = 0; i<50; i++){
-// 		n+=amp*noise(p, f);
-// 		f*=2.;
-// 		normK+=amp;
-// 		amp*=persistance;
-// 		if (iCount == res) break;
-// 		iCount++;
-// 	}
-// 	float nf = n/normK;
-// 	return nf*nf*nf*nf;
-// }
+// 3D hash expanding your existing 2D rand function
+float hash3D(vec3 p) {
+    float xy = rand(p.xy);
+    return rand(vec2(xy, p.z));
+}
+
+// Smooth 3D Value Noise
+float noise3D(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    
+    // Smoothstep interpolation curve
+    vec3 u = f * f * (3.0 - 2.0 * f);
+
+    // Mix the 8 corners of the 3D voxel cube
+    return mix(mix(mix(hash3D(i + vec3(0.0, 0.0, 0.0)), hash3D(i + vec3(1.0, 0.0, 0.0)), u.x),
+                   mix(hash3D(i + vec3(0.0, 1.0, 0.0)), hash3D(i + vec3(1.0, 1.0, 0.0)), u.x), u.y),
+               mix(mix(hash3D(i + vec3(0.0, 0.0, 1.0)), hash3D(i + vec3(1.0, 0.0, 1.0)), u.x),
+                   mix(hash3D(i + vec3(0.0, 1.0, 1.0)), hash3D(i + vec3(1.0, 1.0, 1.0)), u.x), u.y), u.z);
+}
+
+// Fractional Brownian Motion to build structural plains and craters
+float calculateMoonTexture(vec3 normal, float frequency) {
+    vec3 p = normal * frequency;
+    float value = 0.0;
+    float amplitude = 0.5;
+    
+    // 3 octaves gives structured dark plains and subtle surface dust
+    for (int i = 0; i < 3; i++) {
+        value += amplitude * noise3D(p);
+        p *= 2.5; // Lacunarity
+        amplitude *= 0.5; // Gain
+    }
+    return value;
+}

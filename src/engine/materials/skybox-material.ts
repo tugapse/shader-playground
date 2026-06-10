@@ -4,7 +4,7 @@ import { JsonSerializedData } from "@engine";
 
 export class SkyboxMaterial extends CubemapMaterial {
 
-  protected override _className: string = "EditorSkyboxMaterial";
+  protected override _className: string = "SkyboxMaterial";
 
     // Procedural sky properties
   public skyColor: Color = new Color(0.35, 0.53, 0.7, 1.0);

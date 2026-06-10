@@ -1,69 +1,116 @@
 @if (entity) {
+  <editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
+    <section>
+      <span>Update in Editor</span
+      ><app-toggle
+        [active]="entity.updateInEditor"
+        (change)="entity.updateInEditor = !entity.updateInEditor"
+      ></app-toggle>
+    </section>
+    <section>
+      <span>Name</span
+      ><input
+        class="text-input"
+        [value]="entity!.name"
+        (change)="onNameChanged($event)"
+      />
+    </section>
+    <section>
+      <span>Tag</span
+      ><input
+        class="text-input"
+        [value]="entity!.tag"
+        (change)="onTagChanged($event)"
+      />
+    </section>
 
-<editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
-  <section> <span>Update in Editor</span><app-toggle [active]="entity.updateInEditor"
-      (change)="entity.updateInEditor = !entity.updateInEditor"></app-toggle>
-  </section>
-  <section> <span>Name</span><input class="text-input" [value]="entity!.name" (change)="onNameChanged($event)">
-  </section>
-  <section> <span>Tag</span><input class="text-input" [value]="entity!.tag" (change)="onTagChanged($event)">
-  </section>
+    @for (entityProperty of objectsToshow; track $index) {
+      @switch (entityProperty.type) {
+        @case ("string") {
+          <editor-text-input-inspector
+            [label]="entityProperty.key.capitalize()"
+            [value]="entityProperty.property"
+            (change)="onValueChanged(entityProperty, $event)"
+          ></editor-text-input-inspector>
+        }
 
-  @for (entityProperty of objectsToshow ; track $index) {
-  @switch (entityProperty.type) {
-  @case ("string") { <editor-text-input-inspector [label]="entityProperty.key.capitalize()"
-    [value]="entityProperty.property" (change)="onValueChanged(entityProperty,  $event)"></editor-text-input-inspector>
+        @case ("number") {
+          <editor-text-input-inspector
+            [isNumber]="true"
+            [label]="entityProperty.key.capitalize()"
+            [value]="entityProperty.property"
+            (change)="onValueChanged(entityProperty, $event)"
+            [dragScale]="0.001"
+          ></editor-text-input-inspector>
+        }
+
+        @case ("boolean") {
+          <app-boolean-inspector
+            [label]="entityProperty.key.capitalize()"
+            [active]="entity[entityProperty.key]"
+            (change)="onValueChanged(entityProperty, $event)"
+          ></app-boolean-inspector>
+        }
+
+        @case ("_Vector234") {
+          <editor-vector-inspector
+            [vector]="entityProperty.property"
+            (vectorChanged)="onVectorChanged(entityProperty, $event)"
+          ></editor-vector-inspector>
+        }
+      }
+    }
+  </editor-inpector-toggle-panel>
+
+  @for (entityProperty of objectsToshow; track $index) {
+    @switch (entityProperty.type) {
+      @case ("transform") {
+        <editor-transform-inspector
+          [entity]="entity"
+          [collapsed]="true"
+        ></editor-transform-inspector>
+      }
+
+      @case ("color") {
+        <editor-color-inspector
+          [label]="entityProperty.key"
+          [selectedColor]="entity[entityProperty.key]"
+          (colorChange)="onColorChanged(entityProperty, $event)"
+        ></editor-color-inspector>
+      }
+
+      @case ("object") {
+        <editor-object-inspector
+          [label]="entityProperty.key.capitalize()"
+          [targetObject]="entityProperty"
+        ></editor-object-inspector>
+      }
+    }
   }
 
-  @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="entityProperty.key.capitalize()"
-    [value]="entityProperty.property" (change)="onValueChanged(entityProperty,$event)"
-    [dragScale]="0.001"></editor-text-input-inspector>
+  <div class="behaviours-header-container" style="position: relative">
+    <h4 class="behaviours-header">Behaviours</h4>
+    <app-icon
+      class="icon"
+      iconName="fa-add"
+      (click)="onAddBehaviourRequested($event)"
+    ></app-icon>
+    <editor-add-behaviour-menu
+      [isOpen]="isAddBehaviourMenuOpen"
+      [behaviours]="availableBehaviours"
+      [menuX]="menuX"
+      [menuY]="menuY"
+      (behaviourSelected)="onBehaviourSelected($event)"
+      (closeMenu)="isAddBehaviourMenuOpen = false"
+    >
+    </editor-add-behaviour-menu>
+  </div>
+  @if (entity.behaviours.length > 0) {
+    @for (behaviour of entity.behaviours; track $index) {
+      <editor-behaviour-inspector
+        [behaviour]="behaviour"
+        [label]="behaviour.name || behaviour.className.capitalize()"
+      ></editor-behaviour-inspector>
+    }
   }
-
-  @case ("boolean") {<app-boolean-inspector [label]="entityProperty.key.capitalize()"
-    [active]="entity[entityProperty.key]" (change)="onValueChanged(entityProperty, $event)"></app-boolean-inspector>}
-
-  @case ("_Vector234") { <editor-vector-inspector [vector]="entityProperty.property"
-    (vectorChanged)="onVectorChanged(entityProperty, $event)"></editor-vector-inspector>}
-  }
-  }
-
-</editor-inpector-toggle-panel>
-
-@for (entityProperty of objectsToshow ; track $index) {
-@switch (entityProperty.type) {
-
-@case ("transform") {<editor-transform-inspector [entity]="entity" [collapsed]="true"></editor-transform-inspector> }
-
-@case ("color") {<editor-color-inspector  [label]="entityProperty.key" [selectedColor]="entity[entityProperty.key]"
-  (colorChange)="onColorChanged(entityProperty,$event)"></editor-color-inspector>}
-
-@case ("object") {<editor-object-inspector [label]="entityProperty.key.capitalize()"
-  [targetObject]="entityProperty"></editor-object-inspector>}
-
-}
-}
-
-<div class="behaviours-header-container" style="position: relative;">
-  <h4 class="behaviours-header">Behaviours</h4>
-  <app-icon class="icon" iconName="fa-add" (click)="onAddBehaviourRequested($event)"></app-icon>
-  <editor-add-behaviour-menu
-    [isOpen]="isAddBehaviourMenuOpen"
-    [behaviours]="availableBehaviours"
-    [menuX]="menuX"
-    [menuY]="menuY"
-    (behaviourSelected)="onBehaviourSelected($event)"
-    (closeMenu)="isAddBehaviourMenuOpen = false">
-  </editor-add-behaviour-menu>
-</div>
-@if(entity.behaviours.length >0){
-
-
-
-@for (behaviour of entity.behaviours ; track $index) {
-<editor-behaviour-inspector [behaviour]="behaviour"
-  [label]="behaviour.name || behaviour.className.capitalize()"></editor-behaviour-inspector>
-}
-}
-
 }

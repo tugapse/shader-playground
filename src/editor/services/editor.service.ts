@@ -26,15 +26,26 @@ export class EditorService {
 
   public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
   public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
+  private _gl!: WebGL2RenderingContext;
+  
   public get scene(): Scene {
     return this.currentScene;
   }
 
+  public get gl(): WebGL2RenderingContext {
+    return this._gl;
+  }
   
   private currentScene!: Scene;
   private camera!: Camera;
   constructor() {
     this.initializeEditorCamera();
+    this.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
+
+  }
+  onGlContextCreated(gl: WebGL2RenderingContext) {
+    console.log("onGlContextCreated");  
+    this._gl = gl;
   }
   
 
