@@ -9,8 +9,8 @@ import { EngineCache, Vector2 } from "../core";
  * @augments {ColorMaterial}
  */
 export class UnlitMaterial extends ColorMaterial {
-  protected override _className = "UnlitMaterial";
 
+  protected override _className = "UnlitMaterial";
 
   /**
     The UV scaling factor for the main texture.

@@ -1,4 +1,4 @@
-import { Color, DirectionalLight, EntityBehaviour, JsonSerializedData, Light, ObjectInstanciator, RendererBehaviour, SkyboxRenderer, SkyboxShader, Vector3 } from "@engine";
+import { Color, EntityBehaviour, JsonSerializedData, Light, ObjectInstanciator, RendererBehaviour, SkyboxRenderer, SkyboxShader, Vector3 } from "@engine";
 import { ClassType } from "@engine/enums/class-type.enum";
 import { vec3 } from "gl-matrix";
 
@@ -10,13 +10,13 @@ export class SunBehaviour extends EntityBehaviour {
 
   protected override _className = "SunBehaviour";
   
-  public light!:DirectionalLight;
-  public timeOfDayText!:string; 
+
+  public timeOfDayText = "12:00";
 
   public sun = {
     speed: 0.01,
     timeOfDay: 21.0, // 0 to 24, maps to 00:00 to 23:59
-    arcHeight: 0.5, // 0 to 1, max height of the sun arc
+    arcHeight: 0.65, // 0 to 1, max height of the sun arc
   };
 
   public moon = {
@@ -42,13 +42,15 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   override initialize(): boolean {
+    const init = super.initialize();
     this.update(1);
-    return super.initialize();
+    return init;
   }
 
   public override update(elapsed: number): void {
     // 1. Update time of day
-    this.sun.timeOfDay += elapsed * this.sun.speed * 0.01;
+    if(this.parent.scene.isRunning) 
+      this.sun.timeOfDay += elapsed * this.sun.speed * 0.01;
     
     // Loop strictly between 0.0 and 24.0 (00:00 to 23:59)
     if (this.sun.timeOfDay >= 24.0) {
@@ -96,7 +98,7 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   private updateLightColor(): void {
-    const light = this.light;
+    const light = this.parent as Light;
     if (!light) return;
 
     const scene = light.scene;
@@ -150,6 +152,7 @@ export class SunBehaviour extends EntityBehaviour {
         const skyboxRenderer = skyboxEntity.getBehaviour(SkyboxRenderer) as SkyboxRenderer;
         if (skyboxRenderer.shader && skyboxRenderer.shader instanceof SkyboxShader) {
           const shader = skyboxRenderer.shader as SkyboxShader;
+          shader.material.horizonColor = light.color
           shader.useSun = 1;
           const normalizedDir = vec3.normalize(vec3.create(), this.transform.worldPosition);
           shader._sunDirection.set(normalizedDir[0], normalizedDir[1], normalizedDir[2]);
