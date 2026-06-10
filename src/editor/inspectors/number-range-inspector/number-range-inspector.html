@@ -1,0 +1,37 @@
+@if (range) {
+  <div class="line-item">
+    <span
+      class="drag-label"
+      (mousedown)="startLabelDrag($event)"
+      style="cursor: ew-resize; user-select: none"
+    >
+      {{ label }}
+    </span>
+
+    <div class="slider-container">
+      <input
+        #sliderInput
+        type="range"
+        class="slider"
+        [min]="range.min"
+        [max]="range.max"
+        [step]="range.step"
+        [value]="range.value"
+        (mousedown)="startLabelDrag($event)"
+        [style.--slider-pos.%]="
+          ((range.value - range.min) / (range.max - range.min)) * 100
+        "
+        (input)="onSliderChange($event)"
+      />
+      <input
+        type="number"
+        class="text-input number-input"
+        [value]="range.value"
+        [min]="range.min"
+        [max]="range.max"
+        [step]="range.step"
+        (input)="onInputChange($event)"
+      />
+    </div>
+  </div>
+}

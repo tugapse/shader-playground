@@ -1,15 +1,24 @@
 @if (targetEntity) {
-<div class="inspector" appMovable movableHandleId="header" resizeHandleId="resize-handle">
-  <editor-inspector-header id="header" [entity]="targetEntity"></editor-inspector-header>
+  <div
+    class="inspector"
+    appMovable
+    movableHandleId="header"
+    resizeHandleId="resize-handle"
+  >
+    <editor-inspector-header
+      id="header"
+      [entity]="targetEntity"
+    ></editor-inspector-header>
 
-  <div class="content">
-    <editor-entity-inspector [targetEntity]="targetEntity"></editor-entity-inspector>
+    <div class="content">
+      <editor-entity-inspector
+        [targetEntity]="targetEntity"
+      ></editor-entity-inspector>
+    </div>
+
+    <section class="footer">
+      <span>Inspector {{ targetEntity.name }}</span
+      ><app-icon id="resize-handle" iconName="fa-sort"></app-icon>
+    </section>
   </div>
-
-  <section class="footer">
-    <span>Inspector {{targetEntity.name}}</span><app-icon id="resize-handle" iconName="fa-sort"></app-icon>
-  </section>
-
-
-</div>
 }

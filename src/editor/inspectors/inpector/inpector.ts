@@ -6,6 +6,7 @@ import { InspectorHeader } from '../../components/inspector/inspector-header/ins
 import { EntityInspector } from "../entity-inspector/entity-inspector";
 import { GlEntity } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
+import { SandboxSliderComponent } from "../sandbox-slider.component";
 
 @Component({
   selector: 'editor-inpector',
@@ -14,8 +15,9 @@ import { EditorService } from '@editor/services/editor.service';
   imports: [
     CommonModule, InspectorHeader, MovableDirective,
     Icon,
-    EntityInspector
-  ],
+    EntityInspector,
+    SandboxSliderComponent
+],
 })
 export class Inpector {
 
