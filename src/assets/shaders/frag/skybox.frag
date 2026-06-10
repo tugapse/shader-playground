@@ -51,7 +51,6 @@ void main() {
   float y = viewDir.y;
   vec3 gradientColor = vec3(0.0);
 
-  // Optimized background gradient calculation
   float absY = abs(y);
   float p = pow(absY, u_exponent);
   vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
@@ -59,12 +58,10 @@ void main() {
 
   vec3 finalColor = gradientColor;
 
-  // Render atmospheric effect layers
   finalColor = drawStars(finalColor, viewDir);
   finalColor = drawClouds(finalColor, viewDir); 
 
   if (u_useSun == 1) {
-    // Branchless optimization for sky lighting occlusion
     vec3 weatherTint = mix(u_sunColor.rgb, vec3(0.4), g_cloudAlpha * 0.75);
     finalColor *= weatherTint;
 
@@ -82,21 +79,21 @@ void main() {
 // --- RENDERING SUBSYSTEM IMPLEMENTATIONS ---
 
 vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
-    // Early exit if looking below the horizon line
     if (viewDir.y < 0.0) {
         return currentSkyColor;
     }
 
-    // Configuration constants
-    const float c_starScale       = 160.0;                        
-    const float c_starSparsity    = 34.0;                         
-    const float c_starIntensity   = 5.0;                          
-    const float c_starClusterFreq = 1.5;                          
-    const float c_starClusterCut  = 0.4;                          
-    const float c_starSpeed       = 0.01;                         
-    const vec3 c_rotationAxis     = vec3(0.1961, 0.8825, 0.0981); 
+    // =========================================================================
+    // CONFIGURATION PROPERTIES (STARFIELD SYSTEM)
+    // =========================================================================
+    const float c_starScale       = 100.0;                        // Size/frequency of star cells (higher = smaller stars)
+    const float c_starSparsity    = 34.0;                         // Noise exponent threshold at night (higher = fewer stars)
+    const float c_starIntensity   = 5.0;                          // Maximum brightness multiplier during absolute night
+    const float c_starClusterFreq = 2.9;                          // Frequency scale of the cosmic galaxy banding patterns
+    const float c_starClusterCut  = 0.35;                          // Contrast threshold cutoff defining empty space dark voids
+    const float c_starSpeed       = 0.004;                         // Rotational speed tracking calculation velocity over time
+    const vec3 c_rotationAxis     = vec3(0.1961, 0.8825, 0.0981); // Pre-normalized 3D directional vector axis of Earth's tilt
 
-    // Axis-Angle rotation tracking
     float angle = u_time * c_starSpeed;
     float s = sin(angle);
     float c = cos(angle);
@@ -110,7 +107,6 @@ vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
 
     vec3 rotatedViewDir = rotationMatrix * viewDir;
 
-    // Fast check for celestial body clipping before calculating noise
     vec3 moonDir = normalize(u_moonDirection);
     float moonDot = max(0.0, dot(viewDir, moonDir));
     float d2 = 1.0 - moonDot * moonDot;
@@ -120,7 +116,6 @@ vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
         return currentSkyColor;
     }
 
-    // Grid tracking transformation calculations
     vec3 starCoord = rotatedViewDir * c_starScale; 
     vec3 i = floor(starCoord);
     vec3 f = fract(starCoord);
@@ -128,14 +123,12 @@ vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
     float distToCenter = length(f - vec3(0.5));
     float pointMask = smoothstep(0.4, 0.0, distToCenter);
 
-    // Dynamic solar attenuation factor logic
     float nightFactor = smoothstep(0.1, -0.2, u_sunDirection.y); 
     float dynamicExponent = mix(45.0, c_starSparsity, nightFactor);
     
     float rawNoise = hash3D(i);
     float starMask = pow(rawNoise, dynamicExponent) * pointMask; 
 
-    // Early exit if the grid cell contains no active star points
     if (starMask <= 0.0) {
         return currentSkyColor;
     }
@@ -148,7 +141,6 @@ vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
     float dynamicIntensity = mix(0.5, c_starIntensity, nightFactor);
     float finalStarIntensity = starMask * horizonFade * dynamicIntensity;
 
-    // Branchless chromatic color variation selection mapping
     float colorSeed = hash3D(i + vec3(12.34, 56.78, 90.12));
     vec3 icyBlue    = vec3(0.75, 0.88, 1.00);
     vec3 warmAmber  = vec3(1.00, 0.92, 0.78);
@@ -166,33 +158,35 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
         return currentSkyColor;
     }
 
-    // Configuration constants
-    float c_weatherCondition = 0.45 + sin(u_time * 0.3) * 0.4;     
-    const float c_cloudScale       = 0.4;                         
-    const float c_cloudSpeed       = 0.015;                        
-    const float c_zenithPatchWeight= 0.7;                         
-    const float c_maxOpacityClear  = 0.85;                        
-    const float c_maxOpacityStorm  = 0.98;                        
-    const vec3 c_cloudSeed         = vec3(42.12, 128.54, 954.31); 
+    // =========================================================================
+    // CONFIGURATION PROPERTIES (METEOROLOGICAL SYSTEM)
+    // =========================================================================
+    float c_weatherCondition = 0.45 + sin(u_time * 0.3) * 0.4;     // Testing driver loop state (0.0 = Clear, 1.0 = Heavy Storm)
+    const float c_cloudScale       = 0.4;                         // Size/frequency scale of the cloud fractal structures
+    const float c_cloudSpeed       = 0.15;                        // Wind drift translation velocity speed factor over time
+    const float c_zenithPatchWeight= 0.7;                         // Opacity blending mix weight of the overhead zenith dome cap
+    const float c_maxOpacityClear  = 0.85;                        // Alpha opacity limit clamping factor during standard clear days
+    const float c_maxOpacityStorm  = 0.98;                        // Alpha opacity limit clamping factor during heavy dark storms
+    const vec3 c_cloudSeed         = vec3(42.12 , 128.54, 954.31); // 3D generation coordinate translation offsets (Procedural Seed)
 
-    vec3 c_cloudColorDay  = mix(vec3(1.0), u_sunColor.rgb, 0.5);  
-    vec3 c_cloudShadowDay = u_horizonColor.rgb * 0.8;             
-    vec3 c_cloudColorRain  = mix(u_horizonColor.rgb * 1.5, vec3(0.75, 0.77, 0.80), 0.3);
-    vec3 c_cloudShadowRain = mix(u_horizonColor.rgb * 0.8, vec3(0.45, 0.47, 0.50), 0.3);
+    // Configurable Color Parameters
+    vec3 c_cloudColorDay  = mix(vec3(1.0), u_sunColor.rgb, 0.5);  // Main daylight color highlight profile edge
+    vec3 c_cloudShadowDay = u_horizonColor.rgb * 0.8;             // Base undershade color profile for fair weather clouds
+    vec3 c_cloudColorRain  = mix(u_horizonColor.rgb * 1.5, vec3(0.75, 0.77, 0.80), 0.3); // Rain highlight color configuration matrix
+    vec3 c_cloudShadowRain = mix(u_horizonColor.rgb * 0.8, vec3(0.45, 0.47, 0.50), 0.3); // Rain undershade color configuration matrix
 
-    // Radial planar projection step mapping
+    // =========================================================================
+
     vec2 cloudUV = viewDir.xz / (viewDir.y + 0.001);
     vec2 windOffset = vec2(u_time * c_cloudSpeed, u_time * c_cloudSpeed * 0.3);
     cloudUV = (cloudUV * c_cloudScale) + windOffset;
 
-    // Evaluate Planar Fractal Brownian Motion loop profile
     vec3 pPlanar = vec3(cloudUV.x, 0.0, cloudUV.y) + c_cloudSeed;
     float nPlanar  = 0.500 * noise3D(pPlanar); pPlanar *= 2.05;
     nPlanar       += 0.250 * noise3D(pPlanar); pPlanar *= 2.02;
     nPlanar       += 0.125 * noise3D(pPlanar);
     float baseCloudNoise = nPlanar / 0.875;
 
-    // Evaluate Spherical Zenith Dome compensation pass
     vec3 pSpherical = (viewDir * (c_cloudScale * 2.5)) + vec3(windOffset.x, 0.0, windOffset.y) + c_cloudSeed;
     float nSpherical  = 0.500 * noise3D(pSpherical); pSpherical *= 2.05;
     nSpherical       += 0.250 * noise3D(pSpherical);
@@ -201,7 +195,6 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     float zenithWeight = pow(viewDir.y, 3.0); 
     float cloudNoise = mix(baseCloudNoise, zenithNoise, zenithWeight * c_zenithPatchWeight);
 
-    // Weather threshold processing
     float dynamicDensity = mix(0.75, 0.15, c_weatherCondition);
     float dynamicSharpness = mix(0.35, 0.15, c_weatherCondition);
     float cloudCoverage = smoothstep(dynamicDensity, dynamicDensity + dynamicSharpness, cloudNoise);
@@ -209,7 +202,6 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     float edgeFade = smoothstep(0.01, 0.15, viewDir.y);
     g_cloudAlpha = cloudCoverage * edgeFade;
 
-    // CRITICAL PERFORMANCE GUARD: Skip mathematical lighting evaluations if completely transparent
     if (g_cloudAlpha <= 0.0) {
         return currentSkyColor;
     }
@@ -223,20 +215,22 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
 }
 
 vec3 calculateSunDisc(vec3 viewDir) {
-    const float c_coronaGlowPower = 180.0;                       
-    const float c_coronaGlowScale = 0.65;                        
-    const float c_wideGlarePower  = 12.0;                         
-    const float c_wideGlareScale  = 0.25;                         
-    const float c_raySymmetryFreq1= 9.0;                          
-    const float c_raySymmetryFreq2= 15.0;                         
-    const float c_raySymmetryFreq3= 4.0;                          
-    const float c_rayFalloffPower = 450.0;                        
-    const float c_rayIntensityScale = 0.45;                       
+    // =========================================================================
+    // CONFIGURATION PROPERTIES (HELIOCENTRIC LOGIC SUB-SYSTEM)
+    // =========================================================================
+    const float c_coronaGlowPower = 180.0;                       // Sharpness falloff rate exponent of the tight corona flare halo
+    const float c_coronaGlowScale = 0.65;                        // Intensity scale brightness factor of the tight corona halo
+    const float c_wideGlarePower  = 12.0;                         // Sharpness falloff rate exponent of the broad screen lens flood
+    const float c_wideGlareScale  = 0.25;                         // Intensity scale brightness factor of the broad screen lens flood
+    const float c_raySymmetryFreq1= 9.0;                          // Sharpness pattern frequency speed pass 1 for solar ray needles
+    const float c_raySymmetryFreq2= 15.0;                         // Sharpness pattern frequency speed pass 2 for structural solar beams
+    const float c_raySymmetryFreq3= 4.0;                          // Cross modulation masking frequency mapping break gaps between rays
+    const float c_rayFalloffPower = 450.0;                        // Compression distance curve multiplier scaling starburst projections
+    const float c_rayIntensityScale = 0.45;                       // Shimmer emission strength scale factor for the directional beams
 
     vec3 sunDir = normalize(u_sunDirection);
     float sunDot = max(0.0, dot(viewDir, sunDir));
     
-    // Performance Guard: Exit early if completely outside the sun's glare radius
     if (sunDot < 0.7) {
         return vec3(0.0);
     }
@@ -264,16 +258,19 @@ vec3 calculateSunDisc(vec3 viewDir) {
 }
 
 vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
-    const float c_haloRadiusWiden = 0.0015;                      
-    const float c_haloAlphaWeight = 0.4;                         
-    const float c_terminatorSoft  = 0.5;                          
-    const float c_textureFreqBase = 3.5;                          
-    const float c_textureFreqDet  = 12.0;                         
-    const float c_craterRimCutoff = 0.68;                         
-    const float c_earthshineValue = 0.02;                         
-    const float c_horizonHazePow  = 2.0;                          
-    const int c_enableMoonRotation = 1;    
-    const float c_moonRotationSpeed = 0.05; 
+    // =========================================================================
+    // CONFIGURATION PROPERTIES (LUNAR ENVIRONMENT SYSTEM)
+    // =========================================================================
+    const float c_haloRadiusWiden = 0.0015;                      // Mathematical thickness boundary radius of the atmospheric ring
+    const float c_haloAlphaWeight = 0.1;                         // Ambient light blending transparency factor for phase glow halos
+    const float c_terminatorSoft  = 0.5;                          // Shadow transition softness window spanning the terminator edge line
+    const float c_textureFreqBase = 3.5;                          // Octave frequency scale mapping primary lunar craters/maria valleys
+    const float c_textureFreqDet  = 12.0;                         // Octave frequency scale mapping secondary high-resolution cracks
+    const float c_craterRimCutoff = 0.68;                         // Highpass amplitude filter mask clipping crater wall brightness
+    const float c_earthshineValue = 0.02;                         // Albedo brightness multiplier filling unlit eclipse side details
+    const float c_horizonHazePow  = 2.0;                          // Thickness curve attenuation falloff driving dust horizon fading
+    const int c_enableMoonRotation = 1;                           // Activation logic toggle state switch (1 = Animated, 0 = Frozen)
+    const float c_moonMoonRotationSpeed = 0.05;                   // Surface scrolling translation velocity tracking movement over time
 
     vec3 moonDir = normalize(u_moonDirection);
     float moonDot = max(0.0, dot(viewDir, moonDir));
@@ -292,7 +289,6 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
         colorOut = mix(currentSkyColor, u_horizonColor.rgb, c_haloAlphaWeight * haloFactor * phaseFade);
     }
 
-    // Performance Guard: Immediately return if pixel is outside moon boundaries entirely
     if (d2 > R2) {
         return colorOut;
     }
@@ -306,13 +302,11 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
     vec3 L = normalize(moonDir * cos(phaseAngle) + moonRight * sin(phaseAngle));
     float moonLighting = smoothstep(-c_terminatorSoft, c_terminatorSoft, dot(N, L));
     
-    // Vectorized structural matrix rotation pass optimization
     vec3 rotatedN = N;
     if (c_enableMoonRotation == 1) {
-        float rotAngle = u_time * c_moonRotationSpeed;
+        float rotAngle = u_time * c_moonMoonRotationSpeed;
         float rSin = sin(rotAngle);
         float rCos = cos(rotAngle);
-        // Optimized multi-component vector assignment
         rotatedN.xz = vec2(N.x * rCos - N.z * rSin, N.x * rSin + N.z * rCos);
     }
     
@@ -337,4 +331,4 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
 
     vec3 completeMoon = mix(colorOut, moonBodyColor, moonAlpha);
     return mix(completeMoon, g_cloudColor, g_cloudAlpha * 0.9);
-}
+}   

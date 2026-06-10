@@ -116,6 +116,7 @@ export class Light extends GlEntity {
 export class DirectionalLight extends Light {
 
    protected override _className = "DirectionalLight";
+  public static override get className() { return "DirectionalLight"; };
 
   /**
     Gets the direction of the light, derived from the transform's rotation.
@@ -183,6 +184,8 @@ export class DirectionalLight extends Light {
  */
 export class PointLight extends Light {
    protected override _className = "PointLight";
+  public static override get className() { return "PointLight"; };
+
 
   /**
     The type of the entity, specifically set to LIGHT_POINT.

@@ -316,6 +316,24 @@ export class Scene extends GlEntity {
   public getEntitieByName(name: string): GlEntity | undefined {
     return this.objects.find(o => o.name === name);
   }
+  
+  /**
+    Retrieves an entity by Classname.
+   * @param {string} name - The name of the entity class to find.
+   * @returns {GlEntity | undefined} - The found entity, or undefined.
+   */
+  public getEntitieClassByName(className: string): GlEntity | undefined {
+    return this.objects.find(o => o.className === className);
+  }
+
+  /**
+    Retrieves all entity by its Classname.
+   * @param {string} className - The name of the entity class to find.
+   * @returns {GlEntity[]} - The found entity, or undefined.
+   */
+  public getEntitiesClassByName(className: string): GlEntity[] {
+    return this.objects.filter(o => o.className === className);
+  }
 
   /**
     Retrieves an entity by its unique identifier.

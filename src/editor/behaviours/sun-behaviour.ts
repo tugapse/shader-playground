@@ -1,4 +1,4 @@
-import { Color, EntityBehaviour, JsonSerializedData, Light, ObjectInstanciator, RendererBehaviour, SkyboxRenderer, SkyboxShader, Vector3 } from "@engine";
+import { Color, DirectionalLight, EntityBehaviour, JsonSerializedData, Light, ObjectInstanciator, RendererBehaviour, SkyboxRenderer, SkyboxShader, Vector3 } from "@engine";
 import { ClassType } from "@engine/enums/class-type.enum";
 import { vec3 } from "gl-matrix";
 
@@ -10,8 +10,8 @@ export class SunBehaviour extends EntityBehaviour {
 
   protected override _className = "SunBehaviour";
   
-
-  public timeOfDayText = "12:00";
+  public light!:DirectionalLight;
+  public timeOfDayText!:string; 
 
   public sun = {
     speed: 0.01,
@@ -96,7 +96,7 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   private updateLightColor(): void {
-    const light = this.parent as Light;
+    const light = this.light;
     if (!light) return;
 
     const scene = light.scene;
