@@ -16,6 +16,12 @@ import { NumberRange } from '@engine/core/range';
 import { ClassType } from '@engine/enums/class-type.enum';
 import { vec3 } from 'gl-matrix';
 
+// Helper for smooth (ease-in, ease-out) interpolation
+const smoothstep = (t: number): number => {
+  const clamped = Math.max(0, Math.min(1, t));
+  return clamped * clamped * (3 - 2 * clamped);
+};
+
 /**
  * Controls the sun's position, color, and the day/night cycle in the scene.
  * This behaviour simulates the sun's movement across the sky based on a time-of-day system,
@@ -23,11 +29,14 @@ import { vec3 } from 'gl-matrix';
  * This component should be attached to an entity that represents the sun, typically a DirectionalLight.
  */
 export class SunBehaviour extends EntityBehaviour {
+
   static override instanciate(): SunBehaviour {
     return new SunBehaviour();
   }
 
   protected override _className = 'SunBehaviour';
+  private _skyboxRenderer: SkyboxRenderer | undefined;
+  protected moonLight :DirectionalLight | undefined;
 
   /** Settings related to the passage of time in the day/night cycle. */
   public daySettings = {
@@ -59,8 +68,16 @@ export class SunBehaviour extends EntityBehaviour {
     phaseSpeed: 0.0005,
     /** The current phase of the moon, from 0 (new moon) to 1 (new moon again). */
     phase: new NumberRange(0, 0, 1.01, 0.01),
+    useDirectionalLight:false
   };
 
+  /** Settings for shadow appearance during the day/night cycle. */
+  public shadows = {
+    /** The strength of shadows at night (e.g., from the moon). */
+    nightStrength: new NumberRange(0.2, 0, 1, 0.01),
+    /** The duration of the shadow fade-in/out transition in hours (e.g., 0.5 for 30 minutes). */
+    fadeDuration: new NumberRange(0.5, 0, 2, 0.1),
+  };
   /** Key time points in the 24-hour day cycle. */
   public hours = {
     sunrise: 6.0, // 6:00 AM
@@ -90,6 +107,9 @@ export class SunBehaviour extends EntityBehaviour {
 
   override initialize(): boolean {
     const init = super.initialize();
+    this._skyboxRenderer = this.parent.scene?.objects
+      .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
+      ?.getBehaviour(SkyboxRenderer);
     this.update(0);
     return init;
   }
@@ -97,12 +117,22 @@ export class SunBehaviour extends EntityBehaviour {
   public override update(elapsed: number): void {
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
+    const moonLight = this.moonLight || this.parent.scene.lights.find(o=>o.tag == 'MoonLight') as DirectionalLight;
+    if(this.moon.useDirectionalLight == true){
+      if(!moonLight){
+         this.moonLight = new DirectionalLight('MoonLight')
+         this.moonLight.tag = 'MoonLight';
+        this.moonLight.color = this.colors.nightColor;
+        this.moonLight.transform.setParent(this.transform)
+        this.parent.scene.addEntity(this.moonLight)
+      }
+    }
 
     if (!light || light.entityType !== EntityType.LIGHT_DIRECTIONAL) {
       return;
     }
 
-    this.updateSunPosition(light);
+    this.updateSunPosition(light,moonLight);
     this.updateLightColor(light);
   }
 
@@ -140,7 +170,7 @@ export class SunBehaviour extends EntityBehaviour {
    * The sun follows a tilted arc path, simulating its daily journey.
    * The height and tilt of the arc can be configured.
    */
-  private updateSunPosition(light: DirectionalLight | undefined): void {
+  private updateSunPosition(light: DirectionalLight | undefined, moonLight:DirectionalLight | undefined): void {
     if (!light) return;
     const sunDistance = 1.0;
     const tiltAngle = Math.acos(this.sun.sunHeight.value);
@@ -159,6 +189,11 @@ export class SunBehaviour extends EntityBehaviour {
 
     light.transform.setWorldPosition(x, y, z);
     light.transform.lookAt(new Vector3(0, 0, 0));
+
+    if(moonLight){
+      moonLight.transform.setWorldPosition(-x, -y, -z);
+      moonLight.transform.lookAt(new Vector3(0, 0, 0));
+    } 
   }
 
   /**
@@ -262,10 +297,67 @@ export class SunBehaviour extends EntityBehaviour {
 
     light.color = Color.lerp(fromLightColor, toLightColor, clampedDelta);
 
+    const shadowRenderer = this.parent.scene.shadowmapRenderer;
+    if (shadowRenderer) {
+      shadowRenderer.shadowstrength.value = this._calculateShadowStrength(
+        time,
+        shadowRenderer.shadowstrength.max,
+      );
+    }
     this.updateSceneColors(light.color);
-    this.updateSkybox(light, fromSkyColor, toSkyColor, fromHorizonColor, toHorizonColor, clampedDelta);
+    this.updateSkybox(
+      light,
+      fromSkyColor,
+      toSkyColor,
+      fromHorizonColor,
+      toHorizonColor,
+      clampedDelta,
+      isNight,
+    );
   }
 
+  /**
+   * Calculates the appropriate shadow strength based on the time of day.
+   * @param time The current time of day (0-24).
+   * @param maxDayStrength The maximum shadow strength during the day.
+   * @returns The calculated shadow strength (0-1).
+   */
+  private _calculateShadowStrength(time: number, maxDayStrength: number): number {
+    let shadowStrength = 0.0;
+    const dayStrength = maxDayStrength;
+    const nightStrength = this.shadows.nightStrength.value;
+    const fadeDuration = this.shadows.fadeDuration.value;
+
+    const sunsetFadeStart = this.hours.sunset - fadeDuration;
+    const nightFadeEnd = this.hours.sunset + fadeDuration;
+    const sunriseFadeStart = this.hours.sunrise - fadeDuration;
+    const sunriseFadeEnd = this.hours.sunrise + fadeDuration;
+
+    if (time >= sunriseFadeEnd && time < sunsetFadeStart) {
+      // Full day
+      shadowStrength = dayStrength;
+    } else if (time >= sunsetFadeStart && time < this.hours.sunset) {
+      // Fading out day shadow
+      const progress = (time - sunsetFadeStart) / (this.hours.sunset - sunsetFadeStart);
+      shadowStrength = (1 - smoothstep(progress)) * dayStrength;
+    } else if (time >= this.hours.sunset && time < nightFadeEnd) {
+      // Fading in night shadow
+      const progress = (time - this.hours.sunset) / (nightFadeEnd - this.hours.sunset);
+      shadowStrength = smoothstep(progress) * nightStrength;
+    } else if (time >= sunriseFadeStart && time < this.hours.sunrise) {
+      // Fading out night shadow
+      const progress = (time - sunriseFadeStart) / (this.hours.sunrise - sunriseFadeStart);
+      shadowStrength = (1 - smoothstep(progress)) * nightStrength;
+    } else if (time >= this.hours.sunrise && time < sunriseFadeEnd) {
+      // Fading in day shadow
+      const progress = (time - this.hours.sunrise) / (sunriseFadeEnd - this.hours.sunrise);
+      shadowStrength = smoothstep(progress) * dayStrength;
+    } else {
+      // Full night
+      shadowStrength = nightStrength;
+    }
+    return Math.max(0, shadowStrength);
+  }
   /**
    * Updates the scene's ambient colors (background and fog) to match the light color.
    * @param The color to apply to the scene.
@@ -289,31 +381,24 @@ export class SunBehaviour extends EntityBehaviour {
     fromHorizonColor: Color,
     toHorizonColor: Color,
     delta: number,
+    isNight: boolean,
   ): void {
     const scene = this.parent.scene;
-    if (!scene || !light) return;
+    if (!scene || !light) {
+      return;
+    }
 
-    const skyboxEntity = scene.objects.find((o: GlEntity) =>
-      o.getBehaviour(SkyboxRenderer),
-    );
-    if (skyboxEntity) {
-      const skyboxRenderer = skyboxEntity.getBehaviour(
-        SkyboxRenderer,
-      ) as SkyboxRenderer;
-      if (
-        skyboxRenderer.shader &&
-        skyboxRenderer.shader instanceof SkyboxShader
-      ) {
-        this.updateShaderVariables(
-          skyboxRenderer,
-          light,
-          fromSkyColor,
-          toSkyColor,
-          fromHorizonColor,
-          toHorizonColor,
-          delta,
-        );
-      }
+    if (!this._skyboxRenderer) {
+      this._skyboxRenderer = scene.objects
+        .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
+        ?.getBehaviour(SkyboxRenderer);
+    }
+
+    if (this._skyboxRenderer?.shader instanceof SkyboxShader) {
+      this._updateSkyboxShaderVariables(
+        this._skyboxRenderer, light, fromSkyColor, toSkyColor,
+        fromHorizonColor, toHorizonColor, delta, isNight,
+      );
     }
   }
 
@@ -322,7 +407,7 @@ export class SunBehaviour extends EntityBehaviour {
    * @param skyboxRenderer The renderer containing the skybox shader.
    * @param light The main directional light.
    */
-  private updateShaderVariables(
+  private _updateSkyboxShaderVariables(
     skyboxRenderer: SkyboxRenderer,
     light: Light,
     fromSkyColor: Color,
@@ -330,13 +415,14 @@ export class SunBehaviour extends EntityBehaviour {
     fromHorizonColor: Color,
     toHorizonColor: Color,
     delta: number,
+    isNight: boolean,
   ): void {
     const shader = skyboxRenderer.shader as SkyboxShader;
     shader.material.skyColor = Color.lerp(fromSkyColor, toSkyColor, delta);
     shader.material.horizonColor = Color.lerp(fromHorizonColor, toHorizonColor, delta);
 
-    shader.useSun = this.sun.show ? 1 : 0;
-    shader.useMoon = this.moon.show ? 1 : 0;
+    shader.useSun = this.sun.show && !isNight ? 1 : 0;
+    shader.useMoon = this.moon.show && isNight ? 1 : 0;
     shader.sunSize = this.sun.sunSize.value;
     shader.sunFalloff = this.sun.sunFalloff.value;
 
@@ -383,6 +469,10 @@ export class SunBehaviour extends EntityBehaviour {
         phaseSpeed: this.moon.phaseSpeed,
         color: this.moon.color.toJsonObject(),
       },
+      shadows: {
+        nightStrength: this.shadows.nightStrength.toJsonObject(),
+        fadeDuration: this.shadows.fadeDuration.toJsonObject(),
+      },
       hours: { ...this.hours },
       colors: {
         sunriseColor: this.colors.sunriseColor.toJsonObject(),
@@ -411,6 +501,10 @@ export class SunBehaviour extends EntityBehaviour {
       this.moon.phase.fromJson(jsonObject['moon'].phase);
       this.moon.phaseSpeed = this.moon.phaseSpeed;
       this.moon.color.fromJson(jsonObject['moon'].color);
+    }
+    if (jsonObject['shadows']) {
+      this.shadows.nightStrength.fromJson(jsonObject['shadows'].nightStrength);
+      this.shadows.fadeDuration.fromJson(jsonObject['shadows'].fadeDuration);
     }
     if (jsonObject['hours']) {
       this.hours = { ...this.hours, ...jsonObject['hours'] };

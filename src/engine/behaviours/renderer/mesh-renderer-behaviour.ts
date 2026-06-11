@@ -107,6 +107,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
   }
 
   protected override setShaderVariables(): void {
+    this.shader!.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.parent.scene.shadowmapRenderer.shadowstrength.value);
     this.setLightInformation();
     this.setNormalMapsInformation();
   }

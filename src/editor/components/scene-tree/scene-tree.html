@@ -16,7 +16,7 @@
 <div class="tree-body">
   @for (node of sceneTreeNodes; track node.id) {
   <app-tree-node [node]="node" [selectedNodeId]="selectedUuid" (nodeSelected)="onNodeSelected($event)"
-    (nodeDropped)="handleNodeDropped($event)" />
+    (nodeDropped)="handleNodeDropped($event)" (nodeDeleted)="onNodeDeleted($event)" />
   }@empty {
   <div>No Objects added to the scene</div>
   }

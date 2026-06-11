@@ -212,6 +212,20 @@ export class Scene extends GlEntity {
   }
 
   /**
+    Removes an entity from the scene.
+   * @param {GlEntity} entity - The entity to remove.
+   * @returns {void}
+   */
+  public removeEntity(entity: GlEntity): void {
+    if (this.destroyed) return;
+    const index = this._objects.indexOf(entity);
+    if (index !== -1) {
+      this._objects.splice(index, 1);
+      entity.destroy();
+    }
+  }
+
+  /**
     Adds a new scene-specific behaviour.
    * @override
    * @param {SceneEntityBehaviour} behaviour - The behaviour to add.

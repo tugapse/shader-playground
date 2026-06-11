@@ -165,6 +165,27 @@ export class SceneTree {
     this.sceneTreeNodes = [...this.sceneTreeNodes]; // Trigger change detection
   }
 
+  onNodeDeleted(node: TreeNode<string>) {
+    if (!this.scene) return;
+    const entity = this.treeNodeMap[node.id];
+    if (entity) {
+      this.deleteEntityAndChildren(entity);
+      this.sceneTreeService.onSceneUpdated.emit(this.scene);
+      if (this.selectedUuid === node.id) {
+         this.selectedUuid = '';
+         this.sceneTreeService.onEntitySelected.emit(undefined as any);
+      }
+    }
+  }
+
+  private deleteEntityAndChildren(entity: GlEntity) {
+      const children = this.scene.objects.filter(e => e.transform.parent?.parentEntity === entity);
+      for (const child of children) {
+          this.deleteEntityAndChildren(child);
+      }
+      this.scene.removeEntity(entity);
+  }
+
   // Helper function to find a node and its direct parent
   private findNodeAndParent(nodes: TreeNode<string>[], name: string, parent: TreeNode<string> | null = null): { node: TreeNode<string> | null, parent: TreeNode<string> | null } {
     for (const node of nodes) {

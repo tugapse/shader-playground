@@ -61,16 +61,14 @@ void main() {
   finalColor = drawStars(finalColor, viewDir);
   finalColor = drawClouds(finalColor, viewDir); 
 
-  if (u_useSun == 1) {
-    vec3 weatherTint = mix(u_sunColor.rgb, vec3(0.4), g_cloudAlpha * 0.75);
-    finalColor *= weatherTint;
-
-    if (u_useMoon == 1) {
-      finalColor = drawMoon(finalColor, viewDir);
-    }
-
+  // Sun is only visible when it's above the horizon
+  if (u_useSun == 1 && u_sunDirection.y > -0.1) {
     float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
     finalColor += drawSun(viewDir) * sunOcclusion;
+  }
+
+  if (u_useMoon == 1 && u_moonDirection.y > -0.1) {
+    finalColor = drawMoon(finalColor, viewDir);
   }
 
   fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);

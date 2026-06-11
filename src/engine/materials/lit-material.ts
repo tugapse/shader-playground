@@ -20,11 +20,7 @@ export class LitMaterial extends UnlitMaterial {
    * @type {number}
    */
   public roughness: number = 0.01;
-  /**
-    The strength of the shadows cast onto this material.
-   * @type {number}
-   */
-  public shadowStrength: number = 0.5;
+
   /**
     The intensity of the normal map effect.
    * @type {number}
@@ -52,7 +48,6 @@ export class LitMaterial extends UnlitMaterial {
       normalTex: this.normalTex?.toJsonObject(),
       specularStrength: this.specularStrength,
       roughness: this.roughness,
-      shadowStrength: this.shadowStrength,
       normalMapStrength: this.normalMapStrength,
     };
   }
@@ -70,7 +65,6 @@ export class LitMaterial extends UnlitMaterial {
       this.normalTex.fromJson(jsonObject['normalTex']);
     }
     this.roughness = jsonObject['roughness'];
-    this.shadowStrength = jsonObject['shadowStrength'] ?? 0.5;
     this.normalMapStrength = jsonObject['normalMapStrength'];
     debugger
   }
