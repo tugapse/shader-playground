@@ -9,6 +9,7 @@
     color: var(--editor-panel-color);
 
     .drag-label {
+      padding-left: 4px;
       flex: 0 0 60px;
       overflow: hidden;
       text-overflow: ellipsis;

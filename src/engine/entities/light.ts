@@ -1,10 +1,10 @@
-import { vec3 } from "gl-matrix";
-import { Color } from "../core/color";
-import { Transform } from "../core/transform";
-import { Vector3 } from "../core/vector";
-import { EntityType } from "../enums/entity-type.enum";
-import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
-import { GlEntity } from "./entity";
+import { vec3 } from 'gl-matrix';
+import { Color } from '../core/color';
+import { Transform } from '../core/transform';
+import { Vector3 } from '../core/vector';
+import { EntityType } from '../enums/entity-type.enum';
+import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
+import { GlEntity } from './entity';
 
 /**
   Defines the properties for light attenuation, controlling how light intensity diminishes with distance.
@@ -48,8 +48,7 @@ export class LightConeAngles {
  * @augments {GlEntity}
  */
 export class Light extends GlEntity {
-
-  protected override _className = "Light";
+  protected override _className = 'Light';
 
   /**
     The type of the entity, specifically set to LIGHT_AMBIENT.
@@ -105,7 +104,7 @@ export class Light extends GlEntity {
    * @returns {Light} - The newly created Light instance.
    */
   static override instanciate(name?: string, transform?: Transform): Light {
-    return new Light(name || "Light");
+    return new Light(name || 'Light');
   }
 }
 
@@ -114,24 +113,30 @@ export class Light extends GlEntity {
  * @augments {Light}
  */
 export class DirectionalLight extends Light {
-
-   protected override _className = "DirectionalLight";
-  public static override get className() { return "DirectionalLight"; };
-
-  /**
-    Gets the direction of the light, derived from the transform's rotation.
-   * @readonly
-   * @type {vec3}
-   */
-  public get direction(): vec3 {
-    return vec3.normalize(vec3.create(), this.transform.forward);
+  
+  public static override get className() {
+    return 'DirectionalLight';
   }
+  
+  protected override _className = 'DirectionalLight';
+  
   /**
     The type of the entity, specifically set to LIGHT_DIRECTIONAL.
    * @override
    * @type {EntityType}
    */
   public override entityType: EntityType = EntityType.LIGHT_DIRECTIONAL;
+  
+  /**
+    Gets the direction of the light, derived from the transform's rotation.
+   * @readonly
+   * @type {vec3}
+   */
+  public get direction(): vec3 {
+    return vec3.normalize(vec3.create(), this.invertLightDirection ? this.transform.forward: this.transform.back);
+  }
+
+  public invertLightDirection = false;
 
   /**
     Creates an instance of DirectionalLight.
@@ -151,7 +156,7 @@ export class DirectionalLight extends Light {
    */
   public override toJsonObject(): JsonSerializedData {
     return {
-      ...super.toJsonObject()
+      ...super.toJsonObject(),
     };
   }
 
@@ -173,8 +178,11 @@ export class DirectionalLight extends Light {
    * @param {Transform} [transform] - The transform for the directional light.
    * @returns {DirectionalLight} - The newly created DirectionalLight instance.
    */
-  static override instanciate(name?: string, transform?: Transform): DirectionalLight {
-    return new DirectionalLight(name || "Directional Light");
+  static override instanciate(
+    name?: string,
+    transform?: Transform,
+  ): DirectionalLight {
+    return new DirectionalLight(name || 'Directional Light');
   }
 }
 
@@ -183,9 +191,10 @@ export class DirectionalLight extends Light {
  * @augments {Light}
  */
 export class PointLight extends Light {
-   protected override _className = "PointLight";
-  public static override get className() { return "PointLight"; };
-
+  protected override _className = 'PointLight';
+  public static override get className() {
+    return 'PointLight';
+  }
 
   /**
     The type of the entity, specifically set to LIGHT_POINT.
@@ -242,8 +251,11 @@ export class PointLight extends Light {
    * @param {Transform} [transform] - The transform for the point light.
    * @returns {PointLight} - The newly created PointLight instance.
    */
-  static override instanciate(name?: string, transform?: Transform): PointLight {
-    return new PointLight(name || "Light");
+  static override instanciate(
+    name?: string,
+    transform?: Transform,
+  ): PointLight {
+    return new PointLight(name || 'Light');
   }
 }
 
@@ -252,8 +264,7 @@ export class PointLight extends Light {
  * @augments {Light}
  */
 export class SpotLight extends Light {
-
-   protected override _className = "SpotLight";
+  protected override _className = 'SpotLight';
 
   /**
     The type of the entity, specifically set to LIGHT_SPOT.
@@ -327,6 +338,6 @@ export class SpotLight extends Light {
    * @returns {SpotLight} - The newly created SpotLight instance.
    */
   static override instanciate(name?: string, transform?: Transform): SpotLight {
-    return new SpotLight(name || "Light");
+    return new SpotLight(name || 'Light');
   }
 }

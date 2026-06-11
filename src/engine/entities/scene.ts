@@ -5,7 +5,7 @@ import { JsonSerializedData } from "../interfaces/json-serialized-data.interface
 import { SceneEntityBehaviour } from "../interfaces/scene-behaviour.interface";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Light } from "./light";
+import { Light ,DirectionalLight} from "./light";
 import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
 import { RenderLayer } from "../enums";
 import { CubemapTexture, Texture } from "../textures";
@@ -151,7 +151,7 @@ export class Scene extends GlEntity {
 
     const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
     if (this.shadowmapRenderer?.enabled && lightEntity) {
-      this.shadowmapRenderer.drawShadowapTexture(lightEntity.transform);
+      this.shadowmapRenderer.drawShadowapTexture(lightEntity as DirectionalLight);
     } else {
       this.shadowmapRenderer.clearShadowMap()
     }

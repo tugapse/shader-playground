@@ -37,8 +37,8 @@ export class SkyboxShader extends Shader {
   // Sun properties to be passed as uniforms
   public _sunDirection: Vector3 = new Vector3(0, 1, 0);
   public _sunColor: Color = new Color(1, 1, 1, 1);
-  public _sunSize: number = 0.999;
-  public _sunFalloff: number = 0.01;
+  public sunSize: number = 0.999;
+  public sunFalloff: number = 0.03;
   public useSun: number = 1;
 
   // Moon properties
@@ -88,8 +88,8 @@ export class SkyboxShader extends Shader {
     // Set sun uniforms from the shader's properties
     this.setVec3(ShaderUniformsEnum.U_SUN_DIRECTION, this._sunDirection.vector);
     this.setVec4(ShaderUniformsEnum.U_SUN_COLOR, this._sunColor.toVec4());
-    this.setFloat(ShaderUniformsEnum.U_SUN_SIZE, this._sunSize);
-    this.setFloat(ShaderUniformsEnum.U_SUN_FALLOFF, this._sunFalloff);
+    this.setFloat(ShaderUniformsEnum.U_SUN_SIZE, this.sunSize);
+    this.setFloat(ShaderUniformsEnum.U_SUN_FALLOFF, this.sunFalloff);
     this.setInt(ShaderUniformsEnum.U_USE_SUN, this.useSun);
 
     this.setVec3(ShaderUniformsEnum.U_MOON_DIRECTION, this._moonDirection.vector);

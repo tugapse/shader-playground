@@ -1,42 +1,100 @@
-<editor-inpector-toggle-panel [isChild]="isChild" [title]="label" [collapsed]="true">
+<editor-inpector-toggle-panel
+  [isChild]="isChild"
+  [title]="label"
+  [collapsed]="true"
+>
   @if (_selectedObject) {
+    @for (item of _properties; track $index) {
+      @if (item.value != undefined) {
+        @switch (item.type) {
+          @case ("entity") {
+            <editor-text-input-inspector
+              [label]="item.key.capitalize()"
+              [value]="item.value.uuid"
+              (change)="onValueChanged(item, $event)"
+            ></editor-text-input-inspector>
+          }
 
-  @for (item of _properties; track $index) {
-  @if (item.value != undefined) {
-  @switch (item.type) {
+          @case ("mesh") {
+            <editor-text-input-inspector
+              [label]="item.key.capitalize()"
+              [value]="item.value.uuid"
+              (change)="onValueChanged(item, $event)"
+            ></editor-text-input-inspector>
+          }
 
+          @case ("string") {
+            <editor-text-input-inspector
+              [label]="item.key.capitalize()"
+              [value]="item.value"
+              (change)="onValueChanged(item, $event)"
+            ></editor-text-input-inspector>
+          }
 
+          @case ("number") {
+            <editor-text-input-inspector
+              [isNumber]="true"
+              [label]="item.key.capitalize()"
+              [value]="item.value"
+              (change)="onValueChanged(item, $event)"
+              [dragScale]="0.001"
+            ></editor-text-input-inspector>
+          }
 
-  @case ("entity") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="item.value.uuid"
-    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
+          @case ("range") {
+            <editor-number-range-inspector
+              [label]="item.key.capitalize()"
+              [range]="item.value"
+              (rangeChange)="onValueChanged(item, $event)"
+            ></editor-number-range-inspector>
+          }
 
-  @case ("mesh") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="item.value.uuid"
-    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
+          @case ("boolean") {
+            <app-boolean-inspector
+              [label]="item.key.capitalize()"
+              [title]="item.key"
+              [active]="item.value"
+              (change)="onValueChanged(item, $event)"
+            ></app-boolean-inspector>
+          }
 
-  @case ("string") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="item.value"
-    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
+          @case ("color") {
+            <editor-color-inspector
+              [label]="item.key"
+              [selectedColor]="item.value"
+              (colorChange)="onColorChanged(item, $event)"
+            ></editor-color-inspector>
+          }
 
-  @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()" [value]="item.value"
-    (change)="onValueChanged(item,$event)" [dragScale]="0.001"></editor-text-input-inspector> }
+          @case ("vector234") {
+            <editor-vector-inspector
+              [label]="item.key"
+              [vectorKeys]="['x', 'y', 'z', 'w']"
+              [vector]="item.value"
+              (vectorChanged)="onVectorChanged(item, $event)"
+              [scale]="0.1"
+            ></editor-vector-inspector>
+          }
 
-  @case ("range") { <editor-number-range-inspector [label]="item.key.capitalize()" [range]="item.value"
-    (rangeChange)="onValueChanged(item,$event)"></editor-number-range-inspector> }
+          @case ("enum") {
+            <editor-enum-inspector
+              [label]="item.key.capitalize()"
+            ></editor-enum-inspector>
+          }
 
-  @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [title]="item.key" [active]="item.property"
-    (change)="item.property = $event"></app-boolean-inspector>}
-
-  @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="item.value"
-    (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
-
-  @case ("vector234") { <editor-vector-inspector [label]="item.key" [vectorKeys]="['x','y','z','w']"
-    [vector]="item.value" (vectorChanged)="onVectorChanged(item, $event)" [scale]="0.1"></editor-vector-inspector>}
-
-  @case ("enum") {<editor-enum-inspector [label]="item.key.capitalize()"></editor-enum-inspector> }
-
-  @default { <editor-object-inspector [isChild]="true" [label]="item.key.capitalize()+' '+item.name"
-    [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
-
+          @default {
+            <editor-object-inspector
+              [isChild]="true"
+              [label]="item.key.capitalize() + ' ' + item.name"
+              [targetObject]="{
+                key: item.key,
+                type: item.type,
+                property: item.value,
+              }"
+            ></editor-object-inspector>
+          }
+        }
+      }
+    }
   }
-  } } }
-
 </editor-inpector-toggle-panel>

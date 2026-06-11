@@ -61,6 +61,7 @@ export class BehaviourInspector extends ObjectInspector {
 
   override onValueChanged(property: ITargetObject, value: string | number | boolean): void {
     if ((typeof value == 'number' || typeof value == 'string' || typeof value == 'boolean'))
+      debugger
       this._selectedObject!.property[property.key] = value;
   }
 
@@ -76,7 +77,7 @@ export class BehaviourInspector extends ObjectInspector {
         arrayValues.push(enumObj)
       }
       if (value != undefined) {
-
+        debugger
         const p: ITargetProperty = {
           key: enumName,
           type: "boolean",

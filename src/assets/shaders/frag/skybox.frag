@@ -41,7 +41,7 @@ vec3 g_cloudColor  = vec3(0.0);
 // --- FUNCTION PROTOTYPES ---
 vec3 drawStars(vec3 currentSkyColor, vec3 viewDir);
 vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir);
-vec3 calculateSunDisc(vec3 viewDir);
+vec3 drawSun(vec3 viewDir);
 vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir);
 
 // --- MAIN PIPELINE EXECUTION ---
@@ -70,7 +70,7 @@ void main() {
     }
 
     float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
-    finalColor += calculateSunDisc(viewDir) * sunOcclusion;
+    finalColor += drawSun(viewDir) * sunOcclusion;
   }
 
   fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
@@ -154,6 +154,8 @@ vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
 }
 
 vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
+        return currentSkyColor;
+
     if (viewDir.y < 0.01) {
         return currentSkyColor;
     }
@@ -161,16 +163,16 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     // =========================================================================
     // CONFIGURATION PROPERTIES (METEOROLOGICAL SYSTEM)
     // =========================================================================
-    float c_weatherCondition = 0.45 + sin(u_time * 0.3) * 0.4;     // Testing driver loop state (0.0 = Clear, 1.0 = Heavy Storm)
+    float c_weatherCondition = 0.45 + sin(u_time * 0.03) ;     // Testing driver loop state (0.0 = Clear, 1.0 = Heavy Storm)
     const float c_cloudScale       = 0.4;                         // Size/frequency scale of the cloud fractal structures
     const float c_cloudSpeed       = 0.15;                        // Wind drift translation velocity speed factor over time
     const float c_zenithPatchWeight= 0.7;                         // Opacity blending mix weight of the overhead zenith dome cap
-    const float c_maxOpacityClear  = 0.85;                        // Alpha opacity limit clamping factor during standard clear days
+    const float c_maxOpacityClear  = 0.75;                        // Alpha opacity limit clamping factor during standard clear days
     const float c_maxOpacityStorm  = 0.98;                        // Alpha opacity limit clamping factor during heavy dark storms
     const vec3 c_cloudSeed         = vec3(42.12 , 128.54, 954.31); // 3D generation coordinate translation offsets (Procedural Seed)
 
     // Configurable Color Parameters
-    vec3 c_cloudColorDay  = mix(vec3(1.0), u_sunColor.rgb, 0.5);  // Main daylight color highlight profile edge
+    vec3 c_cloudColorDay  = mix(vec3(1.0), u_sunColor.rgb, 0.3);  // Main daylight color highlight profile edge
     vec3 c_cloudShadowDay = u_horizonColor.rgb * 0.8;             // Base undershade color profile for fair weather clouds
     vec3 c_cloudColorRain  = mix(u_horizonColor.rgb * 1.5, vec3(0.75, 0.77, 0.80), 0.3); // Rain highlight color configuration matrix
     vec3 c_cloudShadowRain = mix(u_horizonColor.rgb * 0.8, vec3(0.45, 0.47, 0.50), 0.3); // Rain undershade color configuration matrix
@@ -184,6 +186,7 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     vec3 pPlanar = vec3(cloudUV.x, 0.0, cloudUV.y) + c_cloudSeed;
     float nPlanar  = 0.500 * noise3D(pPlanar); pPlanar *= 2.05;
     nPlanar       += 0.250 * noise3D(pPlanar); pPlanar *= 2.02;
+
     nPlanar       += 0.125 * noise3D(pPlanar);
     float baseCloudNoise = nPlanar / 0.875;
 
@@ -214,7 +217,7 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     return mix(currentSkyColor, g_cloudColor, g_cloudAlpha * dynamicMaxOpacity);
 }
 
-vec3 calculateSunDisc(vec3 viewDir) {
+vec3 drawSun(vec3 viewDir) {
     // =========================================================================
     // CONFIGURATION PROPERTIES (HELIOCENTRIC LOGIC SUB-SYSTEM)
     // =========================================================================
@@ -256,6 +259,8 @@ vec3 calculateSunDisc(vec3 viewDir) {
            (sunRays * edgeColor) + 
            (wideGlare * outerHazeColor * u_sunColor.rgb);
 }
+
+
 
 vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
     // =========================================================================

@@ -3,8 +3,8 @@ import { Transform, Vector3 } from "../../core";
 import { CanvasViewport } from "../../core/canvas-viewport";
 import { Mesh } from "../../core/mesh";
 import { ObjectInstanciator } from "../../core/object-instanciator";
-import { Camera } from "../../entities/camera";
-import { FaceWinding, RenderLayer } from "../../enums";
+import { Camera, DirectionalLight, Light } from "../../entities";
+import { EntityType, FaceWinding, RenderLayer } from "../../enums";
 import { GLPrimitiveType } from "../../enums/gl-primitive-type.enum";
 import { BlendingDestinationFactor, BlendingSourceFactor } from "../../enums/gl/blend.enum";
 import { CullFace } from "../../enums/gl/cull-face.enum";
@@ -486,7 +486,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
    * These matrices are used in shadow mapping to render the scene from the light's perspective.
    *
    * @param {Transform} cameraTransform - The transform of the main camera.
-   * @param {Transform} lightTransform - The transform of the light source.
+   * @param {Light} light - The light source entity.
    * @param {number} [frustumSize=60.0] - The size of the orthographic frustum used for the light's projection.
    * @param {number} [near=0.1] - The near clipping plane of the light's frustum.
    * @param {number} [far=200.0] - The far clipping plane of the light's frustum.
@@ -494,13 +494,18 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
    */
   public createLightMatrices(
     cameraTransform: Transform,
-    lightTransform: Transform,
+    light: Light,
     frustumSize: number = 60.0,
     near: number = 0.1,
     far: number = 200.0,
   ) {
-    // 1. Get the light's direction from the new 'lightTransform' parameter.
-    const lightDirection = vec3.normalize(vec3.create(), lightTransform.forward);
+    // 1. Get the light's direction from the light entity.
+    let lightDirection: vec3;
+    if (light.entityType === EntityType.LIGHT_DIRECTIONAL) {
+      lightDirection = (light as DirectionalLight).direction;
+    } else {
+      lightDirection = vec3.normalize(vec3.create(), light.transform.forward);
+    }
 
     // 2. Determine the center of the light's view frustum.
     // It is centered on the camera's position for consistent shadow coverage.

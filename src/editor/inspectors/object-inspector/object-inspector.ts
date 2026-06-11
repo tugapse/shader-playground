@@ -61,6 +61,7 @@ export class ObjectInspector {
   }
 
   onValueChanged(property: ITargetObject, value: string | number | boolean | NumberRange) {
+    debugger
     if (!this._selectedObject || (value as any) instanceof Event) return;
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
@@ -136,14 +137,14 @@ export class ObjectInspector {
       result = 'shader';
     if (newValue instanceof Texture)
       result = 'texture';
-    // if (newValue instanceof Color)
-    //   result = 'color';
     if (newValue instanceof NumberRange)
       result = 'range';
     if (newValue instanceof ColorMaterial || newValue instanceof LitMaterial || newValue instanceof UnlitMaterial)
       result = 'material';
     if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
       result = "vector234";
+    if (newValue instanceof Boolean)
+      result = 'boolean';
 
     return result.replace("_", "").toLowerCase()
   }
