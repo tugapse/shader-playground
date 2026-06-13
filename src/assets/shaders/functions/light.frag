@@ -97,9 +97,9 @@ vec3 applyDirectionalLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal,
     if (intensities.x <= 0.0) return vec3(0.0);
 
     float shadowFactor = 1.0;
-    if (index == 0) { // Only first directional light casts shadows
+    // if (index == 0) { // Only first directional light casts shadows
         shadowFactor = is_in_shadow_pcf(v_lightSpacePosition, normal, lightDir);
-    }
+    // }
 
     vec3 diffuse = baseColor * intensities.x;
     vec3 specular = vec3(1.0) * intensities.y;

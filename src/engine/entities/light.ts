@@ -133,7 +133,7 @@ export class DirectionalLight extends Light {
    * @type {vec3}
    */
   public get direction(): vec3 {
-    return vec3.normalize(vec3.create(), this.invertLightDirection ? this.transform.forward: this.transform.back);
+    return vec3.normalize(vec3.create(), this.invertLightDirection ? this.transform.back : this.transform.forward);
   }
 
   public invertLightDirection = false;

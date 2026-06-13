@@ -149,7 +149,7 @@ export class Scene extends GlEntity {
   public override draw(): void {
     if (this.destroyed || !this.gl || !Camera.mainCamera || !this.shadowmapRenderer) return;
 
-    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
+    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL && obj.active && obj.show);
     if (this.shadowmapRenderer?.enabled && lightEntity) {
       this.shadowmapRenderer.drawShadowapTexture(lightEntity as DirectionalLight);
     } else {

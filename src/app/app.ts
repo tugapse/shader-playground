@@ -125,6 +125,9 @@ export class App implements OnDestroy {
   private async createFloor(scene: Scene) {
     const primitive = new PlanePrimitive(50);
     const material = new LitMaterial();
+    material.normalMapStrength = 0.0;
+    material.roughness = 0.0;
+    material.specularStrength = 0.0;
 
     const shader = new LitShader(this.gl, material);
     
@@ -132,7 +135,7 @@ export class App implements OnDestroy {
     renderer.name = "Renderer";
     renderer.castShadows = false;
     material.mainTex = await EngineCache.getTexture2D("assets/images/wood-texture.jpg", this.gl);
-    material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal1.jpg", this.gl);
+    // material.normalTex = await EngineCache.getTexture2D("assets/images/wood-normal1.jpg", this.gl);
 
 
     renderer.shader = shader;

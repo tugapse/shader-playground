@@ -75,6 +75,10 @@ export class SceneTree {
     }
   }
 
+  refreshTree() {
+    this.prepareObjects();
+  }
+
   prepareObjects() {
     if (!this.scene) return;
     const sceneObjects = this.scene.objects;
