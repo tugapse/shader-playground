@@ -58,7 +58,6 @@ export class LitShader extends Shader {
 
     this.setFloat(ShaderUniformsEnum.U_SPECULAR_STRENGTH, this.material.specularStrength);
     this.setFloat(ShaderUniformsEnum.U_ROUGHNESS, Math.max(this.material.roughness, 0.01));
-    this.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.material.shadowStrength);
     this.setFloat(ShaderUniformsEnum.U_NORMAL_MAP_STRENGTH, this.material.normalMapStrength);
 
     this.setVec3(ShaderUniformsEnum.U_CAMERA_POSITION, Camera.mainCamera.transform.worldPosition);

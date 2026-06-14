@@ -72,7 +72,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
         this.shadowMapTexture.bind();
 
         if (lightEntity) {
-          let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity.transform);
+          let { lightMvpMatrix } = this.createLightMatrices(Camera.mainCamera.transform, lightEntity as Light);
           mat4.multiply(this._mvpScratch, lightMvpMatrix, this.transform.modelMatrix);
           this.shader.setMat4(ShaderUniformsEnum.U_LIGHT_MVP_MATRIX, this._mvpScratch);
           this.receiveShadows && this.shader.setInt(ShaderUniformsEnum.U_USE_SHADOWS, 1);
@@ -107,6 +107,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
   }
 
   protected override setShaderVariables(): void {
+    this.shader!.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.parent.scene.shadowmapRenderer.shadowstrength.value);
     this.setLightInformation();
     this.setNormalMapsInformation();
   }

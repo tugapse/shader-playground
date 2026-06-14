@@ -1,60 +1,128 @@
 @if (behaviour) {
-<editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
+  <editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
+    <div class="header-content" header-content>
+      <app-boolean-inspector
+        align="right"
+        [active]="behaviour.active"
+        (change)="behaviour.active = !behaviour.active"
+      ></app-boolean-inspector>
+      <app-icon
+        class="icon"
+        iconName="fa-trash"
+        (click)="onRemoveBehaviourRequested()"
+      ></app-icon>
+    </div>
 
-<div class="header-content" header-content >
-  <app-boolean-inspector align="right"[active]="behaviour.active"
-    (change)="behaviour.active = !behaviour.active"></app-boolean-inspector>
-  <app-icon class="icon" iconName="fa-trash" (click)="onRemoveBehaviourRequested()"></app-icon>
-</div>
+    @for (item of _properties; track $index) {
+      @switch (item.type) {
+        @case ("entity") {
+          <editor-text-input-inspector
+            [label]="item.key.capitalize()"
+            [value]="behaviour[item.key].uuid"
+            readonly
+          ></editor-text-input-inspector>
+        }
+        @case ("string") {
+          <editor-text-input-inspector
+            [label]="item.key.capitalize()"
+            [value]="behaviour[item.key]"
+            (change)="onValueChanged(item, $event)"
+          ></editor-text-input-inspector>
+        }
 
+        @case ("number") {
+          <editor-text-input-inspector
+            [isNumber]="true"
+            [label]="item.key.capitalize()"
+            [value]="behaviour[item.key]"
+            (change)="onValueChanged(item, $event)"
+            [dragScale]="0.001"
+          ></editor-text-input-inspector>
+        }
 
+        @case ("boolean") {
+          <app-boolean-inspector
+            [label]="item.key.capitalize()"
+            [active]="behaviour[item.key]"
+            (change)="onValueChanged(item, $event)"
+          ></app-boolean-inspector>
+        }
 
-  @for (item of _properties; track $index) { @switch (item.type) {
+        @case ("color") {
+          <editor-color-inspector
+            [label]="item.key"
+            [selectedColor]="behaviour[item.key]"
+            (colorChange)="onColorChanged(item, $event)"
+          ></editor-color-inspector>
+        }
 
-  @case ("entity") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key].uuid"
-    readonly></editor-text-input-inspector> }
-  @case ("string") { <editor-text-input-inspector [label]="item.key.capitalize()" [value]="behaviour[item.key]"
-    (change)="onValueChanged(item,$event)"></editor-text-input-inspector> }
+        @case ("vector234") {
+          <editor-vector-inspector
+            [vector]="behaviour[item.key]"
+            (vectorChanged)="onVectorChanged(item, $event)"
+          ></editor-vector-inspector>
+        }
 
-  @case ("number") { <editor-text-input-inspector [isNumber]="true" [label]="item.key.capitalize()"
-    [value]="behaviour[item.key]" (change)="onValueChanged(item,$event)"
-    [dragScale]="0.001"></editor-text-input-inspector> }
+        @case ("enum") {
+          <editor-enum-inspector
+            [label]="item.key"
+            [items]="item.property"
+            [selected]="item.value"
+            (change)="onEnumChanged(item, $event)"
+          ></editor-enum-inspector>
+        }
+        @case ("range") {
+          <editor-number-range-inspector
+            [label]="item.key.capitalize()"
+            [range]="item.value"
+            (rangeChange)="onRangeChanges(item, $event)"
+          ></editor-number-range-inspector>
+        }
 
-  @case ("boolean") { <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
-    (change)="onValueChanged(item,$event)"></app-boolean-inspector>}
+        @default {
+          <editor-object-inspector
+            [isChild]="true"
+            [label]="item.value?.name || item.key.capitalize()"
+            [targetObject]="{
+              key: item.key,
+              type: item.type,
+              property: item.value,
+            }"
+          ></editor-object-inspector>
+        }
+      }
+    }
 
-  @case ("color") {<editor-color-inspector [label]="item.key" [selectedColor]="behaviour[item.key]"
-    (colorChange)="onColorChanged(item,$event)"></editor-color-inspector> }
-
-  @case ("vector234") { <editor-vector-inspector [vector]="behaviour[item.key]"
-    (vectorChanged)="onVectorChanged(item, $event)"></editor-vector-inspector>}
-
-  @case ("enum") {<editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
-    (change)="onEnumChanged(item, $event)"></editor-enum-inspector> }
-
-  @default {
-  <editor-object-inspector [isChild]="true" [label]="item.value?.name || item.key.capitalize()"
-    [targetObject]="{key:item.key, type:item.type ,property:item.value}"></editor-object-inspector> }
-
-  }}
-
-
-  @if (_renderEnable.length>0) {
-  <editor-inpector-toggle-panel [title]="'Enable Functions'" [isChild]="true" [collapsed]="true">
-    @for (item of _renderEnable; track $index) {
-    <app-boolean-inspector [label]="item.key.capitalize()" [active]="behaviour[item.key]"
-      (change)="onValueChanged(item,$event)"></app-boolean-inspector>
+    @if (_renderEnable.length > 0) {
+      <editor-inpector-toggle-panel
+        [title]="'Enable Functions'"
+        [isChild]="true"
+        [collapsed]="true"
+      >
+        @for (item of _renderEnable; track $index) {
+          <app-boolean-inspector
+            [label]="item.key.capitalize()"
+            [active]="behaviour[item.key]"
+            (change)="onValueChanged(item, $event)"
+          ></app-boolean-inspector>
+        }
+      </editor-inpector-toggle-panel>
+    }
+    @if (_renderProperties.length > 0) {
+      <editor-inpector-toggle-panel
+        [title]="'Render Settings'"
+        [isChild]="true"
+        [collapsed]="true"
+      >
+        @for (item of _renderProperties; track $index) {
+          <editor-enum-inspector
+            [label]="item.key"
+            [items]="item.property"
+            [selected]="item.value"
+            (change)="onEnumChanged(item, $event)"
+          ></editor-enum-inspector>
+        }
+      </editor-inpector-toggle-panel>
     }
   </editor-inpector-toggle-panel>
-  }
-  @if (_renderProperties.length>0) {
-
-  <editor-inpector-toggle-panel [title]="'Render Settings'" [isChild]="true" [collapsed]="true">
-    @for (item of _renderProperties; track $index) {
-    <editor-enum-inspector [label]="item.key" [items]="item.property" [selected]="item.value"
-      (change)="onEnumChanged(item, $event)"></editor-enum-inspector>
-    }
-  </editor-inpector-toggle-panel>
-  }
-</editor-inpector-toggle-panel>
 }

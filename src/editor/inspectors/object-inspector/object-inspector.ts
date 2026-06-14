@@ -1,11 +1,12 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4 } from '@engine';
+import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4, NumberRange } from '@engine';
 import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
 import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
 import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { EnumInspector } from "../enum-inspector/enum-inspector";
+import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
 import { SceneTreeService } from '@editor/services/scene-tree.service';
 import { EditorService } from '@editor/services/editor.service';
 
@@ -23,7 +24,7 @@ export interface ITargetProperty extends ITargetObject {
 @Component({
   selector: 'editor-object-inspector',
   imports: [InpectorTogglePanel, TextInputInspector, ColorInspector,
-    VectorInspector, BooleanInspector, EnumInspector],
+    VectorInspector, BooleanInspector, EnumInspector, NumberRangeInspector],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss'
 })
@@ -34,7 +35,7 @@ export class ObjectInspector {
 
   @Input() allowProperties: string[] = [];
   @Input() denyProperties: string[] = ["meshData", "gl", "mesh"];
-  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh", "vetor234"];
+  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh", "vetor234", "range"];
 
   @Input() label: string = "No title";
   @Input() isChild = false;
@@ -59,7 +60,8 @@ export class ObjectInspector {
     this.sceneTreeService.onSceneUpdated.emit(scene);
   }
 
-  onValueChanged(property: ITargetObject, value: string | number | boolean) {
+  onValueChanged(property: ITargetObject, value: string | number | boolean | NumberRange) {
+    debugger
     if (!this._selectedObject || (value as any) instanceof Event) return;
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);
@@ -135,12 +137,14 @@ export class ObjectInspector {
       result = 'shader';
     if (newValue instanceof Texture)
       result = 'texture';
-    // if (newValue instanceof Color)
-    //   result = 'color';
+    if (newValue instanceof NumberRange)
+      result = 'range';
     if (newValue instanceof ColorMaterial || newValue instanceof LitMaterial || newValue instanceof UnlitMaterial)
       result = 'material';
     if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
       result = "vector234";
+    if (newValue instanceof Boolean)
+      result = 'boolean';
 
     return result.replace("_", "").toLowerCase()
   }

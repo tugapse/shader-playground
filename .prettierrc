@@ -1,11 +1,21 @@
 {
+  "printWidth": 160,
+  "tabWidth": 2,
+  "useTabs": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf",
   "parser": "html",
   "plugins": ["prettier-plugin-angular"],
   "overrides": [
     {
       "files": "*.html",
       "options": {
-        "parser": "angular"
+        "parser": "angular",
+        "htmlWhitespaceSensitivity": "ignore",
+        "bracketSameLine": false
       }
     }
   ]

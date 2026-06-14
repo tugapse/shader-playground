@@ -394,5 +394,19 @@ export enum ShaderUniformsEnum {
    * Flag to determine if moon should be computed.
    * @type {string}
    */
-  U_USE_MOON = "u_useMoon"
+  U_USE_MOON = "u_useMoon",
+  U_CLOUD_SPEED = "u_cloudSpeed",
+  U_CLOUD_SEED = "u_cloudSeed",
+  U_USE_CLOUDS = "u_useClouds",
+  U_WHEATHER_CONDITION = "u_weatherCondition",
+  U_CLOUD_TILING = "u_cloudTiling",
+  U_CLOUD_SPARSITY = "u_cloudSparsity",
+  U_STAR_INTENSITY = "u_starIntensity",
+  U_STAR_SCALE = "u_starScale",
+  U_STAR_SPARSITY = "u_starSparsity",
+  U_STAR_SPEED = "u_starSpeed",
+  U_MOON_EARTHSHINE = "u_moonEarthshine",
+  U_MOON_TERMINATOR_SOFTNESS = "u_moonTerminatorSoftness",
+  U_MOON_ENABLE_ROTATION = "u_moonEnableRotation",
+  U_MOON_ROTATION_SPEED = "u_moonRotationSpeed"
 }

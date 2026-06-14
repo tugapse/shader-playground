@@ -4,10 +4,11 @@ import { mat4, vec3 } from "gl-matrix";
 import { Transform } from "./transform";
 import { RendererBehaviour } from "../behaviours";
 import { CullFace, ShaderUniformsEnum } from "../enums";
-import { Camera, GlEntity } from "../entities";
+import { Camera, DirectionalLight, GlEntity, Light } from "../entities";
 import { CanvasViewport } from "./canvas-viewport";
 import { Shader } from "../shaders";
 import { ColorMaterial } from "../materials";
+import { NumberRange } from "./range";
 
 /**
  * A specialized renderer responsible for creating a shadow map.
@@ -53,6 +54,7 @@ export class ShadowMapRenderer {
    * @type {boolean}
    */
   public enabled: boolean = true;
+  public shadowstrength = new NumberRange(0.2,0,0.9,0.001)
 
   /**
    * Creates an instance of ShadowMapRenderer.
@@ -88,7 +90,7 @@ export class ShadowMapRenderer {
    * @override
    * @returns {void}
    */
-  drawShadowapTexture(lightTransform: Transform): void {
+  drawShadowapTexture(lightEntity: DirectionalLight): void {
     if (!this.shadowmapTexture.glTexture || !this.depthShader._shaderProgram) return;
 
     // Begin the off-screen render pass to the shadow map texture.
@@ -117,7 +119,7 @@ export class ShadowMapRenderer {
       // Bind the index buffer for the current object.
       this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, renderer.shader.buffers.indices);
 
-      const { lightMvpMatrix } = renderer.createLightMatrices(Camera.mainCamera.transform, lightTransform);
+      const { lightMvpMatrix } = renderer.createLightMatrices(Camera.mainCamera.transform, lightEntity);
 
       // Set the transformation matrices for the current object from the light's perspective.
       this.setMatrices(entity.transform, lightMvpMatrix);
@@ -145,7 +147,7 @@ export class ShadowMapRenderer {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, CanvasViewport.rendererWidth, CanvasViewport.rendererHeight);
     this.shadowmapTexture.unBind();
-
+    this.depthShader.release();
   }
 
   /**

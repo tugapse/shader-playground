@@ -10,10 +10,11 @@ import { EnumInspector } from "../enum-inspector/enum-inspector";
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { Icon } from "src/app/components/icon/icon";
 import { ConfirmationService } from 'src/app/services/confirmation.service';
+import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon],
+  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector],
   templateUrl: './behaviour-inspector.html',
   styleUrl: './behaviour-inspector.scss'
 })
@@ -56,8 +57,11 @@ export class BehaviourInspector extends ObjectInspector {
 
   get behaviour() { return this._selectedObject?.property }
 
+
+
   override onValueChanged(property: ITargetObject, value: string | number | boolean): void {
     if ((typeof value == 'number' || typeof value == 'string' || typeof value == 'boolean'))
+      debugger
       this._selectedObject!.property[property.key] = value;
   }
 
@@ -73,7 +77,7 @@ export class BehaviourInspector extends ObjectInspector {
         arrayValues.push(enumObj)
       }
       if (value != undefined) {
-
+        debugger
         const p: ITargetProperty = {
           key: enumName,
           type: "boolean",
@@ -105,6 +109,10 @@ export class BehaviourInspector extends ObjectInspector {
   onEnumChanged(item: ITargetProperty, $event: DropdownItem) {
     this._selectedObject!.property[item.key] = $event.value
 
+  }
+
+  onRangeChanges(item:ITargetProperty, $event:any){
+    debugger
   }
 
   onRemoveBehaviourRequested() {

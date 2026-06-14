@@ -3,7 +3,7 @@
 // shader.
 
 // Define the maximum number of lights to match your engine's setup
-#define MAX_DIRECTIONAL_LIGHTS 1
+#define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 20
 #define MAX_SPOT_LIGHTS 20
 
@@ -69,90 +69,106 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   return mix(1.0, shadowFactor, u_shadowStrength);
 }
 
+vec3 getFinalNormal(vec2 uv) {
+    vec3 n = normalize(v_normal);
+    if (u_normalMapStrength > 0.0) {
+        vec3 normalFromMap = texture(u_normalMap, uv).rgb * 2.0 - 1.0;
+        mat3 tbnMatrix = mat3(normalize(v_tangent), normalize(v_bitangent), n);
+        vec3 perturbedNormal = tbnMatrix * normalFromMap;
+        return normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
+    }
+    return n;
+}
+
+vec2 calculateBlinnPhong(vec3 lightDir, vec3 viewDir, vec3 normal, float shininess) {
+    float diffuseIntensity = max(dot(normal, lightDir), 0.0);
+    float specularIntensity = 0.0;
+    if (diffuseIntensity > 0.0) {
+        vec3 halfVec = normalize(lightDir + viewDir);
+        specularIntensity = pow(max(0.0, dot(normal, halfVec)), shininess) * u_specularStrength;
+    }
+    return vec2(diffuseIntensity, specularIntensity);
+}
+
+vec3 applyDirectionalLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightDir = normalize(-u_directionalLightDirections[index]);
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    
+    if (intensities.x <= 0.0) return vec3(0.0);
+
+    float shadowFactor = 1.0;
+    // if (index == 0) { // Only first directional light casts shadows
+        shadowFactor = is_in_shadow_pcf(v_lightSpacePosition, normal, lightDir);
+    // }
+
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+    return (diffuse + specular) * u_directionalLightColors[index] * shadowFactor;
+}
+
+vec3 applyPointLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightVec = u_pointLightPositions[index] - v_position;
+    vec3 lightDir = normalize(lightVec);
+
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    if (intensities.x <= 0.0) return vec3(0.0);
+
+    float distance = length(lightVec);
+    float attenuation = 1.0 / (u_pointLightConstantAtts[index] +
+                               u_pointLightLinearAtts[index] * distance +
+                               u_pointLightQuadraticAtts[index] * (distance * distance));
+
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+
+    return (diffuse + specular) * u_pointLightColors[index] * attenuation;
+}
+
+vec3 applySpotLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightVec = u_spotLightPositions[index] - v_position;
+    vec3 lightDir = normalize(lightVec);
+
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    if (intensities.x <= 0.0) return vec3(0.0);
+
+    float angleCos = dot(lightDir, -u_spotLightDirections[index]);
+    float coneFactor = smoothstep(u_spotLightOuterConeCos[index], u_spotLightInnerConeCos[index], angleCos);
+    
+    if (coneFactor <= 0.0) return vec3(0.0);
+
+    float distance = length(lightVec);
+    float attenuation = 1.0 / (u_spotLightConstantAtts[index] +
+                               u_spotLightLinearAtts[index] * distance +
+                               u_spotLightQuadraticAtts[index] * (distance * distance));
+    
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+
+    return (diffuse + specular) * u_spotLightColors[index] * attenuation * coneFactor;
+}
+
 // This function calculates the final lit color, including shadows
 vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
-
-  vec3 n = normalize(v_normal);
-  // Apply normal mapping if a normal map is provided
-  vec3 finalNormal;
-  if (u_normalMapStrength > 0.0) {
-    vec3 normalFromMap = texture(u_normalMap, uv).rgb;
-    normalFromMap = normalFromMap * 2.0 - 1.0;
-    mat3 tbnMatrix =
-        mat3(normalize(v_tangent), normalize(v_bitangent), normalize(v_normal));
-    vec3 perturbedNormal = tbnMatrix * normalFromMap;
-    finalNormal = normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
-  } else {
-    finalNormal = n;
-  }
-
+  vec3 finalNormal = getFinalNormal(uv);
   vec3 viewDir = normalize(u_cameraPosition - v_position);
-  float clampedRoughness = clamp(u_roughness, 0.001, 0.999);
-  float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
+  float shininess = (2.0 / (1.0 - clamp(u_roughness, 0.001, 0.999))) - 2.0;
 
   // Start with ambient lighting
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
 
   // Directional Lighting
-
-  vec3 lightDir = normalize(-u_directionalLightDirections[0]);
-  float ndotl = dot(finalNormal, lightDir);
-  float diffuseIntensity = max(ndotl, 0.0);
-  vec3 halfVec = normalize(lightDir + viewDir);
-  float shadowFactor =
-      is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
-
-  float specularIntensity =
-      pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
-  vec3 diffuse = baseColor * diffuseIntensity;
-  vec3 specular = vec3(1.0) * specularIntensity; // Specular highlights are reflections of the light source, not the object's color.
-  totalLitColorRGB += (diffuse + specular) * u_directionalLightColors[0] * shadowFactor;
+  for (int i = 0; i < u_numDirectionalLights; ++i) {
+    totalLitColorRGB += applyDirectionalLight(i, baseColor, viewDir, finalNormal, shininess);
+  }
 
   // Point Light Contributions
   for (int i = 0; i < u_numPointLights; ++i) {
-    vec3 lightVecPoint = u_pointLightPositions[i] - v_position; ;
-    float distancePoint = length(lightVecPoint);
-    vec3 pointLightDir = normalize(lightVecPoint);
-
-    float attenuationPoint =
-        1.0 / (u_pointLightConstantAtts[i] +
-               u_pointLightLinearAtts[i] * distancePoint +
-               u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
-
-
-    float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
-    vec3 h = normalize(pointLightDir + viewDir);
-    float pointSpecularIntensity = (pointDiffuseIntensity <= 0.0) ? 0.0 : 
-        pow(max(0.0, dot(finalNormal, h)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB +=
-        (baseColor * u_pointLightColors[i] *
-         (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint);
+    totalLitColorRGB += applyPointLight(i, baseColor, viewDir, finalNormal, shininess);
   }
 
   // Spot Light Contributions
   for (int i = 0; i < u_numSpotLights; ++i) {
-    vec3 lightVecSpot = u_spotLightPositions[i] - v_position;
-    float distanceSpot = length(lightVecSpot);
-    float attenuationSpot =
-        1.0 /
-        (u_spotLightConstantAtts[i] + u_spotLightLinearAtts[i] * distanceSpot +
-         u_spotLightQuadraticAtts[i] * (distanceSpot * distanceSpot));
-    attenuationSpot = clamp(attenuationSpot, 0.0, 1.0);
-    vec3 spotLightDirFromFrag = normalize(lightVecSpot);
-    float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
-    float coneFactor = smoothstep(u_spotLightOuterConeCos[i],
-                                  u_spotLightInnerConeCos[i], angleCos);
-    coneFactor = clamp(coneFactor, 0.0, 1.0);
-    float spotDiffuseIntensity =
-        max(dot(finalNormal, spotLightDirFromFrag), 0.0);
-    vec3 hSpot = normalize(spotLightDirFromFrag + viewDir);
-    float spotSpecularIntensity = (spotDiffuseIntensity <= 0.0) ? 0.0 :
-        pow(max(0.0, dot(finalNormal, hSpot)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB += (baseColor * u_spotLightColors[i] *
-                         (spotDiffuseIntensity + spotSpecularIntensity) *
-                         attenuationSpot * coneFactor);
+    totalLitColorRGB += applySpotLight(i, baseColor, viewDir, finalNormal, shininess);
   }
   return totalLitColorRGB;
 }

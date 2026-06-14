@@ -18,10 +18,20 @@ export class TreeNodeComponent<T> {
   @Output() nodeDropped = new EventEmitter<{ draggedNode: TreeNode<T>, targetNode: TreeNode<T>, dropPosition: 'above' | 'below' | 'inside' }>();
   @Output() visibilityChange = new EventEmitter<TreeNode<T>>();
   @Output() nodeSelected = new EventEmitter<TreeNode<T>>();
+  @Output() nodeDeleted = new EventEmitter<TreeNode<T>>();
 
   isDropAbove = false;
   isDropBelow = false;
   isDropInside = false;
+
+  onDeleteClick(node: TreeNode<T>, event: MouseEvent) {
+    event.stopPropagation();
+    this.nodeDeleted.emit(node);
+  }
+
+  onChildDeleted(node: TreeNode<T>) {
+    this.nodeDeleted.emit(node);
+  }
 
   onDragStart(event: DragEvent): void {
     if (event.dataTransfer) {

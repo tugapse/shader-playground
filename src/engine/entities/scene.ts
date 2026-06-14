@@ -5,7 +5,7 @@ import { JsonSerializedData } from "../interfaces/json-serialized-data.interface
 import { SceneEntityBehaviour } from "../interfaces/scene-behaviour.interface";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Light } from "./light";
+import { Light ,DirectionalLight} from "./light";
 import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
 import { RenderLayer } from "../enums";
 import { CubemapTexture, Texture } from "../textures";
@@ -149,9 +149,9 @@ export class Scene extends GlEntity {
   public override draw(): void {
     if (this.destroyed || !this.gl || !Camera.mainCamera || !this.shadowmapRenderer) return;
 
-    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL);
+    const lightEntity = this.lights.find(obj => obj.entityType === EntityType.LIGHT_DIRECTIONAL && obj.active && obj.show);
     if (this.shadowmapRenderer?.enabled && lightEntity) {
-      this.shadowmapRenderer.drawShadowapTexture(lightEntity.transform);
+      this.shadowmapRenderer.drawShadowapTexture(lightEntity as DirectionalLight);
     } else {
       this.shadowmapRenderer.clearShadowMap()
     }
@@ -209,6 +209,20 @@ export class Scene extends GlEntity {
     entity.scene = this;
     this._objects.push(entity);
     entity.initialize();
+  }
+
+  /**
+    Removes an entity from the scene.
+   * @param {GlEntity} entity - The entity to remove.
+   * @returns {void}
+   */
+  public removeEntity(entity: GlEntity): void {
+    if (this.destroyed) return;
+    const index = this._objects.indexOf(entity);
+    if (index !== -1) {
+      this._objects.splice(index, 1);
+      entity.destroy();
+    }
   }
 
   /**
