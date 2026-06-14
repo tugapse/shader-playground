@@ -61,14 +61,14 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   public dayPhaseColors = {
-    sunriseSkyColor: new Color(135 / 255, 160 / 255, 220 / 255), // Soft, warm blue
-    sunriseHorizonColor: new Color(255 / 255, 200 / 255, 140 / 255), // Bright, warm yellow
-    noonSkyColor: new Color(135 / 255, 206 / 255, 235 / 255), // Classic sky blue
-    noonHorizonColor: new Color(220 / 255, 235 / 255, 250 / 255), // Light, hazy blue
-    sunsetSkyColor: new Color(80 / 255, 90 / 255, 150 / 255), // Deep purplish-blue
-    sunsetHorizonColor: new Color(255 / 255, 120 / 255, 60 / 255), // Fiery orange-red
-    nightSkyColor: new Color(10 / 255, 15 / 255, 30 / 255), // Very dark navy blue
-    nightHorizonColor: new Color(20 / 255, 30 / 255, 50 / 255), // Dark blue
+    sunriseSkyColor: new Color(0.43, 0.47, 0.57, 1.0),
+    sunriseHorizonColor: new Color(0.34, 0.35, 0.35, 1.0),
+    noonSkyColor: new Color(0.53, 0.81, 0.92, 1.0),
+    noonHorizonColor: new Color(0.86, 0.92, 0.98, 1.0),
+    sunsetSkyColor: new Color(0.19, 0.21, 0.34, 1.0),
+    sunsetHorizonColor: new Color(0.32, 0.29, 0.28, 1.0),
+    nightSkyColor: new Color(0.04, 0.06, 0.12, 1.0),
+    nightHorizonColor: new Color(0.08, 0.12, 0.2, 1.0),
   };
   /** Settings for the sun's appearance and path. */
   public sun = {
@@ -137,16 +137,15 @@ export class SunBehaviour extends EntityBehaviour {
     /** The density of stars. Higher values mean fewer stars are visible. */
     sparsity: new NumberRange(34.0, 10, 100, 1),
     /** The rotational speed of the starfield. */
-    speed: new NumberRange(0.004, 0, 0.02, 0.0001),
+    speed: new NumberRange(0.0004, 0, 0.02, 0.0001),
   };
 
   override initialize(): boolean {
-    const init = super.initialize();
     this._skyboxRenderer = this.parent.scene?.objects
       .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
       ?.getBehaviour(SkyboxRenderer);
     this.update(0);
-    return init;
+    return super.initialize();
   }
 
   public override update(elapsed: number): void {
