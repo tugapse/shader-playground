@@ -566,117 +566,12 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      dayCycleSettings: {
-        speed: this.dayCycleSettings.speed.toJsonObject(),
-        timeOfDay: this.dayCycleSettings.timeOfDay.toJsonObject(),
-      },
-      sun: {
-        show: this.sun.show,
-        sunHeight: this.sun.sunHeight.toJsonObject(),
-        sunSize: this.sun.sunSize.toJsonObject(),
-        sunFalloff: this.sun.sunFalloff.toJsonObject(),
-      },
-      moon: {
-        show: this.moon.show,
-        phase: this.moon.phase.toJsonObject(),
-        phaseSpeed: this.moon.phaseSpeed,
-        color: this.moon.color.toJsonObject(),
-        earthshine: this.moon.earthshine.toJsonObject(),
-        terminatorSoftness: this.moon.terminatorSoftness.toJsonObject(),
-        enableRotation: this.moon.enableRotation,
-        rotationSpeed: this.moon.rotationSpeed.toJsonObject(),
-      },
-      shadows: {
-        nightStrength: this.shadows.nightStrength.toJsonObject(),
-        fadeDuration: this.shadows.fadeDuration.toJsonObject(),
-      },
-      clouds: {
-        show: this.clouds.show,
-        speed: this.clouds.speed.toJsonObject(),
-        tiling: this.clouds.tiling.toJsonObject(),
-        seed: this.clouds.seed.toJsonObject(),
-        sparsity: this.clouds.sparsity.toJsonObject(),
-        weather: this.clouds.weather.toJsonObject(),
-      },
-      stars: {
-        intensity: this.stars.intensity.toJsonObject(),
-        scale: this.stars.scale.toJsonObject(),
-        sparsity: this.stars.sparsity.toJsonObject(),
-        speed: this.stars.speed.toJsonObject(),
-      },
-      hours: { ...this.hours },
-      lighColor: {
-        sunriseColor: this.lighColor.sunriseColor.toJsonObject(),
-        noonColor: this.lighColor.noonColor.toJsonObject(),
-        sunsetColor: this.lighColor.sunsetColor.toJsonObject(),
-        nightColor: this.lighColor.nightColor.toJsonObject(),
-      },
-    };
+    return this.serializeAutomatically();
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-
-    if (jsonObject['dayCycleSettings']) {
-      this.dayCycleSettings.speed.fromJson(
-        jsonObject['dayCycleSettings'].speed,
-      );
-      this.dayCycleSettings.timeOfDay.fromJson(
-        jsonObject['dayCycleSettings'].timeOfDay,
-      );
-    }
-    if (jsonObject['sun']) {
-      this.sun.show = jsonObject['sun'].show ?? this.sun.show;
-      this.sun.sunHeight.fromJson(jsonObject['sun'].sunHeight);
-      this.sun.sunSize.fromJson(jsonObject['sun'].sunSize);
-      this.sun.sunFalloff.fromJson(jsonObject['sun'].sunFalloff);
-    }
-    if (jsonObject['moon']) {
-      this.moon.show = jsonObject['moon'].show ?? this.moon.show;
-      this.moon.phase.fromJson(jsonObject['moon'].phase);
-      this.moon.phaseSpeed = this.moon.phaseSpeed;
-      this.moon.color.fromJson(jsonObject['moon'].color);
-      if (jsonObject['moon'].earthshine) {
-        this.moon.earthshine.fromJson(jsonObject['moon'].earthshine);
-        this.moon.terminatorSoftness.fromJson(
-          jsonObject['moon'].terminatorSoftness,
-        );
-        this.moon.enableRotation =
-          jsonObject['moon'].enableRotation ?? this.moon.enableRotation;
-        this.moon.rotationSpeed.fromJson(jsonObject['moon'].rotationSpeed);
-      }
-    }
-    if (jsonObject['shadows']) {
-      this.shadows.nightStrength.fromJson(jsonObject['shadows'].nightStrength);
-      this.shadows.fadeDuration.fromJson(jsonObject['shadows'].fadeDuration);
-    }
-    if (jsonObject['clouds']) {
-      this.clouds.show = jsonObject['clouds'].show ?? this.clouds.show;
-      this.clouds.speed.fromJson(jsonObject['clouds'].speed);
-      this.clouds.tiling.fromJson(jsonObject['clouds'].tiling);
-      this.clouds.seed.fromJson(jsonObject['clouds'].seed);
-      this.clouds.sparsity.fromJson(jsonObject['clouds'].sparsity);
-      this.clouds.weather.fromJson(jsonObject['clouds'].weather);
-    }
-    if (jsonObject['stars']) {
-      this.stars.intensity.fromJson(jsonObject['stars'].intensity);
-      this.stars.scale.fromJson(jsonObject['stars'].scale);
-      this.stars.sparsity.fromJson(jsonObject['stars'].sparsity);
-      this.stars.speed.fromJson(jsonObject['stars'].speed);
-    }
-    if (jsonObject['hours']) {
-      this.hours = { ...this.hours, ...jsonObject['hours'] };
-    }
-    if (jsonObject['lighColor']) {
-      this.lighColor.sunriseColor.fromJson(
-        jsonObject['lighColor'].sunriseColor,
-      );
-      this.lighColor.noonColor.fromJson(jsonObject['lighColor'].noonColor);
-      this.lighColor.sunsetColor.fromJson(jsonObject['lighColor'].sunsetColor);
-      this.lighColor.nightColor.fromJson(jsonObject['lighColor'].nightColor);
-    }
+    this.deserializeAutomatically(jsonObject);
   }
 }
 

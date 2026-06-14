@@ -30,6 +30,7 @@ export class NumberRange extends JsonSerializable {
    */
   override toJsonObject(): any {
     return {
+      ...super.toJsonObject(),
       min: this._min,
       max: this._max,
       step: this._step,
