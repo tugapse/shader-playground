@@ -109,7 +109,7 @@ export class SunBehaviour extends EntityBehaviour {
     /** The strength of shadows at night (e.g., from the moon). */
     nightStrength: new NumberRange(0.2, 0, 1, 0.01),
     /** The strength of shadows during the day (e.g., from the sun). */
-    dayStrength: new NumberRange(0, 0, 1, 0.01),
+    dayStrength: new NumberRange(0.5, 0, 1, 0.01),
     /** The duration of the shadow fade-in/out transition in hours (e.g., 0.5 for 30 minutes). */
     fadeDuration: new NumberRange(1.2, 0, 2, 0.1),
   };
@@ -118,15 +118,16 @@ export class SunBehaviour extends EntityBehaviour {
     /** Toggles the visibility of clouds in the skybox. */
     show: true,
     /** The speed at which clouds drift across the sky. */
-    speed: new NumberRange(0.81, 0.0, 0.5, 0.01),
+    speed: new NumberRange(0.01, 0.001, 0.5, 0.000001),
     /** The tiling/scale of the cloud noise. Higher values make clouds smaller and more repetitive. */
-    tiling: new NumberRange(0.4, 0.01, 2, 0.01),
-    /** The procedural seed for generating cloud patterns. */
-    seed: new NumberRange(10.0, 0, 100, 1),
+    tiling: new NumberRange(0.05, 0.0001, 2, 0.000001),
+   
     /** The sparsity of clouds. Higher values make clouds more sparse and scattered. */
-    sparsity: new NumberRange(0.01, 0, 1, 0.01),
+    sparsity: new NumberRange(0.01, 0, 1, 0.000001),
     /** The overall weather condition, from clear (0) to stormy (1). */
-    weather: new NumberRange(0.4, 0, 1, 0.01),
+    weather: new NumberRange(0.4, 0, 1, 0.000001),
+    /** The number of tmer to loop the noise */
+    repetition: new NumberRange(1, 0, 10, 1),
   };
 
   public stars = {
@@ -149,6 +150,9 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   public override update(elapsed: number): void {
+    if(!this.parent?.scene) return;
+    super.update(elapsed);
+    
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
     let moonLight =
@@ -193,7 +197,7 @@ export class SunBehaviour extends EntityBehaviour {
    * @param elapsed The time in seconds since the last frame.
    */
   private updateTime(elapsed: number): void {
-    if (this.parent.scene.isRunning) {
+    if (this.parent?.scene?.isRunning) {
       this.dayCycleSettings.timeOfDay.value +=
         elapsed * this.dayCycleSettings.speed.value * 0.01;
 
@@ -379,7 +383,7 @@ export class SunBehaviour extends EntityBehaviour {
     if (shadowRenderer) {
       shadowRenderer.shadowstrength.value = this._calculateShadowStrength(
         time,
-        shadowRenderer.shadowstrength.max,
+        this.shadows.dayStrength.value,
       );
     }
     this.updateSceneColors(light.color);
@@ -555,8 +559,8 @@ export class SunBehaviour extends EntityBehaviour {
     shader.useClouds = this.clouds.show ? 1 : 0;
     shader.cloudSpeed = this.clouds.speed.value;
     shader.cloudTiling = this.clouds.tiling.value;
-    shader.cloudSeed = this.clouds.seed.value;
     shader.cloudSparsity = this.clouds.sparsity.value;
+    shader.cloudRepetition = this.clouds.repetition.value;
     shader.wheatherCondition = this.clouds.weather.value;
 
     shader.starIntensity = this.stars.intensity.value;

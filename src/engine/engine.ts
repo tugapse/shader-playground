@@ -307,10 +307,10 @@ export class Engine {
       path: "Materials/Cubemap",
       description: "A material used specifically for skyboxes and reflections, mapping a cubemap texture."
     });
-    ObjectInstanciator.addDependency("EditorSkyboxMaterial", () => new SkyboxMaterial, {
-      name: "EditorSkyboxMaterial",
+    ObjectInstanciator.addDependency("SkyboxMaterial", () => new SkyboxMaterial, {
+      name: "SkyboxMaterial",
       type: ClassType.Material,
-      path: "Editor/Materials/EditorSkyboxMaterial",
+      path: "Materials/SkyboxMaterial",
       description: "A specialized skybox material used specifically within the editor environment."
     });
 

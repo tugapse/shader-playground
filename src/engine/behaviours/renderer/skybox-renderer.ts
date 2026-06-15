@@ -35,8 +35,6 @@ protected async createDefaultSkybox(): Promise<void> {
     this.mesh.meshData = new CubePrimitive();
     const material = new SkyboxMaterial();
     this.shader = new SkyboxShader(this._gl, material);
-    debugger
-    this.shader.initialize();
     material.mainTex = await EngineCache.getWhiteTextureCube(this._gl);
   }
 

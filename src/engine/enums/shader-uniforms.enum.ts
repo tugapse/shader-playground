@@ -401,6 +401,7 @@ export enum ShaderUniformsEnum {
   U_WHEATHER_CONDITION = "u_weatherCondition",
   U_CLOUD_TILING = "u_cloudTiling",
   U_CLOUD_SPARSITY = "u_cloudSparsity",
+  U_CLOUD_REPETITION = "u_cloudRepetition",
   U_STAR_INTENSITY = "u_starIntensity",
   U_STAR_SCALE = "u_starScale",
   U_STAR_SPARSITY = "u_starSparsity",
@@ -408,5 +409,5 @@ export enum ShaderUniformsEnum {
   U_MOON_EARTHSHINE = "u_moonEarthshine",
   U_MOON_TERMINATOR_SOFTNESS = "u_moonTerminatorSoftness",
   U_MOON_ENABLE_ROTATION = "u_moonEnableRotation",
-  U_MOON_ROTATION_SPEED = "u_moonRotationSpeed"
+  U_MOON_ROTATION_SPEED = "u_moonRotationSpeed",
 }
