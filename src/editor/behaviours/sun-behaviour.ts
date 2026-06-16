@@ -149,6 +149,9 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   public override update(elapsed: number): void {
+    if(!this.parent?.scene)
+      return;
+    
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
     let moonLight =
