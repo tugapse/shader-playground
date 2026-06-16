@@ -61,6 +61,8 @@ export class SkyboxShader extends Shader {
   /** The sparsity of clouds. 0 is default, 1 is very sparse. */
   public cloudSparsity = 0.01;
   public wheatherCondition = 0.4;
+
+  public useStars: number = 1.0;
   /** The overall brightness of the stars. */
   public starIntensity = 3.0;
   /** Size/frequency of star cells (higher = smaller stars). */
@@ -139,6 +141,8 @@ export class SkyboxShader extends Shader {
     this.setInt(ShaderUniformsEnum.U_USE_CLOUDS, this.useClouds);
     this.setFloat(ShaderUniformsEnum.U_WHEATHER_CONDITION, this.wheatherCondition);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SPARSITY, this.cloudSparsity);
+
+    this.setInt(ShaderUniformsEnum.U_USE_STARS, this.useStars);
     this.setFloat(ShaderUniformsEnum.U_STAR_INTENSITY, this.starIntensity);
     this.setFloat(ShaderUniformsEnum.U_STAR_SCALE, this.starScale);
     this.setFloat(ShaderUniformsEnum.U_STAR_SPARSITY, this.starSparsity);

@@ -131,6 +131,7 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   public stars = {
+    show:true,
     /** The overall brightness of the stars. */
     intensity: new NumberRange(3.0, 0, 20, 0.1),
     /** Size/frequency of star cells. Higher values result in smaller, more numerous stars. */
@@ -142,6 +143,7 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   override initialize(): boolean {
+    this._serializationIgnoreKeys.push('moonLight')
     this._skyboxRenderer = this.parent.scene?.objects
       .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
       ?.getBehaviour(SkyboxRenderer);
@@ -152,7 +154,7 @@ export class SunBehaviour extends EntityBehaviour {
   public override update(elapsed: number): void {
     if(!this.parent?.scene) return;
     super.update(elapsed);
-    
+
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
     let moonLight =
@@ -495,7 +497,7 @@ export class SunBehaviour extends EntityBehaviour {
         fromSkyColor,
         toSkyColor,
         fromHorizonColor,
-        toHorizonColor,
+        light.color,
         delta,
         isSunDown,
       );
@@ -557,16 +559,21 @@ export class SunBehaviour extends EntityBehaviour {
     }
 
     shader.useClouds = this.clouds.show ? 1 : 0;
-    shader.cloudSpeed = this.clouds.speed.value;
-    shader.cloudTiling = this.clouds.tiling.value;
-    shader.cloudSparsity = this.clouds.sparsity.value;
-    shader.cloudRepetition = this.clouds.repetition.value;
-    shader.wheatherCondition = this.clouds.weather.value;
+    if(this.clouds.show){
 
+      shader.cloudSpeed = this.clouds.speed.value;
+      shader.cloudTiling = this.clouds.tiling.value;
+      shader.cloudSparsity = this.clouds.sparsity.value;
+      shader.cloudRepetition = this.clouds.repetition.value;
+      shader.wheatherCondition = this.clouds.weather.value;
+    }
+    shader.useStars = this.stars.show ? 1 : 0;
+  if(this.stars.show){
     shader.starIntensity = this.stars.intensity.value;
     shader.starScale = this.stars.scale.value;
     shader.starSparsity = this.stars.sparsity.value;
     shader.starSpeed = this.stars.speed.value;
+  }
   }
 
   public override toJsonObject(): JsonSerializedData {

@@ -410,4 +410,5 @@ export enum ShaderUniformsEnum {
   U_MOON_TERMINATOR_SOFTNESS = "u_moonTerminatorSoftness",
   U_MOON_ENABLE_ROTATION = "u_moonEnableRotation",
   U_MOON_ROTATION_SPEED = "u_moonRotationSpeed",
+  U_USE_STARS = "u_useStars",
 }

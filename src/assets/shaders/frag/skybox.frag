@@ -43,6 +43,7 @@ uniform float u_cloudSpeed;
 uniform int u_cloudRepetition;
 
 // --- STARS UNIFORMS ---
+uniform int u_useStars;
 uniform float u_starIntensity;
 uniform float u_starScale;
 uniform float u_starSparsity;
@@ -66,32 +67,36 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir);
 
 // --- MAIN PIPELINE EXECUTION ---
 void main() {
-  vec3 viewDir = normalize(v_viewDirection);
+    vec3 viewDir = normalize(v_viewDirection);
 
-  float y = viewDir.y;
-  vec3 gradientColor = vec3(0.0);
+    float y = viewDir.y;
+    vec3 gradientColor = vec3(0.0);
 
-  float absY = abs(y);
-  float p = pow(absY, u_exponent);
-  vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
-  gradientColor = mix(u_horizonColor.rgb, targetColor, p);
+    float absY = abs(y);
+    float p = pow(absY, u_exponent);
+    vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
+    gradientColor = mix(u_horizonColor.rgb, targetColor, p);
 
-  vec3 finalColor = gradientColor;
+    vec3 finalColor = gradientColor;
 
-  finalColor = drawStars(finalColor, viewDir);
-  finalColor = drawClouds(finalColor, viewDir); 
+    if(u_useStars == 1){
+       finalColor = drawStars(finalColor, viewDir);
+    }
+    if(u_useClouds == 1){
+      finalColor = drawClouds(finalColor, viewDir); 
+    }
 
-  // Sun is only visible when it's above the horizon
-  if (u_useSun == 1 && u_sunDirection.y > -0.2) {
-    float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
-    finalColor += drawSun(viewDir) * sunOcclusion;
-  }
+    // Sun is only visible when it's above the horizon
+    if (u_useSun == 1 && u_sunDirection.y > -0.1) {
+        float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
+        finalColor += drawSun(viewDir) * sunOcclusion;
+    }
 
-  if (u_useMoon == 1 && u_moonDirection.y > -0.2) {
-    finalColor = drawMoon(finalColor, viewDir);
-  }
+    if (u_useMoon == 1 && u_moonDirection.y > -0.1) {
+        finalColor = drawMoon(finalColor, viewDir);
+    }
 
-  fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
+    fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
 }
 
 // --- RENDERING SUBSYSTEM IMPLEMENTATIONS ---

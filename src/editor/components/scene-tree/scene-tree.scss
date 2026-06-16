@@ -10,6 +10,12 @@
     align-items: center;
     padding: 4px;
   }
+  .tree-header .title {
+    &:hover {
+      cursor: pointer;
+      color: #07acff;
+    }
+  }
 
   .tree-header .icon {
     &:hover {

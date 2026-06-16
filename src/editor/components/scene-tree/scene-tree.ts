@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-import { Icon } from "../../../app/components/icon/icon";
+import { Icon } from '../../../app/components/icon/icon';
 import { SceneTreeService } from '../../services/scene-tree.service';
 import { GlEntity, EntityType, Scene, ObjectInstanciator } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
@@ -11,56 +11,51 @@ import { AddBehaviourMenuComponent } from '../../components/add-behaviour-menu/a
 import { ClassType } from '@engine/enums/class-type.enum';
 import { ClassMetadata } from '@engine/interfaces/class-metadata';
 
-
 @Component({
   selector: 'app-scene-tree',
   imports: [CommonModule, Icon, TreeNodeComponent, AddBehaviourMenuComponent],
   templateUrl: './scene-tree.html',
-  styleUrl: './scene-tree.scss'
+  styleUrl: './scene-tree.scss',
 })
 export class SceneTree {
-
-
-
-
   @Input() public set targetScene(scene: Scene) {
     this.scene = scene;
     this.prepareObjects();
-  };
+  }
 
-
-
-  constructor(public sceneTreeService: SceneTreeService, private editorService: EditorService) {
-    this.sceneTreeService.onSceneUpdated.subscribe(scene => {
+  constructor(
+    public sceneTreeService: SceneTreeService,
+    private editorService: EditorService,
+  ) {
+    this.sceneTreeService.onSceneUpdated.subscribe((scene) => {
       this.targetScene = scene;
     });
-    this.editorService.onSceneLoaded.subscribe(scene => {
+    this.editorService.onSceneLoaded.subscribe((scene) => {
       this.targetScene = scene;
 
       const entity = scene.getEntitieByUuid(this.selectedUuid);
       this.sceneTreeService.onEntitySelected.emit(entity);
     });
-    this.sceneTreeService.onEntitySelected.subscribe(entity => {
+    this.sceneTreeService.onEntitySelected.subscribe((entity) => {
       this.selectedUuid = entity?.uuid;
-    })
+    });
   }
 
-
-  objectsToDraw: GlEntity[] = []
+  objectsToDraw: GlEntity[] = [];
   scene!: Scene;
   selectedUuid!: string;
   sceneTreeNodes!: TreeNode<string>[];
   treeNodeMap: { [key: string]: GlEntity } = {};
 
   readonly iconNames: { [key: string]: string } = {
-    [EntityType.STATIC]: "fa-object-group",
-    [EntityType.CAMERA]: "fa-camera",
-    [EntityType.LIGHT_AMBIENT]: "fa-circle-half-stroke",
-    [EntityType.LIGHT_DIRECTIONAL]: "fa-sun",
-    [EntityType.LIGHT_POINT]: "fa-lightbulb",
-    [EntityType.LIGHT_SPOT]: "fa-traffic-light",
-    [EntityType.SCENE]: "fa-bank",
-  }
+    [EntityType.STATIC]: 'fa-object-group',
+    [EntityType.CAMERA]: 'fa-camera',
+    [EntityType.LIGHT_AMBIENT]: 'fa-circle-half-stroke',
+    [EntityType.LIGHT_DIRECTIONAL]: 'fa-sun',
+    [EntityType.LIGHT_POINT]: 'fa-lightbulb',
+    [EntityType.LIGHT_SPOT]: 'fa-traffic-light',
+    [EntityType.SCENE]: 'fa-bank',
+  };
 
   toggleObj(obj: GlEntity, event: Event) {
     event.preventDefault();
@@ -82,15 +77,20 @@ export class SceneTree {
   prepareObjects() {
     if (!this.scene) return;
     const sceneObjects = this.scene.objects;
-    this.treeNodeMap = sceneObjects.reduce((acc, curr) => { return { ...acc, [curr.uuid]: curr } }, {});
-    const rootObjects = [...sceneObjects.filter(e => !e.transform.parent?.parentEntity)];
+    this.treeNodeMap = sceneObjects.reduce((acc, curr) => {
+      return { ...acc, [curr.uuid]: curr };
+    }, {});
+    const rootObjects = [
+      ...sceneObjects.filter((e) => !e.transform.parent?.parentEntity),
+    ];
     const childObjects: { [key: string]: GlEntity[] } = {};
 
-    sceneObjects.forEach(ob => {
+    sceneObjects.forEach((ob) => {
       if (ob.transform.parent) {
         if (ob.transform.parent.parentEntity) {
           const key = ob.transform.parent.parentEntity.uuid;
-          const parentList: GlEntity[] = childObjects[key] = childObjects[key] || [];
+          const parentList: GlEntity[] = (childObjects[key] =
+            childObjects[key] || []);
           parentList.push(ob);
         }
       }
@@ -100,7 +100,10 @@ export class SceneTree {
     this.sceneTreeNodes = nodes;
   }
 
-  protected createNodeListFromObjectArray(objs: GlEntity[], childObjectsMap: { [key: string]: GlEntity[] }) {
+  protected createNodeListFromObjectArray(
+    objs: GlEntity[],
+    childObjectsMap: { [key: string]: GlEntity[] },
+  ) {
     const result: TreeNode<string>[] = [];
 
     for (const elm of objs) {
@@ -108,11 +111,14 @@ export class SceneTree {
         icon: this.iconNames[elm.entityType],
         name: elm.name,
         id: elm.uuid,
-        object: elm.uuid
+        object: elm.uuid,
       };
       const child = childObjectsMap[elm.uuid];
       if (child?.length > 0) {
-        node.children = this.createNodeListFromObjectArray(child, childObjectsMap);
+        node.children = this.createNodeListFromObjectArray(
+          child,
+          childObjectsMap,
+        );
       }
       result.push(node);
     }
@@ -120,22 +126,29 @@ export class SceneTree {
     return result;
   }
 
-
-  handleNodeDropped(event: { draggedNode: TreeNode<string>, targetNode: TreeNode<string>, dropPosition: 'above' | 'below' | 'inside' }) {
-
-
+  handleNodeDropped(event: {
+    draggedNode: TreeNode<string>;
+    targetNode: TreeNode<string>;
+    dropPosition: 'above' | 'below' | 'inside';
+  }) {
     const { draggedNode, targetNode, dropPosition } = event;
 
-    const { node: foundDraggedNode, parent: draggedParent } = this.findNodeAndParent(this.sceneTreeNodes, draggedNode.name);
-    const { node: foundTargetNode, parent: targetParent } = this.findNodeAndParent(this.sceneTreeNodes, targetNode.name);
+    const { node: foundDraggedNode, parent: draggedParent } =
+      this.findNodeAndParent(this.sceneTreeNodes, draggedNode.name);
+    const { node: foundTargetNode, parent: targetParent } =
+      this.findNodeAndParent(this.sceneTreeNodes, targetNode.name);
 
     if (!foundDraggedNode) return;
 
     // Remove the dragged node from its original location
     if (draggedParent) {
-      draggedParent.children = draggedParent.children?.filter(n => n.name !== foundDraggedNode.name);
+      draggedParent.children = draggedParent.children?.filter(
+        (n) => n.name !== foundDraggedNode.name,
+      );
     } else {
-      this.sceneTreeNodes = this.sceneTreeNodes.filter(n => n.name !== foundDraggedNode.name);
+      this.sceneTreeNodes = this.sceneTreeNodes.filter(
+        (n) => n.name !== foundDraggedNode.name,
+      );
     }
 
     const childEntity = this.treeNodeMap[foundDraggedNode.id];
@@ -147,16 +160,23 @@ export class SceneTree {
       foundTargetNode.children.push(foundDraggedNode);
       const parentEntity = this.treeNodeMap[foundTargetNode.id];
       childEntity.transform.setParent(parentEntity.transform);
-
     } else if (dropPosition === 'above' && targetParent) {
-      const index = targetParent.children?.findIndex(n => n.name === foundTargetNode?.name) || 0;
+      const index =
+        targetParent.children?.findIndex(
+          (n) => n.name === foundTargetNode?.name,
+        ) || 0;
       targetParent.children?.splice(index, 0, foundDraggedNode);
     } else if (dropPosition === 'below' && targetParent) {
-      const index = targetParent.children?.findIndex(n => n.name === foundTargetNode?.name) || 0;
+      const index =
+        targetParent.children?.findIndex(
+          (n) => n.name === foundTargetNode?.name,
+        ) || 0;
       targetParent.children?.splice(index + 1, 0, foundDraggedNode);
     } else {
       // Handles dropping above/below a root node
-      const index = this.sceneTreeNodes.findIndex(n => n.name === foundTargetNode?.name);
+      const index = this.sceneTreeNodes.findIndex(
+        (n) => n.name === foundTargetNode?.name,
+      );
       if (index !== -1 && index !== undefined) {
         if (dropPosition === 'above') {
           this.sceneTreeNodes.splice(index, 0, foundDraggedNode);
@@ -176,22 +196,28 @@ export class SceneTree {
       this.deleteEntityAndChildren(entity);
       this.sceneTreeService.onSceneUpdated.emit(this.scene);
       if (this.selectedUuid === node.id) {
-         this.selectedUuid = '';
-         this.sceneTreeService.onEntitySelected.emit(undefined as any);
+        this.selectedUuid = '';
+        this.sceneTreeService.onEntitySelected.emit(undefined as any);
       }
     }
   }
 
   private deleteEntityAndChildren(entity: GlEntity) {
-      const children = this.scene.objects.filter(e => e.transform.parent?.parentEntity === entity);
-      for (const child of children) {
-          this.deleteEntityAndChildren(child);
-      }
-      this.scene.removeEntity(entity);
+    const children = this.scene.objects.filter(
+      (e) => e.transform.parent?.parentEntity === entity,
+    );
+    for (const child of children) {
+      this.deleteEntityAndChildren(child);
+    }
+    this.scene.removeEntity(entity);
   }
 
   // Helper function to find a node and its direct parent
-  private findNodeAndParent(nodes: TreeNode<string>[], name: string, parent: TreeNode<string> | null = null): { node: TreeNode<string> | null, parent: TreeNode<string> | null } {
+  private findNodeAndParent(
+    nodes: TreeNode<string>[],
+    name: string,
+    parent: TreeNode<string> | null = null,
+  ): { node: TreeNode<string> | null; parent: TreeNode<string> | null } {
     for (const node of nodes) {
       if (node.name === name) {
         return { node, parent };
@@ -207,14 +233,13 @@ export class SceneTree {
   }
 
   onNodeSelected(node: TreeNode<string>) {
-    console.debug("Scene tree selected ", node);
+    console.debug('Scene tree selected ', node);
     this.selectedUuid = node.id;
     const entity = this.treeNodeMap[this.selectedUuid];
     if (entity) {
       this.sceneTreeService.onEntitySelected.emit(entity);
       setTimeout(() => this.editorService.requestCanvasResize(), 30);
     } else {
-
     }
   }
 
@@ -232,17 +257,27 @@ export class SceneTree {
     this.menuY = rect.bottom + 5;
     this.menuX = rect.left;
     const hiddenentities = ['GLEntity', 'Scene'];
-    this.availableEntities = ObjectInstanciator.getMetadata([ClassType.Entity, ClassType.Light]).filter(meta => !hiddenentities.includes(meta.name));
+    this.availableEntities = ObjectInstanciator.getMetadata([
+      ClassType.Entity,
+      ClassType.Light,
+    ]).filter((meta) => !hiddenentities.includes(meta.name));
     this.isAddEntityMenuOpen = true;
   }
 
   onEntitySelected(entityMetadata: ClassMetadata) {
     if (!this.scene) return;
-    const instance = ObjectInstanciator.instanciateObjectFromJsonData(entityMetadata.name, ["New " + entityMetadata.name]);
+    const instance = ObjectInstanciator.instanciateObjectFromJsonData(
+      entityMetadata.name,
+      ['New ' + entityMetadata.name],
+    );
     if (instance) {
       this.scene.addEntity(instance as GlEntity);
       this.sceneTreeService.onSceneUpdated.emit(this.scene);
       this.sceneTreeService.onEntitySelected.emit(instance as GlEntity);
     }
+  }
+
+  inspectScene(arg0: Scene) {
+        this.sceneTreeService.onEntitySelected.emit(this.scene as GlEntity);
   }
 }
