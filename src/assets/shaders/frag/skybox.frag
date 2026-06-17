@@ -79,7 +79,7 @@ void main() {
 
     vec3 finalColor = gradientColor;
 
-    if(u_useStars == 1){
+    if(u_useStars == 1 && u_sunDirection.y < 0.0){
        finalColor = drawStars(finalColor, viewDir);
     }
     if(u_useClouds == 1){

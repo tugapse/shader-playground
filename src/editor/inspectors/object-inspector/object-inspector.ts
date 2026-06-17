@@ -61,7 +61,7 @@ export class ObjectInspector {
   }
 
   onValueChanged(property: ITargetObject, value: string | number | boolean | NumberRange) {
-    debugger
+    
     if (!this._selectedObject || (value as any) instanceof Event) return;
     this._selectedObject.property[property.key] = value;
     this.change.emit(this._selectedObject.property);

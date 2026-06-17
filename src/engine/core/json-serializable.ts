@@ -4,19 +4,23 @@ import { JsonSerializedData } from '../interfaces/json-serialized-data.interface
   An abstract base class providing a common interface for objects that can be serialized to and deserialized from a JSON object.
  */
 export class JsonSerializable {
+  public name: string = '';
+  protected _className: string;
+  protected _uuid: string;
+  protected _serializationIgnoreKeys: string[];
+
   public get className(): string {
     return this._className;
   }
-  public name: string = '';
-  protected _uuid: string;
-  protected _serializationIgnoreKeys: string[] = ['_uuid', '_className'];
-
   public get uuid(): string {
     return this._uuid;
   }
 
-  constructor(protected _className: string) {
+  constructor(className: string) {
+    if (!className) throw new Error('className is required');
+    this._className = className;
     this._uuid = uuidV4();
+    this._serializationIgnoreKeys = ['_serializationIgnoreKeys', "scene", "parent"];
   }
 
   private loopAndSaveProperties(value: any): any {
@@ -56,6 +60,14 @@ export class JsonSerializable {
     return undefined;
   }
 
+  protected getBaseJsonInfo(): JsonSerializedData {
+    return {
+      type: this.constructor.name,
+      name: this.name,
+      className: this.className,
+      uuid: this.uuid,
+    };
+  }
   protected serializeAutomatically(): JsonSerializedData {
     const data: JsonSerializedData = {};
 
@@ -131,12 +143,7 @@ export class JsonSerializable {
    * @returns {JsonSerializedData} - A JSON data object representing the serialized state.
    */
   public toJsonObject(): JsonSerializedData {
-    return {
-      type: this.constructor.name,
-      name: this.name,
-      className: this.className,
-      uuid: this.uuid,
-    };
+    return this.getBaseJsonInfo();
   }
 
   /**

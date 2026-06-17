@@ -45,8 +45,10 @@ protected async createDefaultSkybox(): Promise<void> {
    * @returns {boolean} - True if initialization is successful, otherwise false.
    */
   override initialize(): boolean {
-    this.transform.setLocalPosition(0, 0, 0);
-    this.transform.setLocalScale(1000, 1000, 1000);
+    if(this.transform){
+      this.transform.setLocalPosition(0, 0, 0);
+      this.transform.setLocalScale(1000, 1000, 1000);
+    }
     return super.initialize()
   }
   
@@ -116,7 +118,4 @@ protected async createDefaultSkybox(): Promise<void> {
     this.setCameraMatrices();
   }
 
-  override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
-    await super.fromJson(jsonObject);
-  }
 }

@@ -101,6 +101,6 @@ export class TopBar implements OnInit {
   }  
   
   goHome() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/home']);
   }
 }

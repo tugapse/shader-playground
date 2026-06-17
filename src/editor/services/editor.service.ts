@@ -43,6 +43,7 @@ export class EditorService {
     this.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
 
   }
+  
   onGlContextCreated(gl: WebGL2RenderingContext) {
     console.log("onGlContextCreated");  
     this._gl = gl;

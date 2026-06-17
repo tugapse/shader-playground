@@ -143,6 +143,7 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   override initialize(): boolean {
+    if(!this.parent?.scene) return false;
     this._serializationIgnoreKeys.push('moonLight')
     this._skyboxRenderer = this.parent.scene?.objects
       .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))

@@ -66,7 +66,7 @@ export class LitMaterial extends UnlitMaterial {
     }
     this.roughness = jsonObject['roughness'];
     this.normalMapStrength = jsonObject['normalMapStrength'];
-    debugger
+    
   }
 
   /**

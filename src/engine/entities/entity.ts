@@ -4,7 +4,7 @@ import { Transform } from "../core/transform";
 import { EntityType } from '../enums/entity-type.enum';
 import { JsonSerializable } from '../core/json-serializable';
 import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
-import { Scene } from "./scene";
+import { ObjectInstanciator } from '../core/object-instanciator';
 
 /**
   The base class for all entities within the engine. It manages a transform, a collection of behaviours, and the entity's state within a scene.
@@ -40,9 +40,9 @@ export class GlEntity extends JsonSerializable {
   protected destroyed: boolean = false;
   /**
     The scene to which this entity belongs.
-   * @type {Scene}
+   * @type {import("./scene").Scene}
    */
-  public scene!: Scene;
+  public scene!: import("./scene").Scene;
   /**
     A flag indicating if the entity is active and should be updated.
    * @type {boolean}
@@ -97,7 +97,6 @@ export class GlEntity extends JsonSerializable {
     this.name = name;
     this.transform = transform;
     this.transform.parentEntity = this;
-    this._uuid = uuidv4();
   }
 
   /**
@@ -189,7 +188,7 @@ export class GlEntity extends JsonSerializable {
   public getBehaviour<T extends EntityBehaviour>(constructor: new (...args: any[]) => T): T | undefined {
     return this.behaviours.find((o): o is T => o instanceof constructor);
   }
-
+   
   /**
     Deserializes the entity's state from a JSON object.
    * @override
@@ -198,14 +197,7 @@ export class GlEntity extends JsonSerializable {
    */
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.name = jsonObject['name'];
-    this.entityType = jsonObject['entityType'] as EntityType;
-    this._uuid = jsonObject['uuid'] || uuidv4();
-    this.active = jsonObject['active'];
-    this.show = jsonObject['show'];
-    this.tag = jsonObject['tag'];
-    this.updateInEditor = jsonObject['updateInEditor'];
-    this.transform.fromJson(jsonObject['transform']);
+    this.deserializeAutomatically(jsonObject);
   }
 
   /**
@@ -213,22 +205,12 @@ export class GlEntity extends JsonSerializable {
    * @override
    * @returns {JsonSerializedData} - The JSON object representation.
    */
-  public override toJsonObject(): JsonSerializedData {
-    const result = {
-      ...super.toJsonObject(),
-      uuid: this.uuid,
-      entityType: this.entityType,
-      type: this.constructor.name,
-      active: this.active,
-      show: this.show,
-      name: this.name,
-      tag: this.tag,
-      transform: this.transform.toJsonObject(),
-      updateInEditor: this.updateInEditor,
-      behaviours: this.behaviours.map(e => e.toJsonObject()),
-    };
-    return result;
-  }
+  public override toJsonObject(): JsonSerializedData {    
+    const result = this.serializeAutomatically();
+    result['behaviours'] = this.behaviours.map(b => b.toJsonObject());
+    console.debug("Serialized behaviour", result)
+    return result;  
+ }
 
   /**
     Creates a deep copy of the current GlEntity instance.
