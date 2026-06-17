@@ -70,10 +70,8 @@ export class Editor implements OnDestroy, AfterViewInit {
       // TODO set some loading state
       this.assetService.getTextAssetContent(projectId, sceneId).subscribe(textContent => {
         const sceneData = JSON.parse(textContent) as JsonSerializedData;
-        
-        SceneManager.loadScene(this.gl, sceneData).then(scene => {
-          this.onSceneLoaded(scene);
-        });
+
+        SceneManager.loadScene(this.gl, sceneData).then(scene => this.editorService.loadScene(scene));
       });
 
       this.editorState.setActiveProject({ id: projectId, scene: sceneId, config: {} });

@@ -18,7 +18,9 @@ import { ClassMetadata } from '@engine/interfaces/class-metadata';
   styleUrl: './scene-tree.scss',
 })
 export class SceneTree {
+
   @Input() public set targetScene(scene: Scene) {
+    if (!scene) return;
     this.scene = scene;
     this.prepareObjects();
   }
@@ -27,7 +29,7 @@ export class SceneTree {
     public sceneTreeService: SceneTreeService,
     private editorService: EditorService,
   ) {
-    this.sceneTreeService.onSceneUpdated.subscribe((scene) => {
+    this.editorService.onSceneUpdated.subscribe((scene) => {
       this.targetScene = scene;
     });
     this.editorService.onSceneLoaded.subscribe((scene) => {
@@ -38,6 +40,10 @@ export class SceneTree {
     });
     this.sceneTreeService.onEntitySelected.subscribe((entity) => {
       this.selectedUuid = entity?.uuid;
+    });
+    this.editorService.onSceneUpdated.subscribe((scene) => {
+      this.targetScene = scene;
+      ;
     });
   }
 
@@ -194,7 +200,7 @@ export class SceneTree {
     const entity = this.treeNodeMap[node.id];
     if (entity) {
       this.deleteEntityAndChildren(entity);
-      this.sceneTreeService.onSceneUpdated.emit(this.scene);
+      this.editorService.onSceneUpdated.emit(this.scene);
       if (this.selectedUuid === node.id) {
         this.selectedUuid = '';
         this.sceneTreeService.onEntitySelected.emit(undefined as any);
@@ -272,7 +278,7 @@ export class SceneTree {
     );
     if (instance) {
       this.scene.addEntity(instance as GlEntity);
-      this.sceneTreeService.onSceneUpdated.emit(this.scene);
+      this.editorService.onSceneUpdated.emit(this.scene);
       this.sceneTreeService.onEntitySelected.emit(instance as GlEntity);
     }
   }

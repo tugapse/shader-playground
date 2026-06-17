@@ -130,7 +130,7 @@ export class SceneManager {
 
 
   private static instanciateBehaviours(jsonObject: JsonSerializedData, scene: Scene, meshes: { [key: string]: MeshData }, gl: WebGL2RenderingContext) {
-    debugger
+    
     jsonObject["entity"].scene = scene;
     jsonObject["entity"].behaviours = [];
 

@@ -11,6 +11,7 @@ import { EditorStateService } from '@editor/services/editor-state.service';
 import { AuthService } from '../../../app/api/services/auth.service';
 import { UserService } from '../../../app/api/services/user.service';
 import { UserResponse } from '../../../app/api/models/omega-api.models';
+import { SceneTreeService } from '@editor/services/scene-tree.service';
 
 @Component({
   selector: 'editor-top-bar',
@@ -37,6 +38,7 @@ export class TopBar implements OnInit {
     public editorState: EditorStateService,
     private authService: AuthService,
     private userService: UserService,
+    private sceneTreeService:SceneTreeService,
     private router: Router
   ) {
     this.editorService.gizmoMode.subscribe(mode => {
@@ -100,6 +102,11 @@ export class TopBar implements OnInit {
     });
   }  
   
+  inspectCamera(){
+    this.sceneTreeService.onEntitySelected.emit(this.editorService.camera);
+  }
+
+
   goHome() {
     this.router.navigate(['/home']);
   }

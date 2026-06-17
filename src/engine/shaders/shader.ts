@@ -562,6 +562,6 @@ export class Shader extends JsonSerializable {
     // this.fragUri = jsonObject['fragUri'];
     // this.vertexUri = jsonObject['vertexUri'];
     // this.material = ObjectInstanciator.instanciateObjectFromJsonData(jsonObject["material"].className) || new ColorMaterial();
-    debugger
+    
   }
 }
