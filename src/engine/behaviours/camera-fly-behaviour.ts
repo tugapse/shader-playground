@@ -67,7 +67,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 0.8
    */
-  public rotationSpeed = 0.25;
+  public rotationSpeed = 0.10;
 
   /**
    * The dampening factor for rotation. A higher value means rotation snaps faster.
@@ -75,7 +75,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 0.4
    */
-  public rotationDampening = 0.16;
+  public rotationDampening = 0.3;
 
   /**
    * The dampening factor for movement. A higher value means movement stops faster.
@@ -90,7 +90,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 1.0
    */
-  public scrollSpeed = 0.3;
+  public scrollSpeed = 0.041;
 
   /**
    * The multiplier applied to `moveSpeed` when the boost key is held down.
@@ -127,7 +127,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 10
    */
-  protected _acceleration = 3;
+  protected _acceleration = 2;
 
   /** @protected Current forward/backward velocity. */
   protected _forwardVelocity = 0;
@@ -160,8 +160,8 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @param {number} ellapsed - The time elapsed since the last update in seconds.
    */
   override update(ellapsed: number): void {
-    this.updateInput(ellapsed);
     super.update(ellapsed);
+    this.updateInput(ellapsed);
   }
 
 
@@ -356,56 +356,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     this.applyRotationVelocity(transform, ellapsed);
 
   }
-
-  /**
-   * Serializes the camera's properties to a JSON object for persistence.
-   * @returns {JsonSerializedData} An object containing the serialized properties.
-   */
-  override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      moveSpeed: this.moveSpeed,
-      rotationSpeed: this.rotationSpeed,
-      rotationDampening: this.rotationDampening,
-      moveDampening: this.moveDampening,
-      scrollSpeed: this.scrollSpeed,
-      moveKeys: this.moveKeys,
-      boostMultiplier: this.boostMultiplier,
-      lookMouseButtons: this.lookMouseButtons,
-    };
-  }
-
-  /**
-   * Deserializes the camera's properties from a JSON object.
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   */
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject); // Call superclass's fromJson first
-    if (jsonObject['moveSpeed'] !== undefined) {
-      this.moveSpeed = jsonObject['moveSpeed'];
-    }
-    if (jsonObject['rotationSpeed'] !== undefined) {
-      this.rotationSpeed = jsonObject['rotationSpeed'];
-    }
-    if (jsonObject['rotationDampening'] !== undefined) {
-      this.rotationDampening = jsonObject['rotationDampening'];
-    }
-    if (jsonObject['moveDampening'] !== undefined) {
-      this.moveDampening = jsonObject['moveDampening'];
-    }
-    if (jsonObject['scrollSpeed'] !== undefined) {
-      this.scrollSpeed = jsonObject['scrollSpeed'];
-    }
-    if (jsonObject['moveKeys'] !== undefined) {
-      this.moveKeys = jsonObject['moveKeys'];
-    }
-    if (jsonObject['boostMultiplier'] !== undefined) {
-      this.boostMultiplier = jsonObject['boostMultiplier'];
-    }
-    if (jsonObject['lookMouseButtons'] !== undefined) {
-      this.lookMouseButtons = jsonObject['lookMouseButtons'];
-    }
-  }
+  
 
   override clone(): EntityBehaviour | null {
     const clone = new CameraFlyBehaviour();

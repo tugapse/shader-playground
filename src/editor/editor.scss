@@ -19,12 +19,20 @@
 }
 
 .container .canvas-info{
+  cursor: pointer;
   position: fixed;
   padding: 12px;
   border-radius: 12px;
   background-color: rgba(0, 0, 0, 0.486);
-  left: 50vw;
+  left:50vw;
   margin-top: 10px;
+}
+.container .canvas.fullscreen{
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  position:fixed;
 }
 
 // Left Sidebar styling

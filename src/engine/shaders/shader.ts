@@ -424,6 +424,7 @@ export class Shader extends JsonSerializable {
    * @returns {void}
    */
   public setTexture(name: string, texture: Texture, textureIndex: number): void {
+    this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
       this.gl.activeTexture(this.gl.TEXTURE0 + textureIndex);
@@ -557,8 +558,11 @@ export class Shader extends JsonSerializable {
    */
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.fragUri = jsonObject['fragUri'];
-    this.vertexUri = jsonObject['vertexUri'];
-    this.material = ObjectInstanciator.instanciateObjectFromJsonData(jsonObject["material"].className) || new ColorMaterial();
+    this.deserializeAutomatically(jsonObject);
+    
+    // this.fragUri = jsonObject['fragUri'];
+    // this.vertexUri = jsonObject['vertexUri'];
+    // this.material = ObjectInstanciator.instanciateObjectFromJsonData(jsonObject["material"].className) || new ColorMaterial();
+    
   }
 }

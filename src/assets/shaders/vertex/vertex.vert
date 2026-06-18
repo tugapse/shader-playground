@@ -44,8 +44,8 @@ void main() {
   v_bitangent = u_worldInverseTransposeMatrix * a_bitangent;
   v_uv = a_uv;
 
-  // Calculate the distance for fog (use the absolute view-space Z-depth)
-  v_fogDistance = abs(viewPosition.z )+ u_fogDistance;
+  // Calculate the distance for fog (using true radial distance from the camera)
+  v_fogDistance = length(viewPosition.xyz) + u_fogDistance;
 
   // Calculate the vertex position in light space and pass it to the fragment shader
   v_lightSpacePosition = u_lightMVPMatrix * vec4(a_position, 1.0);

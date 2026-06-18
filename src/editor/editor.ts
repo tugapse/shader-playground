@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager } from '@engine';
 import { Subscription } from 'rxjs';
@@ -25,7 +25,7 @@ import { AssetService } from 'src/app/api/services/asset.service';
   templateUrl: './editor.html',
   styleUrl: './editor.scss'
 })
-export class Editor implements OnDestroy, OnInit {
+export class Editor implements OnDestroy, AfterViewInit {
 
   scene!: Scene;
   inspectorSelectedEntity!: GlEntity;
@@ -45,6 +45,7 @@ export class Editor implements OnDestroy, OnInit {
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
+isFullScreen: any;
 
   constructor(
     protected editorService: EditorService,
@@ -61,17 +62,17 @@ export class Editor implements OnDestroy, OnInit {
     (window as any)['omegaEditor'] = this;
   }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
 
     const projectId = this.route.snapshot.paramMap.get('project');
     const sceneId = this.route.snapshot.paramMap.get('scene');
 
     if (projectId && sceneId) {
+      // TODO set some loading state
       this.assetService.getTextAssetContent(projectId, sceneId).subscribe(textContent => {
         const sceneData = JSON.parse(textContent) as JsonSerializedData;
-        SceneManager.loadScene(this.gl, sceneData).then(scene => {
-          this.onSceneLoaded(scene);
-        });
+
+        SceneManager.loadScene(this.gl, sceneData).then(scene => this.editorService.loadScene(scene));
       });
 
       this.editorState.setActiveProject({ id: projectId, scene: sceneId, config: {} });
@@ -160,7 +161,8 @@ export class Editor implements OnDestroy, OnInit {
   protected subscribeEvents(): void {
     this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
 
-    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this))); this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
+    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this))); 
+    this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
     this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
     this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
     this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));

@@ -72,28 +72,6 @@ export class Light extends GlEntity {
     this.entityType = EntityType.LIGHT_AMBIENT;
   }
 
-  /**
-    Serializes the light's state to a JSON object.
-   * @override
-   * @returns {JsonSerializedData} - The JSON object representation.
-   */
-  public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      color: this.color.toJsonObject(),
-    };
-  }
-
-  /**
-    Deserializes the light's state from a JSON object.
-   * @override
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   * @returns {void}
-   */
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-    this.color = Color.createFromJsonData(jsonObject['color']);
-  }
 
   /**
     Creates a new Light instance.
@@ -145,19 +123,7 @@ export class DirectionalLight extends Light {
   constructor(name: string) {
     super(name);
     this.entityType = EntityType.LIGHT_DIRECTIONAL;
-    // Realistic Sunlight Color (approx 5500K)
-    this.color = new Color(1.0, 0.98, 0.95, 1.0);
-  }
-
-  /**
-    Serializes the directional light's state to a JSON object.
-   * @override
-   * @returns {JsonSerializedData} - The JSON object representation.
-   */
-  public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-    };
+    this.color = new Color(1.0, 0.98, 0.95, 0.7);
   }
 
   /**
@@ -221,29 +187,6 @@ export class PointLight extends Light {
   }
 
   /**
-    Serializes the point light's state to a JSON object.
-   * @override
-   * @returns {JsonSerializedData} - The JSON object representation.
-   */
-  public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      attenuation: this.attenuation,
-    };
-  }
-
-  /**
-    Deserializes the point light's state from a JSON object.
-   * @override
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   * @returns {void}
-   */
-  override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-    this.attenuation = jsonObject['attenuation'];
-  }
-
-  /**
     Creates a new PointLight instance.
 
    * @override
@@ -304,30 +247,6 @@ export class SpotLight extends Light {
     this.attenuation = new LightAttenuation();
   }
 
-  /**
-    Serializes the spot light's state to a JSON object.
-   * @override
-   * @returns {JsonSerializedData} - The JSON object representation.
-   */
-  public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      coneAngles: this.coneAngles,
-      attenuation: this.attenuation,
-    };
-  }
-
-  /**
-    Deserializes the spot light's state from a JSON object.
-   * @override
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   * @returns {void}
-   */
-  public override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-    this.coneAngles = jsonObject['coneAngles'];
-    this.attenuation = jsonObject['attenuation'];
-  }
 
   /**
     Creates a new SpotLight instance.

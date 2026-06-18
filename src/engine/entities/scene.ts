@@ -276,6 +276,7 @@ export class Scene extends GlEntity {
    */
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
+    
     for (const entity of jsonObject['objects']) {
       this.addEntity(entity);
     }
@@ -313,8 +314,7 @@ export class Scene extends GlEntity {
       }
     }
     return {
-      ...super.toJsonObject(),
-      className: Scene.className,
+      ...this.getBaseJsonInfo(),
       objects: this.objects.map(o => o.toJsonObject()),
       meshMaps,
       textureMaps

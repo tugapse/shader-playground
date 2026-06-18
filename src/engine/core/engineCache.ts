@@ -129,7 +129,7 @@ export abstract class EngineCache {
     const keyUrl = "assets/images/default/white.jpg";
     const uris = { right: keyUrl, left: keyUrl, up: keyUrl, bottom: keyUrl, front: keyUrl, back: keyUrl }
     const key = [keyUrl, keyUrl, keyUrl, keyUrl, keyUrl, keyUrl].join("|");
-    debugger
+    
     let result = EngineCache.__cache.textures[key] as CubemapTexture;
     if (!result) {
       result = await EngineCache.getTextureCube(uris, gl)

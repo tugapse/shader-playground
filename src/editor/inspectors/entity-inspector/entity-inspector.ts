@@ -9,7 +9,7 @@ import { BehaviourInspector } from "../behaviour-inspector/behaviour-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ObjectInspector } from '../object-inspector/object-inspector';
 import { TransformInspector } from "../transform-inspector/transform-inspector";
-import { GlEntity, Color, ObjectInstanciator } from '@engine';
+import { GlEntity, Color, ObjectInstanciator, EntityBehaviour } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { Icon } from "src/app/components/icon/icon";
 import { ClassType } from '@engine/enums/class-type.enum';
@@ -105,7 +105,8 @@ export class EntityInspector extends ObjectInspector {
     if (!this.entity) return;
     const instance = ObjectInstanciator.instanciateObjectFromJsonData( behaviour.name, [this.editorService.gl]);
     if (instance) {
-      this.entity.addBehaviour(instance as any);
+      this.entity.addBehaviour(instance as EntityBehaviour);
+      this.editorService.onSceneUpdated.emit(this.editorService.scene);
     }
   }
 }

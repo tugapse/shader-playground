@@ -76,6 +76,9 @@ precision highp float;
 uniform int u_fogEnabled;
 uniform vec3 u_FogColor;
 uniform float u_FogDensity;
+uniform int u_fogType; 
+uniform float u_FogHeightFalloff; 
+uniform float u_FogBaseHeight;    
 uniform vec4 u_matColor;
 uniform vec2 u_uvScale;
 uniform vec2 u_uvOffset;
@@ -102,7 +105,19 @@ void main() {
   vec4 finalColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
   vec3 foggedRGB = finalColor.rgb;
   if (u_fogEnabled == 1) {
-    foggedRGB = applyExponentialFog(finalColor.rgb, u_FogColor, v_fogDistance, u_FogDensity);
+    vec3 effectiveFogColor = u_FogColor;
+    if (u_numDirectionalLights > 0) {
+      vec3 viewDir = normalize(v_position - u_cameraPosition);
+      vec3 lightDir = normalize(-u_directionalLightDirections[0]);
+      float sunInscatter = max(0.0, dot(viewDir, lightDir));
+      sunInscatter = pow(sunInscatter, 8.0);
+      vec3 sunGlowColor = u_directionalLightColors[0] * sunInscatter;
+      effectiveFogColor += sunGlowColor;
+    }
+    float heightDelta = max(0.0, v_position.y - u_FogBaseHeight);
+    float heightDensityFactor = exp(-heightDelta * u_FogHeightFalloff);
+    float effectiveDensity = u_FogDensity * heightDensityFactor;
+    foggedRGB = applyFog(finalColor.rgb, effectiveFogColor, v_fogDistance, effectiveDensity, u_fogType);
   }
   fragColor = vec4(foggedRGB, finalColor.a);
 }
@@ -112,6 +127,7 @@ void main() {
 precision mediump float;
 uniform samplerCube u_mainTex;
 uniform vec4 u_matColor;
+uniform float u_time;
 uniform vec4 u_skyColor;
 uniform vec4 u_horizonColor;
 uniform vec4 u_groundColor;
@@ -127,49 +143,238 @@ uniform vec4 u_moonColor;
 uniform float u_moonSize;
 uniform float u_moonFalloff;
 uniform float u_moonPhase;
+uniform float u_moonEarthshine;
+uniform float u_moonTerminatorSoftness;
+uniform int u_moonEnableRotation;
+uniform float u_moonRotationSpeed;
+uniform int u_useClouds;
+uniform float u_cloudSeed;
+uniform float u_cloudTiling;
+uniform float u_weatherCondition;
+uniform float u_cloudSparsity;
+uniform float u_windCloudSpeed;
+uniform float u_cloudSpeed;
+uniform int u_cloudRepetition;
+uniform int u_useStars;
+uniform float u_starIntensity;
+uniform float u_starScale;
+uniform float u_starSparsity;
+uniform float u_starSpeed;
 in vec3 v_viewDirection;
 out vec4 fragColor;
+@INCLUDE_FUNC
+float g_cloudAlpha = 0.0;
+vec3 g_cloudColor  = vec3(0.0);
+vec3 drawStars(vec3 currentSkyColor, vec3 viewDir);
+vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir);
+vec3 drawSun(vec3 viewDir);
+vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir);
 void main() {
-  vec3 viewDir = normalize(v_viewDirection);
-  float y = viewDir.y;
-  vec3 gradientColor = vec3(0.0);
-  if (y > 0.0) {
-    float p = pow(y, u_exponent);
-    gradientColor = mix(u_horizonColor.rgb, u_skyColor.rgb, p);
-  } else {
-    float p = pow(-y, u_exponent);
-    gradientColor = mix(u_horizonColor.rgb, u_groundColor.rgb, p);
-  }
-  vec4 texColor = texture(u_mainTex, viewDir) * u_matColor;
-  vec3 mixedColor = gradientColor * texColor.rgb * 1.5;
-  vec3 blendedColor = mix(gradientColor, mixedColor, texColor.a);
-  vec4 finalColor = vec4(blendedColor, 1.0);
-  if (u_useSun == 1) {
-    finalColor.rgb *= u_sunColor.rgb;
+    vec3 viewDir = normalize(v_viewDirection);
+    float y = viewDir.y;
+    vec3 gradientColor = vec3(0.0);
+    float absY = abs(y);
+    float p = pow(absY, u_exponent);
+    vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
+    gradientColor = mix(u_horizonColor.rgb, targetColor, p);
+    vec3 finalColor = gradientColor;
+    if(u_useStars == 1 && u_sunDirection.y < 0.0){
+       finalColor = drawStars(finalColor, viewDir);
+    }
+    if(u_useClouds == 1){
+      finalColor = drawClouds(finalColor, viewDir); 
+    }
+    if (u_useSun == 1 && u_sunDirection.y > -0.1) {
+        float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
+        finalColor += drawSun(viewDir) * sunOcclusion;
+    }
+    if (u_useMoon == 1 && u_moonDirection.y > -0.1) {
+        finalColor = drawMoon(finalColor, viewDir);
+    }
+    fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
+}
+vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
+    if (viewDir.y < 0.0) {
+        return currentSkyColor;
+    }
+    const float c_starClusterFreq = 2.9;                          
+    const float c_starClusterCut  = 0.35;                          
+    const vec3 c_rotationAxis     = vec3(0.1961, 0.8825, 0.0981); 
+    float angle = u_time * u_starSpeed;
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    mat3 rotationMatrix = mat3(
+        oc * c_rotationAxis.x * c_rotationAxis.x + c,                    oc * c_rotationAxis.x * c_rotationAxis.y - c_rotationAxis.z * s, oc * c_rotationAxis.x * c_rotationAxis.z + c_rotationAxis.y * s,
+        oc * c_rotationAxis.x * c_rotationAxis.y + c_rotationAxis.z * s, oc * c_rotationAxis.y * c_rotationAxis.y + c,                    oc * c_rotationAxis.y * c_rotationAxis.z - c_rotationAxis.x * s,
+        oc * c_rotationAxis.x * c_rotationAxis.z - c_rotationAxis.y * s, oc * c_rotationAxis.y * c_rotationAxis.z + c_rotationAxis.x * s, oc * c_rotationAxis.z * c_rotationAxis.z + c
+    );
+    vec3 rotatedViewDir = rotationMatrix * viewDir;
+    vec3 moonDir = normalize(u_moonDirection);
+    float moonDot = max(0.0, dot(viewDir, moonDir));
+    float d2 = 1.0 - moonDot * moonDot;
+    float R2 = 1.0 - u_moonSize * u_moonSize;
+    if (u_useMoon == 1 && d2 <= R2) {
+        return currentSkyColor;
+    }
+    vec3 starCoord = rotatedViewDir * u_starScale; 
+    vec3 i = floor(starCoord);
+    vec3 f = fract(starCoord);
+    float distToCenter = length(f - vec3(0.5));
+    float pointMask = smoothstep(0.4, 0.0, distToCenter);
+    float nightFactor = smoothstep(0.1, -0.2, u_sunDirection.y); 
+    float dynamicExponent = mix(45.0, u_starSparsity, nightFactor);
+    float rawNoise = hash3D(i);
+    float starMask = pow(rawNoise, dynamicExponent) * pointMask; 
+    if (starMask <= 0.0) {
+        return currentSkyColor;
+    }
+    float densityNoise = calculateMoonTexture(rotatedViewDir, c_starClusterFreq);
+    float densityMask = smoothstep(c_starClusterCut, c_starClusterCut + 0.3, densityNoise);
+    starMask *= mix(0.1, 1.0, densityMask);
+    float horizonFade = smoothstep(0.04, 0.25, viewDir.y); 
+    float dynamicIntensity = mix(0.5, u_starIntensity, nightFactor);
+    float finalStarIntensity = starMask * horizonFade * dynamicIntensity;
+    float colorSeed = hash3D(i + vec3(12.34, 56.78, 90.12));
+    vec3 icyBlue    = vec3(0.75, 0.88, 1.00);
+    vec3 warmAmber  = vec3(1.00, 0.92, 0.78);
+    vec3 cleanWhite = vec3(0.98, 0.98, 1.00);
+    vec3 starColor = cleanWhite;
+    starColor = mix(starColor, mix(cleanWhite, icyBlue, 0.5), step(colorSeed, 0.35));
+    starColor = mix(starColor, mix(cleanWhite, warmAmber, 0.4), step(0.75, colorSeed));
+    return max(currentSkyColor, starColor * finalStarIntensity);
+}
+vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
+    if(u_useClouds == 0){
+        return currentSkyColor;
+    }
+    if (viewDir.y < -0.01) {
+        return currentSkyColor;
+    }
+    int rep = 1 + u_cloudRepetition;
+    float c_weatherCondition = u_weatherCondition;     
+    float c_cloudTiling      = u_cloudTiling;                       
+    vec3 c_cloudSeed         = vec3(200.0  , 128.54 / (100.0 + u_time) , 954.31) + u_time *  u_cloudSpeed; 
+    float c_maxOpacityClear  = 0.75;                        
+    float c_maxOpacityStorm  = 0.98;                        
+    const float c_zenithPatchWeight= 0.8;                         
+    vec3 c_cloudColorDay  = mix(vec3(1.0), u_sunColor.rgb, 0.3);  
+    vec3 c_cloudShadowDay = u_horizonColor.rgb * 0.8;             
+    vec3 c_cloudColorRain  = mix(u_horizonColor.rgb * 1.5, vec3(0.75, 0.77, 0.80), 0.3); 
+    vec3 c_cloudShadowRain = mix(u_horizonColor.rgb * 0.8, vec3(0.45, 0.47, 0.50), 0.3); 
+    vec2 cloudUV = viewDir.xz / (viewDir.y + 0.001);
+    vec2 windOffset = vec2(u_time * u_windCloudSpeed, u_time * u_windCloudSpeed);
+    cloudUV = (cloudUV * c_cloudTiling) + windOffset;
+    vec3 pPlanar = vec3(cloudUV.x, 0.0, cloudUV.y) + c_cloudSeed;
+    float nPlanar  = 0.500 * noise3D(pPlanar); pPlanar *= 2.05;
+    for(int i = 0; i < rep; i++){
+        nPlanar       += 0.250 * noise3D(pPlanar); pPlanar *= 1.02;
+    }
+    nPlanar       += 0.125 * noise3D(pPlanar);
+    float baseCloudNoise = nPlanar / 0.875;
+    vec3 pSpherical = (viewDir * (c_cloudTiling * 2.5)) + vec3(windOffset.x, 0.0, windOffset.y) + c_cloudSeed;
+    float nSpherical  = 0.500 * noise3D(pSpherical); pSpherical *= 2.05;
+    nSpherical       += 0.250 * noise3D(pSpherical);
+    float zenithNoise = nSpherical / 0.750;
+    float zenithWeight = pow(viewDir.y, 3.0); 
+    float cloudNoise = mix(baseCloudNoise, zenithNoise, zenithWeight * c_zenithPatchWeight);
+    float baseDensity = mix(0.75, 0.15, c_weatherCondition);
+    float dynamicDensity = clamp(baseDensity + u_cloudSparsity * (1.0 - baseDensity), 0.0, 0.98);
+    float dynamicSharpness = mix(0.35, 0.15, c_weatherCondition);
+    float cloudCoverage = smoothstep(dynamicDensity, dynamicDensity + dynamicSharpness, cloudNoise);
+    float edgeFade = smoothstep(0.01, 0.15, viewDir.y);
+    g_cloudAlpha = cloudCoverage * edgeFade;
+    if (g_cloudAlpha <= 0.0) {
+        return currentSkyColor;
+    }
+    vec3 currentShadow    = mix(c_cloudShadowDay, c_cloudShadowRain, c_weatherCondition);
+    vec3 currentHighlight = mix(c_cloudColorDay, c_cloudColorRain, c_weatherCondition);
+    g_cloudColor = mix(currentShadow, currentHighlight, smoothstep(0.2, 0.8, cloudNoise));
+    float dynamicMaxOpacity = mix(c_maxOpacityClear, c_maxOpacityStorm, c_weatherCondition);
+    return mix(currentSkyColor, g_cloudColor, g_cloudAlpha * dynamicMaxOpacity);
+}
+vec3 drawSun(vec3 viewDir) {
+    const float c_coronaGlowPower = 180.0;                       
+    const float c_coronaGlowScale = 0.65;                        
+    const float c_wideGlarePower  = 12.0;                         
+    const float c_wideGlareScale  = 0.25;                         
+    const float c_raySymmetryFreq1= 9.0;                          
+    const float c_raySymmetryFreq2= 15.0;                         
+    const float c_raySymmetryFreq3= 4.0;                          
+    const float c_rayFalloffPower = 450.0;                        
+    const float c_rayIntensityScale = 0.45;                       
     vec3 sunDir = normalize(u_sunDirection);
     float sunDot = max(0.0, dot(viewDir, sunDir));
-    float sunCore = smoothstep(u_sunSize - u_sunFalloff, u_sunSize, sunDot);
-    float sunGlow = pow(sunDot, 120.0) * 0.5; 
-    finalColor.rgb += u_sunColor.rgb * (sunCore + sunGlow);
-    if (u_useMoon == 1) {
-      vec3 moonDir = normalize(u_moonDirection);
-      float moonDot = max(0.0, dot(viewDir, moonDir));
-      float moonCore = smoothstep(u_moonSize - u_moonFalloff, u_moonSize, moonDot);
-      float d2 = 1.0 - moonDot * moonDot;
-      float R2 = 1.0 - u_moonSize * u_moonSize;
-      float z = sqrt(max(0.0, R2 - d2));
-      vec3 N = normalize(viewDir + moonDir * (z - moonDot));
-      float phaseAngle = u_moonPhase * 6.2831853;
-      vec3 moonRight = normalize(cross(vec3(0.0, 1.0, 0.0001), moonDir));
-      vec3 L = normalize(moonDir * cos(phaseAngle) + moonRight * sin(phaseAngle));
-      float moonLighting = smoothstep(-0.5, 0.5, dot(N, L));
-      float earthshine = 0.02;
-      vec3 moonBodyColor = u_moonColor.rgb * mix(earthshine, 1.0, moonLighting);
-      float moonGlow = pow(moonDot, 200.0) * 0.05 * (0.5 + 0.5 * cos(phaseAngle)); 
-      finalColor.rgb = mix(finalColor.rgb, moonBodyColor, moonCore) + u_moonColor.rgb * moonGlow;
+    if (sunDot < 0.7) {
+        return vec3(0.0);
     }
-  }
-  fragColor = clamp(finalColor, 0.0, 1.0);
+    float sunCore = smoothstep(u_sunSize - u_sunFalloff, u_sunSize, sunDot);
+    float sunGlow = pow(sunDot, c_coronaGlowPower) * c_coronaGlowScale; 
+    float wideGlare = pow(sunDot, c_wideGlarePower) * c_wideGlareScale; 
+    vec3 rayProj = cross(viewDir, sunDir);
+    float rayAngle = atan(rayProj.y, rayProj.x);
+    float rayPattern = sin(rayAngle * c_raySymmetryFreq1) * sin(rayAngle * c_raySymmetryFreq2 + 1.2) * cos(rayAngle * c_raySymmetryFreq3);
+    float sunRays = max(0.0, rayPattern) * pow(sunDot, c_rayFalloffPower) * c_rayIntensityScale;
+    vec3 coreColor = vec3(1.0, 0.98, 0.95);      
+    vec3 edgeColor = vec3(1.0, 0.65, 0.28);      
+    vec3 outerHazeColor = vec3(0.92, 0.42, 0.3); 
+    vec3 mixedSunColor = mix(edgeColor, coreColor, sunCore);
+    vec3 finalGlowColor = mix(outerHazeColor, mixedSunColor, smoothstep(0.0, 0.3, sunGlow + sunCore));
+    return (sunCore * coreColor) + 
+           (sunGlow * finalGlowColor) + 
+           (sunRays * edgeColor) + 
+           (wideGlare * outerHazeColor * u_sunColor.rgb);
+}
+vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
+    const float c_haloRadiusWiden = 0.015;                      
+    const float c_haloAlphaWeight = 0.1;                         
+    const float c_textureFreqBase = 3.5;                          
+    const float c_textureFreqDet  = 12.0;                         
+    const float c_craterRimCutoff = 0.68;                         
+    const float c_horizonHazePow  = 2.0;                          
+    vec3 moonDir = normalize(u_moonDirection);
+    float moonDot = max(0.0, dot(viewDir, moonDir));
+    float d2 = 1.0 - moonDot * moonDot;
+    float R2 = 1.0 - u_moonSize * u_moonSize;
+    float phaseAngle = u_moonPhase * 6.2831853;
+    float phaseFade = 1.0;
+    float haloOuterRadius = R2 + c_haloRadiusWiden;
+    vec3 colorOut = currentSkyColor;
+    if (d2 > R2 && d2 < haloOuterRadius) {
+        float haloFactor = 1.0 - ((d2 - R2) / (haloOuterRadius - R2));
+        colorOut = mix(currentSkyColor, u_horizonColor.rgb, c_haloAlphaWeight * haloFactor * phaseFade);
+    }
+    if (d2 > R2) {
+        return colorOut;
+    }
+    float moonCore = smoothstep(u_moonSize - u_moonFalloff, u_moonSize, moonDot);
+    float z = sqrt(max(0.0, R2 - d2));
+    vec3 N = normalize(viewDir + moonDir * (z - moonDot));
+    vec3 moonRight = normalize(cross(vec3(0.0, 1.0, 0.0001), moonDir));
+    vec3 L = normalize(moonDir * cos(phaseAngle) + moonRight * sin(phaseAngle));
+    float moonLighting = smoothstep(-u_moonTerminatorSoftness, u_moonTerminatorSoftness, dot(N, L));
+    vec3 rotatedN = N;
+    if (u_moonEnableRotation == 1) {
+        float rotAngle = u_time * u_moonRotationSpeed;
+        float rSin = sin(rotAngle);
+        float rCos = cos(rotAngle);
+        rotatedN.xz = vec2(N.x * rCos - N.z * rSin, N.x * rSin + N.z * rCos);
+    }
+    float baseNoise = calculateMoonTexture(rotatedN, c_textureFreqBase);
+    float detailNoise = calculateMoonTexture(rotatedN + vec3(baseNoise * 0.15), c_textureFreqDet);
+    float combinedNoise = mix(baseNoise, detailNoise, 0.35);
+    float mariaMask = smoothstep(0.25, 0.55, combinedNoise);
+    vec3 moonBaseColor = mix(u_moonColor.rgb * 0.3, u_moonColor.rgb * 1.1, mariaMask);
+    float craterRim = smoothstep(c_craterRimCutoff, c_craterRimCutoff + 0.04, detailNoise) * 0.25;
+    moonBaseColor += vec3(craterRim);
+    vec3 moonBodyColor = moonBaseColor * mix(u_moonEarthshine, 1.0, moonLighting);
+    float horizonHaze = pow(1.0 - max(0.0, viewDir.y), c_horizonHazePow);
+    float atmosphericThickness = mix(0.15, 0.65, horizonHaze);
+    moonBodyColor = mix(moonBodyColor, currentSkyColor, atmosphericThickness);
+    float edgeLightingFactor = smoothstep(0.4, 0.6, cos(phaseAngle) * 0.5 + 0.5);
+    float moonAlpha = moonCore * mix(u_moonEarthshine, 1.0, edgeLightingFactor);
+    vec3 completeMoon = mix(colorOut, moonBodyColor, moonAlpha);
+    return mix(completeMoon, g_cloudColor, g_cloudAlpha * 0.9);
 }
 `,
   unlit: `
@@ -186,9 +391,6 @@ out vec4 fragColor;
 void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
   fragColor = texture(u_mainTex, uv) * u_matColor;
-  if (u_id > 0.0) {
-    fragColor = vec4(u_id / 255.0, 0.0, 0.0, 1.0);
-  }
 }
 `,
   functions: `
@@ -200,6 +402,10 @@ float calculateExponentialFogFactor(float distance, float fogDensity) {
     float fogFactor = 1.0 - exp(-distance * fogDensity);
     return clamp(fogFactor, 0.0, 1.0);
 }
+float calculateExponentialSquaredFogFactor(float distance, float fogDensity) {
+    float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
+    return clamp(fogFactor, 0.0, 1.0);
+}
 vec3 applyLinearFog(vec3 originalColor, vec3 fogColor, float distance, float fogStart, float fogEnd) {
     float fogFactor = calculateLinearFogFactor(distance, fogStart, fogEnd);
     return mix(originalColor, fogColor, fogFactor);
@@ -208,8 +414,45 @@ vec3 applyExponentialFog(vec3 originalColor, vec3 fogColor, float distance, floa
     float fogFactor = calculateExponentialFogFactor(distance, fogDensity);
     return mix(originalColor, fogColor, fogFactor);
 }
+vec3 applyExponentialSquaredFog(vec3 originalColor, vec3 fogColor, float distance, float fogDensity) {
+    float fogFactor = calculateExponentialSquaredFogFactor(distance, fogDensity);
+    return mix(originalColor, fogColor, fogFactor);
+}
+vec3 applyFog(vec3 originalColor, vec3 fogColor, float distance, float fogDensity, int fogType) {
+    if (fogType == 2) {
+        return applyExponentialSquaredFog(originalColor, fogColor, distance, fogDensity);
+    } else if (fogType == 0) {
+        return applyLinearFog(originalColor, fogColor, distance, 1.0 / (fogDensity + 0.001), 2.0 / (fogDensity + 0.001)); 
+    } else {
+        return applyExponentialFog(originalColor, fogColor, distance, fogDensity);
+    }
+}
 float rand(vec2 c){
-	return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+    return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+float hash3D(vec3 p) {
+    float xy = rand(p.xy);
+    return rand(vec2(xy, p.z));
+}
+float noise3D(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    vec3 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(hash3D(i + vec3(0.0, 0.0, 0.0)), hash3D(i + vec3(1.0, 0.0, 0.0)), u.x),
+                   mix(hash3D(i + vec3(0.0, 1.0, 0.0)), hash3D(i + vec3(1.0, 1.0, 0.0)), u.x), u.y),
+               mix(mix(hash3D(i + vec3(0.0, 0.0, 1.0)), hash3D(i + vec3(1.0, 0.0, 1.0)), u.x),
+                   mix(hash3D(i + vec3(0.0, 1.0, 1.0)), hash3D(i + vec3(1.0, 1.0, 1.0)), u.x), u.y), u.z);
+}
+float calculateMoonTexture(vec3 normal, float frequency) {
+    vec3 p = normal * frequency;
+    float value = 0.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < 3; i++) {
+        value += amplitude * noise3D(p);
+        p *= 2.5; 
+        amplitude *= 0.5; 
+    }
+    return value;
 }
 `,
   light_header: `
@@ -241,7 +484,7 @@ uniform float u_spotLightLinearAtts[MAX_SPOT_LIGHTS];
 uniform float u_spotLightQuadraticAtts[MAX_SPOT_LIGHTS];
 `,
   light: `
-#define MAX_DIRECTIONAL_LIGHTS 1
+#define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 20
 #define MAX_SPOT_LIGHTS 20
 uniform float u_specularStrength;
@@ -277,7 +520,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   if (projCoords.z > 1.0 || u_useShadows == 0) {
     return 1.0;
   }
-  float cells = 1.0;
+  float cells = 1.0; 
   float total = cells * 2.0 + 1.0;
   float shadow = 0.0;
   vec2 texelSize = 1.0 / u_shadowMapSize;
@@ -290,83 +533,83 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   float shadowFactor = max(0.05, shadow / (total*total));
   return mix(1.0, shadowFactor, u_shadowStrength);
 }
+vec3 getFinalNormal(vec2 uv) {
+    vec3 n = normalize(v_normal);
+    if (u_normalMapStrength > 0.0) {
+        vec3 normalFromMap = texture(u_normalMap, uv).rgb * 2.0 - 1.0;
+        mat3 tbnMatrix = mat3(normalize(v_tangent), normalize(v_bitangent), n);
+        vec3 perturbedNormal = tbnMatrix * normalFromMap;
+        return normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
+    }
+    return n;
+}
+vec2 calculateBlinnPhong(vec3 lightDir, vec3 viewDir, vec3 normal, float shininess) {
+    float diffuseIntensity = max(dot(normal, lightDir), 0.0);
+    float specularIntensity = 0.0;
+    if (diffuseIntensity > 0.0) {
+        vec3 halfVec = normalize(lightDir + viewDir);
+        specularIntensity = pow(max(0.0, dot(normal, halfVec)), shininess) * u_specularStrength;
+    }
+    return vec2(diffuseIntensity, specularIntensity);
+}
+vec3 applyDirectionalLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightDir = normalize(-u_directionalLightDirections[index]);
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    if (intensities.x <= 0.0) return vec3(0.0);
+    float shadowFactor = 1.0;
+        shadowFactor = is_in_shadow_pcf(v_lightSpacePosition, normal, lightDir);
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+    return (diffuse + specular) * u_directionalLightColors[index] * shadowFactor;
+}
+vec3 applyPointLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightVec = u_pointLightPositions[index] - v_position;
+    vec3 lightDir = normalize(lightVec);
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    if (intensities.x <= 0.0) return vec3(0.0);
+    float distance = length(lightVec);
+    float attenuation = 1.0 / (u_pointLightConstantAtts[index] +
+                               u_pointLightLinearAtts[index] * distance +
+                               u_pointLightQuadraticAtts[index] * (distance * distance));
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+    return (diffuse + specular) * u_pointLightColors[index] * attenuation;
+}
+vec3 applySpotLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float shininess) {
+    vec3 lightVec = u_spotLightPositions[index] - v_position;
+    vec3 lightDir = normalize(lightVec);
+    vec2 intensities = calculateBlinnPhong(lightDir, viewDir, normal, shininess);
+    if (intensities.x <= 0.0) return vec3(0.0);
+    float angleCos = dot(lightDir, -u_spotLightDirections[index]);
+    float coneFactor = smoothstep(u_spotLightOuterConeCos[index], u_spotLightInnerConeCos[index], angleCos);
+    if (coneFactor <= 0.0) return vec3(0.0);
+    float distance = length(lightVec);
+    float attenuation = 1.0 / (u_spotLightConstantAtts[index] +
+                               u_spotLightLinearAtts[index] * distance +
+                               u_spotLightQuadraticAtts[index] * (distance * distance));
+    vec3 diffuse = baseColor * intensities.x;
+    vec3 specular = vec3(1.0) * intensities.y;
+    return (diffuse + specular) * u_spotLightColors[index] * attenuation * coneFactor;
+}
 vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
-  vec3 finalNormal;
-  if (u_normalMapStrength > 0.0) {
-    vec3 normalFromMap = texture(u_normalMap, uv).rgb;
-    normalFromMap = normalFromMap * 2.0 - 1.0;
-    mat3 tbnMatrix =
-        mat3(normalize(v_tangent), normalize(v_bitangent), normalize(v_normal));
-    vec3 perturbedNormal = tbnMatrix * normalFromMap;
-    finalNormal = normalize(mix(normalize(v_normal), normalize(perturbedNormal),
-                                u_normalMapStrength));
-  } else {
-    finalNormal = normalize(v_normal);
-  }
+  vec3 finalNormal = getFinalNormal(uv);
   vec3 viewDir = normalize(u_cameraPosition - v_position);
-  float clampedRoughness = clamp(u_roughness, 0.001, 0.999);
-  float shininess = (2.0 / (1.0 - clampedRoughness)) - 2.0;
+  float shininess = (2.0 / (1.0 - clamp(u_roughness, 0.001, 0.999))) - 2.0;
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
   for (int i = 0; i < u_numDirectionalLights; ++i) {
-    vec3 lightDir = normalize(-u_directionalLightDirections[i]);
-    float diffuseIntensity = max(dot(finalNormal, lightDir), 0.0);
-    if (diffuseIntensity > 0.0) {
-      vec3 halfVec = normalize(lightDir + viewDir);
-      float currentShadowFactor = 1.0;
-      if (i == 0) {
-        currentShadowFactor = is_in_shadow_pcf(v_lightSpacePosition, finalNormal, lightDir);
-      }
-      float specularIntensity = pow(max(0.0, dot(finalNormal, halfVec)), shininess) * u_specularStrength;
-      vec3 diffuse = baseColor * diffuseIntensity;
-      vec3 specular = vec3(1.0) * specularIntensity;
-      totalLitColorRGB += (diffuse + specular) * u_directionalLightColors[i] * currentShadowFactor;
-    }
+    totalLitColorRGB += applyDirectionalLight(i, baseColor, viewDir, finalNormal, shininess);
   }
   for (int i = 0; i < u_numPointLights; ++i) {
-    vec3 lightVecPoint = u_pointLightPositions[i] - v_position; ;
-    float distancePoint = length(lightVecPoint);
-    vec3 pointLightDir = normalize(lightVecPoint);
-    float attenuationPoint =
-        1.0 / (u_pointLightConstantAtts[i] +
-               u_pointLightLinearAtts[i] * distancePoint +
-               u_pointLightQuadraticAtts[i] * (distancePoint * distancePoint));
-    float pointDiffuseIntensity = max(dot(finalNormal, pointLightDir), 0.0);
-    vec3 halfVec = normalize(pointLightDir + viewDir);
-    float pointSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB +=
-        (baseColor * u_pointLightColors[i] *
-         (pointDiffuseIntensity + pointSpecularIntensity) * attenuationPoint);
+    totalLitColorRGB += applyPointLight(i, baseColor, viewDir, finalNormal, shininess);
   }
   for (int i = 0; i < u_numSpotLights; ++i) {
-    vec3 lightVecSpot = u_spotLightPositions[i] - v_position;
-    float distanceSpot = length(lightVecSpot);
-    float attenuationSpot =
-        1.0 /
-        (u_spotLightConstantAtts[i] + u_spotLightLinearAtts[i] * distanceSpot +
-         u_spotLightQuadraticAtts[i] * (distanceSpot * distanceSpot));
-    attenuationSpot = clamp(attenuationSpot, 0.0, 1.0);
-    vec3 spotLightDirFromFrag = normalize(lightVecSpot);
-    float angleCos = dot(spotLightDirFromFrag, -u_spotLightDirections[i]);
-    float coneFactor = smoothstep(u_spotLightOuterConeCos[i],
-                                  u_spotLightInnerConeCos[i], angleCos);
-    coneFactor = clamp(coneFactor, 0.0, 1.0);
-    float spotDiffuseIntensity =
-        max(dot(finalNormal, spotLightDirFromFrag), 0.0);
-    vec3 halfVec = normalize(spotLightDirFromFrag + viewDir);
-    float spotSpecularIntensity =
-        pow(max(0.0, dot(finalNormal, halfVec)), shininess) *
-        u_specularStrength;
-    totalLitColorRGB += (baseColor * u_spotLightColors[i] *
-                         (spotDiffuseIntensity + spotSpecularIntensity) *
-                         attenuationSpot * coneFactor);
+    totalLitColorRGB += applySpotLight(i, baseColor, viewDir, finalNormal, shininess);
   }
   return totalLitColorRGB;
 }
 `,
   light_old: `
-#define MAX_DIRECTIONAL_LIGHTS 5
+#define MAX_DIRECTIONAL_LIGHTS 1
 #define MAX_POINT_LIGHTS 20
 #define MAX_SPOT_LIGHTS 20
 uniform float u_specularStrength;
@@ -578,7 +821,7 @@ void main() {
   v_tangent = u_worldInverseTransposeMatrix * a_tangent;
   v_bitangent = u_worldInverseTransposeMatrix * a_bitangent;
   v_uv = a_uv;
-  v_fogDistance = abs(viewPosition.z )+ u_fogDistance;
+  v_fogDistance = length(viewPosition.xyz) + u_fogDistance;
   v_lightSpacePosition = u_lightMVPMatrix * vec4(a_position, 1.0);
   gl_Position = u_mvpMatrix * vec4(a_position, 1.0);
   gl_PointSize = 10.0;

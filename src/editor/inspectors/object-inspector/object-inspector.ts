@@ -1,121 +1,171 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { Color, ColorMaterial, EntityBehaviour, GlEntity, LitMaterial, Shader, Texture, Transform, UnlitMaterial, Vector2, Vector3, Vector4, NumberRange } from '@engine';
-import { BooleanInspector } from "../../components/inspector/boolean-inspector/boolean-inspector";
-import { TextInputInspector } from "../../components/inspector/text-input-inspector/text-input-inspector";
-import { VectorInspector } from "../../components/inspector/vector-inspector/vector-inspector";
-import { ColorInspector } from "../color-inspector/color-inspector";
-import { EnumInspector } from "../enum-inspector/enum-inspector";
-import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
+import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
+import {
+  Color,
+  ColorMaterial,
+  EntityBehaviour,
+  GlEntity,
+  LitMaterial,
+  Shader,
+  Texture,
+  Transform,
+  UnlitMaterial,
+  Vector2,
+  Vector3,
+  Vector4,
+  NumberRange,
+} from '@engine';
+import { BooleanInspector } from '../../components/inspector/boolean-inspector/boolean-inspector';
+import { TextInputInspector } from '../../components/inspector/text-input-inspector/text-input-inspector';
+import { VectorInspector } from '../../components/inspector/vector-inspector/vector-inspector';
+import { ColorInspector } from '../color-inspector/color-inspector';
+import { EnumInspector } from '../enum-inspector/enum-inspector';
+import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
 import { SceneTreeService } from '@editor/services/scene-tree.service';
 import { EditorService } from '@editor/services/editor.service';
 
-
 export interface ITargetObject {
   [key: string]: any;
-  key: string, type: string, property?: any, name?: string
+  key: string;
+  type: string;
+  property?: any;
+  name?: string;
 }
 
 export interface ITargetProperty extends ITargetObject {
-  value: any
+  value: any;
 }
-
 
 @Component({
   selector: 'editor-object-inspector',
-  imports: [InpectorTogglePanel, TextInputInspector, ColorInspector,
-    VectorInspector, BooleanInspector, EnumInspector, NumberRangeInspector],
+  imports: [
+    InpectorTogglePanel,
+    TextInputInspector,
+    ColorInspector,
+    VectorInspector,
+    BooleanInspector,
+    EnumInspector,
+    NumberRangeInspector,
+  ],
   templateUrl: './object-inspector.html',
-  styleUrl: './object-inspector.scss'
+  styleUrl: './object-inspector.scss',
 })
 export class ObjectInspector {
- // inject SceneTreeService
+  // Injected services
   protected sceneTreeService = inject(SceneTreeService);
   protected editorService = inject(EditorService);
 
+  // Inputs
   @Input() allowProperties: string[] = [];
-  @Input() denyProperties: string[] = ["meshData", "gl", "mesh"];
-  @Input() validTypes: string[] = ["string", "boolean", "number", "shader", "material", "color", "mesh", "vetor234", "range"];
-
-  @Input() label: string = "No title";
+  @Input() denyProperties: string[] = ['meshData', 'gl', 'mesh'];
+  @Input() validTypes: string[] = [
+    'string',
+    'boolean',
+    'number',
+    'shader',
+    'material',
+    'color',
+    'mesh',
+    'vetor234',
+    'range',
+  ];
+  @Input() label: string = 'No title';
   @Input() isChild = false;
+  @Input() showPrivateProperties = false;
+  @Input() showAllProperties = false;
 
   @Input() set targetObject(value: ITargetObject) {
     this._selectedObject = value;
     this.loadProperties();
   }
-  @Input() showPrivateProperties = false;
-  @Input() showAllProperties = false;
 
-  @Output() change = new EventEmitter();
+  // Outputs
+  @Output() change = new EventEmitter<any>();
 
+  // Component state
   _selectedObject?: ITargetObject;
   _properties: ITargetProperty[] = [];
- 
-  /**
-   * This method is used to update the scene after a property has been changed. It emits the onSceneUpdated event from the SceneTreeService to notify all subscribers that the scene has been updated and they should refresh their data if needed.
-   */
-  protected updateScene(){
-    const scene = this.editorService.scene;
-    this.sceneTreeService.onSceneUpdated.emit(scene);
+
+  // Event Handlers from template
+  onValueChanged(
+    property: ITargetObject,
+    value: string | number | boolean | NumberRange,
+  ): void {
+    this._onPropertyChanged(property.key, value);
   }
 
-  onValueChanged(property: ITargetObject, value: string | number | boolean | NumberRange) {
-    debugger
-    if (!this._selectedObject || (value as any) instanceof Event) return;
-    this._selectedObject.property[property.key] = value;
+  onVectorChanged(property: ITargetObject, value: Vector4 | Vector3 | Vector2): void {
+    this._onPropertyChanged(property.key, value);
+  }
+
+  onColorChanged(property: ITargetObject, value: Color): void {
+    this._onPropertyChanged(property.key, value);
+  }
+
+  // Protected methods for template
+  protected isNotPrivate(key: string): boolean {
+    if (this.showPrivateProperties) return true;
+    return !key.startsWith('_');
+  }
+
+  protected isValidPropertyType(key: string): boolean {
+    if (!this._selectedObject) return false;
+    const value =
+      this._selectedObject.property?.[key] || this._selectedObject[key];
+    const obType = this.getObjectType(value);
+    return this.showAllProperties
+      ? true
+      : this.isNotPrivate(key) && this.validTypes.includes(obType);
+  }
+
+  protected convertEnumToObject(something: any): { key: string; value: number }[] {
+    return Object.keys(something)
+      .filter((k) => Number.isNaN(+k))
+      .map((e: string) => {
+        return { key: e, value: (something as any)[e] as number };
+      });
+  }
+
+  // Private and protected helpers
+  private _onPropertyChanged(propertyKey: string, value: any): void {
+    if (!this._selectedObject?.property || value instanceof Event) return;
+
+    this._selectedObject.property[propertyKey] = value;
     this.change.emit(this._selectedObject.property);
     this.loadProperties();
-
   }
 
-  onVectorChanged(property: ITargetObject, value: Vector4 | Vector3 | Vector2) {
-    if (!this._selectedObject || (value as any) instanceof Event) return;
-
-    this._selectedObject.property[property.key] = value;
-    this.change.emit(this._selectedObject.property);
-    this.loadProperties();
-
-  }
-
-  onColorChanged(property: ITargetObject, value: Color) {
-    if (!this._selectedObject || (value as any) instanceof Event) return;
-
-    this._selectedObject.property[property.key] = value;
-    this.change.emit(this._selectedObject.property);
-    this.loadProperties();
-  }
-
-
-
-  protected loadProperties() {
+  protected loadProperties(): void {
     if (!this._selectedObject?.property) {
-      return
-    };
-
-    this._properties = [];
-    const object = this._selectedObject.property;
-    const keys = Object.keys(object).filter(this.isPropertyValid.bind(this));
-
-    for (const key of keys) {
-      const newValue = (object)[key];
-      if(newValue===undefined || newValue===null) continue;
-      let newObType: string = typeof newValue;
-      let name = "";
-      // console.debug(key, this.getObjectType(newValue), newValue instanceof Color, newValue instanceof Shader);
-      if (newObType == 'object') {
-        newObType = this.getObjectType(newValue);
-        name = newValue.name
-      }
-
-      this._properties.push({ key, type: newObType, value: newValue, name });
-      // console.debug(this._properties)
+      this._properties = [];
+      return;
     }
+
+    const object = this._selectedObject.property;
+    this._properties = Object.keys(object)
+      .filter(key => this.isPropertyValid(key))
+      .map(key => this._createPropertyViewModel(key, object[key]))
+      .filter((p): p is ITargetProperty => !!p);
   }
 
-  getObjectType(newValue: Object): string {
-    const className = (newValue as any)['className'];
-    let result = (typeof newValue) as string;
+  private _createPropertyViewModel(key: string, value: any): ITargetProperty | null {
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    let type: string = typeof value;
+    let name = '';
+
+    if (type === 'object') {
+      type = this.getObjectType(value);
+      name = (value as any).name || '';
+    }
+
+    return { key, type, value, name };
+  }
+
+  protected getObjectType(value: object): string {
+    const className = (value as any)?.className;
 
     if (className) {
       switch (className) {
@@ -126,49 +176,54 @@ export class ObjectInspector {
       }
     }
 
+    if (value instanceof Transform) return 'transform';
+    if (value instanceof GlEntity) return 'entity';
+    if (value instanceof EntityBehaviour) return 'entitybehaviour';
+    if (value instanceof Shader) return 'shader';
+    if (value instanceof Texture) return 'texture';
+    if (value instanceof NumberRange) return 'range';
+    if (
+      value instanceof ColorMaterial ||
+      value instanceof LitMaterial ||
+      value instanceof UnlitMaterial
+    ) {
+      return 'material';
+    }
+    if (
+      value instanceof Vector2 ||
+      value instanceof Vector3 ||
+      value instanceof Vector4 ||
+      value instanceof Float32Array
+    ) {
+      return 'vector234';
+    }
+    if (value instanceof Boolean) return 'boolean';
 
-    if (newValue instanceof Transform)
-      result = 'transform';
-    if (newValue instanceof GlEntity)
-      result = 'entity';
-    if (newValue instanceof EntityBehaviour)
-      result = 'entityBehaviour';
-    if (newValue instanceof Shader)
-      result = 'shader';
-    if (newValue instanceof Texture)
-      result = 'texture';
-    if (newValue instanceof NumberRange)
-      result = 'range';
-    if (newValue instanceof ColorMaterial || newValue instanceof LitMaterial || newValue instanceof UnlitMaterial)
-      result = 'material';
-    if (newValue instanceof Vector2 || newValue instanceof Vector3 || newValue instanceof Vector4 || newValue instanceof Float32Array)
-      result = "vector234";
-    if (newValue instanceof Boolean)
-      result = 'boolean';
-
-    return result.replace("_", "").toLowerCase()
+    return typeof value;
   }
 
-  protected isPropertyValid(key: string) {
-    const notPrivate = key.startsWith("_") == false;
-    if (this.allowProperties.length > 0) return this.allowProperties.includes(key) && notPrivate;
-    if (this.denyProperties.length > 0) return this.denyProperties.includes(key) == false && notPrivate;
-    return notPrivate;
+  protected isPropertyValid(key: string): boolean {
+    const isPublic = !key.startsWith('_');
+    if (!isPublic) {
+      return false;
+    }
+
+    if (this.allowProperties.length > 0) {
+      return this.allowProperties.includes(key);
+    }
+
+    if (this.denyProperties.length > 0) {
+      return !this.denyProperties.includes(key);
+    }
+
+    return true;
   }
 
-
-  protected isValidPropertyType(key: string): boolean {
-    console.debug("I was called !!!!")
-    if (!this._selectedObject) return false;
-    const value = this._selectedObject.property?.[key] || this._selectedObject[key];
-    const obType = this.getObjectType(value)
-    const bool = this.showAllProperties ? true : (this.isNotPrivate(key) && this.validTypes.includes(obType));
-
-    return bool;
+  /**
+   * This method is used to update the scene after a property has been changed. It emits the onSceneUpdated event from the SceneTreeService to notify all subscribers that the scene has been updated and they should refresh their data if needed.
+   */
+  protected updateScene(): void {
+    const scene = this.editorService.scene;
+    this.editorService.onSceneUpdated.emit(scene);
   }
-  protected isNotPrivate(key: String) {
-    if (this.showPrivateProperties) return true;
-    return key.startsWith("_") == false
-  }
-
 }

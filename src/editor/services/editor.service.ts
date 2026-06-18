@@ -13,6 +13,10 @@ export class EditorService {
   onScenePlay = new EventEmitter<Scene>();
   onScenePause = new EventEmitter<Scene>();
   onSceneStop = new EventEmitter<Scene>();
+  onSceneUpdated = new EventEmitter<Scene>();
+
+
+
   onEditorSaveStateRequest = new EventEmitter();
 
   editorRunningState = new EventEmitter<boolean>();
@@ -25,11 +29,15 @@ export class EditorService {
   onUpdateFrame = new BehaviorSubject<number>(0);
 
   public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
-  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
+  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.Local);
   private _gl!: WebGL2RenderingContext;
   
   public get scene(): Scene {
     return this.currentScene;
+  }
+  
+  public get camera(): Camera {
+    return this._camera;
   }
 
   public get gl(): WebGL2RenderingContext {
@@ -37,12 +45,13 @@ export class EditorService {
   }
   
   private currentScene!: Scene;
-  private camera!: Camera;
+  private _camera!: Camera;
   constructor() {
     this.initializeEditorCamera();
     this.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
 
   }
+
   onGlContextCreated(gl: WebGL2RenderingContext) {
     console.log("onGlContextCreated");  
     this._gl = gl;
@@ -51,6 +60,7 @@ export class EditorService {
 
 
   loadScene(scene: Scene) {
+    
     this.currentScene = scene;
     this.onSceneLoaded.emit(scene);
   }
@@ -81,15 +91,15 @@ export class EditorService {
 
 
   protected initializeEditorCamera() {
-    this.camera = new Camera();
-    this.camera.name = "Editor Camera"
-    this.camera.fieldOfView = 65;
-    this.camera.transform.translate(2, 3, 10);
-    this.camera.transform.rotate(0, 180, 0);
-    this.camera.initialize();
-    this.camera.addBehaviour(new CameraFlyBehaviour())
-    Camera.setMainCamera(this.camera);
-    this.camera.updateInEditor = true;
+    this._camera = new Camera();
+    this._camera.name = "Editor Camera"
+    this._camera.fieldOfView = 65;
+    this._camera.transform.translate(2, 3, 10);
+    this._camera.transform.rotate(0, 180, 0);
+    this._camera.initialize();
+    this._camera.addBehaviour(new CameraFlyBehaviour())
+    Camera.setMainCamera(this._camera);
+    this._camera.updateInEditor = true;
   }
 
 

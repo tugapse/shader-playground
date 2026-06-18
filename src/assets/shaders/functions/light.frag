@@ -48,18 +48,17 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
   projCoords = projCoords * 0.5 + 0.5;
 
-  // Check bounds
-  if (projCoords.z > 1.0 || u_useShadows == 0) {
+  // Check bounds with a tiny epsilon padding to handle floating-point rounding errors at the edges
+  if (projCoords.z > 1.0 || projCoords.x < 0.0005 || projCoords.x > 0.9995 || projCoords.y < 0.0005 || projCoords.y > 0.9995 || u_useShadows == 0) {
     return 1.0;
   }
 
-  float cells = 1.0; // Reduced from 2.0 (5x5) to 1.0 (3x3) for performance (9 vs 25 samples)
+  float cells = 1.0; 
   float total = cells * 2.0 + 1.0;
 
   float shadow = 0.0;
   vec2 texelSize = 1.0 / u_shadowMapSize;
-  float bias = max(0.001 * (1.0 - dot(finalNormal, lightDir)), 0.0005);
-
+  float bias = max(0.002 * (1.0 - dot(finalNormal, lightDir)), 0.001);
   for (float x = -cells; x <= cells; ++x) {
     for (float y = -cells; y <= cells; ++y) {
       shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
@@ -71,11 +70,15 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
 
 vec3 getFinalNormal(vec2 uv) {
     vec3 n = normalize(v_normal);
+    
     if (u_normalMapStrength > 0.0) {
-        vec3 normalFromMap = texture(u_normalMap, uv).rgb * 2.0 - 1.0;
-        mat3 tbnMatrix = mat3(normalize(v_tangent), normalize(v_bitangent), n);
-        vec3 perturbedNormal = tbnMatrix * normalFromMap;
-        return normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
+
+        if (length(v_tangent) > 0.0001 && length(v_bitangent) > 0.0001) {
+            vec3 normalFromMap = texture(u_normalMap, uv).rgb * 2.0 - 1.0;
+            mat3 tbnMatrix = mat3(normalize(v_tangent), normalize(v_bitangent), n);
+            vec3 perturbedNormal = tbnMatrix * normalFromMap;
+            return normalize(mix(n, normalize(perturbedNormal), u_normalMapStrength));
+        }
     }
     return n;
 }
@@ -83,8 +86,11 @@ vec3 getFinalNormal(vec2 uv) {
 vec2 calculateBlinnPhong(vec3 lightDir, vec3 viewDir, vec3 normal, float shininess) {
     float diffuseIntensity = max(dot(normal, lightDir), 0.0);
     float specularIntensity = 0.0;
+    
     if (diffuseIntensity > 0.0) {
-        vec3 halfVec = normalize(lightDir + viewDir);
+        vec3 halfVecSum = lightDir + viewDir;
+  
+        vec3 halfVec = length(halfVecSum) > 0.0001 ? normalize(halfVecSum) : normal;
         specularIntensity = pow(max(0.0, dot(normal, halfVec)), shininess) * u_specularStrength;
     }
     return vec2(diffuseIntensity, specularIntensity);
@@ -97,9 +103,7 @@ vec3 applyDirectionalLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal,
     if (intensities.x <= 0.0) return vec3(0.0);
 
     float shadowFactor = 1.0;
-    // if (index == 0) { // Only first directional light casts shadows
-        shadowFactor = is_in_shadow_pcf(v_lightSpacePosition, normal, lightDir);
-    // }
+    shadowFactor = is_in_shadow_pcf(v_lightSpacePosition, normal, lightDir);
 
     vec3 diffuse = baseColor * intensities.x;
     vec3 specular = vec3(1.0) * intensities.y;
@@ -147,26 +151,26 @@ vec3 applySpotLight(int index, vec3 baseColor, vec3 viewDir, vec3 normal, float 
     return (diffuse + specular) * u_spotLightColors[index] * attenuation * coneFactor;
 }
 
-// This function calculates the final lit color, including shadows
 vec3 calculateTotalLitColor(vec3 baseColor, vec2 uv) {
   vec3 finalNormal = getFinalNormal(uv);
-  vec3 viewDir = normalize(u_cameraPosition - v_position);
-  float shininess = (2.0 / (1.0 - clamp(u_roughness, 0.001, 0.999))) - 2.0;
+  
+ 
+  vec3 cameraDelta = u_cameraPosition - v_position;
+  vec3 viewDir = length(cameraDelta) > 0.0001 ? normalize(cameraDelta) : vec3(0.0, 0.0, 1.0);
+  
+  float clampedRoughness = clamp(u_roughness * u_roughness, 0.001, 0.999);
+  float shininess = (2.0 / clampedRoughness) - 2.0;
 
-  // Start with ambient lighting
   vec3 totalLitColorRGB = u_ambientLight.rgb * baseColor;
 
-  // Directional Lighting
   for (int i = 0; i < u_numDirectionalLights; ++i) {
     totalLitColorRGB += applyDirectionalLight(i, baseColor, viewDir, finalNormal, shininess);
   }
 
-  // Point Light Contributions
   for (int i = 0; i < u_numPointLights; ++i) {
     totalLitColorRGB += applyPointLight(i, baseColor, viewDir, finalNormal, shininess);
   }
 
-  // Spot Light Contributions
   for (int i = 0; i < u_numSpotLights; ++i) {
     totalLitColorRGB += applySpotLight(i, baseColor, viewDir, finalNormal, shininess);
   }

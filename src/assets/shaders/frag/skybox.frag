@@ -34,13 +34,16 @@ uniform float u_moonRotationSpeed;
 
 // --- CLOUDS UNIFORMS ---
 uniform int u_useClouds;
-uniform float u_cloudSpeed;
+uniform float u_cloudSeed;
 uniform float u_cloudTiling;
 uniform float u_weatherCondition;
-uniform float u_cloudSeed;
 uniform float u_cloudSparsity;
+uniform float u_windCloudSpeed;
+uniform float u_cloudSpeed;
+uniform int u_cloudRepetition;
 
 // --- STARS UNIFORMS ---
+uniform int u_useStars;
 uniform float u_starIntensity;
 uniform float u_starScale;
 uniform float u_starSparsity;
@@ -64,32 +67,36 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir);
 
 // --- MAIN PIPELINE EXECUTION ---
 void main() {
-  vec3 viewDir = normalize(v_viewDirection);
+    vec3 viewDir = normalize(v_viewDirection);
 
-  float y = viewDir.y;
-  vec3 gradientColor = vec3(0.0);
+    float y = viewDir.y;
+    vec3 gradientColor = vec3(0.0);
 
-  float absY = abs(y);
-  float p = pow(absY, u_exponent);
-  vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
-  gradientColor = mix(u_horizonColor.rgb, targetColor, p);
+    float absY = abs(y);
+    float p = pow(absY, u_exponent);
+    vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
+    gradientColor = mix(u_horizonColor.rgb, targetColor, p);
 
-  vec3 finalColor = gradientColor;
+    vec3 finalColor = gradientColor;
 
-  finalColor = drawStars(finalColor, viewDir);
-  finalColor = drawClouds(finalColor, viewDir); 
+    if(u_useStars == 1 && u_sunDirection.y < 0.0){
+       finalColor = drawStars(finalColor, viewDir);
+    }
+    if(u_useClouds == 1){
+      finalColor = drawClouds(finalColor, viewDir); 
+    }
 
-  // Sun is only visible when it's above the horizon
-  if (u_useSun == 1 && u_sunDirection.y > -0.2) {
-    float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
-    finalColor += drawSun(viewDir) * sunOcclusion;
-  }
+    // Sun is only visible when it's above the horizon
+    if (u_useSun == 1 && u_sunDirection.y > -0.1) {
+        float sunOcclusion = 1.0 - (g_cloudAlpha * 0.95); 
+        finalColor += drawSun(viewDir) * sunOcclusion;
+    }
 
-  if (u_useMoon == 1 && u_moonDirection.y > -0.2) {
-    finalColor = drawMoon(finalColor, viewDir);
-  }
+    if (u_useMoon == 1 && u_moonDirection.y > -0.1) {
+        finalColor = drawMoon(finalColor, viewDir);
+    }
 
-  fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
+    fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
 }
 
 // --- RENDERING SUBSYSTEM IMPLEMENTATIONS ---
@@ -171,17 +178,17 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
         return currentSkyColor;
     }
 
-    if (viewDir.y < 0.01) {
+    if (viewDir.y < -0.01) {
         return currentSkyColor;
     }
 
     // =========================================================================
     // CONFIGURATION PROPERTIES (METEOROLOGICAL SYSTEM)
     // =========================================================================
+    int rep = 1 + u_cloudRepetition;
     float c_weatherCondition = u_weatherCondition;     // Testing driver loop state (0.0 = Clear, 1.0 = Heavy Storm)
     float c_cloudTiling      = u_cloudTiling;                       // Size/frequency scale of the cloud fractal structures
-    vec3 c_cloudSeed         = vec3( 42.12 , 128.54 , 954.31) + vec3(u_cloudSeed); // 3D generation coordinate translation offsets (Procedural Seed)
-    
+    vec3 c_cloudSeed         = vec3(200.0  , 128.54 / (100.0 + u_time) , 954.31) + u_time *  u_cloudSpeed; // 3D generation coordinate translation offsets (Procedural Seed)
     float c_maxOpacityClear  = 0.75;                        // Alpha opacity limit clamping factor during standard clear days
     float c_maxOpacityStorm  = 0.98;                        // Alpha opacity limit clamping factor during heavy dark storms
     const float c_zenithPatchWeight= 0.8;                         // Opacity blending mix weight of the overhead zenith dome cap
@@ -195,14 +202,16 @@ vec3 drawClouds(vec3 currentSkyColor, vec3 viewDir) {
     // =========================================================================
 
     vec2 cloudUV = viewDir.xz / (viewDir.y + 0.001);
-    vec2 windOffset = vec2(u_time * u_cloudSpeed, u_time * u_cloudSpeed * 0.3);
+    vec2 windOffset = vec2(u_time * u_windCloudSpeed, u_time * u_windCloudSpeed);
     cloudUV = (cloudUV * c_cloudTiling) + windOffset;
 
     vec3 pPlanar = vec3(cloudUV.x, 0.0, cloudUV.y) + c_cloudSeed;
     float nPlanar  = 0.500 * noise3D(pPlanar); pPlanar *= 2.05;
-    nPlanar       += 0.250 * noise3D(pPlanar); pPlanar *= 2.02;
-
+    for(int i = 0; i < rep; i++){
+        nPlanar       += 0.250 * noise3D(pPlanar); pPlanar *= 1.02;
+    }
     nPlanar       += 0.125 * noise3D(pPlanar);
+    
     float baseCloudNoise = nPlanar / 0.875;
 
     vec3 pSpherical = (viewDir * (c_cloudTiling * 2.5)) + vec3(windOffset.x, 0.0, windOffset.y) + c_cloudSeed;

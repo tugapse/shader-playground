@@ -1,12 +1,11 @@
-import { vec3, vec4 } from "gl-matrix";
+import { Color } from "@engine/core/color";
+import { Vector3 } from "@engine/core/vector";
+import { SkyboxMaterial } from "@engine/materials/skybox-material";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
-import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
 import { CubemapMaterial } from "../materials/cubemap-material";
 import { CubemapTexture } from "../textures/cubemap-texture";
 import { Shader } from "./shader";
-import { Vector3, Vector4 } from "@engine/core/vector";
-import { Color } from "@engine/core/color";
-import { SkyboxMaterial } from "@engine/materials/skybox-material";
+import { JsonSerializedData } from "@engine/interfaces";
 
 /**
   A shader designed specifically for rendering skyboxes using a cubemap texture.
@@ -55,12 +54,15 @@ export class SkyboxShader extends Shader {
 
   public useClouds = 1;
   public cloudSpeed = 0.1;
+  public cloudRepetition = 0;
   /** The tiling/scale of the clouds. Higher values make clouds smaller and more repetitive. */
   public cloudTiling = 0.4;
   public cloudSeed = 10.0;
   /** The sparsity of clouds. 0 is default, 1 is very sparse. */
   public cloudSparsity = 0.01;
   public wheatherCondition = 0.4;
+
+  public useStars: number = 1.0;
   /** The overall brightness of the stars. */
   public starIntensity = 3.0;
   /** Size/frequency of star cells (higher = smaller stars). */
@@ -126,18 +128,21 @@ export class SkyboxShader extends Shader {
     this.setFloat(ShaderUniformsEnum.U_MOON_TERMINATOR_SOFTNESS, this.moonTerminatorSoftness);
     this.setInt(ShaderUniformsEnum.U_MOON_ENABLE_ROTATION, this.moonEnableRotation);
     this.setFloat(ShaderUniformsEnum.U_MOON_ROTATION_SPEED, this.moonRotationSpeed);
-
+    
     this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.material.skyColor.toVec4());
     this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.material.horizonColor.toVec4());
     this.setVec4(ShaderUniformsEnum.U_GROUND_COLOR, this.material.groundColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_EXPONENT, this.material.exponent);
-
+    
+    this.setInt(ShaderUniformsEnum.U_CLOUD_REPETITION, this.cloudRepetition);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SPEED, this.cloudSpeed);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_TILING, this.cloudTiling);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SEED, this.cloudSeed);
     this.setInt(ShaderUniformsEnum.U_USE_CLOUDS, this.useClouds);
     this.setFloat(ShaderUniformsEnum.U_WHEATHER_CONDITION, this.wheatherCondition);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SPARSITY, this.cloudSparsity);
+
+    this.setInt(ShaderUniformsEnum.U_USE_STARS, this.useStars);
     this.setFloat(ShaderUniformsEnum.U_STAR_INTENSITY, this.starIntensity);
     this.setFloat(ShaderUniformsEnum.U_STAR_SCALE, this.starScale);
     this.setFloat(ShaderUniformsEnum.U_STAR_SPARSITY, this.starSparsity);
@@ -162,4 +167,7 @@ export class SkyboxShader extends Shader {
       this.gl.uniform1i(location, textureIndex);
     }
   }
+
+
+
 }

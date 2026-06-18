@@ -7,30 +7,75 @@
   <div class="top-bar">
     <div class="left-menu">
       <!-- <app-icon class="play-icon" iconName="fa-burger" [iconSize]="18" ></app-icon> -->
-      <span class="item" (cancel)="goHome()">Home</span>
-      <span class="item">Objects</span>
-      <span class="item" (click)="showAssets()" [class.selected]="isAssetsActive()">Assets</span>
+      <span class="item" (click)="goHome()">Back to Home</span>
+      <span class="item" (click)="inspectCamera()">Editor Camera</span>
     </div>
     <div class="center-menu">
-      <app-icon class="play-icon" iconName="fa-play" (click)="onPlay()" [isButton]="true"
-        [isSelected]="scene && scene.isRunning" title="Play Scene (Ctrl + P)"></app-icon>
-      <app-icon class="play-icon" iconName="fa-pause" (click)="onPause()" [isButton]="true"
-        [isSelected]="isEditorPaused" title="Pause Scene (Ctrl + P)"></app-icon>
-      <app-icon class="play-icon" iconName="fa-stop" (click)="onStop()" [isButton]="true"
-        [isSelected]="scene && !scene.isRunning && !isEditorPaused" title="Stop Scene (Ctrl + O)"></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-play"
+        (click)="onPlay()"
+        [isButton]="true"
+        [isSelected]="scene && scene.isRunning"
+        title="Play Scene (Ctrl + P)"
+      ></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-pause"
+        (click)="onPause()"
+        [isButton]="true"
+        [isSelected]="isEditorPaused"
+        title="Pause Scene (Ctrl + P)"
+      ></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-stop"
+        (click)="onStop()"
+        [isButton]="true"
+        [isSelected]="scene && !scene.isRunning && !isEditorPaused"
+        title="Stop Scene (Ctrl + O)"
+      ></app-icon>
 
-      <app-icon class="play-icon" iconName="fa-code" (click)="onCodeEditor()" [isButton]="true"
-        title="Code Editor"></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-code"
+        (click)="onCodeEditor()"
+        [isButton]="true"
+        title="Code Editor"
+      ></app-icon>
     </div>
     <div class="right-menu">
-      <app-icon class="play-icon" iconName="fa-arrows-alt" (click)="setGizmoMode(GizmoMode.Translate)" [isButton]="true"
-        [isSelected]="gizmoMode === GizmoMode.Translate" title="Translate Gizmo (1)"></app-icon>
-      <app-icon class="play-icon" iconName="fa-sync-alt" (click)="setGizmoMode(GizmoMode.Rotate)" [isButton]="true"
-        [isSelected]="gizmoMode === GizmoMode.Rotate" title="Rotate Gizmo (2)"></app-icon>
-      <app-icon class="play-icon" iconName="fa-expand-arrows-alt" (click)="setGizmoMode(GizmoMode.Scale)" [isButton]="true"
-        [isSelected]="gizmoMode === GizmoMode.Scale" title="Scale Gizmo (3)"></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-arrows-alt"
+        (click)="setGizmoMode(GizmoMode.Translate)"
+        [isButton]="true"
+        [isSelected]="gizmoMode === GizmoMode.Translate"
+        title="Translate Gizmo (1)"
+      ></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-sync-alt"
+        (click)="setGizmoMode(GizmoMode.Rotate)"
+        [isButton]="true"
+        [isSelected]="gizmoMode === GizmoMode.Rotate"
+        title="Rotate Gizmo (2)"
+      ></app-icon>
+      <app-icon
+        class="play-icon"
+        iconName="fa-expand-arrows-alt"
+        (click)="setGizmoMode(GizmoMode.Scale)"
+        [isButton]="true"
+        [isSelected]="gizmoMode === GizmoMode.Scale"
+        title="Scale Gizmo (3)"
+      ></app-icon>
 
-        <span class="item" (click)="toggleTransformSpace()" title="Toggle Transform Space (4)">{{transformSpace}}</span>
+      <span
+        class="item"
+        (click)="toggleTransformSpace()"
+        title="Toggle Transform Space (4)"
+        >{{ transformSpace }}</span
+      >
     </div>
   </div>
 </div>

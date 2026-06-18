@@ -94,7 +94,7 @@ export class SceneManager {
     const instanciatedTransforms: { [key: string]: Transform } = {};
 
     objects.forEach((ob: JsonSerializable) => {
-      this.instanciateEntities(ob, instanciatedTransforms);
+      this.instanciateEntity(ob, instanciatedTransforms);
       this.instanciateBehaviours(ob, scene, meshes, gl);
     }
     );
@@ -130,7 +130,17 @@ export class SceneManager {
 
 
   private static instanciateBehaviours(jsonObject: JsonSerializedData, scene: Scene, meshes: { [key: string]: MeshData }, gl: WebGL2RenderingContext) {
+    
     jsonObject["entity"].scene = scene;
+    jsonObject["entity"].behaviours = [];
+
+    
+    if( !jsonObject["behaviours"]){
+      jsonObject["behaviours"] = []
+      console.debug("No behaviours found in scene JSON data",jsonObject)
+      // throw new Error('No behaviours found in scene JSON data',jsonObject)
+    }
+    
 
     jsonObject["behaviours"].forEach((behaviourJsonData: any) => {
       if (behaviourJsonData.mesh) {
@@ -138,14 +148,14 @@ export class SceneManager {
       }
       const newBehaviour = ObjectInstanciator.instanciateObjectFromJsonData<EntityBehaviour>(behaviourJsonData.className || behaviourJsonData.type, [gl]);
       if (newBehaviour) {
+        // newBehaviour.parent = jsonObject["entity"];
         newBehaviour.fromJson(behaviourJsonData);
-        newBehaviour.parent = jsonObject["entity"];
         jsonObject["entity"].addBehaviour(newBehaviour);
       }
     });
   }
 
-  private static instanciateEntities(jsonObject: JsonSerializedData, instanciatedTransforms: { [key: string]: Transform }): void {
+  private static instanciateEntity(jsonObject: JsonSerializedData, instanciatedTransforms: { [key: string]: Transform }): void {
     const entity = ObjectInstanciator.instanciateObjectFromJsonData<GlEntity>(jsonObject["className"]) || new GlEntity(jsonObject["name"]);
     entity.fromJson(jsonObject);
     instanciatedTransforms[entity.transform.uuid] = entity.transform;

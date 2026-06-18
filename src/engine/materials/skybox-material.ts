@@ -29,6 +29,7 @@ export class SkyboxMaterial extends CubemapMaterial {
     this.skyColor = Color.createFromJsonData(jsonObject['skyColor']);
     this.groundColor = Color.createFromJsonData(jsonObject['groundColor']);
     this.exponent = jsonObject['exponent'] || this.exponent;   
+    
   }
 
 }

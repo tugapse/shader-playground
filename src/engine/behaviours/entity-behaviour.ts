@@ -63,6 +63,7 @@ export class EntityBehaviour extends JsonSerializable {
   constructor() {
     super("EntityBehaviour");
     this._uuid = uuidv4();
+    this._serializationIgnoreKeys.push('parent', '_initialized',"_serializationIgnoreKeys");
   }
 
   /**

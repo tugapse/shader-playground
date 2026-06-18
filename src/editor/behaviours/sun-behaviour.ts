@@ -109,7 +109,7 @@ export class SunBehaviour extends EntityBehaviour {
     /** The strength of shadows at night (e.g., from the moon). */
     nightStrength: new NumberRange(0.2, 0, 1, 0.01),
     /** The strength of shadows during the day (e.g., from the sun). */
-    dayStrength: new NumberRange(0, 0, 1, 0.01),
+    dayStrength: new NumberRange(0.5, 0, 1, 0.01),
     /** The duration of the shadow fade-in/out transition in hours (e.g., 0.5 for 30 minutes). */
     fadeDuration: new NumberRange(1.2, 0, 2, 0.1),
   };
@@ -118,18 +118,20 @@ export class SunBehaviour extends EntityBehaviour {
     /** Toggles the visibility of clouds in the skybox. */
     show: true,
     /** The speed at which clouds drift across the sky. */
-    speed: new NumberRange(0.81, 0.0, 0.5, 0.01),
+    speed: new NumberRange(0.01, 0.001, 0.5, 0.000001),
     /** The tiling/scale of the cloud noise. Higher values make clouds smaller and more repetitive. */
-    tiling: new NumberRange(0.4, 0.01, 2, 0.01),
-    /** The procedural seed for generating cloud patterns. */
-    seed: new NumberRange(10.0, 0, 100, 1),
+    tiling: new NumberRange(0.05, 0.0001, 2, 0.000001),
+
     /** The sparsity of clouds. Higher values make clouds more sparse and scattered. */
-    sparsity: new NumberRange(0.01, 0, 1, 0.01),
+    sparsity: new NumberRange(0.01, 0, 1, 0.000001),
     /** The overall weather condition, from clear (0) to stormy (1). */
-    weather: new NumberRange(0.4, 0, 1, 0.01),
+    weather: new NumberRange(0.4, 0, 1, 0.000001),
+    /** The number of tmer to loop the noise */
+    repetition: new NumberRange(1, 0, 10, 1),
   };
 
   public stars = {
+    show: true,
     /** The overall brightness of the stars. */
     intensity: new NumberRange(3.0, 0, 20, 0.1),
     /** Size/frequency of star cells. Higher values result in smaller, more numerous stars. */
@@ -141,6 +143,8 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   override initialize(): boolean {
+    if (!this.parent?.scene) return false;
+    this._serializationIgnoreKeys.push('moonLight');
     this._skyboxRenderer = this.parent.scene?.objects
       .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
       ?.getBehaviour(SkyboxRenderer);
@@ -149,9 +153,9 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   public override update(elapsed: number): void {
-    if(!this.parent?.scene)
-      return;
-    
+    if (!this.parent?.scene) return;
+    super.update(elapsed);
+
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
     let moonLight =
@@ -196,7 +200,7 @@ export class SunBehaviour extends EntityBehaviour {
    * @param elapsed The time in seconds since the last frame.
    */
   private updateTime(elapsed: number): void {
-    if (this.parent.scene.isRunning) {
+    if (this.parent?.scene?.isRunning) {
       this.dayCycleSettings.timeOfDay.value +=
         elapsed * this.dayCycleSettings.speed.value * 0.01;
 
@@ -352,8 +356,26 @@ export class SunBehaviour extends EntityBehaviour {
     } = this.getInterpolationData();
     const clampedDelta = Math.max(0, Math.min(1, delta));
 
-    // Set the light's RGB color by interpolating. Alpha (strength) is handled below.
+    // Set the light's RGB color by interpolating.
     light.color = Color.lerp(fromLightColor, toLightColor, clampedDelta);
+
+    const fadeDuration = 0.5; // 30 minutes for fade in/out
+    let sunAlpha = 1.0;
+
+    // Fade out before sunset
+    if (time >= sunset - fadeDuration && time <= sunset) {
+      const fadeProgress = (time - (sunset - fadeDuration)) / fadeDuration;
+      sunAlpha = 1.0 - smoothstep(fadeProgress);
+    } 
+    // Fade in before sunrise
+    else if (time >= sunrise - fadeDuration && time <= sunrise) {
+      const fadeProgress = (time - (sunrise - fadeDuration)) / fadeDuration;
+      sunAlpha = smoothstep(fadeProgress);
+    }
+    // Sun is down
+    else if (time > sunset || time < sunrise - fadeDuration) {
+      sunAlpha = 0.0;
+    }
 
     if (moonLight) {
       // Two-light setup: Sun and Moon are separate lights.
@@ -363,33 +385,42 @@ export class SunBehaviour extends EntityBehaviour {
       const transitionDelta = smoothstep(clampedDelta);
 
       if (time >= sunrise && time < sunset) {
-        // Daytime: Sun is at full strength, moon is off.
-        light.color.a = 1.0;
+        // Daytime: Sun is controlled by sunAlpha, moon is off.
+        light.color.a = sunAlpha;
         moonLight.color.a = 0.0;
       } else if (time >= sunset && time < night) {
         // Sunset to Night: Fade out sun, fade in moon.
-        light.color.a = 1.0 - transitionDelta;
+        light.color.a = sunAlpha;
         moonLight.color.a = transitionDelta * this.lighColor.nightColor.a;
       } else {
         // Night to Sunrise: Fade in sun, fade out moon.
-        light.color.a = transitionDelta;
+        light.color.a = sunAlpha;
         moonLight.color.a =
           (1.0 - transitionDelta) * this.lighColor.nightColor.a;
       }
+    } else {
+      // If there's no moon light, just apply the sun alpha
+      light.color.a = sunAlpha;
     }
 
     const shadowRenderer = this.parent.scene.shadowmapRenderer;
     if (shadowRenderer) {
       shadowRenderer.shadowstrength.value = this._calculateShadowStrength(
         time,
-        shadowRenderer.shadowstrength.max,
+        this.shadows.dayStrength.value,
       );
     }
     this.updateSceneColors(light.color);
+    
+    if (time > this.hours.night - 0.5 && time < this.hours.night) {
 
+        // ex if time is 15.54 it should show all the light streagth
+        // if time is 15.98 it should almost fade with 0.0.0.1
+    
+    }
     // For skybox visuals, we switch between sun and moon at the actual sunset/sunrise times.
     const isSunDown = time < this.hours.sunrise || time > this.hours.sunset;
-    light.show = !isSunDown;
+    // light.invertLightDirection = isSunDown;
 
     this.updateSkybox(
       light,
@@ -556,130 +587,29 @@ export class SunBehaviour extends EntityBehaviour {
     }
 
     shader.useClouds = this.clouds.show ? 1 : 0;
-    shader.cloudSpeed = this.clouds.speed.value;
-    shader.cloudTiling = this.clouds.tiling.value;
-    shader.cloudSeed = this.clouds.seed.value;
-    shader.cloudSparsity = this.clouds.sparsity.value;
-    shader.wheatherCondition = this.clouds.weather.value;
-
-    shader.starIntensity = this.stars.intensity.value;
-    shader.starScale = this.stars.scale.value;
-    shader.starSparsity = this.stars.sparsity.value;
-    shader.starSpeed = this.stars.speed.value;
+    if (this.clouds.show) {
+      shader.cloudSpeed = this.clouds.speed.value;
+      shader.cloudTiling = this.clouds.tiling.value;
+      shader.cloudSparsity = this.clouds.sparsity.value;
+      shader.cloudRepetition = this.clouds.repetition.value;
+      shader.wheatherCondition = this.clouds.weather.value;
+    }
+    shader.useStars = this.stars.show ? 1 : 0;
+    if (this.stars.show) {
+      shader.starIntensity = this.stars.intensity.value;
+      shader.starScale = this.stars.scale.value;
+      shader.starSparsity = this.stars.sparsity.value;
+      shader.starSpeed = this.stars.speed.value;
+    }
   }
 
   public override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      dayCycleSettings: {
-        speed: this.dayCycleSettings.speed.toJsonObject(),
-        timeOfDay: this.dayCycleSettings.timeOfDay.toJsonObject(),
-      },
-      sun: {
-        show: this.sun.show,
-        sunHeight: this.sun.sunHeight.toJsonObject(),
-        sunSize: this.sun.sunSize.toJsonObject(),
-        sunFalloff: this.sun.sunFalloff.toJsonObject(),
-      },
-      moon: {
-        show: this.moon.show,
-        phase: this.moon.phase.toJsonObject(),
-        phaseSpeed: this.moon.phaseSpeed,
-        color: this.moon.color.toJsonObject(),
-        earthshine: this.moon.earthshine.toJsonObject(),
-        terminatorSoftness: this.moon.terminatorSoftness.toJsonObject(),
-        enableRotation: this.moon.enableRotation,
-        rotationSpeed: this.moon.rotationSpeed.toJsonObject(),
-      },
-      shadows: {
-        nightStrength: this.shadows.nightStrength.toJsonObject(),
-        fadeDuration: this.shadows.fadeDuration.toJsonObject(),
-      },
-      clouds: {
-        show: this.clouds.show,
-        speed: this.clouds.speed.toJsonObject(),
-        tiling: this.clouds.tiling.toJsonObject(),
-        seed: this.clouds.seed.toJsonObject(),
-        sparsity: this.clouds.sparsity.toJsonObject(),
-        weather: this.clouds.weather.toJsonObject(),
-      },
-      stars: {
-        intensity: this.stars.intensity.toJsonObject(),
-        scale: this.stars.scale.toJsonObject(),
-        sparsity: this.stars.sparsity.toJsonObject(),
-        speed: this.stars.speed.toJsonObject(),
-      },
-      hours: { ...this.hours },
-      lighColor: {
-        sunriseColor: this.lighColor.sunriseColor.toJsonObject(),
-        noonColor: this.lighColor.noonColor.toJsonObject(),
-        sunsetColor: this.lighColor.sunsetColor.toJsonObject(),
-        nightColor: this.lighColor.nightColor.toJsonObject(),
-      },
-    };
+    return this.serializeAutomatically();
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-
-    if (jsonObject['dayCycleSettings']) {
-      this.dayCycleSettings.speed.fromJson(
-        jsonObject['dayCycleSettings'].speed,
-      );
-      this.dayCycleSettings.timeOfDay.fromJson(
-        jsonObject['dayCycleSettings'].timeOfDay,
-      );
-    }
-    if (jsonObject['sun']) {
-      this.sun.show = jsonObject['sun'].show ?? this.sun.show;
-      this.sun.sunHeight.fromJson(jsonObject['sun'].sunHeight);
-      this.sun.sunSize.fromJson(jsonObject['sun'].sunSize);
-      this.sun.sunFalloff.fromJson(jsonObject['sun'].sunFalloff);
-    }
-    if (jsonObject['moon']) {
-      this.moon.show = jsonObject['moon'].show ?? this.moon.show;
-      this.moon.phase.fromJson(jsonObject['moon'].phase);
-      this.moon.phaseSpeed = this.moon.phaseSpeed;
-      this.moon.color.fromJson(jsonObject['moon'].color);
-      if (jsonObject['moon'].earthshine) {
-        this.moon.earthshine.fromJson(jsonObject['moon'].earthshine);
-        this.moon.terminatorSoftness.fromJson(
-          jsonObject['moon'].terminatorSoftness,
-        );
-        this.moon.enableRotation =
-          jsonObject['moon'].enableRotation ?? this.moon.enableRotation;
-        this.moon.rotationSpeed.fromJson(jsonObject['moon'].rotationSpeed);
-      }
-    }
-    if (jsonObject['shadows']) {
-      this.shadows.nightStrength.fromJson(jsonObject['shadows'].nightStrength);
-      this.shadows.fadeDuration.fromJson(jsonObject['shadows'].fadeDuration);
-    }
-    if (jsonObject['clouds']) {
-      this.clouds.show = jsonObject['clouds'].show ?? this.clouds.show;
-      this.clouds.speed.fromJson(jsonObject['clouds'].speed);
-      this.clouds.tiling.fromJson(jsonObject['clouds'].tiling);
-      this.clouds.seed.fromJson(jsonObject['clouds'].seed);
-      this.clouds.sparsity.fromJson(jsonObject['clouds'].sparsity);
-      this.clouds.weather.fromJson(jsonObject['clouds'].weather);
-    }
-    if (jsonObject['stars']) {
-      this.stars.intensity.fromJson(jsonObject['stars'].intensity);
-      this.stars.scale.fromJson(jsonObject['stars'].scale);
-      this.stars.sparsity.fromJson(jsonObject['stars'].sparsity);
-      this.stars.speed.fromJson(jsonObject['stars'].speed);
-    }
-    if (jsonObject['hours']) {
-      this.hours = { ...this.hours, ...jsonObject['hours'] };
-    }
-    if (jsonObject['lighColor']) {
-      this.lighColor.sunriseColor.fromJson(
-        jsonObject['lighColor'].sunriseColor,
-      );
-      this.lighColor.noonColor.fromJson(jsonObject['lighColor'].noonColor);
-      this.lighColor.sunsetColor.fromJson(jsonObject['lighColor'].sunsetColor);
-      this.lighColor.nightColor.fromJson(jsonObject['lighColor'].nightColor);
-    }
+    this.deserializeAutomatically(jsonObject);
   }
 }
 

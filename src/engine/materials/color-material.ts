@@ -50,6 +50,7 @@ export class ColorMaterial extends JsonSerializable {
    * @returns {void}
    */
   override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
     this.name = jsonObject['name'];
     this.color = Color.createFromJsonData(jsonObject['color']);
   }
