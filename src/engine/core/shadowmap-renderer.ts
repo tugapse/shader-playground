@@ -109,7 +109,7 @@ export class ShadowMapRenderer {
  
     const orgCulling = renderer.cullFace;
     this.gl.enable(this.gl.CULL_FACE);
-    this.gl.cullFace(this.gl.FRONT);
+    this.gl.cullFace(this.gl.BACK);
 
     const positionAttributeLocation = this.gl.getAttribLocation(this.depthShader._shaderProgram, ShaderUniformsEnum.A_POSITION);
     if (positionAttributeLocation !== -1 && renderer.shader.buffers.position) {

@@ -10,6 +10,7 @@ import {
   DirectionalLight,
   EngineCache,
   GlEntity,
+  Light,
   LitMaterial,
   LitShader,
   Mesh,
@@ -159,14 +160,15 @@ export class App implements OnDestroy {
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.name = 'Renderer';
     renderer.castShadows = false;
+    
     material.mainTex = await EngineCache.getTexture2D(
       'assets/images/wood-texture.jpg',
       this.gl,
     );
-    material.normalTex = await EngineCache.getTexture2D(
-      'assets/images/wood-normal1.jpg',
-      this.gl,
-    );
+    // material.normalTex = await EngineCache.getTexture2D(
+    //   'assets/images/wood-normal1.jpg',
+    //   this.gl,
+    // );
 
     renderer.castShadows = false;
     renderer.shader = shader;
@@ -197,7 +199,7 @@ export class App implements OnDestroy {
     spotLight.coneAngles = { inner: 15, outer: 20 };
     spotLight.color = Colors.azure;
 
-    // scene.addEntity(new Light("Ambient light"));
+    scene.addEntity(new Light("Ambient light"));
     // scene.addEntity(plight);
     // scene.addEntity(spotLight);
     scene.addEntity(dlight);

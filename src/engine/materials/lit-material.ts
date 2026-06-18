@@ -30,7 +30,7 @@ export class LitMaterial extends UnlitMaterial {
     The normal map texture object.
    * @type {Texture}
    */
-  public normalTex!: Texture;
+  public normalTex?: Texture;
 
   constructor() {
     super();
