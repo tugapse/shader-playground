@@ -318,6 +318,21 @@ export enum ShaderUniformsEnum {
   U_FOG_DISTANCE = "u_fogDistance",
 
   /**
+   * The type of fog (0: Linear, 1: Exp, 2: Exp2).
+   */
+  U_FOG_TYPE = "u_fogType",
+
+  /**
+   * The exponential falloff of fog based on height.
+   */
+  U_FOG_HEIGHT_FALLOFF = "u_FogHeightFalloff",
+
+  /**
+   * The baseline height where fog is at maximum density.
+   */
+  U_FOG_BASE_HEIGHT = "u_FogBaseHeight",
+
+  /**
    * --- Skybox / Sun ---
    */
   /**

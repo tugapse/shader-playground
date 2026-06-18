@@ -28,7 +28,7 @@ export class TopBar implements OnInit {
   public gizmoMode: GizmoMode = GizmoMode.Translate;
   public GizmoMode = GizmoMode;
 
-  public transformSpace: TransformSpace = TransformSpace.World;
+  public transformSpace: TransformSpace = TransformSpace.Local;
   public TransformSpace = TransformSpace;
 
   public user: UserResponse | undefined;

@@ -29,7 +29,7 @@ export class EditorService {
   onUpdateFrame = new BehaviorSubject<number>(0);
 
   public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
-  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.World);
+  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.Local);
   private _gl!: WebGL2RenderingContext;
   
   public get scene(): Scene {

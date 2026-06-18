@@ -90,6 +90,9 @@ export class MeshRendererBehaviour extends RendererBehaviour {
       this.shader.setVec3(ShaderUniformsEnum.U_FOG_COLOR, this.fog.color.toVec3());
       this.shader.setFloat(ShaderUniformsEnum.U_FOG_DENSITY, this.fog.density);
       this.shader.setFloat(ShaderUniformsEnum.U_FOG_DISTANCE, this.fog.distance);
+      this.shader.setInt(ShaderUniformsEnum.U_FOG_TYPE, this.fog.fogType);
+      this.shader.setFloat(ShaderUniformsEnum.U_FOG_HEIGHT_FALLOFF, this.fog.heightFalloff);
+      this.shader.setFloat(ShaderUniformsEnum.U_FOG_BASE_HEIGHT, this.fog.baseHeight);
     }
     
     super.setShaderVariables();

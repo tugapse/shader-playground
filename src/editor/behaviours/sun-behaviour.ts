@@ -121,7 +121,7 @@ export class SunBehaviour extends EntityBehaviour {
     speed: new NumberRange(0.01, 0.001, 0.5, 0.000001),
     /** The tiling/scale of the cloud noise. Higher values make clouds smaller and more repetitive. */
     tiling: new NumberRange(0.05, 0.0001, 2, 0.000001),
-   
+
     /** The sparsity of clouds. Higher values make clouds more sparse and scattered. */
     sparsity: new NumberRange(0.01, 0, 1, 0.000001),
     /** The overall weather condition, from clear (0) to stormy (1). */
@@ -131,7 +131,7 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   public stars = {
-    show:true,
+    show: true,
     /** The overall brightness of the stars. */
     intensity: new NumberRange(3.0, 0, 20, 0.1),
     /** Size/frequency of star cells. Higher values result in smaller, more numerous stars. */
@@ -143,8 +143,8 @@ export class SunBehaviour extends EntityBehaviour {
   };
 
   override initialize(): boolean {
-    if(!this.parent?.scene) return false;
-    this._serializationIgnoreKeys.push('moonLight')
+    if (!this.parent?.scene) return false;
+    this._serializationIgnoreKeys.push('moonLight');
     this._skyboxRenderer = this.parent.scene?.objects
       .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
       ?.getBehaviour(SkyboxRenderer);
@@ -153,7 +153,7 @@ export class SunBehaviour extends EntityBehaviour {
   }
 
   public override update(elapsed: number): void {
-    if(!this.parent?.scene) return;
+    if (!this.parent?.scene) return;
     super.update(elapsed);
 
     this.updateTime(elapsed);
@@ -356,8 +356,26 @@ export class SunBehaviour extends EntityBehaviour {
     } = this.getInterpolationData();
     const clampedDelta = Math.max(0, Math.min(1, delta));
 
-    // Set the light's RGB color by interpolating. Alpha (strength) is handled below.
+    // Set the light's RGB color by interpolating.
     light.color = Color.lerp(fromLightColor, toLightColor, clampedDelta);
+
+    const fadeDuration = 0.5; // 30 minutes for fade in/out
+    let sunAlpha = 1.0;
+
+    // Fade out before sunset
+    if (time >= sunset - fadeDuration && time <= sunset) {
+      const fadeProgress = (time - (sunset - fadeDuration)) / fadeDuration;
+      sunAlpha = 1.0 - smoothstep(fadeProgress);
+    } 
+    // Fade in before sunrise
+    else if (time >= sunrise - fadeDuration && time <= sunrise) {
+      const fadeProgress = (time - (sunrise - fadeDuration)) / fadeDuration;
+      sunAlpha = smoothstep(fadeProgress);
+    }
+    // Sun is down
+    else if (time > sunset || time < sunrise - fadeDuration) {
+      sunAlpha = 0.0;
+    }
 
     if (moonLight) {
       // Two-light setup: Sun and Moon are separate lights.
@@ -367,19 +385,22 @@ export class SunBehaviour extends EntityBehaviour {
       const transitionDelta = smoothstep(clampedDelta);
 
       if (time >= sunrise && time < sunset) {
-        // Daytime: Sun is at full strength, moon is off.
-        light.color.a = 1.0;
+        // Daytime: Sun is controlled by sunAlpha, moon is off.
+        light.color.a = sunAlpha;
         moonLight.color.a = 0.0;
       } else if (time >= sunset && time < night) {
         // Sunset to Night: Fade out sun, fade in moon.
-        light.color.a = 1.0 - transitionDelta;
+        light.color.a = sunAlpha;
         moonLight.color.a = transitionDelta * this.lighColor.nightColor.a;
       } else {
         // Night to Sunrise: Fade in sun, fade out moon.
-        light.color.a = transitionDelta;
+        light.color.a = sunAlpha;
         moonLight.color.a =
           (1.0 - transitionDelta) * this.lighColor.nightColor.a;
       }
+    } else {
+      // If there's no moon light, just apply the sun alpha
+      light.color.a = sunAlpha;
     }
 
     const shadowRenderer = this.parent.scene.shadowmapRenderer;
@@ -390,10 +411,16 @@ export class SunBehaviour extends EntityBehaviour {
       );
     }
     this.updateSceneColors(light.color);
+    
+    if (time > this.hours.night - 0.5 && time < this.hours.night) {
 
+        // ex if time is 15.54 it should show all the light streagth
+        // if time is 15.98 it should almost fade with 0.0.0.1
+    
+    }
     // For skybox visuals, we switch between sun and moon at the actual sunset/sunrise times.
     const isSunDown = time < this.hours.sunrise || time > this.hours.sunset;
-    light.show = !isSunDown;
+    // light.invertLightDirection = isSunDown;
 
     this.updateSkybox(
       light,
@@ -560,8 +587,7 @@ export class SunBehaviour extends EntityBehaviour {
     }
 
     shader.useClouds = this.clouds.show ? 1 : 0;
-    if(this.clouds.show){
-
+    if (this.clouds.show) {
       shader.cloudSpeed = this.clouds.speed.value;
       shader.cloudTiling = this.clouds.tiling.value;
       shader.cloudSparsity = this.clouds.sparsity.value;
@@ -569,12 +595,12 @@ export class SunBehaviour extends EntityBehaviour {
       shader.wheatherCondition = this.clouds.weather.value;
     }
     shader.useStars = this.stars.show ? 1 : 0;
-  if(this.stars.show){
-    shader.starIntensity = this.stars.intensity.value;
-    shader.starScale = this.stars.scale.value;
-    shader.starSparsity = this.stars.sparsity.value;
-    shader.starSpeed = this.stars.speed.value;
-  }
+    if (this.stars.show) {
+      shader.starIntensity = this.stars.intensity.value;
+      shader.starScale = this.stars.scale.value;
+      shader.starSparsity = this.stars.sparsity.value;
+      shader.starSpeed = this.stars.speed.value;
+    }
   }
 
   public override toJsonObject(): JsonSerializedData {

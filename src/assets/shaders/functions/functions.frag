@@ -16,6 +16,14 @@ float calculateExponentialFogFactor(float distance, float fogDensity) {
     return clamp(fogFactor, 0.0, 1.0);
 }
 
+// Function to calculate exponential squared (Exp2) fog factor
+float calculateExponentialSquaredFogFactor(float distance, float fogDensity) {
+    // Calculates an Exp2 fog factor.
+    // Produces less fog close to the camera and a thicker, more natural falloff in the distance.
+    float fogFactor = 1.0 - exp(-pow(distance * fogDensity, 2.0));
+    return clamp(fogFactor, 0.0, 1.0);
+}
+
 // New function to apply linear fog to a color
 vec3 applyLinearFog(vec3 originalColor, vec3 fogColor, float distance, float fogStart, float fogEnd) {
     // Calculates the linear fog factor and mixes the original color with the fog color.
@@ -28,6 +36,25 @@ vec3 applyExponentialFog(vec3 originalColor, vec3 fogColor, float distance, floa
     // Calculates the exponential fog factor and mixes the original color with the fog color.
     float fogFactor = calculateExponentialFogFactor(distance, fogDensity);
     return mix(originalColor, fogColor, fogFactor);
+}
+
+// New function to apply exponential squared (Exp2) fog to a color
+vec3 applyExponentialSquaredFog(vec3 originalColor, vec3 fogColor, float distance, float fogDensity) {
+    float fogFactor = calculateExponentialSquaredFogFactor(distance, fogDensity);
+    return mix(originalColor, fogColor, fogFactor);
+}
+
+// General function to apply fog based on type (0: Linear (using distance * 0.5 and distance * 1.5 as temporary start/end), 1: Exp, 2: Exp2)
+vec3 applyFog(vec3 originalColor, vec3 fogColor, float distance, float fogDensity, int fogType) {
+    if (fogType == 2) {
+        return applyExponentialSquaredFog(originalColor, fogColor, distance, fogDensity);
+    } else if (fogType == 0) {
+        // Placeholder linear values. Usually, start/end are separate uniforms.
+        return applyLinearFog(originalColor, fogColor, distance, 1.0 / (fogDensity + 0.001), 2.0 / (fogDensity + 0.001)); 
+    } else {
+        // Default to Exp
+        return applyExponentialFog(originalColor, fogColor, distance, fogDensity);
+    }
 }
 
 float rand(vec2 c){

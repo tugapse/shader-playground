@@ -39,7 +39,7 @@
             [isNumber]="true"
             [label]="entityProperty.key.capitalize()"
             [value]="entityProperty.property"
-            (change)="onValueChanged(entityProperty, $event)"
+            (change)="onValueChanged(entityProperty, +$event)"
             [dragScale]="0.001"
           ></editor-text-input-inspector>
         }

@@ -146,7 +146,7 @@ export class App implements OnDestroy {
   }
 
   private async createFloor(scene: Scene) {
-    const primitive = new CubePrimitive(10);
+    const primitive = new PlanePrimitive(10);
     const material = new LitMaterial();
 
     material.uvScale.set(100, 100);

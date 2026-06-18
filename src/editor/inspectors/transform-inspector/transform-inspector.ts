@@ -53,6 +53,8 @@ export class TransformInspector {
 
   @Input() set entity(value: GlEntity) {
     this.transform = value.transform;
+    this.transform.setDirty(true);
+    this.transform.updateMatrices();  
     this.scaleX = this.transform.localScale[0];
     this.scaleY = this.transform.localScale[1];
     this.scaleZ = this.transform.localScale[2];
@@ -60,20 +62,21 @@ export class TransformInspector {
   @Input() collapsed = false;
 
   onPositionChanged(index: number, event: Event) {
-    const value = this.transform.worldPosition;
-    value[index] = (event.target as any).value;
-    this.transform.setWorldPosition(...value);
+    const value = this.transform.localPosition;
+    value[index] = +(event.target as any).value;
+    this.transform.worldPosition = value;
+    this.transform.setLocalPosition(value[0], value[1], value[2]);
   }
 
   onRotationChanged(index: number, event: Event) {
-    const value = this.transform.worldRotation;
-    value[index] = (event.target as any).value;
-    this.transform.setWorldRotation(...value);
+    const value = this.transform.localRotation;
+    value[index] = +(event.target as any).value;
+    this.transform.setLocalRotation(value[0], value[1], value[2]);
   }
 
   onScaleChanged(index: number, event: Event) {
-    const value = this.transform.worldScale;
-    value[index] = (event.target as any).value;
-    this.transform.setWorldScale(...value);
-  }
+    const value = this.transform.localScale;
+    value[index] = +(event.target as any).value;
+      this.transform.setLocalScale(value[0], value[1], value[2]);
+}
 }
