@@ -7,16 +7,17 @@
 
   @switch (editorState.centralView()) {
     @case ("canvas") {
-      <div class="canvas-info">
-        <span>{{ fpsCounter }}</span>
-      </div>
       <editor-canvas
         tabindex="0"
         class="canvas"
+        [ngClass]="{ fullscreen: isFullScreen }"
         [scene]="scene"
         (fps)="onFpsUpdated($event)"
         (onGlContextCreated)="onGlContextCreated($event)"
       ></editor-canvas>
+      <div class="canvas-info">
+        <span (click)="isFullScreen = !isFullScreen">{{ fpsCounter }}</span>
+      </div>
     }
     <!-- @case ("assets") {
       <app-assets-explorer></app-assets-explorer>

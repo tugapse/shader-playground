@@ -146,13 +146,13 @@ export class App implements OnDestroy {
   }
 
   private async createFloor(scene: Scene) {
-    const primitive = new PlanePrimitive(10);
+    const primitive = new PlanePrimitive(100);
     const material = new LitMaterial();
 
     material.uvScale.set(100, 100);
-    material.normalMapStrength = 0.2;
-    material.roughness = 0.789;
-    material.specularStrength = 0.4;
+    material.normalMapStrength = 0.02;
+    material.roughness = 0.02;
+    material.specularStrength = 0.01;
 
     const shader = new LitShader(this.gl, material);
 
@@ -178,7 +178,7 @@ export class App implements OnDestroy {
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
 
-    material.mainTex = this.shadowMapTexture;
+    // material.mainTex = this.shadowMapTexture;
   }
 
   private async createLights(scene: Scene) {

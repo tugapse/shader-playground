@@ -45,6 +45,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
+isFullScreen: any;
 
   constructor(
     protected editorService: EditorService,

@@ -525,7 +525,7 @@ export class SunBehaviour extends EntityBehaviour {
         fromSkyColor,
         toSkyColor,
         fromHorizonColor,
-        light.color,
+        toHorizonColor,
         delta,
         isSunDown,
       );

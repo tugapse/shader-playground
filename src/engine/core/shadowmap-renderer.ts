@@ -103,41 +103,40 @@ export class ShadowMapRenderer {
       obj.active && obj.show &&
       obj.getBehaviour(RendererBehaviour)?.castShadows));
 
-    for (const entity of shadowCasters) {
-      const renderer = entity.getBehaviour(RendererBehaviour);
-      if (!renderer || !renderer.shader) continue;
-      const orgCulling = renderer.cullFace;
-      renderer.cullFace = CullFace.FRONT;
-      // Bind the position buffer of the current object to the depth shader.
-      const positionAttributeLocation = this.gl.getAttribLocation(this.depthShader._shaderProgram, ShaderUniformsEnum.A_POSITION);
-      if (positionAttributeLocation !== -1 && renderer.shader.buffers.position) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, renderer.shader.buffers.position);
-        this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(positionAttributeLocation);
-      }
+   for (const entity of shadowCasters) {
+    const renderer = entity.getBehaviour(RendererBehaviour);
+    if (!renderer || !renderer.shader) continue;
+ 
+    const orgCulling = renderer.cullFace;
+    this.gl.enable(this.gl.CULL_FACE);
+    this.gl.cullFace(this.gl.FRONT);
 
-      // Bind the index buffer for the current object.
-      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, renderer.shader.buffers.indices);
+    const positionAttributeLocation = this.gl.getAttribLocation(this.depthShader._shaderProgram, ShaderUniformsEnum.A_POSITION);
+    if (positionAttributeLocation !== -1 && renderer.shader.buffers.position) {
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, renderer.shader.buffers.position);
+    this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(positionAttributeLocation);
+    }
 
-      const { lightMvpMatrix } = renderer.createLightMatrices(Camera.mainCamera.transform, lightEntity);
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, renderer.shader.buffers.indices);
 
-      // Set the transformation matrices for the current object from the light's perspective.
-      this.setMatrices(entity.transform, lightMvpMatrix);
+    const { lightMvpMatrix } = renderer.createLightMatrices(Camera.mainCamera.transform, lightEntity);
 
-      // Draw the object.
-      this.gl.drawElements(
+    this.setMatrices(entity.transform, lightMvpMatrix);
+
+    this.gl.drawElements(
         WebGL2RenderingContext.TRIANGLES,
         renderer.mesh.meshData.indices.length,
         this.gl.UNSIGNED_SHORT,
         0
-      );
+    );
 
-      // It's good practice to disable the vertex attribute array after drawing.
-      if (positionAttributeLocation !== -1) {
-        this.gl.disableVertexAttribArray(positionAttributeLocation);
-      }
-      renderer.cullFace = orgCulling;
+    this.gl.cullFace(orgCulling);
+
+    if (positionAttributeLocation !== -1) {
+    this.gl.disableVertexAttribArray(positionAttributeLocation);
     }
+}
 
     // End the render pass, unbinding the framebuffer and restoring the default state.
     this.endPass();

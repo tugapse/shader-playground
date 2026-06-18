@@ -142,8 +142,8 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
    * @inheritdoc
    */
   protected createMesh() {
-    this.mesh = new Mesh();
-    this.mesh.meshData = new MeshData([]);
+    // this.mesh = new Mesh();
+    // this.mesh.meshData = new MeshData([]);
   }
 
   /**
