@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { ColorPickerComponent } from "src/app/components/color-picker/color-picker";
 import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
 import { Color } from '@engine';
@@ -22,21 +22,19 @@ export class ColorInspector implements OnInit {
 
   colorRgbaString = "";
   // Inject NgZone into the constructor
-  constructor(private zone: NgZone) { }
+  constructor(private changeDetector:ChangeDetectorRef) { }
 
   ngOnInit() {
   }
 
   onColorChanged($event: { rgba: { r: number; g: number; b: number; a: number; }; hex: string; }) {
-    this.zone.run(() => {
       this.r = ($event.rgba.r ).toFixed(2).toString();
       this.g = ($event.rgba.g ).toFixed(2).toString();
       this.b = ($event.rgba.b ).toFixed(2).toString();
       this.a = ($event.rgba.a ).toFixed(2).toString();
 
       this.colorChange.emit(new Color($event.rgba.r, $event.rgba.g, $event.rgba.b, $event.rgba.a));
-    });
-
-  }
+      this.changeDetector.detectChanges();
+  } 
 
 }

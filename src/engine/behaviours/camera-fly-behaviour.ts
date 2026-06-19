@@ -311,10 +311,8 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @protected
    */
   protected applyRotationVelocity(transform: Transform, ellapsed: number) {
+    // FIXME: insert this as a msmber of this class, this was removed from camera class
     let is2D = false;
-    if (this.parent instanceof Camera) {
-      is2D = (this.parent as Camera).is2D;
-    }
 
     if (Mouse.mouseButtonDown[this.lookMouseButtons.look]) {
       if (!is2D) {

@@ -32,7 +32,7 @@ export class ShadowMapRenderer {
    * @static
    * @type {number}
    */
-  public static shadowMapSize = 8192;
+  public static shadowMapSize = 2096;
   /**
    * The framebuffer object used for rendering to the shadow map texture.
    * @protected
@@ -54,7 +54,7 @@ export class ShadowMapRenderer {
    * @type {boolean}
    */
   public enabled: boolean = true;
-  public shadowstrength = new NumberRange(0.2,0,0.9,0.001)
+  public shadowstrength = new NumberRange(0.2,0.0,0.9,0.001)
 
   /**
    * Creates an instance of ShadowMapRenderer.
@@ -163,19 +163,6 @@ export class ShadowMapRenderer {
     }
   }
 
-  /**
-   * Sorts entities by their distance to the light source, from furthest to nearest.
-   * This can help with shadow map artifacts in some cases (though front-face culling is the primary solution).
-   * @param {GlEntity} a - The first entity.
-   * @param {GlEntity} b - The second entity.
-   * @returns {number} The sort order.
-   * @protected
-   */
-  protected sortByDistance(a: GlEntity, b: GlEntity, lightTransform: Transform) {
-    const aD = vec3.distance(a.transform.worldPosition, lightTransform.worldPosition);
-    const bD = vec3.distance(b.transform.worldPosition, lightTransform.worldPosition);
-    return bD - aD;
-  }
 
   /**
    * Starts the depth-only rendering pass to the shadow map texture.
@@ -215,6 +202,7 @@ export class ShadowMapRenderer {
       this.gl.deleteFramebuffer(this.framebuffer);
     }
   }
+
   clearShadowMap() {
     if (!this.shadowmapTexture.glTexture) return;
     this.startPass(this.shadowmapTexture.glTexture!, this.shadowmapTexture.width, this.shadowmapTexture.height);

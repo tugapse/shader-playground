@@ -53,7 +53,7 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
     return 1.0;
   }
 
-  float cells = 1.0; 
+  float cells = 2.0; 
   float total = cells * 2.0 + 1.0;
 
   float shadow = 0.0;

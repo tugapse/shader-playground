@@ -44,11 +44,6 @@ export class Camera extends GlEntity {
    */
   public orthoSize: number = 10.0;
   /**
-   * Flag indicating if the camera is a 2D camera. This locks its rotation in the CameraFlyBehaviour.
-   * @type {boolean}
-   */
-  public is2D: boolean = false;
-  /**
    * The camera's field of view in DEGREES.
    * @type {number}
    */
@@ -315,7 +310,6 @@ export class Camera extends GlEntity {
       ...super.toJsonObject(),
       cameraType: this.cameraType,
       orthoSize: this.orthoSize,
-      is2D: this.is2D,
       fieldOfView: this.fieldOfView,
       nearPlane: this.nearPlane,
       farPlane: this.farPlane,
@@ -333,7 +327,6 @@ export class Camera extends GlEntity {
     super.fromJson(jsonObject);
     if (jsonObject['cameraType'] !== undefined) this.cameraType = jsonObject['cameraType'];
     if (jsonObject['orthoSize'] !== undefined) this.orthoSize = jsonObject['orthoSize'];
-    if (jsonObject['is2D'] !== undefined) this.is2D = jsonObject['is2D'];
     if (jsonObject['fieldOfView'] !== undefined) this.fieldOfView = jsonObject['fieldOfView'];
     if (jsonObject['nearPlane'] !== undefined) this.nearPlane = jsonObject['nearPlane'];
     if (jsonObject['farPlane'] !== undefined) this.farPlane = jsonObject['farPlane'];
