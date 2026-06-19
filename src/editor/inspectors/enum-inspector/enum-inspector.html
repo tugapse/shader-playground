@@ -1,4 +1,8 @@
 <div class="editor-inspector-line-item">
-  <span>{{label}}</span>
-  <app-dropdown [items]="items" [selectedItem]="selected" (itemSelected)="change.emit($event)"></app-dropdown>
+  <span>{{ label }}</span>
+  <app-dropdown
+    [items]="items"
+    [selectedItem]="_selected"
+    (itemSelected)="change.emit($event)"
+  ></app-dropdown>
 </div>

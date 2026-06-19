@@ -1,7 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Colors, GlEntity, JsonSerializedData, Scene, SceneManager } from '@engine';
+import {
+  Colors,
+  GlEntity,
+  JsonSerializedData,
+  Scene,
+  SceneManager,
+} from '@engine';
 import { Subscription } from 'rxjs';
 import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
 import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
@@ -21,11 +34,20 @@ import { AssetService } from 'src/app/api/services/asset.service';
 
 @Component({
   selector: 'app-editor',
-  imports: [Canvas, CommonModule, Inpector, TopBar, AssetsExplorerComponent, CodeEditorLogic, SceneTree],
+  imports: [
+    Canvas,
+    CommonModule,
+    Inpector,
+    TopBar,
+    AssetsExplorerComponent,
+    CodeEditorLogic,
+    SceneTree,
+  ],
   templateUrl: './editor.html',
-  styleUrl: './editor.scss'
+  styleUrl: './editor.scss',
 })
 export class Editor implements OnDestroy, AfterViewInit {
+
 
   scene!: Scene;
   inspectorSelectedEntity!: GlEntity;
@@ -34,7 +56,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   fpsCounter: number = 0;
   toastMessage: string | null = null;
   private toastTimeout: any;
-
 
   protected gl!: WebGL2RenderingContext;
   protected subs$: Subscription[] = [];
@@ -45,7 +66,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private settings!: IEditorSettings;
-isFullScreen: any;
+  isFullScreen: any;
 
   constructor(
     protected editorService: EditorService,
@@ -56,26 +77,33 @@ isFullScreen: any;
     protected assetService: AssetService,
     protected route: ActivatedRoute,
     protected router: Router,
-    protected cdr: ChangeDetectorRef
+    protected cdr: ChangeDetectorRef,
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
   }
 
   ngAfterViewInit(): void {
-
     const projectId = this.route.snapshot.paramMap.get('project');
     const sceneId = this.route.snapshot.paramMap.get('scene');
 
     if (projectId && sceneId) {
       // TODO set some loading state
-      this.assetService.getTextAssetContent(projectId, sceneId).subscribe(textContent => {
-        const sceneData = JSON.parse(textContent) as JsonSerializedData;
+      this.assetService
+        .getTextAssetContent(projectId, sceneId)
+        .subscribe((textContent) => {
+          const sceneData = JSON.parse(textContent) as JsonSerializedData;
 
-        SceneManager.loadScene(this.gl, sceneData).then(scene => this.editorService.loadScene(scene));
+          SceneManager.loadScene(this.gl, sceneData).then((scene) =>
+            this.editorService.loadScene(scene),
+          );
+        });
+
+      this.editorState.setActiveProject({
+        id: projectId,
+        scene: sceneId,
+        config: {},
       });
-
-      this.editorState.setActiveProject({ id: projectId, scene: sceneId, config: {} });
       // TODO: Fetch project details and download the scene using the project/scene IDs
     } else {
       this.router.navigate(['/invalid-project']);
@@ -100,7 +128,7 @@ isFullScreen: any;
   }
 
   ngOnDestroy(): void {
-    this.subs$.forEach(sub => sub?.unsubscribe());
+    this.subs$.forEach((sub) => sub?.unsubscribe());
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
@@ -110,7 +138,6 @@ isFullScreen: any;
   }
 
   protected onSceneLoaded(scene: Scene) {
-
     if (this.scene) {
       this.scene.destroy();
     }
@@ -120,8 +147,6 @@ isFullScreen: any;
     this.scene.inEditMode = true;
     this.addEditorBehaviours();
   }
-
-
 
   protected onScenePlay(scene: Scene) {
     if (this.scene.isRunning || this.isPaused) {
@@ -159,17 +184,40 @@ isFullScreen: any;
   }
 
   protected subscribeEvents(): void {
-    this.subs$.push(this.sceneTreeService.onEntitySelected.subscribe(this.onSceneTreeEntitySelected.bind(this)));
+    this.subs$.push(
+      this.sceneTreeService.onEntitySelected.subscribe(
+        this.onSceneTreeEntitySelected.bind(this),
+      ),
+    );
 
-    this.subs$.push(this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this))); 
-    this.subs$.push(this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)));
-    this.subs$.push(this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)));
-    this.subs$.push(this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)));
-    this.subs$.push(this.editorService.onEditorSaveStateRequest.subscribe(this.onEditorSaveInStorage.bind(this)));
-    this.subs$.push(this.editorSettings.onSettingsChanged.subscribe(this.updateEditorSettings.bind(this)));
-    this.subs$.push(this.editorService.onRenderFrame.subscribe(this.onRenderFrame.bind(this)));
-    this.subs$.push(this.editorService.onUpdateFrame.subscribe(this.onUpdateFrame.bind(this)));
-
+    this.subs$.push(
+      this.editorService.onSceneLoaded.subscribe(this.onSceneLoaded.bind(this)),
+    );
+    this.subs$.push(
+      this.editorService.onScenePlay.subscribe(this.onScenePlay.bind(this)),
+    );
+    this.subs$.push(
+      this.editorService.onScenePause.subscribe(this.onScenePause.bind(this)),
+    );
+    this.subs$.push(
+      this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)),
+    );
+    this.subs$.push(
+      this.editorService.onEditorSaveStateRequest.subscribe(
+        this.onEditorSaveInStorage.bind(this),
+      ),
+    );
+    this.subs$.push(
+      this.editorSettings.onSettingsChanged.subscribe(
+        this.updateEditorSettings.bind(this),
+      ),
+    );
+    this.subs$.push(
+      this.editorService.onRenderFrame.subscribe(this.onRenderFrame.bind(this)),
+    );
+    this.subs$.push(
+      this.editorService.onUpdateFrame.subscribe(this.onUpdateFrame.bind(this)),
+    );
   }
 
   private onRenderFrame() {
@@ -187,13 +235,13 @@ isFullScreen: any;
   onEditorSaveInStorage(): void {
     const data = {
       scene: this.scene.toJsonObject(),
-    }
+    };
     const jsonString = JSON.stringify(data);
-    sessionStorage.setItem("omg_scene", jsonString);
+    sessionStorage.setItem('omg_scene', jsonString);
   }
 
   loadFromStorage(): void {
-    const sceneDataString = sessionStorage.getItem("omg_scene");
+    const sceneDataString = sessionStorage.getItem('omg_scene');
     if (sceneDataString) {
       this.sceneState = JSON.parse(sceneDataString);
       this.clearStorage();
@@ -201,13 +249,16 @@ isFullScreen: any;
   }
 
   clearStorage(): void {
-    sessionStorage.removeItem("omg_scene");
+    sessionStorage.removeItem('omg_scene');
   }
 
   createEditorBehaviours() {
     this.editorGridBehaviour = new EditorGridBehaviour(this.gl);
     this.gizmosBehaviour = new GizmosBoxBehaviour(this.gl, this.editorService);
-    this.editorPickerBehaviour = new EditorEntityPicker(this.gl, this.sceneTreeService);
+    this.editorPickerBehaviour = new EditorEntityPicker(
+      this.gl,
+      this.sceneTreeService,
+    );
     this.editorPickerBehaviour.boundingBehaviour = this.gizmosBehaviour;
 
     this.updateEditorSettings(this.settings);
@@ -224,9 +275,10 @@ isFullScreen: any;
     if (this.editorGridBehaviour)
       this.editorGridBehaviour.gridColor = this.settings.sceneEditor.gridColor;
     if (this.gizmosBehaviour) {
-
-      this.gizmosBehaviour.selectedBoundingBoxColor = this.settings.sceneEditor.selectedBoundingBoxColor;
-      this.gizmosBehaviour.hoveredBoundingBoxColor = this.settings.sceneEditor.hoveredBoundingBoxColor;
+      this.gizmosBehaviour.selectedBoundingBoxColor =
+        this.settings.sceneEditor.selectedBoundingBoxColor;
+      this.gizmosBehaviour.hoveredBoundingBoxColor =
+        this.settings.sceneEditor.hoveredBoundingBoxColor;
     }
   }
 
@@ -257,7 +309,8 @@ isFullScreen: any;
 
     const sceneData = this.scene.toJsonObject();
 
-    this.assetService.saveSceneAsset(project.id, project.scene, sceneData)
+    this.assetService
+      .saveSceneAsset(project.id, project.scene, sceneData)
       .subscribe({
         next: (response) => {
           console.log('Scene saved successfully', response);
@@ -266,14 +319,14 @@ isFullScreen: any;
         error: (err) => {
           console.error('Failed to save scene', err);
           this.showToast('Failed to save scene!');
-        }
+        },
       });
   }
 
   private showToast(message: string): void {
     this.toastMessage = message;
     this.cdr.detectChanges(); // Force the UI to update immediately
-    
+
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
     }
@@ -282,5 +335,11 @@ isFullScreen: any;
       this.toastMessage = null;
       this.cdr.detectChanges(); // Update when the toast disappears
     }, 3000);
+  }
+
+    toggleFullscreen() {
+      console.debug("i was called")
+    this.isFullScreen = !this.isFullScreen;
+    setTimeout(()=>this.editorService.requestCanvasResize(),10);
   }
 }

@@ -1,0 +1,29 @@
+@if (isOpen) {
+  <div class="menu-container" [style.left.px]="menuX" [style.top.px]="menuY">
+    <div class="menu-search">
+      <input
+        type="text"
+        placeholder="Search item..."
+        [value]="searchQuery"
+        (input)="onSearch($event)"
+      />
+    </div>
+    <div class="menu-scroll-area">
+      @for (item of filteredItems; track item.name) {
+        <div class="menu-item" (click)="selectItem(item, $event)">
+          <div class="menu-item-header">
+            <span class="menu-item-name">{{ item.name }}</span>
+            <span class="menu-item-type">{{ item.type }}</span>
+          </div>
+          <div class="menu-item-path">{{ item.path }}</div>
+          <div class="menu-item-description" [title]="item.description">
+            {{ item.description }}
+          </div>
+        </div>
+      }
+      @if (filteredItems.length === 0) {
+        <div class="menu-empty">No items found.</div>
+      }
+    </div>
+  </div>
+}

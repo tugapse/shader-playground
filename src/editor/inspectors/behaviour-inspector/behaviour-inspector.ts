@@ -77,7 +77,6 @@ export class BehaviourInspector extends ObjectInspector {
         arrayValues.push(enumObj)
       }
       if (value != undefined) {
-        
         const p: ITargetProperty = {
           key: enumName,
           type: "boolean",

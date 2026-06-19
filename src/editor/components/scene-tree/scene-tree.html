@@ -1,15 +1,15 @@
 <div class="tree-header">
   <h4 class="title" (click)="inspectScene(scene)">Scene Tree</h4>
-  <div>
-    <app-icon
-      class="icon"
-      iconName="fa-arrows-rotate"
-      (click)="refreshTree()"
-    ></app-icon>
+  <div class="left">
     <app-icon
       class="icon"
       iconName="fa-add"
       (click)="onSceneTreeAddNewRequested($event)"
+    ></app-icon>
+    <app-icon
+      class="icon"
+      iconName="fa-arrows-rotate"
+      (click)="refreshTree()"
     ></app-icon>
     <editor-add-behaviour-menu
       [isOpen]="isAddEntityMenuOpen"

@@ -40,7 +40,7 @@
             [label]="entityProperty.key.capitalize()"
             [value]="entityProperty.property"
             (change)="onValueChanged(entityProperty, +$event)"
-            [dragScale]="0.001"
+            [dragScale]="0.1"
           ></editor-text-input-inspector>
         }
 
@@ -57,6 +57,15 @@
             [vector]="entityProperty.property"
             (vectorChanged)="onVectorChanged(entityProperty, $event)"
           ></editor-vector-inspector>
+        }
+
+        @case ("enum") {
+          <editor-enum-inspector
+            [label]="entityProperty.key.capitalize()"
+            [items]="_enums[entityProperty.key]"
+            [selected]="entityProperty.property"
+            (change)="onEnumChange(entityProperty.key, $event)"
+          ></editor-enum-inspector>
         }
       }
     }

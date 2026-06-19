@@ -16,7 +16,7 @@
         (onGlContextCreated)="onGlContextCreated($event)"
       ></editor-canvas>
       <div class="canvas-info">
-        <span (click)="isFullScreen = !isFullScreen">{{ fpsCounter }}</span>
+        <span (click)="toggleFullscreen()">FPS: {{ fpsCounter }}</span>
       </div>
     }
     <!-- @case ("assets") {

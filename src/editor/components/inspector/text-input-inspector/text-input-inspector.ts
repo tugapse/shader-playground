@@ -23,9 +23,11 @@ export class TextInputInspector {
     const newValue = ($event.target as any).value;
     this.value = this.isNumber ? Number(newValue) : newValue;
     this.change.emit(this.value);
+    debugger
   }
 
   onDrag($event: DragEventData) {
+    debugger
     if (this.isNumber) {
       const newValue = ($event.deltaX * this.dragScale) + (+this.value || 0);
       this.value = Number(  newValue.toFixed(this.numberDecimals)) as number;

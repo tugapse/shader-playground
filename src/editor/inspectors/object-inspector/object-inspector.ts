@@ -83,8 +83,9 @@ export class ObjectInspector {
   @Output() change = new EventEmitter<any>();
 
   // Component state
-  _selectedObject?: ITargetObject;
-  _properties: ITargetProperty[] = [];
+  protected _selectedObject?: ITargetObject;
+  protected _properties: ITargetProperty[] = [];
+  protected _enums: { [key: string]: any } = {};
 
   // Event Handlers from template
   onValueChanged(
@@ -94,7 +95,10 @@ export class ObjectInspector {
     this._onPropertyChanged(property.key, value);
   }
 
-  onVectorChanged(property: ITargetObject, value: Vector4 | Vector3 | Vector2): void {
+  onVectorChanged(
+    property: ITargetObject,
+    value: Vector4 | Vector3 | Vector2,
+  ): void {
     this._onPropertyChanged(property.key, value);
   }
 
@@ -118,7 +122,9 @@ export class ObjectInspector {
       : this.isNotPrivate(key) && this.validTypes.includes(obType);
   }
 
-  protected convertEnumToObject(something: any): { key: string; value: number }[] {
+  protected convertEnumToObject(
+    something: any,
+  ): { key: string; value: number }[] {
     return Object.keys(something)
       .filter((k) => Number.isNaN(+k))
       .map((e: string) => {
@@ -143,12 +149,15 @@ export class ObjectInspector {
 
     const object = this._selectedObject.property;
     this._properties = Object.keys(object)
-      .filter(key => this.isPropertyValid(key))
-      .map(key => this._createPropertyViewModel(key, object[key]))
+      .filter((key) => this.isPropertyValid(key))
+      .map((key) => this._createPropertyViewModel(key, object[key]))
       .filter((p): p is ITargetProperty => !!p);
   }
 
-  private _createPropertyViewModel(key: string, value: any): ITargetProperty | null {
+  private _createPropertyViewModel(
+    key: string,
+    value: any,
+  ): ITargetProperty | null {
     if (value === undefined || value === null) {
       return null;
     }
