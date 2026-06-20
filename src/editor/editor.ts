@@ -47,8 +47,6 @@ import { AssetService } from 'src/app/api/services/asset.service';
   styleUrl: './editor.scss',
 })
 export class Editor implements OnDestroy, AfterViewInit {
-
-
   scene!: Scene;
   inspectorSelectedEntity!: GlEntity;
   isPaused = false;
@@ -86,27 +84,25 @@ export class Editor implements OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     const projectId = this.route.snapshot.paramMap.get('project');
     const sceneId = this.route.snapshot.paramMap.get('scene');
-    // TODO this will be removed on the v1
-    if(this.route.snapshot.queryParamMap.get('write-scene'))
-      return;
 
     if (projectId && sceneId) {
-      // TODO set some loading state
-      this.assetService
-        .getTextAssetContent(projectId, sceneId)
-        .subscribe((textContent) => {
-          const sceneData = JSON.parse(textContent) as JsonSerializedData;
-
-          SceneManager.loadScene(this.gl, sceneData).then((scene) =>
-            this.editorService.loadScene(scene),
-          );
-        });
-
       this.editorState.setActiveProject({
         id: projectId,
         scene: sceneId,
         config: {},
       });
+      
+      if (!this.route.snapshot.queryParamMap.get('write-scene'))
+        this.assetService
+          .getTextAssetContent(projectId, sceneId)
+          .subscribe((textContent) => {
+            const sceneData = JSON.parse(textContent) as JsonSerializedData;
+
+            SceneManager.loadScene(this.gl, sceneData).then((scene) =>
+              this.editorService.loadScene(scene),
+            );
+          });
+
       // TODO: Fetch project details and download the scene using the project/scene IDs
     } else {
       this.router.navigate(['/invalid-project']);
@@ -327,9 +323,9 @@ export class Editor implements OnDestroy, AfterViewInit {
     }, 3000);
   }
 
-    toggleFullscreen() {
-      console.debug("i was called")
+  toggleFullscreen() {
+    console.debug('i was called');
     this.isFullScreen = !this.isFullScreen;
-    setTimeout(()=>this.editorService.requestCanvasResize(),10);
+    setTimeout(() => this.editorService.requestCanvasResize(), 10);
   }
 }
