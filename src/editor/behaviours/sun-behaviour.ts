@@ -185,6 +185,8 @@ export class SunBehaviour extends EntityBehaviour {
 
     // Manage moon light's existence and state based on editor settings.
     if (this.moon.useDirectionalLight) {
+      if(! this.parent.scene.isRunning)
+        return
       if (!this.moonLight) {
         this.moonLight = this.creaMoonLight(this.moonLight); // Cache for next frame
       }
@@ -492,7 +494,7 @@ export class SunBehaviour extends EntityBehaviour {
     const scene = this.parent.scene;
     if (scene) {
       scene.clearColor = color;
-      scene.fog.color = color;
+      scene.sceneFog.color = color;
     }
   }
 
@@ -556,6 +558,7 @@ export class SunBehaviour extends EntityBehaviour {
       toHorizonColor,
       delta,
     );
+    this.parent.scene.sceneFog.color = shader.material.horizonColor;
 
     shader.useSun = this.sun.show && !isSunDown ;
     shader.useMoon = this.moon.show && isSunDown ;

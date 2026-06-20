@@ -209,12 +209,14 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   private onRenderFrame() {
+    // this.scene.draw();
     this.editorGridBehaviour?.draw();
     this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
   }
 
   private onUpdateFrame(ellapsed: number) {
+    // this.scene.update(ellapsed);
     this.gizmosBehaviour?.updateEditor(ellapsed);
     this.editorPickerBehaviour?.update(ellapsed);
     this.editorGridBehaviour?.update(ellapsed);

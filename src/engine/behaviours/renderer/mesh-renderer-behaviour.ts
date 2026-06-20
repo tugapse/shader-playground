@@ -50,7 +50,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
     return this.parent.scene.shadowmapRenderer?.shadowmapTexture;
   }
 
-  public get fog() { return this.parent.scene["fog"] as SceneFog; }
+  public get fog() { return this.parent.scene["sceneFog"] as SceneFog; }
 
   constructor(public override _gl: WebGL2RenderingContext) {
     super(_gl);

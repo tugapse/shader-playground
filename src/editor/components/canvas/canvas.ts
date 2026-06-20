@@ -93,8 +93,8 @@ export class Canvas implements OnChanges, OnDestroy {
     if (elapsed > this.frameInterval) {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
       const delta = elapsed / 1000;
-      this.editorService.onUpdateFrame.next(delta);
       this.scene.update(delta);
+      this.editorService.onUpdateFrame.next(delta);
       if (this.gl && this.canvasElement) {
         this.scene.draw();
         this.editorService.onRenderFrame.next(this.gl);

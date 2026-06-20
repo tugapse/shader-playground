@@ -53,7 +53,8 @@ in vec3 v_viewDirection;
 out vec4 fragColor;
 
 // --- EXTERNAL NOISE/UTILITY MACRO ---
-@INCLUDE_FUNC
+@INCLUDE_UTIL_FUNC
+
 
 // --- GLOBAL WEATHER COMMUNICATOR INTERFACE ---
 float g_cloudAlpha = 0.0;
@@ -100,6 +101,18 @@ void main() {
 }
 
 // --- RENDERING SUBSYSTEM IMPLEMENTATIONS ---
+float calculateMoonTexture(vec3 normal, float frequency) {
+    vec3 p = normal * frequency;
+    float value = 0.0;
+    float amplitude = 0.5;
+    
+    for (int i = 0; i < 3; i++) {
+        value += amplitude * noise3D(p);
+        p *= 2.5; 
+        amplitude *= 0.5; 
+    }
+    return value;
+}
 
 vec3 drawStars(vec3 currentSkyColor, vec3 viewDir) {
     if (viewDir.y < 0.0) {
@@ -359,3 +372,4 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir) {
     vec3 completeMoon = mix(colorOut, moonBodyColor, moonAlpha);
     return mix(completeMoon, g_cloudColor, g_cloudAlpha * 0.9);
 }   
+

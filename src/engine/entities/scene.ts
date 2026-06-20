@@ -21,7 +21,7 @@ export class Scene extends GlEntity {
   public get shadowmapRenderer() { return this._renderPipeline.shadowmapRenderer; }
   public get renderPipeline(){return this._renderPipeline;}
   
-  public fog: SceneFog;
+  public sceneFog: SceneFog;
   protected _renderPipeline:RenderPipeline;
 
 
@@ -100,7 +100,7 @@ export class Scene extends GlEntity {
     super("Scene");
     this._objects = [];
     this.behaviours = [];
-    this.fog = new SceneFog(Colors.cornflowerBlue, 0, 0.002);
+    this.sceneFog = new SceneFog();
     this._renderPipeline = new RenderPipeline();
     this._renderPipeline.initialize(this);
 
@@ -241,6 +241,7 @@ export class Scene extends GlEntity {
     }
     this._renderPipeline.initialize(this);
     
+    this.sceneFog.fromJson(jsonObject);
     for (const entity of jsonObject['objects']) {
       this.addEntity(entity);
     }
@@ -280,6 +281,7 @@ export class Scene extends GlEntity {
     return {
       ...this.getBaseJsonInfo(),
       renderPipeline:this._renderPipeline.toJsonObject(),
+      sceneFog:this.sceneFog.toJsonObject(),
       objects: this.objects.map(o => o.toJsonObject()),
       meshMaps,
       textureMaps

@@ -79,6 +79,9 @@
           @case ("enum") {
             <editor-enum-inspector
               [label]="item.key.capitalize()"
+              [items]="_enums[item.key]"
+              [selected]="item.value"
+              (change)="onEnumChange(item.key, $event)"
             ></editor-enum-inspector>
           }
 

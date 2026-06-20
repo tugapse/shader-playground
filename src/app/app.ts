@@ -60,7 +60,7 @@ export class App implements OnDestroy {
     );
     Shader.SHADER_FUNCTIONS = {
       '@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-      '@INCLUDE_FUNC': 'assets/shaders/functions/functions.frag',
+      '@INCLUDE_UTIL_FUNC': 'assets/shaders/functions/functions.frag',
     };
   }
 
@@ -180,7 +180,7 @@ export class App implements OnDestroy {
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
 
-    material.mainTex = this.shadowMapTexture;
+    // material.mainTex = this.shadowMapTexture;
   }
 
   private async createLights(scene: Scene) {

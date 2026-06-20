@@ -24,6 +24,7 @@ import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
 import { SceneTreeService } from '@editor/services/scene-tree.service';
 import { EditorService } from '@editor/services/editor.service';
+import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 
 export interface ITargetObject {
   [key: string]: any;
@@ -74,11 +75,12 @@ export class ObjectInspector {
   @Input() isChild = false;
   @Input() showPrivateProperties = false;
   @Input() showAllProperties = false;
-  objectsToshow: ITargetObject[] = [];
 
   @Input() set targetObject(value: ITargetObject) {
+    debugger
     this._selectedObject = value;
     this.loadProperties();
+    
   }
 
   // Outputs
@@ -89,9 +91,8 @@ export class ObjectInspector {
   protected _properties: ITargetProperty[] = [];
   protected _enums: { [key: string]: any } = {};
 
-  constructor(){
+  constructor() {
     this._enums['fogType'] = this.convertEnumToObject(FogType);
-
   }
 
   // Event Handlers from template
@@ -160,22 +161,7 @@ export class ObjectInspector {
       .map((key) => this._createPropertyViewModel(key, object[key]))
       .filter((p): p is ITargetProperty => !!p);
   }
-  
-  protected prepareProperties(entity: GlEntity) {
-    if (entity) {
-      this.objectsToshow = Object.keys(entity)
-        .filter(this.isPropertyValid.bind(this))
-        .map((key) => this.mapProperty(entity, key));
-    }
-  }
 
-  protected mapProperty(entity: GlEntity, key: string) {
-    const isEnum = !!this._enums[key];
-    const type = isEnum ? 'enum' : this.getObjectType(entity[key]);
-    const property = entity[key];
-
-    return { key, type, property };
-  }
 
   private _createPropertyViewModel(
     key: string,
@@ -188,7 +174,10 @@ export class ObjectInspector {
     let type: string = typeof value;
     let name = '';
 
-    if (type === 'object') {
+    if (!!this._enums[key]){
+      type = "enum"
+    }
+    else if (type === 'object') {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
@@ -229,7 +218,6 @@ export class ObjectInspector {
     ) {
       return 'vector234';
     }
-    if (value instanceof Boolean) return 'boolean';
 
     return typeof value;
   }
@@ -257,5 +245,11 @@ export class ObjectInspector {
   protected updateScene(): void {
     const scene = this.editorService.scene;
     this.editorService.onSceneUpdated.emit(scene);
+  }
+
+  onEnumChange(key: string, menuItem: DropdownItem) {
+    debugger
+    this._selectedObject!.property[key] = menuItem.value;
+    this.editorService.requestCanvasResize();
   }
 }
