@@ -107,7 +107,6 @@ export class BehaviourInspector extends ObjectInspector {
 
   onEnumChanged(item: ITargetProperty, $event: DropdownItem) {
     this._selectedObject!.property[item.key] = $event.value
-
   }
 
   onRangeChanges(item:ITargetProperty, $event:any){

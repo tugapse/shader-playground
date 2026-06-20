@@ -5,7 +5,7 @@ import { JsonSerializedData } from "../interfaces/json-serialized-data.interface
 import { SceneEntityBehaviour } from "../interfaces/scene-behaviour.interface";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Light ,DirectionalLight} from "./light";
+import { Light ,DirectionalLight} from "./lights/light";
 import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
 import { RenderLayer } from "../enums";
 import { CubemapTexture, Texture } from "../textures";
@@ -279,7 +279,7 @@ export class Scene extends GlEntity {
     }
     return {
       ...this.getBaseJsonInfo(),
-      renderPipeline:this._renderPipeline.toJSON(),
+      renderPipeline:this._renderPipeline.toJsonObject(),
       objects: this.objects.map(o => o.toJsonObject()),
       meshMaps,
       textureMaps

@@ -59,15 +59,6 @@ export class EntityInspector extends ObjectInspector {
     'behaviours',
     'scene',
   ];
-  objectsToshow: ITargetObject[] = [];
-
-  private prepareProperties(entity: GlEntity) {
-    if (entity) {
-      this.objectsToshow = Object.keys(entity)
-        .filter(this.isPropertyValid.bind(this))
-        .map((key) => this.mapProperty(entity, key));
-    }
-  }
 
   @Input() set targetEntity(entity: GlEntity) {
     this.prepareProperties(entity);
@@ -101,7 +92,7 @@ export class EntityInspector extends ObjectInspector {
     value: string | number | boolean,
   ): void {
     if (!this.entity || Number.isNaN(value)) return;
-    
+
     this.editorService.requestCanvasResize();
     this.entity[entityProperty.key] = value;
     entityProperty.property[entityProperty.key] = value;
@@ -111,14 +102,6 @@ export class EntityInspector extends ObjectInspector {
     if (!this.entity) return;
     this.entity[entityProperty.key] = value;
     // entityProperty.property[entityProperty.key] = value;
-  }
-
-  private mapProperty(entity: GlEntity, key: string) {
-    const isEnum = !!this._enums[key];
-    const type = isEnum ? 'enum' : this.getObjectType(entity[key]);
-    const property = entity[key];
-
-    return { key, type, property };
   }
 
   protected override isPropertyValid(key: string): boolean {
@@ -157,7 +140,7 @@ export class EntityInspector extends ObjectInspector {
     }
   }
 
-  onEnumChange(key:string, menuItem: DropdownItem) {
+  onEnumChange(key: string, menuItem: DropdownItem) {
     this.entity![key] = menuItem.value;
     this.editorService.requestCanvasResize();
   }

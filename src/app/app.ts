@@ -180,7 +180,7 @@ export class App implements OnDestroy {
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
 
-    // material.mainTex = this.shadowMapTexture;
+    material.mainTex = this.shadowMapTexture;
   }
 
   private async createLights(scene: Scene) {
@@ -191,12 +191,9 @@ export class App implements OnDestroy {
     this.sun = dlight;
 
     const plight = new PointLight('Point light');
-    plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
     plight.color = Colors.red;
 
     const spotLight = new SpotLight('Spot light 1');
-    spotLight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.008 };
-    spotLight.coneAngles = { inner: 15, outer: 20 };
     spotLight.color = Colors.azure;
 
     scene.addEntity(new Light("Ambient light"));

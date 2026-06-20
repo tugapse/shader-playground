@@ -34,14 +34,14 @@ export class SkyboxShader extends Shader {
   public declare material: SkyboxMaterial;
 
   // Sun properties to be passed as uniforms
-  public _sunDirection: Vector3 = new Vector3(0, 1, 0);
-  public _sunColor: Color = new Color(1, 1, 1, 1);
+  public useSun: boolean = true;
+  public sunDirection: Vector3 = new Vector3(0, 1, 0);
+  public sunColor: Color = new Color(1, 1, 1, 1);
   public sunSize: number = 0.999;
   public sunFalloff: number = 0.03;
-  public useSun: number = 1;
 
   // Moon properties
-  public useMoon: number = 1;
+  public useMoon: boolean = true;
   public moonDirection: Vector3 = new Vector3(0, -1, 0);
   public moonColor: Color = new Color(0.8, 0.9, 1.0, 1.0); // Pale bluish-white
   public moonSize: number = 0.998;     // Slightly smaller than the sun
@@ -52,7 +52,7 @@ export class SkyboxShader extends Shader {
   public moonEnableRotation: number = 1;
   public moonRotationSpeed: number = 0.05;
 
-  public useClouds = 1;
+  public useClouds = true;
   public cloudSpeed = 0.1;
   public cloudRepetition = 0;
   /** The tiling/scale of the clouds. Higher values make clouds smaller and more repetitive. */
@@ -62,7 +62,7 @@ export class SkyboxShader extends Shader {
   public cloudSparsity = 0.01;
   public wheatherCondition = 0.4;
 
-  public useStars: number = 1.0;
+  public useStars = true;
   /** The overall brightness of the stars. */
   public starIntensity = 3.0;
   /** Size/frequency of star cells (higher = smaller stars). */
@@ -111,18 +111,18 @@ export class SkyboxShader extends Shader {
     super.loadDataIntoShader();
 
     // Set sun uniforms from the shader's properties
-    this.setVec3(ShaderUniformsEnum.U_SUN_DIRECTION, this._sunDirection.vector);
-    this.setVec4(ShaderUniformsEnum.U_SUN_COLOR, this._sunColor.toVec4());
+    this.setVec3(ShaderUniformsEnum.U_SUN_DIRECTION, this.sunDirection.vector);
+    this.setVec4(ShaderUniformsEnum.U_SUN_COLOR, this.sunColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_SUN_SIZE, this.sunSize);
     this.setFloat(ShaderUniformsEnum.U_SUN_FALLOFF, this.sunFalloff);
-    this.setInt(ShaderUniformsEnum.U_USE_SUN, this.useSun);
+    this.setInt(ShaderUniformsEnum.U_USE_SUN, this.useSun ? 1 : 0);
 
     this.setVec3(ShaderUniformsEnum.U_MOON_DIRECTION, this.moonDirection.vector);
     this.setVec4(ShaderUniformsEnum.U_MOON_COLOR, this.moonColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_MOON_SIZE, this.moonSize);
     this.setFloat(ShaderUniformsEnum.U_MOON_FALLOFF, this.moonFalloff);
     this.setFloat(ShaderUniformsEnum.U_MOON_PHASE, this.moonPhase);
-    this.setInt(ShaderUniformsEnum.U_USE_MOON, this.useMoon);
+    this.setInt(ShaderUniformsEnum.U_USE_MOON, this.useMoon ? 1 : 0);
 
     this.setFloat(ShaderUniformsEnum.U_MOON_EARTHSHINE, this.moonEarthshine);
     this.setFloat(ShaderUniformsEnum.U_MOON_TERMINATOR_SOFTNESS, this.moonTerminatorSoftness);
@@ -138,11 +138,11 @@ export class SkyboxShader extends Shader {
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SPEED, this.cloudSpeed);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_TILING, this.cloudTiling);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SEED, this.cloudSeed);
-    this.setInt(ShaderUniformsEnum.U_USE_CLOUDS, this.useClouds);
+    this.setInt(ShaderUniformsEnum.U_USE_CLOUDS, this.useClouds ? 1 : 0);
     this.setFloat(ShaderUniformsEnum.U_WHEATHER_CONDITION, this.wheatherCondition);
     this.setFloat(ShaderUniformsEnum.U_CLOUD_SPARSITY, this.cloudSparsity);
 
-    this.setInt(ShaderUniformsEnum.U_USE_STARS, this.useStars);
+    this.setInt(ShaderUniformsEnum.U_USE_STARS, this.useStars ? 1 : 0);
     this.setFloat(ShaderUniformsEnum.U_STAR_INTENSITY, this.starIntensity);
     this.setFloat(ShaderUniformsEnum.U_STAR_SCALE, this.starScale);
     this.setFloat(ShaderUniformsEnum.U_STAR_SPARSITY, this.starSparsity);

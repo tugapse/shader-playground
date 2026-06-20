@@ -71,5 +71,6 @@ void main() {
 
     foggedRGB = applyFog(finalColor.rgb, effectiveFogColor, v_fogDistance, effectiveDensity, u_fogType);
   }
+  
   fragColor = vec4(foggedRGB, finalColor.a);
 }

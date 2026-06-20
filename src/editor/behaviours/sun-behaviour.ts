@@ -158,31 +158,13 @@ export class SunBehaviour extends EntityBehaviour {
 
     this.updateTime(elapsed);
     const light = this.parent as DirectionalLight;
-    let moonLight =
-      this.moonLight ||
-      (this.parent.scene.lights.find(
-        (o) => o.tag === 'MoonLight',
-      ) as DirectionalLight);
-
-    // Manage moon light's existence and state based on editor settings.
-    if (this.moon.useDirectionalLight) {
-      if (!moonLight) {
-        moonLight = this.creaMoonLight(moonLight); // Cache for next frame
-      }
-      // Ensure the light is active and has the correct color when enabled.
-      moonLight.active = true;
-      moonLight.color = this.lighColor.nightColor;
-    } else if (moonLight) {
-      // If the option is disabled, ensure the light is inactive.
-      moonLight.active = false;
-    }
 
     if (!light || light.entityType !== EntityType.LIGHT_DIRECTIONAL) {
       return;
     }
-
-    this.updateSunPosition(light, moonLight);
-    this.updateLightColor(light, moonLight);
+    this.updateOrCreateMoonLinght();
+    this.updateSunPosition(light, this.moonLight);
+    this.updateLightColor(light, this.moonLight);
   }
 
   private creaMoonLight(moonLight: DirectionalLight) {
@@ -192,6 +174,28 @@ export class SunBehaviour extends EntityBehaviour {
     this.parent.scene.addEntity(moonLight);
     this.moonLight = moonLight; // Cache for next frame
     return moonLight;
+  }
+
+  updateOrCreateMoonLinght() {
+    this.moonLight =
+      this.moonLight ||
+      (this.parent.scene.lights.find(
+        (o) => o.tag === 'MoonLight',
+      ) as DirectionalLight);
+
+    // Manage moon light's existence and state based on editor settings.
+    if (this.moon.useDirectionalLight) {
+      if (!this.moonLight) {
+        this.moonLight = this.creaMoonLight(this.moonLight); // Cache for next frame
+      }
+      // Ensure the light is active and has the correct color when enabled.
+      this.moonLight.active = true;
+      this.moonLight.color = this.lighColor.nightColor;
+    } else if (this.moonLight) {
+      // If the option is disabled, ensure the light is inactive.
+      this.moonLight.active = false;
+    }
+
   }
 
   /**
@@ -366,7 +370,7 @@ export class SunBehaviour extends EntityBehaviour {
     if (time >= sunset - fadeDuration && time <= sunset) {
       const fadeProgress = (time - (sunset - fadeDuration)) / fadeDuration;
       sunAlpha = 1.0 - smoothstep(fadeProgress);
-    } 
+    }
     // Fade in before sunrise
     else if (time >= sunrise - fadeDuration && time <= sunrise) {
       const fadeProgress = (time - (sunrise - fadeDuration)) / fadeDuration;
@@ -411,12 +415,10 @@ export class SunBehaviour extends EntityBehaviour {
       );
     }
     this.updateSceneColors(light.color);
-    
-    if (time > this.hours.night - 0.5 && time < this.hours.night) {
 
-        // ex if time is 15.54 it should show all the light streagth
-        // if time is 15.98 it should almost fade with 0.0.0.1
-    
+    if (time > this.hours.night - 0.5 && time < this.hours.night) {
+      // ex if time is 15.54 it should show all the light streagth
+      // if time is 15.98 it should almost fade with 0.0.0.1
     }
     // For skybox visuals, we switch between sun and moon at the actual sunset/sunrise times.
     const isSunDown = time < this.hours.sunrise || time > this.hours.sunset;
@@ -555,8 +557,8 @@ export class SunBehaviour extends EntityBehaviour {
       delta,
     );
 
-    shader.useSun = this.sun.show && !isSunDown ? 1 : 0;
-    shader.useMoon = this.moon.show && isSunDown ? 1 : 0;
+    shader.useSun = this.sun.show && !isSunDown ;
+    shader.useMoon = this.moon.show && isSunDown ;
     shader.sunSize = this.sun.sunSize.value;
     shader.sunFalloff = this.sun.sunFalloff.value;
 
@@ -564,12 +566,12 @@ export class SunBehaviour extends EntityBehaviour {
       vec3.create(),
       this.transform.worldPosition,
     );
-    shader._sunDirection.set(
+    shader.sunDirection.set(
       normalizedDir[0],
       normalizedDir[1],
       normalizedDir[2],
     );
-    shader._sunColor = light.color;
+    shader.sunColor = light.color;
 
     if (this.moon.show) {
       // Place the moon exactly opposite to the sun
@@ -586,7 +588,7 @@ export class SunBehaviour extends EntityBehaviour {
       shader.moonRotationSpeed = this.moon.rotationSpeed.value;
     }
 
-    shader.useClouds = this.clouds.show ? 1 : 0;
+    shader.useClouds = this.clouds.show;
     if (this.clouds.show) {
       shader.cloudSpeed = this.clouds.speed.value;
       shader.cloudTiling = this.clouds.tiling.value;
@@ -594,7 +596,7 @@ export class SunBehaviour extends EntityBehaviour {
       shader.cloudRepetition = this.clouds.repetition.value;
       shader.wheatherCondition = this.clouds.weather.value;
     }
-    shader.useStars = this.stars.show ? 1 : 0;
+    shader.useStars = this.stars.show;
     if (this.stars.show) {
       shader.starIntensity = this.stars.intensity.value;
       shader.starScale = this.stars.scale.value;

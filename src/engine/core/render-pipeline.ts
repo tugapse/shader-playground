@@ -11,138 +11,152 @@ import { ObjectInstanciator } from './object-instanciator';
 import { ClassType } from '@engine/enums/class-type.enum';
 
 export class RenderPipeline extends JsonSerializable {
-
   static instanciate() {
     return new RenderPipeline();
   }
-    protected _gl!:WebGL2RenderingContext;
-    protected _ellapsedFrames = 0;
-    protected _activeObjects: GlEntity[] = [];
-    protected _opaqueObjects: GlEntity[] = [];
-    protected _transparentObjects: GlEntity[] = [];
-    protected _skyboxObjects: GlEntity[] = [];
+  protected _gl!: WebGL2RenderingContext;
+  protected _ellapsedFrames = 0;
+  protected _activeObjects: GlEntity[] = [];
+  protected _opaqueObjects: GlEntity[] = [];
+  protected _transparentObjects: GlEntity[] = [];
+  protected _skyboxObjects: GlEntity[] = [];
 
-    public clearColor = Colors.cornflowerBlue;
-    public shadowmapRenderer!: ShadowMapRenderer;
-    protected scene!: Scene;
+  public clearColor = Colors.cornflowerBlue;
+  public shadowmapRenderer!: ShadowMapRenderer;
+  protected scene!: Scene;
 
-    constructor(public override name:string = "Render Pipeline") {
-        super('RenderPipeline');
+  constructor(public override name: string = 'Render Pipeline') {
+    super('RenderPipeline');
+  }
+
+  public initialize(scene: Scene) {
+    this.scene = scene;
+  }
+
+  public draw() {
+    if (!this.scene) {
+      console.error('No scene defined for this render pipeline');
+      return;
     }
 
-    public initialize(scene: Scene) {
-        this.scene = scene;
+    this._ellapsedFrames += 1;
+    if (this._ellapsedFrames > 3 || this._activeObjects.length == 0) {
+      this.fetchandSortEntities();
+      this._ellapsedFrames = 0;
     }
 
-    public draw() {
-        if (!this.scene) {
-            console.error('No scene defined for this render pipeline');
-            return;
-        }
-
-        this._ellapsedFrames += 1;
-        if (this._ellapsedFrames > 3 || this._activeObjects.length == 0) {
-            this.fetchandSortEntities();
-            this._ellapsedFrames = 0;
-        }
-
-        this.drawShadowmap();
-        this.drawScene();
-        // this.drawPostProcess();
+    this.drawShadowmap();
+    this.drawScene();
+    // this.drawPostProcess();
+  }
+  public drawScene() {
+    for (const object of this._opaqueObjects) {
+      object.draw();
     }
-    public drawScene() {
-        for (const object of this._activeObjects) { object.draw(); }
-        for (const object of this._skyboxObjects) { object.draw(); }
-        debugger
+    for (const object of this._skyboxObjects) {
+      object.draw();
     }
-
-    public clearScreen() {
-        this._gl.clearColor(
-            this.clearColor.r,
-            this.clearColor.g,
-            this.clearColor.b,
-            1.0,
-        );
-        this._gl.clear(
-            this._gl.COLOR_BUFFER_BIT |
-            this._gl.DEPTH_BUFFER_BIT |
-            this._gl.STENCIL_BUFFER_BIT,
-        );
+    for (const object of this._transparentObjects) {
+      object.draw();
     }
+  }
 
-    protected fetchandSortEntities() {
-        this._activeObjects = this.scene.objects
-            .filter((ob) => ob.active && ob.show)
-            .sort((a, b) => this.sortByDistance(a, b));
+  public clearScreen() {
+    this._gl.clearColor(
+      this.clearColor.r,
+      this.clearColor.g,
+      this.clearColor.b,
+      1.0,
+    );
+    this._gl.clear(
+      this._gl.COLOR_BUFFER_BIT |
+        this._gl.DEPTH_BUFFER_BIT |
+        this._gl.STENCIL_BUFFER_BIT,
+    );
+  }
 
-        this._skyboxObjects = this._activeObjects.filter(
-            (e) =>
-                e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.SKYBOX,
-        );
+  protected fetchandSortEntities() {
+    this._activeObjects = this.scene.objects
+      .filter((o) => o.active)
+      .sort((a, b) => this.sortByDistance(a, b));
+    this._opaqueObjects = this._activeObjects.filter(
+      (e) =>
+        e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.OPAQUE,
+    );
+
+    this._transparentObjects = this.scene.objects.filter(
+      (e) =>
+        e.getBehaviour(RendererBehaviour)?.renderLayer ==
+        RenderLayer.TRANSPARENT,
+    );
+
+    this._skyboxObjects = this.scene.objects.filter(
+      (e) =>
+        e.getBehaviour(RendererBehaviour)?.renderLayer == RenderLayer.SKYBOX,
+    );
+  }
+
+  protected drawShadowmap() {
+    if (!this.shadowmapRenderer?.enabled) {
+      this.shadowmapRenderer.clearShadowMap();
     }
-
-    protected drawShadowmap() {
-        if (!this.shadowmapRenderer?.enabled) {
-            this.shadowmapRenderer.clearShadowMap();
-        }
-        const lightEntity = this.scene.lights.find(
-            (obj) =>
-                obj.entityType === EntityType.LIGHT_DIRECTIONAL &&
-                obj.active &&
-                obj.show,
-        );
-        if (this.shadowmapRenderer?.enabled && lightEntity) {
-            this.shadowmapRenderer.drawShadowapTexture(
-                lightEntity as DirectionalLight,
-            );
-        } else {
-            this.shadowmapRenderer.clearShadowMap();
-        }
+    const lightEntity = this.scene.lights.find(
+      (obj) =>
+        obj.entityType === EntityType.LIGHT_DIRECTIONAL &&
+        obj.active &&
+        obj.show,
+    );
+    if (this.shadowmapRenderer?.enabled && lightEntity) {
+      this.shadowmapRenderer.drawShadowapTexture(
+        lightEntity as DirectionalLight,
+      );
+    } else {
+      this.shadowmapRenderer.clearShadowMap();
     }
+  }
 
-    protected sortByRenderLayer(a: GlEntity, b: GlEntity) {
-        const aBeh = a.getBehaviour(RendererBehaviour);
-        const bBeh = a.getBehaviour(RendererBehaviour);
-        if (!aBeh || !bBeh) {
-            return 0;
-        }
-        return aBeh.renderLayer - bBeh.renderLayer;
+  protected sortByRenderLayer(a: GlEntity, b: GlEntity) {
+    const aBeh = a.getBehaviour(RendererBehaviour);
+    const bBeh = a.getBehaviour(RendererBehaviour);
+    if (!aBeh || !bBeh) {
+      return 0;
     }
+    return aBeh.renderLayer - bBeh.renderLayer;
+  }
 
-    protected sortByDistance(a: GlEntity, b: GlEntity) {
-        const aD = vec3.distance(
-            a.transform.worldPosition,
-            Camera.mainCamera.transform.worldPosition,
-        );
-        const bD = vec3.distance(
-            b.transform.worldPosition,
-            Camera.mainCamera.transform.worldPosition,
-        );
-        return bD - aD;
-    }
+  protected sortByDistance(a: GlEntity, b: GlEntity) {
+    const aD = vec3.distance(
+      a.transform.worldPosition,
+      Camera.mainCamera.transform.worldPosition,
+    );
+    const bD = vec3.distance(
+      b.transform.worldPosition,
+      Camera.mainCamera.transform.worldPosition,
+    );
+    return bD - aD;
+  }
 
-    public setGlRenderingContext(gl: WebGL2RenderingContext): void {
-        this._gl = gl;
-        
-        if (!this.shadowmapRenderer) {
-            this.shadowmapRenderer = new ShadowMapRenderer(this._gl, this.scene);
-        }
-    }
+  public setGlRenderingContext(gl: WebGL2RenderingContext): void {
+    this._gl = gl;
 
-    public override fromJson(jsonObject: JsonSerializedData): void {
-        super.fromJson(jsonObject);
-        this.deserializeAutomatically(jsonObject);
+    if (!this.shadowmapRenderer) {
+      this.shadowmapRenderer = new ShadowMapRenderer(this._gl, this.scene);
     }
+  }
 
-    public override toJSON(): JsonSerializedData {
-        return this.serializeAutomatically();
-    }
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
+
+  public override toJsonObject(): JsonSerializedData {
+    return this.serializeAutomatically();
+  }
 }
 
-
-    ObjectInstanciator.addDependency("RenderPipeline", RenderPipeline.instanciate, {
-      name: "RenderPipeline",
-      type: ClassType.RenderBehaviour,
-      path: "Renderers/RenderPipeline",
-      description: "Base class for all rendering Pipelines."
-    });
+ObjectInstanciator.addDependency('RenderPipeline', RenderPipeline.instanciate, {
+  name: 'RenderPipeline',
+  type: ClassType.RenderBehaviour,
+  path: 'Renderers/RenderPipeline',
+  description: 'Base class for all rendering Pipelines.',
+});

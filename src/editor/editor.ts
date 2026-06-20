@@ -86,6 +86,9 @@ export class Editor implements OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     const projectId = this.route.snapshot.paramMap.get('project');
     const sceneId = this.route.snapshot.paramMap.get('scene');
+    // TODO this will be removed on the v1
+    if(this.route.snapshot.queryParamMap.get('write-scene'))
+      return;
 
     if (projectId && sceneId) {
       // TODO set some loading state
@@ -110,21 +113,6 @@ export class Editor implements OnDestroy, AfterViewInit {
     }
 
     this.loadFromStorage();
-
-    // document.addEventListener('keydown', (event) => {
-    //   if (event.ctrlKey && event.key === 'p') {
-    //     event.preventDefault();
-    //     if (this.scene.isRunning) {
-    //       this.onScenePause(this.scene);
-    //     } else {
-    //       this.onScenePlay(this.scene);
-    //     }
-    //   }
-    //   if (event.ctrlKey && event.key === 'o') {
-    //     event.preventDefault();
-    //     this.onSceneStop(this.scene);
-    //   }
-    // });
   }
 
   ngOnDestroy(): void {

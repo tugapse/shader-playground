@@ -25,6 +25,11 @@
   position: relative;
 }
 
+.main-content .flex{
+  display: flex;
+  flex-direction: column;
+}
+
 .dashboard-welcome {
   width: 100%;
   height: 100%;

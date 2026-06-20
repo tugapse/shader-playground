@@ -14,6 +14,7 @@ import {
   Vector3,
   Vector4,
   NumberRange,
+  FogType,
 } from '@engine';
 import { BooleanInspector } from '../../components/inspector/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '../../components/inspector/text-input-inspector/text-input-inspector';
@@ -73,6 +74,7 @@ export class ObjectInspector {
   @Input() isChild = false;
   @Input() showPrivateProperties = false;
   @Input() showAllProperties = false;
+  objectsToshow: ITargetObject[] = [];
 
   @Input() set targetObject(value: ITargetObject) {
     this._selectedObject = value;
@@ -86,6 +88,11 @@ export class ObjectInspector {
   protected _selectedObject?: ITargetObject;
   protected _properties: ITargetProperty[] = [];
   protected _enums: { [key: string]: any } = {};
+
+  constructor(){
+    this._enums['fogType'] = this.convertEnumToObject(FogType);
+
+  }
 
   // Event Handlers from template
   onValueChanged(
@@ -152,6 +159,22 @@ export class ObjectInspector {
       .filter((key) => this.isPropertyValid(key))
       .map((key) => this._createPropertyViewModel(key, object[key]))
       .filter((p): p is ITargetProperty => !!p);
+  }
+  
+  protected prepareProperties(entity: GlEntity) {
+    if (entity) {
+      this.objectsToshow = Object.keys(entity)
+        .filter(this.isPropertyValid.bind(this))
+        .map((key) => this.mapProperty(entity, key));
+    }
+  }
+
+  protected mapProperty(entity: GlEntity, key: string) {
+    const isEnum = !!this._enums[key];
+    const type = isEnum ? 'enum' : this.getObjectType(entity[key]);
+    const property = entity[key];
+
+    return { key, type, property };
   }
 
   private _createPropertyViewModel(

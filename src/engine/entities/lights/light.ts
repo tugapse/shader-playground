@@ -1,36 +1,48 @@
 import { vec3 } from 'gl-matrix';
-import { Color } from '../core/color';
-import { Transform } from '../core/transform';
-import { Vector3 } from '../core/vector';
-import { EntityType } from '../enums/entity-type.enum';
-import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
-import { GlEntity } from './entity';
+import { Color } from '../../core/color';
+import { Transform } from '../../core/transform';
+import { Vector3 } from '../../core/vector';
+import { EntityType } from '../../enums/entity-type.enum';
+import { JsonSerializedData } from '../../interfaces/json-serialized-data.interface';
+import { GlEntity } from '../entity';
+import { JsonSerializable } from '@engine/interfaces';
 
 /**
   Defines the properties for light attenuation, controlling how light intensity diminishes with distance.
  */
-export class LightAttenuation {
+export class LightAttenuation extends JsonSerializable {
+  constructor() {
+    super('LightAttenuation');
+  }
   /**
     The constant component of attenuation.
    * @type {number}
    */
-  public constant: number = 1.0;
+  public constant: number = 0.2;
   /**
     The linear component of attenuation.
    * @type {number}
    */
-  public linear: number = 0.0; // 0.0 for strict physical inverse square law falloff
+  public linear: number = 0.01; // 0.0 for strict physical inverse square law falloff
   /**
     The quadratic component of attenuation.
    * @type {number}
    */
-  public quadratic: number = 1.0; // 1.0 for strict physical inverse square law falloff
+  public quadratic: number = 0.001; // 1.0 for strict physical inverse square law falloff
+
+  public override toJsonObject(): JsonSerializedData {
+    return this.serializeAutomatically();
+  }
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
 }
 
 /**
   Defines the properties for the cone angles of a spotlight.
  */
-export class LightConeAngles {
+export class LightConeAngles extends JsonSerializable {
   /**
     The inner cone angle in degrees.
    * @type {number}
@@ -41,6 +53,18 @@ export class LightConeAngles {
    * @type {number}
    */
   public outer: number = 30.0; // Typical physical flashlight outer beam
+
+  constructor(){
+    super("LightConeAngles")
+  }
+
+  public override toJsonObject(): JsonSerializedData {
+    return this.serializeAutomatically();
+  }
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
 }
 
 /**
@@ -72,7 +96,6 @@ export class Light extends GlEntity {
     this.entityType = EntityType.LIGHT_AMBIENT;
   }
 
-
   /**
     Creates a new Light instance.
 
@@ -84,6 +107,16 @@ export class Light extends GlEntity {
   static override instanciate(name?: string, transform?: Transform): Light {
     return new Light(name || 'Light');
   }
+
+  public override toJsonObject(): JsonSerializedData {
+    const result = this.serializeAutomatically();
+    return result;
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
 }
 
 /**
@@ -91,27 +124,29 @@ export class Light extends GlEntity {
  * @augments {Light}
  */
 export class DirectionalLight extends Light {
-  
   public static override get className() {
     return 'DirectionalLight';
   }
-  
+
   protected override _className = 'DirectionalLight';
-  
+
   /**
     The type of the entity, specifically set to LIGHT_DIRECTIONAL.
    * @override
    * @type {EntityType}
    */
   public override entityType: EntityType = EntityType.LIGHT_DIRECTIONAL;
-  
+
   /**
     Gets the direction of the light, derived from the transform's rotation.
    * @readonly
    * @type {vec3}
    */
   public get direction(): vec3 {
-    return vec3.normalize(vec3.create(), this.invertLightDirection ? this.transform.back : this.transform.forward);
+    return vec3.normalize(
+      vec3.create(),
+      this.invertLightDirection ? this.transform.back : this.transform.forward,
+    );
   }
 
   public invertLightDirection = false;
@@ -125,15 +160,14 @@ export class DirectionalLight extends Light {
     this.entityType = EntityType.LIGHT_DIRECTIONAL;
     this.color = new Color(1.0, 0.98, 0.95, 0.7);
   }
+  public override toJsonObject(): JsonSerializedData {
+    const result = this.serializeAutomatically();
+    return result;
+  }
 
-  /**
-    Deserializes the directional light's state from a JSON object.
-   * @override
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   * @returns {void}
-   */
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
   }
 
   /**
@@ -185,6 +219,15 @@ export class PointLight extends Light {
     this.color = new Color(1.0, 0.85, 0.57, 1.0);
     this.attenuation = new LightAttenuation();
   }
+  public override toJsonObject(): JsonSerializedData {
+    const result = this.serializeAutomatically();
+    return result;
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
 
   /**
     Creates a new PointLight instance.
@@ -219,12 +262,12 @@ export class SpotLight extends Light {
     The cone angles that define the shape of the spotlight.
    * @type {LightConeAngles}
    */
-  public coneAngles!: LightConeAngles;
+  public coneAngles: LightConeAngles = new LightConeAngles();
   /**
     The attenuation properties of the light.
    * @type {LightAttenuation}
    */
-  public attenuation!: LightAttenuation;
+  public attenuation: LightAttenuation = new LightAttenuation();
   /**
     Gets the direction of the light, derived from the transform's rotation.
    * @readonly
@@ -243,10 +286,17 @@ export class SpotLight extends Light {
     this.entityType = EntityType.LIGHT_SPOT;
     // LED/Halogen flashlight (approx 5000K)
     this.color = new Color(1.0, 0.96, 0.89, 1.0);
-    this.coneAngles = new LightConeAngles();
-    this.attenuation = new LightAttenuation();
   }
 
+  public override toJsonObject(): JsonSerializedData {
+    const result = this.serializeAutomatically();
+    return result;
+  }
+
+  public override fromJson(jsonObject: JsonSerializedData): void {
+    super.fromJson(jsonObject);
+    this.deserializeAutomatically(jsonObject);
+  }
 
   /**
     Creates a new SpotLight instance.

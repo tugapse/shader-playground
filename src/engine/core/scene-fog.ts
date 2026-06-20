@@ -1,14 +1,20 @@
 import { Color } from "@engine";
 
+
+export enum FogType{
+    LINEAR = 0,
+    EXPONENTIAL = 1, 
+    EXPONEMTIAL_SQUARED = 2
+}
 export class SceneFog {
 
-  color: Color;
+  enabled: boolean = true;
+  fogType: number = FogType.LINEAR; // Default to Exp fog
   distance: number;
   density: number;
-  enabled: boolean = true;
-  fogType: number = 1; // Default to Exp fog
   heightFalloff: number = 0.0; // 0.0 disables height fog
   baseHeight: number = 0.0;
+  color: Color;
 
   constructor(color: Color, distance: number, density: number) {
     this.color = color;
