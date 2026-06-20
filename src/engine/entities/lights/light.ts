@@ -108,15 +108,6 @@ export class Light extends GlEntity {
     return new Light(name || 'Light');
   }
 
-  public override toJsonObject(): JsonSerializedData {
-    const result = this.serializeAutomatically();
-    return result;
-  }
-
-  public override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-    this.deserializeAutomatically(jsonObject);
-  }
 }
 
 /**
@@ -160,15 +151,7 @@ export class DirectionalLight extends Light {
     this.entityType = EntityType.LIGHT_DIRECTIONAL;
     this.color = new Color(1.0, 0.98, 0.95, 0.7);
   }
-  public override toJsonObject(): JsonSerializedData {
-    const result = this.serializeAutomatically();
-    return result;
-  }
 
-  public override fromJson(jsonObject: JsonSerializedData): void {
-    super.fromJson(jsonObject);
-    this.deserializeAutomatically(jsonObject);
-  }
 
   /**
     Creates a new DirectionalLight instance.

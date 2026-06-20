@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditorInpector } from './inpector';
+import { ColorInspector } from './color-inspector';
 
-describe('Inpector', () => {
-  let component: EditorInpector;
-  let fixture: ComponentFixture<EditorInpector>;
+describe('ColorInspector', () => {
+  let component: ColorInspector;
+  let fixture: ComponentFixture<ColorInspector>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EditorInpector]
+      imports: [ColorInspector]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EditorInpector);
+    fixture = TestBed.createComponent(ColorInspector);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,11 +1,15 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
+import { EditorService } from '@editor/services/editor.service';
+import { SceneTreeService } from '@editor/services/scene-tree.service';
 import {
   Color,
   ColorMaterial,
   EntityBehaviour,
+  FogType,
   GlEntity,
   LitMaterial,
+  NumberRange,
   Shader,
   Texture,
   Transform,
@@ -13,18 +17,14 @@ import {
   Vector2,
   Vector3,
   Vector4,
-  NumberRange,
-  FogType,
 } from '@engine';
+import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { BooleanInspector } from '../../components/inspector/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '../../components/inspector/text-input-inspector/text-input-inspector';
 import { VectorInspector } from '../../components/inspector/vector-inspector/vector-inspector';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
-import { SceneTreeService } from '@editor/services/scene-tree.service';
-import { EditorService } from '@editor/services/editor.service';
-import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 
 export interface ITargetObject {
   [key: string]: any;
@@ -47,8 +47,8 @@ export interface ITargetProperty extends ITargetObject {
     VectorInspector,
     BooleanInspector,
     EnumInspector,
-    NumberRangeInspector,
-  ],
+    NumberRangeInspector
+],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss',
 })

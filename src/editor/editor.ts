@@ -21,7 +21,7 @@ import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/en
 import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { Canvas } from './components/canvas/canvas';
 import { TopBar } from './components/top-bar/top-bar';
-import { Inpector } from './inspectors/inpector/inpector';
+import { EditorInpector } from './inspectors/inpector/inpector';
 import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
@@ -37,7 +37,7 @@ import { AssetService } from 'src/app/api/services/asset.service';
   imports: [
     Canvas,
     CommonModule,
-    Inpector,
+    EditorInpector,
     TopBar,
     AssetsExplorerComponent,
     CodeEditorLogic,

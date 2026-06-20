@@ -28,6 +28,7 @@ import { ClassMetadata } from '@engine/interfaces/class-metadata';
 import { take } from 'rxjs';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -44,7 +45,8 @@ import { DropdownItem } from 'src/app/components/dropdown/dropdown';
     Icon,
     AddBehaviourMenuComponent,
     EnumInspector,
-  ],
+    CommonModule
+],
   templateUrl: './entity-inspector.html',
   styleUrl: './entity-inspector.scss',
 })

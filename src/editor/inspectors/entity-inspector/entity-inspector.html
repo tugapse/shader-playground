@@ -16,7 +16,7 @@
           (change)="onNameChanged($event)"
         />
       </section>
-      <section>
+      <section [ngClass]="{ tag: objectsToshow.length > 2 }">
         <span>Tag</span
         ><input
           class="text-input"
@@ -69,38 +69,30 @@
             (change)="onEnumChange(entityProperty.key, $event)"
           ></editor-enum-inspector>
         }
+
+        @case ("color") {
+          <editor-color-inspector
+            [label]="entityProperty.key"
+            [selectedColor]="entity[entityProperty.key]"
+            (colorChange)="onColorChanged(entityProperty, $event)"
+          ></editor-color-inspector>
+        }
+
+        @case ("object") {
+          <editor-object-inspector
+            [label]="entityProperty.key.capitalize()"
+            [targetObject]="entityProperty"
+          ></editor-object-inspector>
+        }
       }
     }
   </editor-inpector-toggle-panel>
 
-  @for (entityProperty of objectsToshow; track $index) {
-    @switch (entityProperty.type) {
-      @case ("transform") {
-        @if (!_isScene) {
-          <editor-transform-inspector
-            [entity]="entity"
-            [collapsed]="true"
-          ></editor-transform-inspector>
-        }
-      }
-
-      @case ("color") {
-        <editor-color-inspector
-          [label]="entityProperty.key"
-          [selectedColor]="entity[entityProperty.key]"
-          (colorChange)="onColorChanged(entityProperty, $event)"
-        ></editor-color-inspector>
-      }
-
-      @case ("object") {
-        <editor-object-inspector
-          [label]="entityProperty.key.capitalize()"
-          [targetObject]="entityProperty"
-        ></editor-object-inspector>
-      }
-    }
-  }
   @if (!_isScene) {
+    <editor-transform-inspector
+      [entity]="entity"
+      [collapsed]="true"
+    ></editor-transform-inspector>
     <div class="behaviours-header-container" style="position: relative">
       <h4 class="behaviours-header">Behaviours</h4>
       <app-icon

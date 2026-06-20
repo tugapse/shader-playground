@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MovableDirective } from '@editor/directives/moveable.directive';
+import { EditorService } from '@editor/services/editor.service';
+import { GlEntity } from '@engine';
 import { Icon } from "src/app/components/icon/icon";
 import { InspectorHeader } from '../../components/inspector/inspector-header/inspector-header';
 import { EntityInspector } from "../entity-inspector/entity-inspector";
-import { GlEntity } from '@engine';
-import { EditorService } from '@editor/services/editor.service';
-import { SandboxSliderComponent } from "../sandbox-slider.component";
 
 @Component({
   selector: 'editor-inpector',
@@ -15,11 +14,10 @@ import { SandboxSliderComponent } from "../sandbox-slider.component";
   imports: [
     CommonModule, InspectorHeader, MovableDirective,
     Icon,
-    EntityInspector,
-    SandboxSliderComponent
+    EntityInspector
 ],
 })
-export class Inpector {
+export class EditorInpector {
 
   objectsToshow: { key: string, type: string, property: any }[] = []
 

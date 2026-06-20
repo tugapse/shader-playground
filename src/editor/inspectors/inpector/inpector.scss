@@ -8,7 +8,6 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    padding: var(--editor-panel-outer-padding);
     background: var(--editor-panel-background);
     color: var(--editor-panel-color);
     border: var(--editor-panel-border);
@@ -21,21 +20,18 @@
     overflow-y: scroll;
   }
 
-  .inspector .content {
-  }
-
-
 
   .inspector .footer {
     display: flex;
     position: sticky;
     margin-top: auto;
     bottom: 0;
-    width: 100%;
+    padding: 10px;
+    border-top:  var(--editor-panel-border);
+    background: var(--editor-panel-background-10);
   }
 
   .inspector .footer span {
     width: 100%;
-    background-color: var(--editor-panel-background);
   }
 }
