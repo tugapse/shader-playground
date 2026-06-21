@@ -35,3 +35,18 @@
     {{ toastMessage }}
   </div>
 }
+
+<div class="desktop-area">
+  @for (win of windowService.windows$ | async; track win.id) {
+    <editor-window
+      [windowId]="win.id"
+      [windowtitle]="win.title"
+      [windowIconName]="win.iconName"
+      [childComponentType]="win.component"
+      [childInputs]="win.inputs"
+      [isActive]="win.id === (windowService.activeWindowId$ | async)"
+      [style.z-index]="win.zIndex"
+    >
+    </editor-window>
+  }
+</div>

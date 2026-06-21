@@ -63,7 +63,9 @@ export class ThemeSelector {
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.items = this.data.map((a) => ({ key: a.title, value: a.code }));
-    this.selectedItem = this.items.find(i=>i.value == localStorage.getItem("omg_theme") || "")!
+    const savedTheme = localStorage.getItem("omg_theme") || ""
+    debugger
+    this.selectedItem = this.items.find(i=>i.value == savedTheme)!
     this.setTheme(this.selectedItem.value.toString())
   }
 }

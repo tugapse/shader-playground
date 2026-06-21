@@ -1,94 +1,92 @@
- :host {
-   display: block;
-   transition: all 0.5s;
- }
+:host {
+  display: block;
+  transition: all 0.5s;
+}
 
- .tree-node {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   justify-content: space-between;
-   cursor: pointer;
-   transition: all 0.3s;
-   position: relative;
-   margin: 2px 4px;
+.tree-node {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  margin: 2px 4px;
 
-   &:hover {
-    background-color: #374151;
-    transform: scale(1.2);
-    width: 78%;
-    left: 30px;
-   }
+  &:hover {  
+    background-color: var(--editor-icon-button-hover-background);
+    transform: scale(1.05);
+  }
 
-   &.selected {
-     background-color: #0095eb;
-   }
- }
+  &.selected {
+    background-color: var(--editor-icon-button-selected-background);
+  }
+}
 
- .tree-node-content {
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
-   flex-grow: 1;
-   padding: 2px 0;
- }
+.tree-node-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-grow: 1;
+  padding: 2px 0;
+}
 
- .tree-node .tree-node-icon {
-   width: 1rem;
-   height: 1rem;
-   flex-shrink: 0;
-   color: #9CA3AF;
- }
+.tree-node .tree-node-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: #9ca3af;
+}
 
- .tree-node-name {
-   color: #E5E7EB;
-   flex-grow: 1;
- }
+.tree-node-name {
+  color: #e5e7eb;
+  flex-grow: 1;
+}
 
- .delete-icon {
-   display: none;
-   width: 24px;
-   color: #9CA3AF;
-   cursor: pointer;
-   
-   &:hover {
-     color: #EF4444; /* red-500 */
-   }
- }
+.delete-icon {
+  display: none;
+  width: 24px;
+  color: #9ca3af;
+  cursor: pointer;
 
- .tree-node:hover .delete-icon {
-   display: flex;
- }
+  &:hover {
+    color: #ef4444; /* red-500 */
+  }
+}
 
- .tree-node-children {
-   margin-left: 10px;
-   border-left: 1px solid #4B5563;
-   padding-left: 2px;
- }
+.tree-node:hover .delete-icon {
+  display: flex;
+}
 
- .drop-inside {
-   background-color: #4B5563;
-   outline: 1px dashed #6EE7B7;
- }
+.tree-node-children {
+  margin-left: 10px;
+  border-left: 1px solid #4b5563;
+  padding-left: 2px;
+}
 
- .drop-above::before {
-   content: '';
-   position: absolute;
-   top: -2px;
-   left: 0;
-   right: 0;
-   height: 2px;
-   background-color: #6EE7B7;
-   border-radius: 1px;
- }
+.drop-inside {
+  background-color: #4b5563;
+  outline: 1px dashed #6ee7b7;
+}
 
- .drop-below::after {
-   content: '';
-   position: absolute;
-   bottom: -2px;
-   left: 0;
-   right: 0;
-   height: 2px;
-   background-color: #6EE7B7;
-   border-radius: 1px;
- }
+.drop-above::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #6ee7b7;
+  border-radius: 1px;
+}
+
+.drop-below::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #6ee7b7;
+  border-radius: 1px;
+}

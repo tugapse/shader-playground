@@ -4,8 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
-  OnDestroy,
-  OnInit,
+  OnDestroy
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -16,21 +15,21 @@ import {
   SceneManager,
 } from '@engine';
 import { Subscription } from 'rxjs';
-import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
+import { AssetService } from 'src/app/api/services/asset.service';
 import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
+import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
 import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { Canvas } from './components/canvas/canvas';
+import { SceneTree } from './components/scene-tree/scene-tree';
 import { TopBar } from './components/top-bar/top-bar';
-import { EditorInpector } from './inspectors/inpector/inpector';
+import { AssetExplorerWindow } from './components/window/window';
+import { EditorInpector } from './inspectors/inpector-window/inpector';
 import { IEditorSettings } from './interfaces/editor-settings';
+import { EditorStateService } from './services/editor-state.service';
 import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
-import { CodeEditorLogic } from './components/code-editor/editor/editor.component';
-import { AssetsExplorerComponent } from './components/asset-explorer/assets-explorer.component';
-import { EditorStateService } from './services/editor-state.service';
 import { SceneTreeService } from './services/scene-tree.service';
-import { SceneTree } from './components/scene-tree/scene-tree';
-import { AssetService } from 'src/app/api/services/asset.service';
+import { WindowService } from './services/window.service';
 
 @Component({
   selector: 'app-editor',
@@ -39,9 +38,8 @@ import { AssetService } from 'src/app/api/services/asset.service';
     CommonModule,
     EditorInpector,
     TopBar,
-    AssetsExplorerComponent,
-    CodeEditorLogic,
     SceneTree,
+    AssetExplorerWindow,
   ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
@@ -71,6 +69,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     protected sceneTreeService: SceneTreeService,
     protected editorSettings: EditorSettingsService,
     protected editorState: EditorStateService,
+    protected windowService: WindowService,
 
     protected assetService: AssetService,
     protected route: ActivatedRoute,
@@ -91,7 +90,7 @@ export class Editor implements OnDestroy, AfterViewInit {
         scene: sceneId,
         config: {},
       });
-      
+
       if (!this.route.snapshot.queryParamMap.get('write-scene'))
         this.assetService
           .getTextAssetContent(projectId, sceneId)
@@ -107,8 +106,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     } else {
       this.router.navigate(['/invalid-project']);
     }
-
-    this.loadFromStorage();
+    
   }
 
   ngOnDestroy(): void {
@@ -186,11 +184,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.subs$.push(
       this.editorService.onSceneStop.subscribe(this.onSceneStop.bind(this)),
     );
-    this.subs$.push(
-      this.editorService.onEditorSaveStateRequest.subscribe(
-        this.onEditorSaveInStorage.bind(this),
-      ),
-    );
+   
     this.subs$.push(
       this.editorSettings.onSettingsChanged.subscribe(
         this.updateEditorSettings.bind(this),
@@ -324,7 +318,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   toggleFullscreen() {
-    console.debug('i was called');
     this.isFullScreen = !this.isFullScreen;
     setTimeout(() => this.editorService.requestCanvasResize(), 10);
   }

@@ -1,0 +1,67 @@
+:host {
+  .window {
+    top: 0;
+    left: 0;
+    overflow: scroll;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    min-height: 100px;
+    width: 500px;
+    height: 300px;
+    box-sizing: border-box;
+    background: var(--editor-panel-background);
+    border: var(--editor-panel-border);
+    box-shadow: var(--editor-panel-box-shadow);
+    color: var(--editor-panel-color);
+    z-index: 10;
+
+    &.focused {
+      border: var(--editor-panel-border);
+      border-color: var(--editor-panel-chevron-color);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+      opacity: 1;
+      z-index: 11;
+    }
+
+    &.maximized {
+    transform: translate(0px,0px) !important;
+     width: 100vw !important;
+     height: 100vh !important;
+    position: absolute;
+    }
+  }
+
+  .window .header {
+    padding: 8px 12px;
+    display: flex;
+    column-gap: 8px;
+  }
+
+  .window .header span {
+    flex-grow: 1;
+  }
+
+  .window .header .click-icon {
+    padding: 4px;
+    cursor: pointer;
+    &:hover {
+      color: var(--editor-icon-button-hover-color);
+    }
+  }
+
+  .window .footer {
+    display: flex;
+    position: sticky;
+    margin-top: auto;
+    bottom: 0;
+    padding: 10px;
+    border-top: var(--editor-panel-border);
+    background: var(--editor-panel-background-10);
+  }
+
+  .window .footer span {
+    width: 100%;
+  }
+}

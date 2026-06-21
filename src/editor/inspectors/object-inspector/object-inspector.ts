@@ -74,7 +74,7 @@ export class ObjectInspector {
   @Input() label: string = 'No title';
   @Input() isChild = false;
   @Input() showPrivateProperties = false;
-  @Input() showAllProperties = false;
+  @Input() showAllProperties = true;
 
   @Input() set targetObject(value: ITargetObject) {
     

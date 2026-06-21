@@ -11,7 +11,7 @@ export class RotateBehaviour extends EntityBehaviour {
   speed = 0.005;
 
   public override update(ellapsed: number): void {
-    const velocity = this.speed*ellapsed
+    const velocity = this.speed * ellapsed
     this.transform.rotate(
       this.rotationAngle.x * velocity, 
       this.rotationAngle.y * velocity,
