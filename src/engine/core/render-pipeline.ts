@@ -16,6 +16,8 @@ export class RenderPipeline extends JsonSerializable {
   }
   protected _gl!: WebGL2RenderingContext;
   protected _ellapsedFrames = 0;
+  protected _maxFramesNeededToResort = 20;
+
   protected _activeObjects: GlEntity[] = [];
   protected _opaqueObjects: GlEntity[] = [];
   protected _transparentObjects: GlEntity[] = [];
@@ -40,7 +42,7 @@ export class RenderPipeline extends JsonSerializable {
     }
 
     this._ellapsedFrames += 1;
-    if (this._ellapsedFrames > 3 || this._activeObjects.length == 0) {
+    if (this._ellapsedFrames > this._maxFramesNeededToResort || this._activeObjects.length == 0) {
       this.fetchandSortEntities();
       this._ellapsedFrames = 0;
     }
@@ -113,15 +115,6 @@ export class RenderPipeline extends JsonSerializable {
     } else {
       this.shadowmapRenderer.clearShadowMap();
     }
-  }
-
-  protected sortByRenderLayer(a: GlEntity, b: GlEntity) {
-    const aBeh = a.getBehaviour(RendererBehaviour);
-    const bBeh = a.getBehaviour(RendererBehaviour);
-    if (!aBeh || !bBeh) {
-      return 0;
-    }
-    return aBeh.renderLayer - bBeh.renderLayer;
   }
 
   protected sortByDistance(a: GlEntity, b: GlEntity) {

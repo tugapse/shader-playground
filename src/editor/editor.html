@@ -12,12 +12,10 @@
         class="canvas"
         [ngClass]="{ fullscreen: isFullScreen }"
         [scene]="scene"
-        (fps)="onFpsUpdated($event)"
+        (stats)="onFpsUpdated($event)"
         (onGlContextCreated)="onGlContextCreated($event)"
       ></editor-canvas>
-      <div class="canvas-info">
-        <span (click)="toggleFullscreen()">FPS: {{ fpsCounter }}</span>
-      </div>
+      <editor-engine-stats [stats]="stats"></editor-engine-stats>
     }
     <!-- @case ("assets") {
       <app-assets-explorer></app-assets-explorer>
