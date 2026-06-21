@@ -10,6 +10,7 @@
   --editor-panel-background-10: #292d39;
   --editor-panel-color: #a6accd;
   --editor-panel-header-title-color: #ffffff;
+  --editor-panel-section-header: #6082a7;
   --editor-panel-H-color: #82aaff; 
   --editor-panel-chevron-color: #717cb4;
   --editor-panel-border: 1px solid #292d39;
@@ -48,54 +49,6 @@
   --scrollbar-thumb-hover-background: #717cb4; 
 }
 
-:root.someother{
-
-   /* global */
-  --global-background-color: #1a1525;
-
-  --editor-panel-outer-padding: 4px;
-  --editor-panel-background: #231d31;
-  --editor-panel-background-50: #2a243b;
-  --editor-panel-background-10: #352e4a;
-  --editor-panel-color: #e0d8f0;
-  --editor-panel-header-title-color: #ffffff;
-  --editor-panel-H-color: #ff7e67; 
-  --editor-panel-chevron-color: #a89fbb;
-  --editor-panel-border: 1px solid #453c5c;
-  --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-
-  /* inputs */
-  --editor-panel-text-input-background: #1a1525;
-  --editor-panel-text-input-color: #ffffff;
-  --editor-panel-text-input-border: 1px solid #453c5c;
-
-  /* icons */
-  --editor-icon-button-background: transparent;
-  --editor-icon-button-color: #a89fbb;
-  --editor-icon-button-hover-background: rgba(255, 126, 103, 0.15);
-  --editor-icon-button-hover-color: #ffb4a2; 
-  --editor-icon-button-selected-background: #ff7e67; 
-  --editor-icon-button-selected-color: #1a1525;
-  --editor-placeholder-icon-color: #6a5f82;
-
-  /* buttons */
-  --editor-primary-button-text-color: #1a1525;
-
-  /* modal */
-  --editor-modal-backdrop-background: rgba(26, 21, 37, 0.85);
-  --editor-modal-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-
-  /* states & feedback */
-  --editor-error-color: #ff4a68; 
-  --editor-focus-shadow: 0 0 0 2px rgba(255, 126, 103, 0.4); 
-
-
-  /* --- New Scrollbar Variables --- */
-  --scrollbar-track-background: var(--editor-panel-background); 
-  --scrollbar-thumb-background: #453c5c; 
-  --scrollbar-thumb-border-color: #231d31; 
-  --scrollbar-thumb-hover-background: #ff7e67; 
-}
 
 
 /* For WebKit browsers (Chrome, Safari, Edge, Opera) */

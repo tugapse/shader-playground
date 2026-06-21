@@ -75,7 +75,7 @@ export class EntityInspector extends ObjectInspector {
   }
 
   @Input() set targetEntity(entity: GlEntity) {
-    debugger
+    
     this._isScene = entity.className == "Scene"
     this.prepareProperties(entity);
     this.entity = entity;

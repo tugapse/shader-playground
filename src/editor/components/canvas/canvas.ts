@@ -90,10 +90,10 @@ export class Canvas implements OnChanges, OnDestroy {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
       return;
     }
+    const delta = elapsed / 1000;
+    this.scene.update(delta);
     if (elapsed > this.frameInterval) {
       this.lastTime = timestamp - (elapsed % this.frameInterval);
-      const delta = elapsed / 1000;
-      this.scene.update(delta);
       this.editorService.onUpdateFrame.next(delta);
       if (this.gl && this.canvasElement) {
         this.scene.draw();
@@ -102,9 +102,9 @@ export class Canvas implements OnChanges, OnDestroy {
     }
     this.frameCount++;
     const fpsElapsed = timestamp - this.lastFpsUpdateTime;
+    const actualFps = (this.frameCount / fpsElapsed) * 1000;
     if (fpsElapsed >= 1000) {
-      const actualFps = (this.frameCount / fpsElapsed) * 1000;
-      this.ngZone.run(() => {
+      this.ngZone.runOutsideAngular(() => {
         this.fps.next(Math.round(actualFps));
       });
       this.frameCount = 0;

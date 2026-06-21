@@ -13,6 +13,6 @@ export class TextureInspector extends ObjectInspector {
   @Input() texture!: Texture;
 
   ngOnInit() {
-    debugger;
+    ;
   }
 }

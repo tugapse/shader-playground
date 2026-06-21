@@ -77,7 +77,7 @@ export class ObjectInspector {
   @Input() showAllProperties = false;
 
   @Input() set targetObject(value: ITargetObject) {
-    debugger
+    
     this._selectedObject = value;
     this.loadProperties();
     
@@ -248,7 +248,7 @@ export class ObjectInspector {
   }
 
   onEnumChange(key: string, menuItem: DropdownItem) {
-    debugger
+    
     this._selectedObject!.property[key] = menuItem.value;
     this.editorService.requestCanvasResize();
   }

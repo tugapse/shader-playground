@@ -5,13 +5,14 @@ import { AuthService } from '../../api/services/auth.service';
 import { UserService } from '../../api/services/user.service';
 import { UserResponse } from '../../api/models/omega-api.models';
 import { Icon } from '../icon/icon';
+import { ThemeSelector } from "@editor/components/theme-selector/theme-selector";
 
 @Component({
   selector: 'app-user-bar',
   templateUrl: './user-bar.component.html',
   styleUrls: ['./user-bar.component.scss'],
   standalone: true,
-  imports: [CommonModule, Icon]
+  imports: [CommonModule, Icon, ThemeSelector]
 })
 export class UserBarComponent implements OnInit {
   public user: UserResponse | undefined;

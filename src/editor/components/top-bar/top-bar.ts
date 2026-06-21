@@ -12,10 +12,11 @@ import { AuthService } from '../../../app/api/services/auth.service';
 import { UserService } from '../../../app/api/services/user.service';
 import { UserResponse } from '../../../app/api/models/omega-api.models';
 import { SceneTreeService } from '@editor/services/scene-tree.service';
+import { ThemeSelector } from "../theme-selector/theme-selector";
 
 @Component({
   selector: 'editor-top-bar',
-  imports: [Icon, CommonModule],
+  imports: [Icon, CommonModule, ThemeSelector],
   templateUrl: './top-bar.html',
   styleUrl: './top-bar.scss'
 })

@@ -108,7 +108,7 @@
 }
 
 @keyframes corePulse {
-  0%, 100% { fill: #2c70cf; opacity: 0.7; r: 4; }
+  0%, 100% { fill: var(--editor-panel-background-10); opacity: 0.7; r: 4; }
   50% { fill: #d5e8f5; opacity: 1; r: 6; }
 }
 
