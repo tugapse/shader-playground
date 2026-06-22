@@ -205,7 +205,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   private onRenderFrame(): void {
-    this.editorGridBehaviour?.draw();
+    // this.editorGridBehaviour?.draw();
     this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
   }
@@ -213,7 +213,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   private onUpdateFrame(ellapsed: number): void {
     this.gizmosBehaviour?.updateEditor(ellapsed);
     this.editorPickerBehaviour?.update(ellapsed);
-    this.editorGridBehaviour?.update(ellapsed);
+    // this.editorGridBehaviour?.update(ellapsed);
   }
 
   onEditorSaveInStorage(): void {

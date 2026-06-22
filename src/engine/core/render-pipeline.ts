@@ -9,6 +9,7 @@ import { EntityType } from '@engine/enums';
 import { ShadowMapRenderer } from './shadowmap-renderer';
 import { ObjectInstanciator } from './object-instanciator';
 import { ClassType } from '@engine/enums/class-type.enum';
+import { CameraUBO } from './camera-ubo';
 
 export class RenderPipeline extends JsonSerializable {
   static instanciate() {
@@ -26,9 +27,18 @@ export class RenderPipeline extends JsonSerializable {
   public clearColor = Colors.cornflowerBlue;
   public shadowmapRenderer!: ShadowMapRenderer;
   protected scene!: Scene;
+  protected ubo!: CameraUBO;
 
   constructor(public override name: string = 'Render Pipeline') {
     super('RenderPipeline');
+  }
+  public setGlRenderingContext(gl: WebGL2RenderingContext): void {
+    this._gl = gl;
+    this.ubo = new CameraUBO(this._gl);
+
+    if (!this.shadowmapRenderer) {
+      this.shadowmapRenderer = new ShadowMapRenderer(this._gl, this.scene);
+    }
   }
 
   public initialize(scene: Scene) {
@@ -40,12 +50,18 @@ export class RenderPipeline extends JsonSerializable {
       console.error('No scene defined for this render pipeline');
       return;
     }
-
+    
     this._ellapsedFrames += 1;
-    if (this._ellapsedFrames > this._maxFramesNeededToResort || this._activeObjects.length == 0) {
+    if (
+      this._ellapsedFrames > this._maxFramesNeededToResort ||
+      this._activeObjects.length == 0
+    ) {
       this.fetchandSortEntities();
       this._ellapsedFrames = 0;
     }
+
+    const camera = Camera.mainCamera;
+    this.ubo.update(camera.viewMatrix, camera.projectionMatrix);
 
     this.drawShadowmap();
     this.drawScene();
@@ -127,14 +143,6 @@ export class RenderPipeline extends JsonSerializable {
       Camera.mainCamera.transform.worldPosition,
     );
     return bD - aD;
-  }
-
-  public setGlRenderingContext(gl: WebGL2RenderingContext): void {
-    this._gl = gl;
-
-    if (!this.shadowmapRenderer) {
-      this.shadowmapRenderer = new ShadowMapRenderer(this._gl, this.scene);
-    }
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {

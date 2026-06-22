@@ -149,20 +149,21 @@ export class ShadowMapRenderer {
     this.depthShader.release();
   }
 
-  /**
+/**
    * Sets the model-view-projection matrix for a given object from the light's perspective.
    * @param {Transform} entityTransform - The transform of the object to be rendered.
    * @protected
    */
-  setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
+setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
     if (this.depthShader) {
       const modelLightMvpMatrix = mat4.create();
-      mat4.multiply(modelLightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix); // Now it's LightProjection * LightView * Model
-      // Set the final combined matrix on the DEPTH shader.
-      this.depthShader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, modelLightMvpMatrix);
+      // Multiply Light View-Projection (lightMvpMatrix) by the object's World Matrix
+      mat4.multiply(modelLightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix);
+      
+      // Send the combined Light-Space MVP directly to the uniform
+      this.depthShader.setMat4(ShaderUniformsEnum.U_MODEL_MATRIX, modelLightMvpMatrix);
     }
   }
-
 
   /**
    * Starts the depth-only rendering pass to the shadow map texture.

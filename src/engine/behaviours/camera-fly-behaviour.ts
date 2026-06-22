@@ -245,8 +245,8 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    */
   protected updatePanVelocity(ellapsed:number) {
     if (Mouse.mouseButtonDown[this.lookMouseButtons.pan]) {
-      this._upVelocity += Mouse.mouseMovement.y * this.moveSpeed * 0.5 * ellapsed;
-      this._strafeVelocity += Mouse.mouseMovement.x * this.moveSpeed *0.5  * ellapsed;
+      this._upVelocity += Mouse.mouseMovement.y * this.moveSpeed * ellapsed / 2;
+      this._strafeVelocity += Mouse.mouseMovement.x * this.moveSpeed * ellapsed / 2;
     }
   }
 

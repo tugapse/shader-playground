@@ -12,6 +12,8 @@ import {
   NumberRange,
   Shader,
   Texture,
+  TextureFilterMode,
+  TextureWrapMode,
   Transform,
   UnlitMaterial,
   Vector2,
@@ -47,8 +49,8 @@ export interface ITargetProperty extends ITargetObject {
     VectorInspector,
     BooleanInspector,
     EnumInspector,
-    NumberRangeInspector
-],
+    NumberRangeInspector,
+  ],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss',
 })
@@ -77,10 +79,8 @@ export class ObjectInspector {
   @Input() showAllProperties = true;
 
   @Input() set targetObject(value: ITargetObject) {
-    
     this._selectedObject = value;
     this.loadProperties();
-    
   }
 
   // Outputs
@@ -93,6 +93,10 @@ export class ObjectInspector {
 
   constructor() {
     this._enums['fogType'] = this.convertEnumToObject(FogType);
+    // this._enums['minFilter'] = this.convertEnumToObject(TextureFilterMode);
+    // this._enums['magFilter'] = this.convertEnumToObject(TextureFilterMode);
+    // this._enums['wrapS'] = this.convertEnumToObject(TextureWrapMode);
+    // this._enums['wrapT'] = this.convertEnumToObject(TextureWrapMode);
   }
 
   // Event Handlers from template
@@ -162,7 +166,6 @@ export class ObjectInspector {
       .filter((p): p is ITargetProperty => !!p);
   }
 
-
   private _createPropertyViewModel(
     key: string,
     value: any,
@@ -174,10 +177,9 @@ export class ObjectInspector {
     let type: string = typeof value;
     let name = '';
 
-    if (!!this._enums[key]){
-      type = "enum"
-    }
-    else if (type === 'object') {
+    if (!!this._enums[key]) {
+      type = 'enum';
+    } else if (type === 'object') {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
@@ -248,7 +250,6 @@ export class ObjectInspector {
   }
 
   onEnumChange(key: string, menuItem: DropdownItem) {
-    
     this._selectedObject!.property[key] = menuItem.value;
     this.editorService.requestCanvasResize();
   }

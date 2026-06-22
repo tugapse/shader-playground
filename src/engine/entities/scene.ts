@@ -153,6 +153,7 @@ export class Scene extends GlEntity {
    */
   public override draw(): void {
     if (this.destroyed || !this.gl || !Camera.mainCamera) return;
+    
     this._renderPipeline.draw();
   }
 

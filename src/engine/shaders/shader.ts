@@ -13,35 +13,11 @@ import { ObjectInstanciator } from "../core";
   An interface defining the structure for WebGL buffers associated with a mesh.
  */
 export interface WebGLBuffers {
-  /**
-    The buffer for vertex positions.
-   * @type {WebGLBuffer | null}
-   */
   position: WebGLBuffer | null;
-  /**
-    The buffer for vertex normals.
-   * @type {WebGLBuffer | null}
-   */
   normal: WebGLBuffer | null;
-  /**
-    The buffer for texture coordinates.
-   * @type {WebGLBuffer | null}
-   */
   uv: WebGLBuffer | null;
-  /**
-    The buffer for tangent vectors.
-   * @type {WebGLBuffer | null}
-   */
   tangent: WebGLBuffer | null;
-  /**
-    The buffer for bitangent vectors.
-   * @type {WebGLBuffer | null}
-   */
   bitangent: WebGLBuffer | null;
-  /**
-    The buffer for element indices.
-   * @type {WebGLBuffer | null}
-   */
   indices: WebGLBuffer | null;
 }
 
@@ -55,7 +31,6 @@ export class Shader extends JsonSerializable {
 
   /**
     A map of string keys to URLs for reusable shader function files.
-
    * @type {{ [key: string]: string }}
    */
   public static SHADER_FUNCTIONS: { [key: string]: string } = {
@@ -63,48 +38,21 @@ export class Shader extends JsonSerializable {
     "//@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
   };
 
-  /**
-    Pre-fetches the GLSL source code for all registered shader functions.
-
-   * @returns {void}
-   */
   public static preFetchFunctionsGlsl(): void {
     for (const a of Object.values(Shader.SHADER_FUNCTIONS)) {
       EngineCache.loadShaderSource(a);
     }
   }
 
-  /**
-    Creates a new Shader instance.
-
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @param {ColorMaterial} material - The material associated with this shader.
-   * @returns {Shader} - A new Shader instance.
-   */
   public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial): Shader {
     return new Shader(gl, material);
   }
 
-
-
   public get shaderProgram(): WebGLProgram { return this._shaderProgram; }
-  /**
-    The compiled WebGL shader program.
-   * @type {WebGLProgram}
-   */
   public _shaderProgram!: WebGLProgram;
-  /**
-    A flag indicating if the shader has been initialized.
-   * @private
-   * @type {boolean}
-   */
   private _initialized: boolean = false;
 
   public get buffers(): WebGLBuffers { return this._buffers }
-  /**
-    The WebGL buffers for vertex data.
-   * @type {WebGLBuffers}
-   */
   protected _buffers: WebGLBuffers = {
     position: null,
     normal: null,
@@ -114,27 +62,9 @@ export class Shader extends JsonSerializable {
     indices: null,
   };
 
-  /**
-   * The source code for the fragment shader.
-   * If provided, this will be used instead of fetching from `fragUri`.
-   * @type {string | null}
-   */
   public fragmentSource: string | null = null;
-
-  /**
-   * The source code for the vertex shader.
-   * If provided, this will be used instead of fetching from `vertexUri`.
-   * @type {string | null}
-   */
   public vertexSource: string | null = null;
 
-  /**
-    Creates an instance of Shader.
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @param {ColorMaterial} material - The material associated with this shader.
-   * @param {string} [fragUri="assets/shaders/frag/color.frag"] - The URI for the fragment shader source.
-   * @param {string} [vertexUri="assets/shaders/vertex/vertex.vert"] - The URI for the vertex shader source.
-   */
   constructor(
     protected gl: WebGL2RenderingContext,
     public material: ColorMaterial,
@@ -145,10 +75,6 @@ export class Shader extends JsonSerializable {
     this._uuid = uuidv4();
   }
 
-  /**
-    Initializes the shader by compiling and linking the shader programs.
-   * @returns {Promise<void>}
-   */
   public async initialize(): Promise<void> {
     if (this._initialized) {
       return;
@@ -157,7 +83,7 @@ export class Shader extends JsonSerializable {
 
     let vsSource = this.vertexSource || await EngineCache.loadShaderSource(this.vertexUri);
     let fsSource = this.fragmentSource || await EngineCache.loadShaderSource(this.fragUri);
-    // replace keys by shader code
+    
     for (const obkey of keys) {
       if (fsSource.includes(obkey)) {
         const url: string = Shader.SHADER_FUNCTIONS[obkey] as string;
@@ -176,12 +102,6 @@ export class Shader extends JsonSerializable {
     this._initialized = true;
   }
 
-  /**
-    Initializes the WebGL buffers with mesh data.
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @param {MeshData} mesh - The mesh data to use for the buffers.
-   * @returns {void}
-   */
   public initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
     mesh.calculateNormals();
     mesh.calculateTangentsAndBitangents();
@@ -245,10 +165,6 @@ export class Shader extends JsonSerializable {
     this._buffers = buffers;
   }
 
-  /**
-    Binds the vertex attribute buffers to the shader program's attributes.
-   * @returns {void}
-   */
   public bindBuffers(): void {
     if (!this.gl || !this._shaderProgram) return;
 
@@ -302,10 +218,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Activates the shader program for rendering.
-   * @returns {void}
-   */
   public use(): void {
     if (!this._shaderProgram || !this._initialized) {
       return;
@@ -315,26 +227,14 @@ export class Shader extends JsonSerializable {
 
   public release(): void { }
 
-
-  /**
-    Loads material data into the shader's uniforms.
-   * @returns {void}
-   */
   public loadDataIntoShader(): void {
     if (!this.material) return;
     this.use();
     const material = this.material as ColorMaterial;
     if (material)
       this.setVec4(ShaderUniformsEnum.U_MAT_COLOR, material.color.toVec4());
-
   }
 
-  /**
-    Sets a `mat4` uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {mat4} value - The matrix value.
-   * @returns {void}
-   */
   public setMat4(name: string, value: mat4): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -343,12 +243,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets a `mat3` uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {mat3} value - The matrix value.
-   * @returns {void}
-   */
   public setMat3(name: string, value: mat3): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -356,12 +250,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets a `vec4` uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {vec4} vec - The vector value.
-   * @returns {void}
-   */
   public setVec4(name: string, vec: vec4): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -369,12 +257,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets a `vec3` uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {vec3} vec - The vector value.
-   * @returns {void}
-   */
   public setVec3(name: string, vec: vec3): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -382,12 +264,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets a `vec2` uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {vec2} vec - The vector value.
-   * @returns {void}
-   */
   public setVec2(name: string, vec: vec2): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -395,12 +271,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets a float uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {number} num - The float value.
-   * @returns {void}
-   */
   public setFloat(name: string, num: number): void {
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -415,14 +285,6 @@ export class Shader extends JsonSerializable {
     }
   }
 
-
-  /**
-    Sets a texture uniform in the shader.
-   * @param {string} name - The name of the uniform.
-   * @param {Texture} texture - The texture object.
-   * @param {number} textureIndex - The texture unit index to bind to.
-   * @returns {void}
-   */
   public setTexture(name: string, texture: Texture, textureIndex: number): void {
     this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
@@ -433,36 +295,17 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  /**
-    Sets vertex buffer data.
-   * @param {WebGLBuffer} buffer - The buffer to set the data for.
-   * @param {vec3[]} values - An array of vectors representing the vertex data.
-   * @returns {void}
-   */
   public setBuffer(buffer: WebGLBuffer, values: vec3[]): void {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(values.flat() as number[]), this.gl.STATIC_DRAW);
   }
 
-  /**
-    Sets index buffer data.
-   * @param {number[]} values - An array of indices.
-   * @returns {void}
-   */
   public setIndices(values: number[]): void {
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this._buffers.indices);
     const indicesArray = new Uint16Array(values);
     this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indicesArray, this.gl.STATIC_DRAW);
   }
 
-  /**
-    Compiles a single shader from source.
-   * @private
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @param {number} type - The type of shader (e.g., `gl.VERTEX_SHADER`).
-   * @param {string} source - The GLSL source code.
-   * @returns {WebGLShader | null} - The compiled shader or null on failure.
-   */
   private compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) {
@@ -479,14 +322,6 @@ export class Shader extends JsonSerializable {
     return shader;
   }
 
-  /**
-    Creates and links a WebGL program from vertex and fragment shaders.
-   * @private
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @param {WebGLShader} vertexShader - The compiled vertex shader.
-   * @param {WebGLShader} fragmentShader - The compiled fragment shader.
-   * @returns {WebGLProgram | null} - The linked program or null on failure.
-   */
   private createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
     const shaderProgram = gl.createProgram();
     if (!shaderProgram) {
@@ -500,22 +335,24 @@ export class Shader extends JsonSerializable {
       console.error('Unable to initialize the shader program:', gl.getProgramInfoLog(shaderProgram));
       return null;
     }
+    
+    // --- UBO BINDING LOGIC ADDED HERE ---
+    // Look for the "CameraBlock" uniform block in this newly compiled shader
+    const blockIndex = gl.getUniformBlockIndex(shaderProgram, "CameraBlock");
+    
+    // If this specific shader actually uses the CameraBlock, bind it to global slot 0
+    if (blockIndex !== gl.INVALID_INDEX) {
+        gl.uniformBlockBinding(shaderProgram, blockIndex, 0); 
+    }
+
     return shaderProgram;
   }
 
-  /**
-    Recompiles the shader program and re-initializes it.
-   * @returns {void}
-   */
   public recompile(): void {
     this.destroy();
     this.initialize();
   }
 
-  /**
-    Destroys all WebGL resources associated with this shader.
-   * @returns {void}
-   */
   public destroy(): void {
     if (this._buffers.position)
       this.gl.deleteBuffer(this._buffers.position);
@@ -534,11 +371,6 @@ export class Shader extends JsonSerializable {
     this._initialized = false;
   }
 
-  /**
-    Serializes the shader's state to a JSON object.
-   * @override
-   * @returns {JsonSerializedData} - The JSON object representation.
-   */
   public override toJsonObject(): JsonSerializedData {
     return {
       ...super.toJsonObject(),
@@ -550,19 +382,8 @@ export class Shader extends JsonSerializable {
     };
   }
 
-  /**
-    Deserializes the shader's state from a JSON object.
-   * @override
-   * @param {JsonSerializedData} jsonObject - The JSON object to deserialize from.
-   * @returns {void}
-   */
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
     this.deserializeAutomatically(jsonObject);
-    
-    // this.fragUri = jsonObject['fragUri'];
-    // this.vertexUri = jsonObject['vertexUri'];
-    // this.material = ObjectInstanciator.instanciateObjectFromJsonData(jsonObject["material"].className) || new ColorMaterial();
-    
   }
 }

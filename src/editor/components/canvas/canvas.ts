@@ -124,7 +124,6 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
         const renderStart = performance.now();
         this.scene.draw();
         currentRenderTime = performance.now() - renderStart;
-        
         this.editorService.onRenderFrame.next(this.gl);
       }
       this.frameCount++;
