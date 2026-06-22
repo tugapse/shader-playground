@@ -1,9 +1,14 @@
 #version 300 es
-in vec2 a_position; // Full screen quad coords (-1 to 1)
-in vec2 a_texCoord;
-out vec2 v_texCoord;
+out vec2 v_uv;
 
+// Generate a full-screen triangle using the gl_VertexID trick
 void main() {
-    v_texCoord = a_texCoord;
-    gl_Position = vec4(a_position, 0.0, 1.0);
+    // Calculate vertices entirely on the GPU
+    float x = float((gl_VertexID & 1) << 2) - 1.0;
+    float y = float((gl_VertexID & 2) << 1) - 1.0;
+    
+    // Map the -1.0 to 1.0 NDC space to 0.0 to 1.0 UV space
+    v_uv = vec2(x * 0.5 + 0.5, y * 0.5 + 0.5);
+    
+    gl_Position = vec4(x, y, 0.0, 1.0);
 }

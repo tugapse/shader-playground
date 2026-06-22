@@ -180,8 +180,7 @@ export class App implements OnDestroy {
     planeEntity.transform.translate(0,-1,0);
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
-
-    material.mainTex = await EngineCache.getWhiteTexture(this.gl);
+    // material.mainTex = await EngineCache.getWhiteTexture(this.gl);
   }
 
   private async createLights(scene: Scene) {
@@ -284,6 +283,7 @@ export class App implements OnDestroy {
     renderer.mesh.meshData = cubePrimitive;
 
     material.name = 'Skybox' + (useWhiteTexture ? '_white' : '');
+    (window as any )['mat'] = material;
 
     // const skyboxTextures = {
     //   right: "assets/images/skybox/blue/right.jpeg",  

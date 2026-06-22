@@ -208,6 +208,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     // this.editorGridBehaviour?.draw();
     this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
+    // (window as any)['mat'].mainTex = 
   }
 
   private onUpdateFrame(ellapsed: number): void {

@@ -3,8 +3,9 @@ import { IRenderPass } from './render-pass.interface';
 import { Texture } from '@engine/textures';
 import { Shader } from '@engine/shaders';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
+import { JsonSerializable } from '../json-serializable';
 
-export class ScreenBlitPass implements IRenderPass {
+export class ScreenBlitPass extends JsonSerializable implements IRenderPass {
   private gl: WebGL2RenderingContext;
   private screenQuadShader: Shader;
 
@@ -12,6 +13,7 @@ export class ScreenBlitPass implements IRenderPass {
   public sourceTexture!: Texture;
 
   constructor(gl: WebGL2RenderingContext) {
+    super('ScreenBlitPass');
     this.gl = gl;
 
     // Initialize a dedicated screen quad shader to blit the texture
@@ -23,7 +25,7 @@ export class ScreenBlitPass implements IRenderPass {
     );
     this.screenQuadShader.initialize();
   }
-  
+
   setGl(gl: WebGL2RenderingContext): void {
     this.gl = gl;
   }
