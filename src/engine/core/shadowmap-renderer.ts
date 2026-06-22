@@ -32,7 +32,7 @@ export class ShadowMapRenderer {
    * @static
    * @type {number}
    */
-  public static shadowMapSize = 8192;
+  public static shadowMapSize = 2096;
   /**
    * The framebuffer object used for rendering to the shadow map texture.
    * @protected
@@ -54,7 +54,7 @@ export class ShadowMapRenderer {
    * @type {boolean}
    */
   public enabled: boolean = true;
-  public shadowstrength = new NumberRange(0.2,0,0.9,0.001)
+  public shadowstrength = new NumberRange(0.2,0.0,0.9,0.001)
 
   /**
    * Creates an instance of ShadowMapRenderer.
@@ -149,32 +149,20 @@ export class ShadowMapRenderer {
     this.depthShader.release();
   }
 
-  /**
+/**
    * Sets the model-view-projection matrix for a given object from the light's perspective.
    * @param {Transform} entityTransform - The transform of the object to be rendered.
    * @protected
    */
-  setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
+setMatrices(entityTransform: Transform, lightMvpMatrix: mat4) {
     if (this.depthShader) {
       const modelLightMvpMatrix = mat4.create();
-      mat4.multiply(modelLightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix); // Now it's LightProjection * LightView * Model
-      // Set the final combined matrix on the DEPTH shader.
-      this.depthShader.setMat4(ShaderUniformsEnum.U_MVP_MATRIX, modelLightMvpMatrix);
+      // Multiply Light View-Projection (lightMvpMatrix) by the object's World Matrix
+      mat4.multiply(modelLightMvpMatrix, lightMvpMatrix, entityTransform.modelMatrix);
+      
+      // Send the combined Light-Space MVP directly to the uniform
+      this.depthShader.setMat4(ShaderUniformsEnum.U_MODEL_MATRIX, modelLightMvpMatrix);
     }
-  }
-
-  /**
-   * Sorts entities by their distance to the light source, from furthest to nearest.
-   * This can help with shadow map artifacts in some cases (though front-face culling is the primary solution).
-   * @param {GlEntity} a - The first entity.
-   * @param {GlEntity} b - The second entity.
-   * @returns {number} The sort order.
-   * @protected
-   */
-  protected sortByDistance(a: GlEntity, b: GlEntity, lightTransform: Transform) {
-    const aD = vec3.distance(a.transform.worldPosition, lightTransform.worldPosition);
-    const bD = vec3.distance(b.transform.worldPosition, lightTransform.worldPosition);
-    return bD - aD;
   }
 
   /**
@@ -215,6 +203,7 @@ export class ShadowMapRenderer {
       this.gl.deleteFramebuffer(this.framebuffer);
     }
   }
+
   clearShadowMap() {
     if (!this.shadowmapTexture.glTexture) return;
     this.startPass(this.shadowmapTexture.glTexture!, this.shadowmapTexture.width, this.shadowmapTexture.height);

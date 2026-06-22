@@ -18,6 +18,7 @@ import {
   ObjectInstanciator,
   EntityBehaviour,
   CameraType,
+  Scene,
 } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { Icon } from 'src/app/components/icon/icon';
@@ -27,6 +28,7 @@ import { ClassMetadata } from '@engine/interfaces/class-metadata';
 import { take } from 'rxjs';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -43,7 +45,8 @@ import { DropdownItem } from 'src/app/components/dropdown/dropdown';
     Icon,
     AddBehaviourMenuComponent,
     EnumInspector,
-  ],
+    CommonModule
+],
   templateUrl: './entity-inspector.html',
   styleUrl: './entity-inspector.scss',
 })
@@ -58,8 +61,10 @@ export class EntityInspector extends ObjectInspector {
     'destroyed',
     'behaviours',
     'scene',
+    'gl'
   ];
   objectsToshow: ITargetObject[] = [];
+  _isScene = false;
 
   private prepareProperties(entity: GlEntity) {
     if (entity) {
@@ -70,6 +75,8 @@ export class EntityInspector extends ObjectInspector {
   }
 
   @Input() set targetEntity(entity: GlEntity) {
+    
+    this._isScene = entity.className == "Scene"
     this.prepareProperties(entity);
     this.entity = entity;
   }
@@ -157,7 +164,7 @@ export class EntityInspector extends ObjectInspector {
     }
   }
 
-  onEnumChange(key:string, menuItem: DropdownItem) {
+  override onEnumChange(key:string, menuItem: DropdownItem) {
     this.entity![key] = menuItem.value;
     this.editorService.requestCanvasResize();
   }

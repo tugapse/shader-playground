@@ -1,28 +1,32 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
+import { EditorService } from '@editor/services/editor.service';
+import { SceneTreeService } from '@editor/services/scene-tree.service';
 import {
   Color,
   ColorMaterial,
   EntityBehaviour,
+  FogType,
   GlEntity,
   LitMaterial,
+  NumberRange,
   Shader,
   Texture,
+  TextureFilterMode,
+  TextureWrapMode,
   Transform,
   UnlitMaterial,
   Vector2,
   Vector3,
   Vector4,
-  NumberRange,
 } from '@engine';
+import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { BooleanInspector } from '../../components/inspector/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '../../components/inspector/text-input-inspector/text-input-inspector';
 import { VectorInspector } from '../../components/inspector/vector-inspector/vector-inspector';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
-import { SceneTreeService } from '@editor/services/scene-tree.service';
-import { EditorService } from '@editor/services/editor.service';
 
 export interface ITargetObject {
   [key: string]: any;
@@ -72,7 +76,7 @@ export class ObjectInspector {
   @Input() label: string = 'No title';
   @Input() isChild = false;
   @Input() showPrivateProperties = false;
-  @Input() showAllProperties = false;
+  @Input() showAllProperties = true;
 
   @Input() set targetObject(value: ITargetObject) {
     this._selectedObject = value;
@@ -86,6 +90,14 @@ export class ObjectInspector {
   protected _selectedObject?: ITargetObject;
   protected _properties: ITargetProperty[] = [];
   protected _enums: { [key: string]: any } = {};
+
+  constructor() {
+    this._enums['fogType'] = this.convertEnumToObject(FogType);
+    // this._enums['minFilter'] = this.convertEnumToObject(TextureFilterMode);
+    // this._enums['magFilter'] = this.convertEnumToObject(TextureFilterMode);
+    // this._enums['wrapS'] = this.convertEnumToObject(TextureWrapMode);
+    // this._enums['wrapT'] = this.convertEnumToObject(TextureWrapMode);
+  }
 
   // Event Handlers from template
   onValueChanged(
@@ -165,7 +177,9 @@ export class ObjectInspector {
     let type: string = typeof value;
     let name = '';
 
-    if (type === 'object') {
+    if (!!this._enums[key]) {
+      type = 'enum';
+    } else if (type === 'object') {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
@@ -206,7 +220,6 @@ export class ObjectInspector {
     ) {
       return 'vector234';
     }
-    if (value instanceof Boolean) return 'boolean';
 
     return typeof value;
   }
@@ -234,5 +247,10 @@ export class ObjectInspector {
   protected updateScene(): void {
     const scene = this.editorService.scene;
     this.editorService.onSceneUpdated.emit(scene);
+  }
+
+  onEnumChange(key: string, menuItem: DropdownItem) {
+    this._selectedObject!.property[key] = menuItem.value;
+    this.editorService.requestCanvasResize();
   }
 }

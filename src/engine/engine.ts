@@ -7,7 +7,7 @@ import { MeshData } from "./core/mesh";
 import { ObjectInstanciator } from "./core/object-instanciator";
 import { Camera } from "./entities/camera";
 import { GlEntity } from "./entities/entity";
-import { DirectionalLight, Light, PointLight, SpotLight } from "./entities/light";
+import { DirectionalLight, Light, PointLight, SpotLight } from "./entities/lights/light";
 import { ColorMaterial } from "./materials/color-material";
 import { CubemapMaterial } from "./materials/cubemap-material";
 import { LitMaterial } from "./materials/lit-material";

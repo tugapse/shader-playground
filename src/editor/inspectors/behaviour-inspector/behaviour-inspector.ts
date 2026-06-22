@@ -11,10 +11,11 @@ import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { Icon } from "src/app/components/icon/icon";
 import { ConfirmationService } from 'src/app/services/confirmation.service';
 import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
+import { TextureInspector } from "../texture-inspector/texture-inspector";
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector],
+  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector, TextureInspector],
   templateUrl: './behaviour-inspector.html',
   styleUrl: './behaviour-inspector.scss'
 })
@@ -107,7 +108,6 @@ export class BehaviourInspector extends ObjectInspector {
 
   onEnumChanged(item: ITargetProperty, $event: DropdownItem) {
     this._selectedObject!.property[item.key] = $event.value
-
   }
 
   onRangeChanges(item:ITargetProperty, $event:any){

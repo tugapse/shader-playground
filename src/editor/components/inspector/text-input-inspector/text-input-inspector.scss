@@ -8,7 +8,6 @@
   }
 
   .line-item>span {
-    padding: 4px;
     min-width: 90px;
     max-width: 150px;
 
@@ -23,7 +22,6 @@
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
-    padding: 4px;
     text-align: right;
     margin-right: 12px;
   }

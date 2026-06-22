@@ -77,7 +77,6 @@ export class UnlitShader extends Shader {
   }
 
   override release(): void {
-    super.release();
     if(this.material?.mainTex)
       this.material.mainTex.unBind();
   }

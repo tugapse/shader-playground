@@ -1,31 +1,31 @@
 #version 300 es
 
-// Define default precision for floats.
-// `highp` is typically used in vertex shaders for better precision in calculations.
 precision highp float;
 
-// The Model-View-Projection matrix, with the camera's translation removed from its view component.
-// This is key for making the skybox appear infinitely far away and only rotate with the camera.
-uniform mat4 u_mvpMatrix;
+// 1. The shared Camera UBO
+layout(std140) uniform CameraBlock {
+    mat4 u_viewMatrix;
+    mat4 u_projectionMatrix;
+};
 
-// Only the position attribute is needed for a skybox cube.
-// These positions will also serve as our sampling direction for the cubemap.
 in vec3 a_position;
-
-// Output to the fragment shader. This `vec3` represents the direction from the camera
-// to the point on the skybox, which is used to sample the cubemap texture.
 out vec3 v_viewDirection;
 
 void main() {
-  // Calculate the final vertex position in clip space.
-  // We use the `u_mvpMatrix` which, for the skybox, will have its camera-translation component
-  // zeroed out on the CPU side. This ensures the skybox remains centered on the camera.
-  // gl_Position is a built-in output variable for the vertex shader and takes a vec4.
-  gl_Position = u_mvpMatrix * vec4(a_position, 1.0);
+  // 2. STRIP THE TRANSLATION
+  // We cast the view matrix down to a mat3 to drop the XYZ position data, 
+  // then back to a mat4. This forces the skybox to only rotate, never move.
+  mat4 viewRotationOnly = mat4(mat3(u_viewMatrix));
 
-  // For skybox rendering, the local vertex position `a_position` itself can be used
-  // as the direction vector for cubemap lookup. This is because the skybox cube
-  // is effectively rendered around the camera's origin, and its vertices point
-  // outwards in the directions corresponding to the environment.
+  // 3. Calculate the clip-space position
+  vec4 pos = u_projectionMatrix * viewRotationOnly * vec4(a_position, 1.0);
+
+  // 4. THE DEPTH TRICK
+  // We set Z equal to W (pos.xyww). When WebGL does the perspective divide (W/W), 
+  // the depth becomes exactly 1.0 (the maximum possible depth). 
+  // This guarantees the skybox renders behind absolutely everything else.
+  gl_Position = pos.xyww;
+
+  // The local vertex position serves as the direction vector for the cubemap
   v_viewDirection = a_position;
 }

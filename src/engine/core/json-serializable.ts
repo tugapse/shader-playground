@@ -19,6 +19,7 @@ export class JsonSerializable {
   constructor(className: string) {
     if (!className) throw new Error('className is required');
     this._className = className;
+    this.name = this.name || this._className;
     this._uuid = uuidV4();
     this._serializationIgnoreKeys = ['_serializationIgnoreKeys', "scene", "parent"];
   }
@@ -157,7 +158,4 @@ export class JsonSerializable {
     if (jsonObject['uuid']) this._uuid = jsonObject['uuid'];
   }
 
-  public toJSON() {
-    return this.toJsonObject();
-  }
 }

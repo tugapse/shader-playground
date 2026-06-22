@@ -60,14 +60,14 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 20
    */
-  public moveSpeed = 20.5;
+  public moveSpeed = 20;
 
   /**
    * The sensitivity of mouse input for camera rotation.
    * @type {number}
-   * @default 0.8
+   * @default 3.0
    */
-  public rotationSpeed = 0.10;
+  public rotationSpeed = 5.0;
 
   /**
    * The dampening factor for rotation. A higher value means rotation snaps faster.
@@ -75,7 +75,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 0.4
    */
-  public rotationDampening = 0.3;
+  public rotationDampening = 0.20;
 
   /**
    * The dampening factor for movement. A higher value means movement stops faster.
@@ -83,14 +83,14 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 0.15
    */
-  public moveDampening = 0.2;
+  public moveDampening = 0.15;
 
   /**
    * The sensitivity of the mouse scroll wheel for moving forward and backward.
    * @type {number}
    * @default 1.0
    */
-  public scrollSpeed = 0.041;
+  public scrollSpeed = 1;
 
   /**
    * The multiplier applied to `moveSpeed` when the boost key is held down.
@@ -127,7 +127,7 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @type {number}
    * @default 10
    */
-  protected _acceleration = 2;
+  protected _acceleration = 4.0;
 
   /** @protected Current forward/backward velocity. */
   protected _forwardVelocity = 0;
@@ -160,7 +160,6 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @param {number} ellapsed - The time elapsed since the last update in seconds.
    */
   override update(ellapsed: number): void {
-    super.update(ellapsed);
     this.updateInput(ellapsed);
   }
 
@@ -244,10 +243,10 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * Updates the camera's pan velocity based on mouse movement.
    * @protected
    */
-  protected updatePanVelocity() {
+  protected updatePanVelocity(ellapsed:number) {
     if (Mouse.mouseButtonDown[this.lookMouseButtons.pan]) {
-      this._upVelocity += Mouse.mouseMovement.y * this.moveDampening / 2.0;
-      this._strafeVelocity += Mouse.mouseMovement.x * this.moveDampening / 2.0;
+      this._upVelocity += Mouse.mouseMovement.y * this.moveSpeed * ellapsed / 2;
+      this._strafeVelocity += Mouse.mouseMovement.x * this.moveSpeed * ellapsed / 2;
     }
   }
 
@@ -255,8 +254,8 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * Updates the forward velocity based on mouse scroll wheel input.
    * @protected
    */
-  protected updateScrollVelocity() {
-    this._forwardVelocity -= Mouse.wheelY * this._acceleration * this.moveDampening * this.scrollSpeed;
+  protected updateScrollVelocity(ellapsed:number) {
+    this._forwardVelocity -= Mouse.wheelY * this._acceleration * this.moveDampening * this.scrollSpeed * ellapsed;
   }
 
   /**
@@ -311,15 +310,13 @@ export class CameraFlyBehaviour extends EntityBehaviour {
    * @protected
    */
   protected applyRotationVelocity(transform: Transform, ellapsed: number) {
+    // FIXME: insert this as a msmber of this class, this was removed from camera class
     let is2D = false;
-    if (this.parent instanceof Camera) {
-      is2D = (this.parent as Camera).is2D;
-    }
 
     if (Mouse.mouseButtonDown[this.lookMouseButtons.look]) {
       if (!is2D) {
-        this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed;
-        this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed;
+        this._currentYaw += -Mouse.mouseMovement.x * this.rotationSpeed * ellapsed;
+        this._currentPitch += Mouse.mouseMovement.y * this.rotationSpeed * ellapsed;
       }
     }
 
@@ -349,8 +346,8 @@ export class CameraFlyBehaviour extends EntityBehaviour {
     const transform = this.parent.transform;
 
     this.updateMoveVelocity(ellapsed);
-    this.updateScrollVelocity();
-    this.updatePanVelocity();
+    this.updateScrollVelocity(ellapsed);
+    this.updatePanVelocity(ellapsed);
 
     this.applyMovementVelocity(transform, ellapsed);
     this.applyRotationVelocity(transform, ellapsed);

@@ -1,0 +1,47 @@
+/* 5. Cyber Pulse Theme (High-Energy Dark) */
+body.theme-cyber-pulse { 
+  /* global */
+  --global-background-color: #0d0d14;
+
+  --editor-panel-outer-padding: 4px;
+  --editor-panel-background: #151521;
+  --editor-panel-background-50: #1d1d2d;
+  --editor-panel-background-10: #26263b;
+  --editor-panel-color: #d1d1e0;
+  --editor-panel-header-title-color: #ffffff;
+  --editor-panel-H-color: #ff007c; /* Neon Pink Header */
+  --editor-panel-chevron-color: #7b7b99;
+  --editor-panel-border: 1px solid #3d2b45; /* Subtle tinted border */
+  --editor-panel-box-shadow: 2px 0 15px rgba(255, 0, 124, 0.08); /* Faint pink glow */
+
+  /* inputs */
+  --editor-panel-text-input-background: #0d0d14;
+  --editor-panel-text-input-color: #00f0ff; /* Cyan text for inputs */
+  --editor-panel-text-input-border: 1px solid #26263b;
+
+  /* icons */
+  --editor-icon-button-background: transparent;
+  --editor-icon-button-color: #7b7b99;
+  --editor-icon-button-hover-background: rgba(0, 240, 255, 0.1);
+  --editor-icon-button-hover-color: #00f0ff; /* Cyan hover */
+  --editor-icon-button-selected-background: #ff007c; /* Pink selected state */
+  --editor-icon-button-selected-color: #ffffff;
+  --editor-placeholder-icon-color: #555570;
+
+  /* buttons */
+  --editor-primary-button-text-color: #ffffff;
+
+  /* modal */
+  --editor-modal-backdrop-background: rgba(13, 13, 20, 0.85);
+  --editor-modal-shadow: 0 8px 32px rgba(255, 0, 124, 0.2);
+
+  /* states & feedback */
+  --editor-error-color: #ff2a2a; 
+  --editor-focus-shadow: 0 0 0 2px rgba(0, 240, 255, 0.4); /* Cyan focus ring */
+
+  /* --- Scrollbar Variables --- */
+  --scrollbar-track-background: var(--editor-panel-background); 
+  --scrollbar-thumb-background: #26263b; 
+  --scrollbar-thumb-border-color: #151521; 
+  --scrollbar-thumb-hover-background: #ff007c; /* Pink on hover */
+}

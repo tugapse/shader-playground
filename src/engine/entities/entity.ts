@@ -108,6 +108,7 @@ export class GlEntity extends JsonSerializable {
       behaviour.initialize();
     }
     this.destroyed = false;
+    this.update(0);
   }
 
   /**

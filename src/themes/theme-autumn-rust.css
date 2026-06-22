@@ -1,0 +1,76 @@
+body.theme-autumn-rust { /* It's good practice to define global variables in :root */
+  /* global */
+  --global-background-color: #1e1915;
+
+  --editor-panel-outer-padding: 4px;
+  --editor-panel-background: #2c241e;
+  --editor-panel-background-50: #382e26;
+  --editor-panel-background-10: #473b32;
+  --editor-panel-color: #dfd2c4;
+  --editor-panel-header-title-color: #f5eedf;
+  --editor-panel-H-color: #e07a5f; 
+  --editor-panel-chevron-color: #bda28b;
+  --editor-panel-border: 1px solid #4a3e35;
+  --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+
+  /* inputs */
+  --editor-panel-text-input-background: #1e1915;
+  --editor-panel-text-input-color: #f5eedf;
+  --editor-panel-text-input-border: 1px solid #4a3e35;
+
+  /* icons */
+  --editor-icon-button-background: transparent;
+  --editor-icon-button-color: #8f7b66;
+  --editor-icon-button-hover-background: rgba(224, 122, 95, 0.15);
+  --editor-icon-button-hover-color: #f4a261; 
+  --editor-icon-button-selected-background: #e07a5f; 
+  --editor-icon-button-selected-color: #1e1915;
+  --editor-placeholder-icon-color: #665849;
+
+  /* buttons */
+  --editor-primary-button-text-color: #1e1915;
+
+  /* modal */
+  --editor-modal-backdrop-background: rgba(30, 25, 21, 0.85);
+  --editor-modal-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* states & feedback */
+  --editor-error-color: #d62828; 
+  --editor-focus-shadow: 0 0 0 2px rgba(224, 122, 95, 0.4); 
+
+
+  /* --- New Scrollbar Variables --- */
+  --scrollbar-track-background: var(--editor-panel-background); 
+  --scrollbar-thumb-background: #4a3e35; 
+  --scrollbar-thumb-border-color: #2c241e; 
+  --scrollbar-thumb-hover-background: #e07a5f; 
+}
+
+
+/* For WebKit browsers (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-background);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-background);
+  border-radius: 5px;
+  border: 1px solid var(--scrollbar-thumb-border-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-background);
+}
+
+/* Optional: For Firefox */
+/* html, body {
+  scrollbar-color: var(--scrollbar-thumb-background) var(--scrollbar-track-background);
+  scrollbar-width: thin;
+}
+*/

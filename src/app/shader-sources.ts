@@ -93,7 +93,7 @@ in vec4 v_lightSpacePosition;
 in float v_fogDistance;
 out vec4 fragColor;
 @INCLUDE_LIGHT_FUNC
-@INCLUDE_FUNC
+@INCLUDE_UTIL_FUNC
 void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
   vec4 sampledTexColor = texture(u_mainTex, uv);

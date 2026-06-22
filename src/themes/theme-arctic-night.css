@@ -1,0 +1,48 @@
+body.theme-arctic-night { /* It's good practice to define global variables in :root */
+  /* global */
+  --global-background-color: #2e3440;
+
+  --editor-panel-outer-padding: 4px;
+  --editor-panel-background: #3b4252;
+  --editor-panel-background-50: #434c5e;
+  --editor-panel-background-10: #4c566a;
+  --editor-panel-color: #d8dee9;
+  --editor-panel-header-title-color: #eceff4;
+  --editor-panel-H-color: #88c0d0; 
+  --editor-panel-chevron-color: #e5e9f0;
+  --editor-panel-border: 1px solid #2e3440;
+  --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+
+  /* inputs */
+  --editor-panel-text-input-background: #2e3440;
+  --editor-panel-text-input-color: #eceff4;
+  --editor-panel-text-input-border: 1px solid #4c566a;
+
+  /* icons */
+  --editor-icon-button-background: transparent;
+  --editor-icon-button-color: #4c566a;
+  --editor-icon-button-hover-background: #434c5e;
+  --editor-icon-button-hover-color: #81a1c1; 
+  --editor-icon-button-selected-background: #81a1c1; 
+  --editor-icon-button-selected-color: #2e3440;
+  --editor-placeholder-icon-color: #4c566a;
+
+  /* buttons */
+  --editor-primary-button-text-color: #2e3440;
+
+  /* modal */
+  --editor-modal-backdrop-background: rgba(46, 52, 64, 0.85);
+  --editor-modal-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* states & feedback */
+  --editor-error-color: #bf616a; 
+  --editor-focus-shadow: 0 0 0 2px rgba(129, 161, 193, 0.5); 
+
+
+  /* --- New Scrollbar Variables --- */
+  --scrollbar-track-background: var(--editor-panel-background); 
+  --scrollbar-thumb-background: #4c566a; 
+  --scrollbar-thumb-border-color: #3b4252; 
+  --scrollbar-thumb-hover-background: #81a1c1; 
+}
+

@@ -59,8 +59,9 @@ export class App implements OnDestroy {
       this.onEditorLoadScene.bind(this),
     );
     Shader.SHADER_FUNCTIONS = {
+      '@INCLUDE_FOG_FUNC': 'assets/shaders/functions/fog.frag',
       '@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-      '@INCLUDE_FUNC': 'assets/shaders/functions/functions.frag',
+      '@INCLUDE_UTIL_FUNC': 'assets/shaders/functions/functions.frag',
     };
   }
 
@@ -165,22 +166,21 @@ export class App implements OnDestroy {
       'assets/images/wood-texture.jpg',
       this.gl,
     );
-    // material.normalTex = await EngineCache.getTexture2D(
-    //   'assets/images/wood-normal1.jpg',
-    //   this.gl,
-    // );
+    material.normalTex = await EngineCache.getTexture2D(
+      'assets/images/wood-normal1.jpg',
+      this.gl,
+    );
 
     renderer.castShadows = false;
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
-
+ 
     const planeEntity = new GlEntity('Floor');
     planeEntity.transform.scale(10, 0.2, 10);
     planeEntity.transform.translate(0,-1,0);
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
-
-    // material.mainTex = this.shadowMapTexture;
+    // material.mainTex = await EngineCache.getWhiteTexture(this.gl);
   }
 
   private async createLights(scene: Scene) {
@@ -191,12 +191,9 @@ export class App implements OnDestroy {
     this.sun = dlight;
 
     const plight = new PointLight('Point light');
-    plight.attenuation = { constant: 1, linear: 0.1, quadratic: 0.002 };
     plight.color = Colors.red;
 
     const spotLight = new SpotLight('Spot light 1');
-    spotLight.attenuation = { constant: 1, linear: 0.2, quadratic: 0.008 };
-    spotLight.coneAngles = { inner: 15, outer: 20 };
     spotLight.color = Colors.azure;
 
     scene.addEntity(new Light("Ambient light"));
@@ -286,9 +283,10 @@ export class App implements OnDestroy {
     renderer.mesh.meshData = cubePrimitive;
 
     material.name = 'Skybox' + (useWhiteTexture ? '_white' : '');
+    (window as any )['mat'] = material;
 
     // const skyboxTextures = {
-    //   right: "assets/images/skybox/blue/right.jpeg",
+    //   right: "assets/images/skybox/blue/right.jpeg",  
     //   left: "assets/images/skybox/blue/left.jpeg",
     //   up: "assets/images/skybox/blue/top.jpeg",
     //   bottom: "assets/images/skybox/blue/bottom.jpeg",

@@ -47,10 +47,10 @@ export class MeshRendererBehaviour extends RendererBehaviour {
   public receiveShadows = true;
 
   public get shadowMapTexture() {
-    return this.parent.scene.shadowmapRenderer?.shadowmapTexture;
+    return this.parent.scene.shadowmap?.shadowmapTexture;
   }
 
-  public get fog() { return this.parent.scene["fog"] as SceneFog; }
+  public get fog() { return this.parent.scene["sceneFog"] as SceneFog; }
 
   constructor(public override _gl: WebGL2RenderingContext) {
     super(_gl);
@@ -110,7 +110,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
   }
 
   protected override setShaderVariables(): void {
-    this.shader!.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.parent.scene.shadowmapRenderer.shadowstrength.value);
+    this.shader!.setFloat(ShaderUniformsEnum.U_SHADOW_STRENGTH, this.parent.scene.shadowmap.shadowstrength.value);
     this.setLightInformation();
     this.setNormalMapsInformation();
   }

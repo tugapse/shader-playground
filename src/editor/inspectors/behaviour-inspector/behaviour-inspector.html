@@ -22,6 +22,7 @@
             readonly
           ></editor-text-input-inspector>
         }
+
         @case ("string") {
           <editor-text-input-inspector
             [label]="item.key.capitalize()"
@@ -93,9 +94,9 @@
       }
     }
 
-    @if (_renderEnable.length > 0) {
+    @if (_renderProperties.length > 0) {
       <editor-inpector-toggle-panel
-        [title]="'Enable Functions'"
+        [title]="'Render Settings'"
         [isChild]="true"
         [collapsed]="true"
       >
@@ -106,19 +107,11 @@
             (change)="onValueChanged(item, $event)"
           ></app-boolean-inspector>
         }
-      </editor-inpector-toggle-panel>
-    }
-    @if (_renderProperties.length > 0) {
-      <editor-inpector-toggle-panel
-        [title]="'Render Settings'"
-        [isChild]="true"
-        [collapsed]="true"
-      >
         @for (item of _renderProperties; track $index) {
           <editor-enum-inspector
             [label]="item.key"
             [items]="item.property"
-            [selected]="item.value"
+            [selected]="item.value.value"
             (change)="onEnumChanged(item, $event)"
           ></editor-enum-inspector>
         }

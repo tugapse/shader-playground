@@ -24,6 +24,11 @@
     text-align: right;
     margin-right: 12px;
   }
+  section.tag{
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    border-bottom: var(--editor-panel-border);
+  }
 
   .behaviours-header {
 

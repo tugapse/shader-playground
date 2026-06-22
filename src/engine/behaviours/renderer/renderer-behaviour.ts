@@ -401,6 +401,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
     // Clean up
     this._gl.disableVertexAttribArray(positionAttributeLocation);
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
+    shader.release()
   }
 
   /**
@@ -443,6 +444,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
     // Clean up
     this._gl.disableVertexAttribArray(positionAttributeLocation);
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
+    this.shader.release();
   }
 
 
@@ -458,6 +460,7 @@ export class RendererBehaviour extends EntityBehaviour implements IRendererBehav
     this.shader.use();
     this.shader.bindBuffers();
     this._gl.drawElements(this.drawPrimitiveType, this.mesh.meshData.indices.length, this._gl.UNSIGNED_SHORT, 0);
+    this.shader.release();
   }
 
 

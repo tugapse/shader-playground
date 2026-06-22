@@ -1,4 +1,14 @@
 #version 300 es
-uniform mat4 u_mvpMatrix;
+
+layout(std140) uniform CameraBlock {
+    mat4 u_viewMatrix;
+    mat4 u_projectionMatrix;
+};
+
+uniform mat4 u_modelMatrix;
+
 in vec4 a_position;
-void main() { gl_Position = u_mvpMatrix * a_position; }
+
+void main() {
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * a_position;
+}

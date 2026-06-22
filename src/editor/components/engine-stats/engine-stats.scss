@@ -1,0 +1,64 @@
+.engine-stats-panel {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  
+  /* Using your theme variables */
+  background-color: var(--editor-panel-background-10);
+  border: var(--editor-panel-border);
+  box-shadow: var(--editor-panel-box-shadow);
+  color: var(--editor-panel-color);
+  
+  padding: 8px 12px;
+  border-radius: 4px;
+  min-width: 140px;
+  z-index: 1;
+  pointer-events: none; /* Let clicks pass through to the canvas */
+  user-select: none;
+  
+  /* Use a monospaced font or tabular numbers so the width doesn't jitter */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  backdrop-filter: blur(4px); /* Optional: Gives it a nice modern IDE feel over the canvas */
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.fps-row {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--editor-panel-background-50);
+      
+      .label {
+        color: var(--editor-panel-header-title-color);
+        font-weight: 600;
+      }
+      
+      .value {
+        color: var(--editor-panel-header-title-color);
+        font-weight: 600;
+        font-size: 14px;
+        
+        &.warning {
+          color: var(--editor-error-color);
+        }
+      }
+    }
+
+    .label {
+      color: var(--editor-panel-section-header);
+    }
+
+    .value {
+      color: var(--editor-panel-H-color);
+    }
+  }
+}

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Inpector } from './inpector';
+import { EngineStats } from './engine-stats';
 
-describe('Inpector', () => {
-  let component: Inpector;
-  let fixture: ComponentFixture<Inpector>;
+describe('EngineStats', () => {
+  let component: EngineStats;
+  let fixture: ComponentFixture<EngineStats>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Inpector]
+      imports: [EngineStats]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Inpector);
+    fixture = TestBed.createComponent(EngineStats);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

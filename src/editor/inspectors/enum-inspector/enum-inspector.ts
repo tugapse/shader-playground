@@ -13,7 +13,7 @@ export class EnumInspector {
   @Input({ required: true }) label: string = '';
   @Input() items: DropdownItem[] = [];
   @Input() set selected(value:number){
-    debugger
+    
     this._selected = this.items.find(e=> +e.value == value) || this.items[0];
   };
   

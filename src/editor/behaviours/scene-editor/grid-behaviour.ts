@@ -25,7 +25,6 @@ export class EditorGridBehaviour extends RendererBehaviour {
 
   protected createMesh() {
     this.mesh = new Mesh();
-
     this.mesh.meshData = new MeshData([]);
   }
 

@@ -5,7 +5,7 @@
 
   .tree-header {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: reverse;
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
@@ -35,5 +35,9 @@
     background-color: black;
   }
   .dropdown .item {
+  }
+
+  .tree-body{
+    padding: 6px;
   }
 }

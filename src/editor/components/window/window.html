@@ -1,0 +1,39 @@
+<div
+  class="window"
+  [class.focused]="isActive"
+  [class.maximized]="isMaximized"
+  appMovable
+  movableHandleId="header"
+  resizeHandleId="resize-handle"
+>
+  <div class="header" id="header">
+    <app-icon [iconName]="windowIconName"></app-icon>
+    <span class="title">{{ windowtitle }}</span>
+
+    <app-icon
+      class="click-icon"
+      iconName="fa-maximize"
+      title="Close window"
+      (click)="isMaximized = !isMaximized"
+    >
+    </app-icon>
+    <app-icon
+      class="click-icon"
+      iconName="fa-xmark"
+      title="Close window"
+      (click)="closeWindow()"
+    >
+    </app-icon>
+  </div>
+
+  <div class="window-content">
+    <ng-container
+      *ngComponentOutlet="childComponentType; inputs: childInputs"
+    ></ng-container>
+  </div>
+
+  <section class="footer">
+    <span>{{ windowFooter }}</span>
+    <app-icon id="resize-handle" iconName="fa-sort"></app-icon>
+  </section>
+</div>

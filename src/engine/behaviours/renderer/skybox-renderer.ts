@@ -3,7 +3,7 @@ import { Camera } from "../../entities/camera";
 import { ShaderUniformsEnum } from "../../enums/shader-uniforms.enum";
 import { JsonSerializedData } from "../../interfaces/json-serialized-data.interface";
 import { MeshRendererBehaviour } from "./mesh-renderer-behaviour";
-import { CubePrimitive, EngineCache, Mesh, MeshData, ShaderSources, SkyboxMaterial, SkyboxShader } from "@engine";
+import { CubePrimitive, EngineCache, Mesh, MeshData, RenderLayer, ShaderSources, SkyboxMaterial, SkyboxShader } from "@engine";
 
 /**
  * A specialized renderer for drawing a skybox.
@@ -30,11 +30,12 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this._className = "SkyboxRenderer";
     this.createDefaultSkybox();
   }
-
-protected async createDefaultSkybox(): Promise<void> {
+  
+  protected async createDefaultSkybox(): Promise<void> {
     this.mesh.meshData = new CubePrimitive();
     const material = new SkyboxMaterial();
     this.shader = new SkyboxShader(this._gl, material);
+    this.renderLayer = RenderLayer.SKYBOX;
     material.mainTex = await EngineCache.getWhiteTextureCube(this._gl);
   }
 
@@ -101,6 +102,7 @@ protected async createDefaultSkybox(): Promise<void> {
     this.setCameraMatrices();
     this.setShaderVariables();
     super.draw();
+    this.shader?.release();
   }
 
   /**

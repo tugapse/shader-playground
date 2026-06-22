@@ -96,7 +96,7 @@ in vec4 v_lightSpacePosition;
 in float v_fogDistance;
 out vec4 fragColor;
 @INCLUDE_LIGHT_FUNC
-@INCLUDE_FUNC
+@INCLUDE_UTIL_FUNC
 void main() {
   vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
   vec4 sampledTexColor = texture(u_mainTex, uv);
@@ -162,7 +162,7 @@ uniform float u_starSparsity;
 uniform float u_starSpeed;
 in vec3 v_viewDirection;
 out vec4 fragColor;
-@INCLUDE_FUNC
+@INCLUDE_UTIL_FUNC
 float g_cloudAlpha = 0.0;
 vec3 g_cloudColor  = vec3(0.0);
 vec3 drawStars(vec3 currentSkyColor, vec3 viewDir);
