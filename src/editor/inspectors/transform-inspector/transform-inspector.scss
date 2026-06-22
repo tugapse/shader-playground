@@ -18,7 +18,6 @@
   }
 
   .line-item>span {
-    padding: 4px;
 
     &:hover {
       cursor: col-resize;
@@ -31,7 +30,6 @@
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
-    padding: 4px;
     margin-right: 6px;
 
   }

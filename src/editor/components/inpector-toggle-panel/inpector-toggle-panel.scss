@@ -1,5 +1,4 @@
 :host {
-  padding: 8px;
   .header {
     display: flex;
     align-items: center;
@@ -26,14 +25,14 @@
   .container {
     transition: all 0.3s;
     border-bottom: var(--editor-panel-border);
-    padding-bottom: 12px;
-    margin-bottom: 12px;
     padding: var(--editor-panel-outer-padding);
 
     // background-color: #283549;
 
     &.child {
-      padding: 2px 0;
+      display: flex;
+      flex-direction: column;
+      row-gap: 8px;
       margin-left: 4px;
       margin-bottom: 4px;
       overflow-y: hidden;
