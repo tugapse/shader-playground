@@ -48,23 +48,48 @@ float is_in_shadow_pcf(vec4 lightSpacePosition, vec3 finalNormal, vec3 lightDir)
   vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
   projCoords = projCoords * 0.5 + 0.5;
 
-  // Check bounds with a tiny epsilon padding to handle floating-point rounding errors at the edges
-  if (projCoords.z > 1.0 || projCoords.x < 0.0005 || projCoords.x > 0.9995 || projCoords.y < 0.0005 || projCoords.y > 0.9995 || u_useShadows == 0) {
+  if (projCoords.z > 1.0 || projCoords.z < 0.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0 || u_useShadows == 0) {
     return 1.0;
   }
 
-  float cells = 2.0; 
-  float total = cells * 2.0 + 1.0;
+  // Pre-defined 16-tap Poisson Disk kernel (distribution within a unit circle)
+  vec2 poissonDisk[16] = vec2[](
+    vec2(-0.94201624, -0.39906216), vec2(0.94558609, -0.76890725),
+    vec2(-0.09418410, -0.92938870), vec2(0.34495938, 0.29387760),
+    vec2(-0.91588581, 0.45778432), vec2(-0.81544232, -0.87912464),
+    vec2(-0.38277543, 0.27676845), vec2(0.97484398, 0.75648379),
+    vec2(0.44323325, -0.97511554), vec2(0.53742981, -0.47373420),
+    vec2(-0.26496911, -0.41893023), vec2(0.79197514, 0.19090188),
+    vec2(-0.24188840, 0.99706507), vec2(-0.81409555, 0.14304622),
+    vec2(0.19984126, 0.78641367), vec2(0.14383161, -0.14100790)
+  );
 
   float shadow = 0.0;
+  float filterRadius = 0.0008; // Adjust this to make shadows softer or sharper
   vec2 texelSize = 1.0 / u_shadowMapSize;
   float bias = max(0.002 * (1.0 - dot(finalNormal, lightDir)), 0.001);
-  for (float x = -cells; x <= cells; ++x) {
-    for (float y = -cells; y <= cells; ++y) {
-      shadow += texture(u_shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, projCoords.z - bias));
-    }
+
+  // Pseudo-random rotation angle per-pixel using your existing rand() function
+  float angle = rand(projCoords.xy) * 6.283185; // 2 * PI
+  float cosAngle = cos(angle);
+  float sinAngle = sin(angle);
+
+  for (int i = 0; i < 16; i++) {
+    // Rotate the poisson disk sample
+    vec2 rotatedSample = vec2(
+      poissonDisk[i].x * cosAngle - poissonDisk[i].y * sinAngle,
+      poissonDisk[i].x * sinAngle + poissonDisk[i].y * cosAngle
+    );
+
+    vec2 sampleCoord = projCoords.xy + rotatedSample * filterRadius;
+    
+    // Manual clamp to avoid edge clamping artifacts
+    sampleCoord = clamp(sampleCoord, 0.0005, 0.9995);
+
+    shadow += texture(u_shadowMap, vec3(sampleCoord, projCoords.z - bias));
   }
-  float shadowFactor = max(0.05, shadow / (total*total));
+
+  float shadowFactor = shadow / 16.0;
   return mix(1.0, shadowFactor, u_shadowStrength);
 }
 

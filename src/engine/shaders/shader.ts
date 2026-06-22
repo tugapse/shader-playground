@@ -225,7 +225,9 @@ export class Shader extends JsonSerializable {
     this.gl.useProgram(this._shaderProgram);
   }
 
-  public release(): void { }
+  public release(): void { 
+    
+  }
 
   public loadDataIntoShader(): void {
     if (!this.material) return;
@@ -378,7 +380,7 @@ export class Shader extends JsonSerializable {
       type: this.constructor.name,
       fragUri: this.fragUri,
       vertexUri: this.vertexUri,
-      material: this.material.toJsonObject()
+      material: this.material?.toJsonObject()
     };
   }
 

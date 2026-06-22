@@ -409,7 +409,7 @@ export class SunBehaviour extends EntityBehaviour {
       light.color.a = sunAlpha;
     }
 
-    const shadowRenderer = this.parent.scene.shadowmapRenderer;
+    const shadowRenderer = this.parent.scene.shadowmap;
     if (shadowRenderer) {
       shadowRenderer.shadowstrength.value = this._calculateShadowStrength(
         time,

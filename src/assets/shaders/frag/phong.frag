@@ -22,8 +22,9 @@ in float v_fogDistance;
 
 out vec4 fragColor;
 
-@INCLUDE_LIGHT_FUNC
 @INCLUDE_UTIL_FUNC
+@INCLUDE_LIGHT_FUNC
+@INCLUDE_FOG_FUNC
 
 void main() {
     vec2 uv = (v_uv * u_uvScale) + u_uvOffset;

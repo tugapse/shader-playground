@@ -9,7 +9,7 @@ import { Light ,DirectionalLight} from "./lights/light";
 import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
 import { RenderLayer } from "../enums";
 import { CubemapTexture, Texture } from "../textures";
-import { RenderPipeline } from "@engine/core/render-pipeline";
+import { RenderPipeline } from "@engine/core/render/render-pipeline";
 /**
   Represents a scene in the 3D world, acting as a container for entities and managing the main game loop operations like update and draw.
  * @augments {GlEntity}
@@ -18,10 +18,11 @@ export class Scene extends GlEntity {
 
   protected override _className = "Scene";
 
-  public get shadowmapRenderer() { return this._renderPipeline.shadowmapRenderer; }
+  public get shadowmap() { return this._renderPipeline.shadowMap; }
   public get renderPipeline(){return this._renderPipeline;}
   
   public sceneFog: SceneFog;
+  
   protected _renderPipeline:RenderPipeline;
 
 

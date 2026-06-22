@@ -168,6 +168,9 @@ export class SkyboxShader extends Shader {
     }
   }
 
+  override release(): void {
+    this.material.mainTex?.unBind();
+  }
 
 
 }

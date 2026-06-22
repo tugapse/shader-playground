@@ -102,6 +102,7 @@ export class SkyboxRenderer extends MeshRendererBehaviour {
     this.setCameraMatrices();
     this.setShaderVariables();
     super.draw();
+    this.shader?.release();
   }
 
   /**
