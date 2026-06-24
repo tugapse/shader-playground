@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
 import { Scene } from '@engine';
 import { Icon } from 'src/app/components/icon/icon';
@@ -25,6 +25,7 @@ export class TopBar implements OnInit {
 
   @Input() scene!: Scene;
   @Input() isEditorPaused!: boolean;
+  @Output() toggleFullscreen = new EventEmitter();
 
   public gizmoMode: GizmoMode = GizmoMode.Translate;
   public GizmoMode = GizmoMode;

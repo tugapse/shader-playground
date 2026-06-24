@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from "@angular/core";
 import { vec3 } from "gl-matrix";
-import { Camera, CameraFlyBehaviour, CameraType, Scene } from "@engine";
+import { Camera, CameraFlyBehaviour, CameraType, CanvasViewport, Scene } from "@engine";
 import { BehaviorSubject } from "rxjs";
 import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
 import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
@@ -22,7 +22,7 @@ export class EditorService {
   editorRunningState = new EventEmitter<boolean>();
 
   onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
-  onCanvasRequestResize = new EventEmitter();
+  onCanvasRequestResize = new BehaviorSubject<{width:number,height:number}>({width:0,height:0});
   onCanvasRequestReset = new EventEmitter();
 
   onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(null);
@@ -66,7 +66,7 @@ export class EditorService {
   }
 
   requestCanvasResize() {
-    this.onCanvasRequestResize.emit();
+    this.onCanvasRequestResize.next({width:CanvasViewport.rendererWidth,height:CanvasViewport.rendererHeight});
   }
 
   requestScenePlay(scene?: Scene) {

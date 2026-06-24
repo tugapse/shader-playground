@@ -2,7 +2,7 @@ import { Scene } from '@engine/entities';
 import { JsonSerializable } from '@engine/interfaces';
 import { Shader } from '@engine/shaders';
 import { Texture } from '@engine/textures';
-import { IRenderPass } from '../render-pass.interface';
+import { IRenderPass } from './render-pass.interface';
 
 export class PostProcessingPass
   extends JsonSerializable

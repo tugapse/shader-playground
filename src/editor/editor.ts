@@ -4,7 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
-  OnDestroy
+  OnDestroy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -31,9 +31,10 @@ import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
-import { DragHandleDirective } from "./directives/mouse-drag.directive";
-import { MovableDirective } from "./directives/moveable.directive";
-import { EngineStatsComponent } from "./components/engine-stats/engine-stats";
+import { DragHandleDirective } from './directives/mouse-drag.directive';
+import { MovableDirective } from './directives/moveable.directive';
+import { EngineStatsComponent } from './components/engine-stats/engine-stats';
+import { Icon } from "src/app/components/icon/icon";
 
 @Component({
   selector: 'app-editor',
@@ -45,7 +46,8 @@ import { EngineStatsComponent } from "./components/engine-stats/engine-stats";
     SceneTree,
     AssetExplorerWindow,
     MovableDirective,
-    EngineStatsComponent
+    EngineStatsComponent,
+    Icon
 ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
@@ -157,7 +159,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     scene.isRunning = false;
     this.isPaused = false;
     scene.destroy();
-    
+
     if (this.sceneState) {
       const newScene = await SceneManager.loadScene(this.gl, this.sceneState);
       this.editorService.loadScene(newScene);
@@ -190,7 +192,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.editorService.onSceneStop
       .pipe(takeUntil(this.destroy$))
       .subscribe(this.onSceneStop.bind(this));
-   
+
     this.editorSettings.onSettingsChanged
       .pipe(takeUntil(this.destroy$))
       .subscribe(this.updateEditorSettings.bind(this));
@@ -202,13 +204,24 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.editorService.onUpdateFrame
       .pipe(takeUntil(this.destroy$))
       .subscribe(this.onUpdateFrame.bind(this));
+
+    this.editorService.onCanvasRequestResize
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(this.onCanvasResize.bind(this));
+  }
+
+  private onCanvasResize(size: { width: number; height: number }) {
+    debugger
+    if (this.scene) {
+      this.scene.renderPipeline.resize(size.width, size.height);
+    }
   }
 
   private onRenderFrame(): void {
     // this.editorGridBehaviour?.draw();
     this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
-    // (window as any)['mat'].mainTex = 
+    // (window as any)['mat'].mainTex =
   }
 
   private onUpdateFrame(ellapsed: number): void {
@@ -295,7 +308,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     }
 
     this.toastMessage = 'Saving scene...';
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
 
     const sceneData = this.scene.toJsonObject();
 
@@ -315,7 +328,7 @@ export class Editor implements OnDestroy, AfterViewInit {
 
   private showToast(message: string): void {
     this.toastMessage = message;
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
 
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
@@ -323,15 +336,13 @@ export class Editor implements OnDestroy, AfterViewInit {
 
     this.toastTimeout = setTimeout(() => {
       this.toastMessage = null;
-      this.cdr.detectChanges(); 
+      this.cdr.detectChanges();
     }, 3000);
   }
 
   toggleFullscreen(): void {
     this.isFullScreen = !this.isFullScreen;
     this.cdr.detectChanges();
-    requestAnimationFrame(() => {
-      this.editorService.requestCanvasResize();
-    });
+    this.editorService.requestCanvasResize();
   }
 }

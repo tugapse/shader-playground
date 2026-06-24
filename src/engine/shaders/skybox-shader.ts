@@ -80,7 +80,7 @@ export class SkyboxShader extends Shader {
    * @override
    * @returns {Promise<void>}
    */
-  public override initialize(): Promise<void> {
+  public override initialize(): Promise<boolean> {
     this.fragUri = "assets/shaders/frag/skybox.frag";
     this.vertexUri = "assets/shaders/vertex/skybox.vert";
     return super.initialize();

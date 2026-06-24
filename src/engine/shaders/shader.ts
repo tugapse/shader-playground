@@ -1,13 +1,13 @@
-import { mat4, mat3, vec4, vec3, vec2 } from "gl-matrix";
-import { EngineCache } from "../core/engineCache";
-import { MeshData } from "../core/mesh";
-import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
-import { JsonSerializable } from "../core/json-serializable";
-import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
-import { ColorMaterial } from "../materials/color-material";
-import { Texture } from "../textures/texture";
+import { mat4, mat3, vec4, vec3, vec2 } from 'gl-matrix';
+import { EngineCache } from '../core/engineCache';
+import { MeshData } from '../core/mesh';
+import { ShaderUniformsEnum } from '../enums/shader-uniforms.enum';
+import { JsonSerializable } from '../core/json-serializable';
+import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
+import { ColorMaterial } from '../materials/color-material';
+import { Texture } from '../textures/texture';
 import { v4 as uuidv4 } from 'uuid';
-import { ObjectInstanciator } from "../core";
+import { ObjectInstanciator } from '../core';
 
 /**
   An interface defining the structure for WebGL buffers associated with a mesh.
@@ -26,16 +26,15 @@ export interface WebGLBuffers {
  * @augments {JsonSerializable}
  */
 export class Shader extends JsonSerializable {
-
-  protected override _className = "Shader"
+  protected override _className = 'Shader';
 
   /**
     A map of string keys to URLs for reusable shader function files.
    * @type {{ [key: string]: string }}
    */
   public static SHADER_FUNCTIONS: { [key: string]: string } = {
-    "//@INCLUDE_LIGHT_FUNC": "assets/shaders/functions/light.frag",
-    "//@INCLUDE_LIGHT_HEADER": "assets/shaders/functions/light-header.frag",
+    '//@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
+    '//@INCLUDE_LIGHT_HEADER': 'assets/shaders/functions/light-header.frag',
   };
 
   public static preFetchFunctionsGlsl(): void {
@@ -44,15 +43,26 @@ export class Shader extends JsonSerializable {
     }
   }
 
-  public static instanciate(gl: WebGL2RenderingContext, material: ColorMaterial): Shader {
+  public static instanciate(
+    gl: WebGL2RenderingContext,
+    material: ColorMaterial,
+  ): Shader {
     return new Shader(gl, material);
   }
 
-  public get shaderProgram(): WebGLProgram { return this._shaderProgram; }
+  public get shaderProgram(): WebGLProgram {
+    return this._shaderProgram;
+  }
   public _shaderProgram!: WebGLProgram;
+
+  public get initialized() {
+    return this._initialized;
+  }
   private _initialized: boolean = false;
 
-  public get buffers(): WebGLBuffers { return this._buffers }
+  public get buffers(): WebGLBuffers {
+    return this._buffers;
+  }
   protected _buffers: WebGLBuffers = {
     position: null,
     normal: null,
@@ -68,22 +78,22 @@ export class Shader extends JsonSerializable {
   constructor(
     protected gl: WebGL2RenderingContext,
     public material: ColorMaterial,
-    public fragUri: string = "assets/shaders/frag/color.frag",
-    public vertexUri: string = "assets/shaders/vertex/vertex.vert"
+    public fragUri: string = 'assets/shaders/frag/color.frag',
+    public vertexUri: string = 'assets/shaders/vertex/vertex.vert',
   ) {
-    super("Shader");
+    super('Shader');
     this._uuid = uuidv4();
   }
 
-  public async initialize(): Promise<void> {
+  public async initialize(): Promise<boolean> {
     if (this._initialized) {
-      return;
+      return true;
     }
     const keys: string[] = Object.keys(Shader.SHADER_FUNCTIONS);
 
-    let vsSource = this.vertexSource || await EngineCache.loadShaderSource(this.vertexUri);
-    let fsSource = this.fragmentSource || await EngineCache.loadShaderSource(this.fragUri);
-    
+    let vsSource = await EngineCache.loadShaderSource(this.vertexUri);
+    let fsSource = await EngineCache.loadShaderSource(this.fragUri);
+
     for (const obkey of keys) {
       if (fsSource.includes(obkey)) {
         const url: string = Shader.SHADER_FUNCTIONS[obkey] as string;
@@ -91,15 +101,29 @@ export class Shader extends JsonSerializable {
         fsSource = fsSource.replace(obkey, text);
       }
     }
+    debugger;
 
-    const vertexShader = this.compileShader(this.gl, this.gl.VERTEX_SHADER, vsSource);
-    const fragmentShader = this.compileShader(this.gl, this.gl.FRAGMENT_SHADER, fsSource);
+    const vertexShader = this.compileShader(
+      this.gl,
+      this.gl.VERTEX_SHADER,
+      vsSource,
+    );
+    const fragmentShader = this.compileShader(
+      this.gl,
+      this.gl.FRAGMENT_SHADER,
+      fsSource,
+    );
 
     if (!vertexShader || !fragmentShader) {
-      return;
+      return false;
     }
-    this._shaderProgram = this.createProgram(this.gl, vertexShader, fragmentShader) as WebGLProgram;
+    this._shaderProgram = this.createProgram(
+      this.gl,
+      vertexShader,
+      fragmentShader,
+    ) as WebGLProgram;
     this._initialized = true;
+    return true;
   }
 
   public initBuffers(gl: WebGL2RenderingContext, mesh: MeshData): void {
@@ -145,7 +169,11 @@ export class Shader extends JsonSerializable {
       for (const t of mesh.tangents) {
         tangents.push(t[0], t[1], t[2]);
       }
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tangents), gl.STATIC_DRAW);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(tangents),
+        gl.STATIC_DRAW,
+      );
     }
 
     if (mesh.bitangents && mesh.bitangents.length > 0) {
@@ -155,12 +183,20 @@ export class Shader extends JsonSerializable {
       for (const b of mesh.bitangents) {
         bitangents.push(b[0], b[1], b[2]);
       }
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bitangents), gl.STATIC_DRAW);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(bitangents),
+        gl.STATIC_DRAW,
+      );
     }
 
     buffers.indices = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(mesh.indices),
+      gl.STATIC_DRAW,
+    );
 
     this._buffers = buffers;
   }
@@ -168,46 +204,96 @@ export class Shader extends JsonSerializable {
   public bindBuffers(): void {
     if (!this.gl || !this._shaderProgram) return;
 
-    const positionAttributeLocation = this.gl.getAttribLocation(this._shaderProgram, ShaderUniformsEnum.A_POSITION);
+    const positionAttributeLocation = this.gl.getAttribLocation(
+      this._shaderProgram,
+      ShaderUniformsEnum.A_POSITION,
+    );
     if (this._buffers.position && positionAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffers.position);
-      this.gl.vertexAttribPointer(positionAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.vertexAttribPointer(
+        positionAttributeLocation,
+        3,
+        this.gl.FLOAT,
+        false,
+        0,
+        0,
+      );
       this.gl.enableVertexAttribArray(positionAttributeLocation);
     } else if (positionAttributeLocation !== -1) {
       this.gl.disableVertexAttribArray(positionAttributeLocation);
     }
 
-    const normalAttributeLocation = this.gl.getAttribLocation(this._shaderProgram, ShaderUniformsEnum.A_NORMAL);
+    const normalAttributeLocation = this.gl.getAttribLocation(
+      this._shaderProgram,
+      ShaderUniformsEnum.A_NORMAL,
+    );
     if (this._buffers.normal && normalAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffers.normal);
-      this.gl.vertexAttribPointer(normalAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.vertexAttribPointer(
+        normalAttributeLocation,
+        3,
+        this.gl.FLOAT,
+        false,
+        0,
+        0,
+      );
       this.gl.enableVertexAttribArray(normalAttributeLocation);
     } else if (normalAttributeLocation !== -1) {
       this.gl.disableVertexAttribArray(normalAttributeLocation);
     }
 
-    const uvAttributeLocation = this.gl.getAttribLocation(this._shaderProgram, ShaderUniformsEnum.A_UV);
+    const uvAttributeLocation = this.gl.getAttribLocation(
+      this._shaderProgram,
+      ShaderUniformsEnum.A_UV,
+    );
     if (this._buffers.uv && uvAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffers.uv);
-      this.gl.vertexAttribPointer(uvAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+      this.gl.vertexAttribPointer(
+        uvAttributeLocation,
+        2,
+        this.gl.FLOAT,
+        false,
+        0,
+        0,
+      );
       this.gl.enableVertexAttribArray(uvAttributeLocation);
     } else if (uvAttributeLocation !== -1) {
       this.gl.disableVertexAttribArray(uvAttributeLocation);
     }
 
-    const tangentAttributeLocation = this.gl.getAttribLocation(this._shaderProgram, ShaderUniformsEnum.A_TANGENT);
+    const tangentAttributeLocation = this.gl.getAttribLocation(
+      this._shaderProgram,
+      ShaderUniformsEnum.A_TANGENT,
+    );
     if (this._buffers.tangent && tangentAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffers.tangent);
-      this.gl.vertexAttribPointer(tangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.vertexAttribPointer(
+        tangentAttributeLocation,
+        3,
+        this.gl.FLOAT,
+        false,
+        0,
+        0,
+      );
       this.gl.enableVertexAttribArray(tangentAttributeLocation);
     } else if (tangentAttributeLocation !== -1) {
       this.gl.disableVertexAttribArray(tangentAttributeLocation);
     }
 
-    const bitangentAttributeLocation = this.gl.getAttribLocation(this._shaderProgram, ShaderUniformsEnum.A_BITANGENT);
+    const bitangentAttributeLocation = this.gl.getAttribLocation(
+      this._shaderProgram,
+      ShaderUniformsEnum.A_BITANGENT,
+    );
     if (this._buffers.bitangent && bitangentAttributeLocation !== -1) {
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._buffers.bitangent);
-      this.gl.vertexAttribPointer(bitangentAttributeLocation, 3, this.gl.FLOAT, false, 0, 0);
+      this.gl.vertexAttribPointer(
+        bitangentAttributeLocation,
+        3,
+        this.gl.FLOAT,
+        false,
+        0,
+        0,
+      );
       this.gl.enableVertexAttribArray(bitangentAttributeLocation);
     } else if (bitangentAttributeLocation !== -1) {
       this.gl.disableVertexAttribArray(bitangentAttributeLocation);
@@ -225,9 +311,7 @@ export class Shader extends JsonSerializable {
     this.gl.useProgram(this._shaderProgram);
   }
 
-  public release(): void { 
-    
-  }
+  public release(): void {}
 
   public loadDataIntoShader(): void {
     if (!this.material) return;
@@ -281,13 +365,19 @@ export class Shader extends JsonSerializable {
   }
 
   setInt(name: string, num: number) {
+    debugger;
+    this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
       this.gl.uniform1i(location, num);
     }
   }
 
-  public setTexture(name: string, texture: Texture, textureIndex: number): void {
+  public setTexture(
+    name: string,
+    texture: Texture,
+    textureIndex: number,
+  ): void {
     this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -299,16 +389,28 @@ export class Shader extends JsonSerializable {
 
   public setBuffer(buffer: WebGLBuffer, values: vec3[]): void {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(values.flat() as number[]), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array(values.flat() as number[]),
+      this.gl.STATIC_DRAW,
+    );
   }
 
   public setIndices(values: number[]): void {
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this._buffers.indices);
     const indicesArray = new Uint16Array(values);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indicesArray, this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ELEMENT_ARRAY_BUFFER,
+      indicesArray,
+      this.gl.STATIC_DRAW,
+    );
   }
 
-  private compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
+  private compileShader(
+    gl: WebGL2RenderingContext,
+    type: number,
+    source: string,
+  ): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) {
       return null;
@@ -317,14 +419,21 @@ export class Shader extends JsonSerializable {
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error('An error occurred compiling the shader:', gl.getShaderInfoLog(shader));
+      console.error(
+        'An error occurred compiling the shader:',
+        gl.getShaderInfoLog(shader),
+      );
       gl.deleteShader(shader);
       return null;
     }
     return shader;
   }
 
-  private createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+  private createProgram(
+    gl: WebGL2RenderingContext,
+    vertexShader: WebGLShader,
+    fragmentShader: WebGLShader,
+  ): WebGLProgram | null {
     const shaderProgram = gl.createProgram();
     if (!shaderProgram) {
       return null;
@@ -334,17 +443,20 @@ export class Shader extends JsonSerializable {
     gl.linkProgram(shaderProgram);
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      console.error('Unable to initialize the shader program:', gl.getProgramInfoLog(shaderProgram));
+      console.trace(
+        'Unable to initialize the shader program:',
+        gl.getProgramInfoLog(shaderProgram),
+      );
       return null;
     }
-    
+
     // --- UBO BINDING LOGIC ADDED HERE ---
     // Look for the "CameraBlock" uniform block in this newly compiled shader
-    const blockIndex = gl.getUniformBlockIndex(shaderProgram, "CameraBlock");
-    
+    const blockIndex = gl.getUniformBlockIndex(shaderProgram, 'CameraBlock');
+
     // If this specific shader actually uses the CameraBlock, bind it to global slot 0
     if (blockIndex !== gl.INVALID_INDEX) {
-        gl.uniformBlockBinding(shaderProgram, blockIndex, 0); 
+      gl.uniformBlockBinding(shaderProgram, blockIndex, 0);
     }
 
     return shaderProgram;
@@ -356,20 +468,13 @@ export class Shader extends JsonSerializable {
   }
 
   public destroy(): void {
-    if (this._buffers.position)
-      this.gl.deleteBuffer(this._buffers.position);
-    if (this._buffers.normal)
-      this.gl.deleteBuffer(this._buffers.normal);
-    if (this._buffers.uv)
-      this.gl.deleteBuffer(this._buffers.uv);
-    if (this._buffers.tangent)
-      this.gl.deleteBuffer(this._buffers.tangent);
-    if (this._buffers.bitangent)
-      this.gl.deleteBuffer(this._buffers.bitangent);
-    if (this._buffers.indices)
-      this.gl.deleteBuffer(this._buffers.indices);
-    if (this._shaderProgram)
-      this.gl.deleteProgram(this._shaderProgram);
+    if (this._buffers.position) this.gl.deleteBuffer(this._buffers.position);
+    if (this._buffers.normal) this.gl.deleteBuffer(this._buffers.normal);
+    if (this._buffers.uv) this.gl.deleteBuffer(this._buffers.uv);
+    if (this._buffers.tangent) this.gl.deleteBuffer(this._buffers.tangent);
+    if (this._buffers.bitangent) this.gl.deleteBuffer(this._buffers.bitangent);
+    if (this._buffers.indices) this.gl.deleteBuffer(this._buffers.indices);
+    if (this._shaderProgram) this.gl.deleteProgram(this._shaderProgram);
     this._initialized = false;
   }
 
@@ -380,7 +485,7 @@ export class Shader extends JsonSerializable {
       type: this.constructor.name,
       fragUri: this.fragUri,
       vertexUri: this.vertexUri,
-      material: this.material?.toJsonObject()
+      material: this.material?.toJsonObject(),
     };
   }
 

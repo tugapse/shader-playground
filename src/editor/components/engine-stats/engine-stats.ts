@@ -6,6 +6,7 @@ export interface EngineStats {
   frameTimeMs: number;
   updateTimeMs: number;
   renderTimeMs: number;
+  browserTimeMs:number;
 }
 
 @Component({

@@ -4,16 +4,16 @@ import { Camera, Scene } from '@engine/entities';
 import { RenderLayer } from '@engine/enums/render-layer.enum';
 import { JsonSerializedData } from '@engine/interfaces';
 import { vec3 } from 'gl-matrix';
-import { JsonSerializable } from '../json-serializable';
+import { JsonSerializable } from '../../json-serializable';
 import { IRenderPass } from './render-pass.interface';
-import { CameraUBO } from '../camera-ubo';
+import { CameraUBO } from '../../camera-ubo';
 
 export class GeometryPass extends JsonSerializable implements IRenderPass {
   private gl: WebGL2RenderingContext;
   private ubo!: CameraUBO;
 
   // Optionally bind to an off-screen FBO texture, or leave null to render directly to the backbuffer (screen)
-  public targetFramebuffer: WebGLFramebuffer | null = null;
+  // public targetFramebuffer: WebGLFramebuffer | null = null;
 
   constructor(gl: WebGL2RenderingContext) {
     super('GeometryPass');
@@ -28,14 +28,14 @@ export class GeometryPass extends JsonSerializable implements IRenderPass {
     this.ubo.update(camera.viewMatrix, camera.projectionMatrix);
     
 
-    // Bind target buffer (null = default screen canvas)
-    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.targetFramebuffer);
-    this.gl.viewport(
-      0,
-      0,
-      CanvasViewport.rendererWidth,
-      CanvasViewport.rendererHeight,
-    );
+    // // Bind target buffer (null = default screen canvas)
+    // this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    // this.gl.viewport(
+    //   0,
+    //   0,
+    //   CanvasViewport.rendererWidth,
+    //   CanvasViewport.rendererHeight,
+    // );
 
     // Fetch and sort scene objects by distance for correct layering
     const activeObjects = scene.objects.filter((o) => o.active);
@@ -82,10 +82,10 @@ export class GeometryPass extends JsonSerializable implements IRenderPass {
       obj.draw();
     }
 
-    // Unbind framebuffer if it was an off-screen pass
-    if (this.targetFramebuffer) {
-      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-    }
+    // // Unbind framebuffer if it was an off-screen pass
+    // if (this.targetFramebuffer) {
+    //   this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    // }
   }
 
   public cleanup(): void {}

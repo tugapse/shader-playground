@@ -5,11 +5,6 @@
   </div>
 
   <div class="stat-row">
-    <span class="label">Frame</span>
-    <span class="value">{{ stats.frameTimeMs | number: "1.2-2" }} ms</span>
-  </div>
-
-  <div class="stat-row">
     <span class="label">Update</span>
     <span class="value">{{ stats.updateTimeMs | number: "1.2-2" }} ms</span>
   </div>
@@ -17,5 +12,19 @@
   <div class="stat-row">
     <span class="label">Render</span>
     <span class="value">{{ stats.renderTimeMs | number: "1.2-2" }} ms</span>
+  </div>
+
+  <div class="stat-row">
+    <span class="label">Frame</span>
+    <span class="value">{{ stats.frameTimeMs | number: "1.2-2" }} ms</span>
+  </div>
+
+  <div class="stat-row">
+    <span
+      class="label"
+      title="This will include the Browser API, GC, And Idle time taken by the browser untill next frame."
+      >Browser</span
+    >
+    <span class="value">{{ stats.browserTimeMs | number: "1.2-2" }} ms</span>
   </div>
 </div>

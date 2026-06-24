@@ -5,8 +5,8 @@ import { RendererBehaviour } from '@engine/behaviours';
 import { mat4 } from 'gl-matrix';
 import { IRenderPass } from './render-pass.interface';
 import { ShaderUniformsEnum } from '@engine/enums/shader-uniforms.enum';
-import { NumberRange } from '../range';
-import { JsonSerializable } from '../json-serializable';
+import { NumberRange } from '../../range';
+import { JsonSerializable } from '../../json-serializable';
 import { JsonSerializedData } from '@engine/interfaces';
 
 export class ShadowMapPass extends JsonSerializable implements IRenderPass {

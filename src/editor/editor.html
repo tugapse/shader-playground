@@ -1,4 +1,8 @@
-<editor-top-bar [scene]="scene" [isEditorPaused]="isPaused"></editor-top-bar>
+<editor-top-bar
+  [scene]="scene"
+  [isEditorPaused]="isPaused"
+  (toggleFullscreen)="toggleFullscreen()"
+></editor-top-bar>
 
 <div class="container">
   <aside class="sidebar">

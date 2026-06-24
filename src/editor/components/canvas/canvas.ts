@@ -9,6 +9,7 @@ export interface EngineStats {
   frameTimeMs: number;
   updateTimeMs: number;
   renderTimeMs: number;
+  browserTimeMs: number;
 }
 
 @Component({
@@ -21,7 +22,7 @@ export interface EngineStats {
 export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   @Input() scene!: Scene;
 
-  @Output() onGlContextCreated = new EventEmitter<WebGL2RenderingContext >();
+  @Output() onGlContextCreated = new EventEmitter<WebGL2RenderingContext>();
   @Output() stats = new EventEmitter<EngineStats>();
 
   @ViewChild('glCanvas') private glCanvas!: ElementRef<HTMLCanvasElement>;
@@ -39,15 +40,14 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   private accumulatedFrameTime = 0;
   private accumulatedUpdateTime = 0;
   private accumulatedRenderTime = 0;
+
+  private lastRafEndTime = 0;
+  private accumulatedBrowserTime = 0;
+  private rafCount = 0;
   
   private readonly targetFps = 60;
   private readonly frameInterval = 1000 / this.targetFps;
   private destroy$ = new Subject<void>();
-
-
-
-
-
 
   constructor(
     private editorService: EditorService, 
@@ -96,6 +96,14 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   }
 
   public render(timestamp: number): void {
+
+    // Measure the gap since the end of the last render call
+    const rafStart = performance.now();
+    if (this.lastRafEndTime > 0) {
+      this.accumulatedBrowserTime += (rafStart - this.lastRafEndTime);
+    }
+    this.rafCount++;
+
     if (!this.lastTime) this.lastTime = timestamp;
     if (!this.lastDrawTime) this.lastDrawTime = timestamp;
 
@@ -105,6 +113,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     if (!this.scene || !this.shouldRender()) {
       this.cleanInput();
       this.animationFrameId = requestAnimationFrame(this.render.bind(this));
+      this.lastRafEndTime = performance.now();
       return;
     }
 
@@ -114,11 +123,11 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
 
     const timeSinceLastDraw = timestamp - this.lastDrawTime;
     let currentRenderTime = 0;
+    this.editorService.onUpdateFrame.next(delta);
     
     if (timeSinceLastDraw >= this.frameInterval) {
       this.lastDrawTime = timestamp - (timeSinceLastDraw % this.frameInterval);
       
-      this.editorService.onUpdateFrame.next(delta);
       
       if (this.gl && this.canvasElement) {
         const renderStart = performance.now();
@@ -134,28 +143,41 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     }
 
     const fpsElapsed = timestamp - this.lastFpsUpdateTime;
+
     if (fpsElapsed >= 1000) {
       const actualFps = Math.round((this.frameCount / fpsElapsed) * 1000);
       const avgFrameTime = this.accumulatedFrameTime / this.frameCount;
       const avgUpdateTime = this.accumulatedUpdateTime / this.frameCount;
       const avgRenderTime = this.accumulatedRenderTime / this.frameCount;
+      
+      // Calculate overhead average based on total rAF cycles, not just drawn frames
+      const avgBrowserTime = this.accumulatedBrowserTime / this.rafCount;
 
       this.ngZone.run(() => this.stats.emit({
         fps: actualFps,
         frameTimeMs: Number(avgFrameTime.toFixed(2)),
         updateTimeMs: Number(avgUpdateTime.toFixed(2)),
-        renderTimeMs: Number(avgRenderTime.toFixed(2))
+        renderTimeMs: Number(avgRenderTime.toFixed(2)),
+        browserTimeMs: Number(avgBrowserTime.toFixed(2))
       }));
 
+      // Reset counters
       this.frameCount = 0;
       this.accumulatedFrameTime = 0;
       this.accumulatedUpdateTime = 0;
       this.accumulatedRenderTime = 0;
+      
+      this.rafCount = 0;
+      this.accumulatedBrowserTime = 0;
+      
       this.lastFpsUpdateTime = timestamp;
     }
 
     this.cleanInput();
     this.animationFrameId = requestAnimationFrame(this.render.bind(this));
+    
+    // Record the exact exit time of the execution context
+    this.lastRafEndTime = performance.now(); 
   }
 
   private cleanInput(): void {
