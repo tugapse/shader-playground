@@ -22,65 +22,7 @@
             readonly
           ></editor-text-input-inspector>
         }
-
-        @case ("string") {
-          <editor-text-input-inspector
-            [label]="item.key.capitalize()"
-            [value]="behaviour[item.key]"
-            (change)="onValueChanged(item, $event)"
-          ></editor-text-input-inspector>
-        }
-
-        @case ("number") {
-          <editor-text-input-inspector
-            [isNumber]="true"
-            [label]="item.key.capitalize()"
-            [value]="behaviour[item.key]"
-            (change)="onValueChanged(item, $event)"
-            [dragScale]="0.001"
-          ></editor-text-input-inspector>
-        }
-
-        @case ("boolean") {
-          <app-boolean-inspector
-            [label]="item.key.capitalize()"
-            [active]="behaviour[item.key]"
-            (change)="onValueChanged(item, $event)"
-          ></app-boolean-inspector>
-        }
-
-        @case ("color") {
-          <editor-color-inspector
-            [label]="item.key"
-            [selectedColor]="behaviour[item.key]"
-            (colorChange)="onColorChanged(item, $event)"
-          ></editor-color-inspector>
-        }
-
-        @case ("vector234") {
-          <editor-vector-inspector
-            [vector]="behaviour[item.key]"
-            (vectorChanged)="onVectorChanged(item, $event)"
-          ></editor-vector-inspector>
-        }
-
-        @case ("enum") {
-          <editor-enum-inspector
-            [label]="item.key"
-            [items]="item.property"
-            [selected]="item.value"
-            (change)="onEnumChanged(item, $event)"
-          ></editor-enum-inspector>
-        }
-        @case ("range") {
-          <editor-number-range-inspector
-            [label]="item.key.capitalize()"
-            [range]="item.value"
-            (rangeChange)="onRangeChanges(item, $event)"
-          ></editor-number-range-inspector>
-        }
-
-        @default {
+        @case ("object") {
           <editor-object-inspector
             [isChild]="true"
             [label]="item.value?.name || item.key.capitalize()"
@@ -90,6 +32,18 @@
               property: item.value,
             }"
           ></editor-object-inspector>
+        }
+        @case ("shader") {
+          <editor-shader-inspector
+            [isChild]="true"
+            [label]="item.value?.name || item.key.capitalize()"
+            [shader]="item.value"
+          >
+          </editor-shader-inspector>
+        }
+
+        @default {
+          <editor-default-inspector [item]="item"></editor-default-inspector>
         }
       }
     }

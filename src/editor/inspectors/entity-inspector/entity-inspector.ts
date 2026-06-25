@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
-import { BooleanInspector } from '@editor/components/inspector/boolean-inspector/boolean-inspector';
-import { TextInputInspector } from '@editor/components/inspector/text-input-inspector/text-input-inspector';
-import { VectorInspector } from '@editor/components/inspector/vector-inspector/vector-inspector';
+import { BooleanInspector } from '@editor/components/inspector-components/boolean-inspector/boolean-inspector';
+import { TextInputInspector } from '@editor/components/inspector-components/text-input-inspector/text-input-inspector';
+import { VectorInspector } from '@editor/components/inspector-components/vector-inspector/vector-inspector';
 
 import { Toggle } from 'src/app/components/toggle/toggle';
 import { BehaviourInspector } from '../behaviour-inspector/behaviour-inspector';

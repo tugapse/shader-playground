@@ -1,0 +1,28 @@
+<editor-inpector-toggle-panel
+  [title]="_shader.name || label"
+  [collapsed]="false"
+  [isChild]="true"
+>
+  @for (item of _properties; track $index) {
+    @switch (item.type) {
+      @case ("material") {
+        <editor-material-inspector [isChild]="true" [material]="item.value">
+        </editor-material-inspector>
+      }
+      @case ("object") {
+        <editor-object-inspector
+          [isChild]="true"
+          [targetObject]="{
+            key: item.key,
+            type: item.type,
+            property: item.value,
+          }"
+        ></editor-object-inspector>
+      }
+
+      @default {
+        <editor-default-inspector [item]="item"></editor-default-inspector>
+      }
+    }
+  }
+</editor-inpector-toggle-panel>

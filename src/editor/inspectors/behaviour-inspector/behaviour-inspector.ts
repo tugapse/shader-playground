@@ -1,21 +1,24 @@
 import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { BooleanInspector } from "@editor/components/inspector/boolean-inspector/boolean-inspector";
-import { TextInputInspector } from "@editor/components/inspector/text-input-inspector/text-input-inspector";
-import { VectorInspector } from "@editor/components/inspector/vector-inspector/vector-inspector";
+import { BooleanInspector } from "@editor/components/inspector-components/boolean-inspector/boolean-inspector";
+import { TextInputInspector } from "@editor/components/inspector-components/text-input-inspector/text-input-inspector";
+import { VectorInspector } from "@editor/components/inspector-components/vector-inspector/vector-inspector";
 import { ColorInspector } from "../color-inspector/color-inspector";
 import { ITargetObject, ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
-import { CullFace, DephFunction, EntityBehaviour, FaceWinding, RenderLayer } from '@engine';
+import { CullFace, DephFunction, EntityBehaviour, FaceWinding, NumberRange, RenderLayer } from '@engine';
 import { EnumInspector } from "../enum-inspector/enum-inspector";
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { Icon } from "src/app/components/icon/icon";
 import { ConfirmationService } from 'src/app/services/confirmation.service';
 import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
 import { TextureInspector } from "../texture-inspector/texture-inspector";
+import { MaterialInspector } from "../material-inspector/material-inspector";
+import { ShaderInspector } from "../shader-inspector/shader-inspector";
+import { DefaultInspector } from "../default-inspector/default-inspector";
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector, TextureInspector],
+  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector, TextureInspector, MaterialInspector, ShaderInspector, DefaultInspector],
   templateUrl: './behaviour-inspector.html',
   styleUrl: './behaviour-inspector.scss'
 })
@@ -80,7 +83,7 @@ export class BehaviourInspector extends ObjectInspector {
       if (value != undefined) {
         const p: ITargetProperty = {
           key: enumName,
-          type: "boolean",
+          type: "enum",
           property: arrayValues,
           value: arrayValues.find(e => e.value == value)
         };
@@ -96,7 +99,7 @@ export class BehaviourInspector extends ObjectInspector {
 
         const p: ITargetProperty = {
           key: boolName,
-          type: "enum",
+          type: "boolean",
           property: this._selectedObject?.property[boolName],
           value: value
         };
@@ -110,9 +113,6 @@ export class BehaviourInspector extends ObjectInspector {
     this._selectedObject!.property[item.key] = $event.value
   }
 
-  onRangeChanges(item:ITargetProperty, $event:any){
-    
-  }
 
   onRemoveBehaviourRequested() {
     this.confirmationService.confirm({

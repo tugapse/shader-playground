@@ -1,9 +1,9 @@
-<editor-inpector-toggle-panel
-  [title]="label.capitalize()"
-  [collapsed]="true"
-  [isChild]="true"
->
-  <div>
-    <img [src]="texture.textureUri" />
+<editor-inpector-toggle-panel [collapsed]="true" [isChild]="true">
+  <div class="line-item">
+    <div class="texture-container">
+      @if (texture) {
+        <img [src]="texture.textureUri" />
+      }
+    </div>
   </div>
 </editor-inpector-toggle-panel>

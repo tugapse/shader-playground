@@ -211,7 +211,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   private onCanvasResize(size: { width: number; height: number }) {
-    debugger
     if (this.scene) {
       this.scene.renderPipeline.resize(size.width, size.height);
     }

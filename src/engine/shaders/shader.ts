@@ -101,7 +101,7 @@ export class Shader extends JsonSerializable {
         fsSource = fsSource.replace(obkey, text);
       }
     }
-    debugger;
+    
 
     const vertexShader = this.compileShader(
       this.gl,
@@ -365,7 +365,7 @@ export class Shader extends JsonSerializable {
   }
 
   setInt(name: string, num: number) {
-    debugger;
+    
     this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {

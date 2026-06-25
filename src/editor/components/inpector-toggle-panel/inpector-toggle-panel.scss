@@ -1,4 +1,5 @@
 :host {
+  
   .header {
     display: flex;
     align-items: center;
@@ -25,11 +26,11 @@
   .container {
     transition: all 0.3s;
     border-bottom: var(--editor-panel-border);
-    padding: var(--editor-panel-outer-padding);
+    padding: var(--editor-panel-outer-padding) 0;
 
     // background-color: #283549;
-
-    &.child {
+    
+    &.child { 
       display: flex;
       flex-direction: column;
       row-gap: 8px;
@@ -37,7 +38,8 @@
       margin-bottom: 4px;
       overflow-y: hidden;
       border: none;
-      background-color: var(--editor-panel-background-50)
+      background-color: var(--editor-panel-background-50);
+      padding:0 !important;
     }
 
     &.collapsed {
