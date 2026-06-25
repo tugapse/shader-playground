@@ -13,7 +13,7 @@ export class VectorInspector {
   @Input() vectorKeys = ["x", "y", "z", "w"];
   @Input() vector!: Vector4 | Vector3 | Vector2;
   @Input() label: string = "No title";
-  @Input() scale: number = 1;
+  @Input() scale: number = 0.1;
   @Output() vectorChanged = new EventEmitter<Vector4 | Vector3 | Vector2>()
 
   onVectorChanged(index: number, value:string|number) {

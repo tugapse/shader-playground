@@ -552,7 +552,7 @@ export class SunBehaviour extends EntityBehaviour {
     isSunDown: boolean,
   ): void {
     const shader = skyboxRenderer.shader as SkyboxShader;
-    shader.material.skyColor = Color.lerp(fromSkyColor, toSkyColor, delta);
+    shader.material.color = Color.lerp(fromSkyColor, toSkyColor, delta);
     shader.material.horizonColor = Color.lerp(
       fromHorizonColor,
       toHorizonColor,

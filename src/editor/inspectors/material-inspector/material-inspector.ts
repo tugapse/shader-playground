@@ -2,7 +2,8 @@ import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
 import { ColorMaterial } from '@engine/materials/color-material';
 import { DefaultInspector } from "../default-inspector/default-inspector";
-import { ObjectInspector } from '../object-inspector/object-inspector';
+import { ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
+import { Color, NumberRange } from '@engine';
 
 @Component({
   selector: 'editor-material-inspector',
@@ -23,6 +24,7 @@ export class MaterialInspector extends ObjectInspector {
       type: 'material',
       property: value
     }
+    this._material = value;
     this.loadProperties();
   }
 
@@ -40,6 +42,14 @@ export class MaterialInspector extends ObjectInspector {
       .filter((key) => this.isPropertyValid(key))
       .map((key) => super.createPropertyViewModel(key, object[key]))
       .filter((p) => !!p.key);
-      debugger
   }
+
+    onDefaultChanged(
+      item: ITargetProperty,
+      value: string | number | boolean | NumberRange | Color,
+    ) {
+      console.log(item.key, value)
+      this._material[item.key] = value
+    }
+  
 }

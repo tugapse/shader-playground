@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BooleanInspector } from '@editor/components/inspector-components/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '@editor/components/inspector-components/text-input-inspector/text-input-inspector';
 import { VectorInspector } from '@editor/components/inspector-components/vector-inspector/vector-inspector';
@@ -9,7 +9,7 @@ import { EnumInspector } from '../enum-inspector/enum-inspector';
 import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
 import {
   ITargetObject,
-  ITargetProperty
+  ITargetProperty,
 } from '../object-inspector/object-inspector';
 
 @Component({
@@ -26,17 +26,17 @@ import {
   styleUrl: './default-inspector.scss',
 })
 export class DefaultInspector {
-
-
   @Input() item!: ITargetProperty;
-  
+  @Output() change = new EventEmitter<
+    string | number | boolean | NumberRange | Color 
+  >();
 
   private _onPropertyChanged(propertyKey: string, value: any): void {
-    if (!this.item?.property || value instanceof Event) return;
-
-    this.item.property[propertyKey] = value;
+    if (value instanceof Event) return;
+    this.item.value = value;
+    this.change.emit(value);
   }
-  
+
   onValueChanged(
     property: ITargetObject,
     value: string | number | boolean | NumberRange,
@@ -55,11 +55,11 @@ export class DefaultInspector {
     this._onPropertyChanged(property.key, value);
   }
 
-   protected onEnumChange(key: string, menuItem: DropdownItem) {
-    this.item!.property[key] = menuItem.value;
+  protected onEnumChange(key: string, menuItem: DropdownItem) {
+   this._onPropertyChanged(key, menuItem.value);
   }
 
-  protected onRangeChange(item:ITargetProperty, $event:NumberRange){
-    this.item!.property[item.key] = $event
+  protected onRangeChange(item: ITargetProperty, $event: NumberRange) {
+    this._onPropertyChanged(item.key, $event.value);
   }
 }

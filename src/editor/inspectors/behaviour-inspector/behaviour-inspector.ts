@@ -1,30 +1,44 @@
 import { Component, Input } from '@angular/core';
-import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
-import { BooleanInspector } from "@editor/components/inspector-components/boolean-inspector/boolean-inspector";
-import { TextInputInspector } from "@editor/components/inspector-components/text-input-inspector/text-input-inspector";
-import { VectorInspector } from "@editor/components/inspector-components/vector-inspector/vector-inspector";
-import { ColorInspector } from "../color-inspector/color-inspector";
-import { ITargetObject, ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
-import { CullFace, DephFunction, EntityBehaviour, FaceWinding, NumberRange, RenderLayer } from '@engine';
-import { EnumInspector } from "../enum-inspector/enum-inspector";
+import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
+import { BooleanInspector } from '@editor/components/inspector-components/boolean-inspector/boolean-inspector';
+import { TextInputInspector } from '@editor/components/inspector-components/text-input-inspector/text-input-inspector';
+import {
+  Color,
+  CullFace,
+  DephFunction,
+  EntityBehaviour,
+  FaceWinding,
+  NumberRange,
+  RenderLayer,
+} from '@engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
-import { Icon } from "src/app/components/icon/icon";
+import { Icon } from 'src/app/components/icon/icon';
 import { ConfirmationService } from 'src/app/services/confirmation.service';
-import { NumberRangeInspector } from "../number-range-inspector/number-range-inspector";
-import { TextureInspector } from "../texture-inspector/texture-inspector";
-import { MaterialInspector } from "../material-inspector/material-inspector";
-import { ShaderInspector } from "../shader-inspector/shader-inspector";
-import { DefaultInspector } from "../default-inspector/default-inspector";
+import { DefaultInspector } from '../default-inspector/default-inspector';
+import { EnumInspector } from '../enum-inspector/enum-inspector';
+import {
+  ITargetObject,
+  ITargetProperty,
+  ObjectInspector,
+} from '../object-inspector/object-inspector';
+import { ShaderInspector } from '../shader-inspector/shader-inspector';
 
 @Component({
   selector: 'editor-behaviour-inspector',
-  imports: [ObjectInspector, InpectorTogglePanel, TextInputInspector, BooleanInspector, ColorInspector, VectorInspector, EnumInspector, Icon, NumberRangeInspector, TextureInspector, MaterialInspector, ShaderInspector, DefaultInspector],
+  imports: [
+    ObjectInspector,
+    InpectorTogglePanel,
+    TextInputInspector,
+    BooleanInspector,
+    EnumInspector,
+    Icon,
+    ShaderInspector,
+    DefaultInspector,
+  ],
   templateUrl: './behaviour-inspector.html',
-  styleUrl: './behaviour-inspector.scss'
+  styleUrl: './behaviour-inspector.scss',
 })
 export class BehaviourInspector extends ObjectInspector {
-
-
   _renderProperties: ITargetProperty[] = [];
   _renderEnable: ITargetProperty[] = [];
 
@@ -33,40 +47,62 @@ export class BehaviourInspector extends ObjectInspector {
   }
 
   // prepare enums related to rendering
-  protected drawingEnums: { [key: string]: { key: string, value: number }[] } = {
-    'renderLayer': Object.keys(RenderLayer).filter(k => Number.isNaN(+k))
-      .map((e: string) => { return { key: e, value: (RenderLayer as any)[(e)] as number } }),
+  protected drawingEnums: { [key: string]: { key: string; value: number }[] } =
+    {
+      renderLayer: Object.keys(RenderLayer)
+        .filter((k) => Number.isNaN(+k))
+        .map((e: string) => {
+          return { key: e, value: (RenderLayer as any)[e] as number };
+        }),
 
-    'cullFace': Object.keys(CullFace).filter(k => Number.isNaN(+k))
-      .map((e: string) => { return { key: e, value: (CullFace as any)[e] } }),
+      cullFace: Object.keys(CullFace)
+        .filter((k) => Number.isNaN(+k))
+        .map((e: string) => {
+          return { key: e, value: (CullFace as any)[e] };
+        }),
 
-    'dephMode': Object.keys(DephFunction).filter(k => Number.isNaN(+k))
-      .map((e: string) => { return { key: e, value: (DephFunction as any)[e] } }),
+      dephMode: Object.keys(DephFunction)
+        .filter((k) => Number.isNaN(+k))
+        .map((e: string) => {
+          return { key: e, value: (DephFunction as any)[e] };
+        }),
 
-    'faceWinding': Object.keys(FaceWinding).filter(k => Number.isNaN(+k))
-      .map((e: string) => { return { key: e, value: (FaceWinding as any)[e] } }),
-  }
-  protected renderBooleans = ["enableCullFace", "enableDephTest", "enableBlend", "writeToDephBuffer"];
+      faceWinding: Object.keys(FaceWinding)
+        .filter((k) => Number.isNaN(+k))
+        .map((e: string) => {
+          return { key: e, value: (FaceWinding as any)[e] };
+        }),
+    };
+  protected renderBooleans = [
+    'enableCullFace',
+    'enableDephTest',
+    'enableBlend',
+    'writeToDephBuffer',
+  ];
 
-
-  override denyProperties: string[] = [ "active", "parent", "enableLights", "mesh", "time", "drawPrimitiveType",
-    ...Object.keys(this.drawingEnums), "blendMode", // inner emuns
+  override denyProperties: string[] = [
+    'active',
+    'parent',
+    'enableLights',
+    'mesh',
+    'time',
+    'drawPrimitiveType',
+    ...Object.keys(this.drawingEnums),
+    'blendMode', // inner emuns
     ...this.renderBooleans,
-  ]
+  ];
 
   @Input() set behaviour(value: EntityBehaviour) {
-    this._selectedObject = { key: value.className, type: value.className, property: value };
+    this._selectedObject = {
+      key: value.className,
+      type: value.className,
+      property: value,
+    };
     this.loadProperties();
-  };
+  }
 
-  get behaviour() { return this._selectedObject?.property }
-
-
-
-  override onValueChanged(property: ITargetObject, value: string | number | boolean): void {
-    if ((typeof value == 'number' || typeof value == 'string' || typeof value == 'boolean'))
-      
-      this._selectedObject!.property[property.key] = value;
+  get behaviour() {
+    return this._selectedObject?.property;
   }
 
   protected override loadProperties(): void {
@@ -78,14 +114,14 @@ export class BehaviourInspector extends ObjectInspector {
       const value = this._selectedObject?.property[enumName];
       const arrayValues: DropdownItem[] = [];
       for (const enumObj of this.drawingEnums[enumName]) {
-        arrayValues.push(enumObj)
+        arrayValues.push(enumObj);
       }
       if (value != undefined) {
         const p: ITargetProperty = {
           key: enumName,
-          type: "enum",
+          type: 'enum',
           property: arrayValues,
-          value: arrayValues.find(e => e.value == value)
+          value: arrayValues.find((e) => e.value == value),
         };
 
         this._renderProperties.push(p);
@@ -96,12 +132,11 @@ export class BehaviourInspector extends ObjectInspector {
       const value = this._selectedObject?.property[boolName];
 
       if (value != undefined) {
-
         const p: ITargetProperty = {
           key: boolName,
-          type: "boolean",
+          type: 'boolean',
           property: this._selectedObject?.property[boolName],
-          value: value
+          value: value,
         };
 
         this._renderEnable.push(p);
@@ -110,20 +145,28 @@ export class BehaviourInspector extends ObjectInspector {
   }
 
   onEnumChanged(item: ITargetProperty, $event: DropdownItem) {
-    this._selectedObject!.property[item.key] = $event.value
+    this._selectedObject!.property[item.key] = $event.value;
   }
 
+  onDefaultChanged(
+    item: ITargetProperty,
+    value: string | number | boolean | NumberRange | Color,
+  ) {
+    this.behaviour[item.key] = value
+  }
 
   onRemoveBehaviourRequested() {
-    this.confirmationService.confirm({
-      title: 'Remove Behaviour',
-      message: `Are you sure you want to remove the ${this.behaviour.className} behaviour?`,
-      confirmText: 'Remove',
-      cancelText: 'Cancel'
-    }).subscribe(confirmed => {
-      if (confirmed) {
-        this.behaviour.parent.removeBehaviour(this.behaviour);
-      }
-    });
+    this.confirmationService
+      .confirm({
+        title: 'Remove Behaviour',
+        message: `Are you sure you want to remove the ${this.behaviour.className} behaviour?`,
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.behaviour.parent.removeBehaviour(this.behaviour);
+        }
+      });
   }
 }

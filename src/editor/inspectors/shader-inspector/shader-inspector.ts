@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
-import { Shader } from '@engine';
+import { Color, NumberRange, Shader } from '@engine';
 import { DefaultInspector } from "../default-inspector/default-inspector";
 import { MaterialInspector } from '../material-inspector/material-inspector';
-import { ObjectInspector } from '../object-inspector/object-inspector';
+import { ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
 
 @Component({
   selector: 'editor-shader-inspector',
@@ -32,6 +32,15 @@ export class ShaderInspector extends ObjectInspector {
       .filter((key) => this.isPropertyValid(key))
       .map((key) => super.createPropertyViewModel(key, object[key]))
       .filter((p) => !!p.key);
-    debugger
+    
   }
+
+
+      onDefaultChanged(
+        item: ITargetProperty,
+        value: string | number | boolean | NumberRange | Color,
+      ) {
+
+        this._shader[item.key] = value
+      }
 }

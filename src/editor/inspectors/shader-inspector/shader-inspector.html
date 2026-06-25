@@ -5,9 +5,11 @@
 >
   @for (item of _properties; track $index) {
     @switch (item.type) {
-      @case ("material") {
-        <editor-material-inspector [isChild]="true" [material]="item.value">
-        </editor-material-inspector>
+      @default {
+        <editor-default-inspector
+          [item]="item"
+          (change)="onDefaultChanged(item, $event)"
+        ></editor-default-inspector>
       }
       @case ("object") {
         <editor-object-inspector
@@ -19,9 +21,9 @@
           }"
         ></editor-object-inspector>
       }
-
-      @default {
-        <editor-default-inspector [item]="item"></editor-default-inspector>
+      @case ("material") {
+        <editor-material-inspector [isChild]="true" [material]="item.value">
+        </editor-material-inspector>
       }
     }
   }

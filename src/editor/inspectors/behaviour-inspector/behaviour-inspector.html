@@ -43,7 +43,10 @@
         }
 
         @default {
-          <editor-default-inspector [item]="item"></editor-default-inspector>
+          <editor-default-inspector
+            [item]="item"
+            (change)="onDefaultChanged(item, $event)"
+          ></editor-default-inspector>
         }
       }
     }

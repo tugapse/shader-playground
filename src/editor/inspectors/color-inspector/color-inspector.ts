@@ -33,8 +33,9 @@ export class ColorInspector implements OnInit {
       this.b = ($event.rgba.b ).toFixed(2).toString();
       this.a = ($event.rgba.a ).toFixed(2).toString();
 
-      this.colorChange.emit(new Color($event.rgba.r, $event.rgba.g, $event.rgba.b, $event.rgba.a));
-      this.changeDetector.detectChanges();
+      // this.colorChange.emit(new Color($event.rgba.r, $event.rgba.g, $event.rgba.b, $event.rgba.a));
+      this.selectedColor.set($event.rgba.r, $event.rgba.g, $event.rgba.b, $event.rgba.a);
+
   } 
 
 }
