@@ -147,6 +147,7 @@ export class ObjectInspector {
 
   // Private and protected helpers
   private _onPropertyChanged(propertyKey: string, value: any): void {
+    debugger
     if (!this._selectedObject?.property || value instanceof Event) return;
 
     this._selectedObject.property[propertyKey] = value;

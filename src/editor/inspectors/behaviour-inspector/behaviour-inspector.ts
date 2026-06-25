@@ -152,7 +152,9 @@ export class BehaviourInspector extends ObjectInspector {
     item: ITargetProperty,
     value: string | number | boolean | NumberRange | Color,
   ) {
-    this.behaviour[item.key] = value
+    if (value instanceof Event) return;
+
+    this.behaviour[item.key] = value;
   }
 
   onRemoveBehaviourRequested() {

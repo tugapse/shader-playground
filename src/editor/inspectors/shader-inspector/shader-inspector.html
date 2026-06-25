@@ -23,7 +23,11 @@
         ></editor-object-inspector>
       }
       @case ("material") {
-        <editor-material-inspector [isChild]="true" [material]="item.value">
+        <editor-material-inspector
+          [isChild]="true"
+          [material]="item.value"
+          [label]="item.value.name || item.key.capitalize()"
+        >
         </editor-material-inspector>
       }
     }

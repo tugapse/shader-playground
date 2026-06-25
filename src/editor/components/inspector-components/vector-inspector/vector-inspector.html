@@ -1,9 +1,34 @@
 @if (vector) {
-  <span>{{label}}</span>
-@for (vectorComponent of vector.vector; track $index) {
-<editor-text-input-inspector [label]="vectorKeys[$index]"
-[isNumber]="true" [value]="vectorComponent"
-[dragScale]="scale" [numberDecimals]="4"
-(change)="onVectorChanged($index, $event)"></editor-text-input-inspector>
-}
+  <div class="vector-header">
+    <span>{{ label }}</span>
+    <button class="toggle-btn" (click)="showGizmo = !showGizmo">
+      {{ showGizmo ? "Hide Gizmo" : "Show Gizmo" }}
+    </button>
+  </div>
+
+  <div class="vector-editor-layout">
+    @if (showGizmo) {
+      <div class="gizmo-column">
+        <editor-vector-gizmo
+          [x]="vector.vector[0]"
+          [y]="vector.vector[1]"
+          [z]="vector.vector[2] || 0"
+          (valueChange)="onGizmoChanged($event)"
+        ></editor-vector-gizmo>
+      </div>
+    }
+
+    <div class="inputs-column">
+      @for (vectorComponent of vector.vector; track $index) {
+        <editor-text-input-inspector
+          [label]="vectorKeys[$index]"
+          [isNumber]="true"
+          [value]="vectorComponent"
+          [dragScale]="scale"
+          [numberDecimals]="4"
+          (change)="onVectorChanged($index, $event)"
+        ></editor-text-input-inspector>
+      }
+    </div>
+  </div>
 }

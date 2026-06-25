@@ -1,38 +1,34 @@
 import { Component, Input } from '@angular/core';
-import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
+import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
 import { ColorMaterial } from '@engine/materials/color-material';
-import { DefaultInspector } from "../default-inspector/default-inspector";
-import { ITargetProperty, ObjectInspector } from '../object-inspector/object-inspector';
+import { DefaultInspector } from '../default-inspector/default-inspector';
+import {
+  ITargetProperty,
+  ObjectInspector,
+} from '../object-inspector/object-inspector';
 import { Color, NumberRange } from '@engine';
 
 @Component({
   selector: 'editor-material-inspector',
-  imports: [
-    DefaultInspector,
-    InpectorTogglePanel,
-    ObjectInspector
-],
+  imports: [DefaultInspector, InpectorTogglePanel, ObjectInspector],
   templateUrl: './material-inspector.html',
   styleUrl: './material-inspector.scss',
 })
 export class MaterialInspector extends ObjectInspector {
-
-
-  @Input() set material(value:ColorMaterial) {
+  @Input() set material(value: ColorMaterial) {
     this._selectedObject = {
       key: value.className,
       type: 'material',
-      property: value
-    }
+      property: value,
+    };
     this._material = value;
     this.loadProperties();
   }
 
+  _material!: ColorMaterial;
 
- _material!: ColorMaterial;
-
-   protected override loadProperties(): void {
-   if (!this._selectedObject?.property) {
+  protected override loadProperties(): void {
+    if (!this._selectedObject?.property) {
       this._properties = [];
       return;
     }
@@ -44,12 +40,12 @@ export class MaterialInspector extends ObjectInspector {
       .filter((p) => !!p.key);
   }
 
-    onDefaultChanged(
-      item: ITargetProperty,
-      value: string | number | boolean | NumberRange | Color,
-    ) {
-      console.log(item.key, value)
-      this._material[item.key] = value
-    }
-  
+  onDefaultChanged(
+    item: ITargetProperty,
+    value: string | number | boolean | NumberRange | Color,
+  ) {
+    if (value instanceof Event) return;
+
+    this._material[item.key] = value;
+  }
 }
