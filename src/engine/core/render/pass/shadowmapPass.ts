@@ -1,5 +1,5 @@
 import { Scene, DirectionalLight, Camera } from '@engine/entities';
-import { Shader } from '@engine/shaders';
+import { Shader, ShaderSources } from '@engine/shaders';
 import { Texture } from '@engine/textures';
 import { RendererBehaviour } from '@engine/behaviours';
 import { mat4 } from 'gl-matrix';
@@ -46,8 +46,8 @@ export class ShadowMapPass extends JsonSerializable implements IRenderPass {
     this.depthShader = new Shader(
       gl,
       null as any,
-      'assets/shaders/frag/depth-only.frag',
-      'assets/shaders/vertex/shadow-caster.vert',
+      ShaderSources.frag.depth_only,
+      ShaderSources.vertex.shadow_caster,
     );
     this.depthShader.initialize();
   }

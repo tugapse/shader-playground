@@ -560,51 +560,51 @@ export class SunBehaviour extends EntityBehaviour {
     );
     this.parent.scene.sceneFog.color = shader.material.horizonColor;
 
-    shader.useSun = this.sun.show && !isSunDown ;
-    shader.useMoon = this.moon.show && isSunDown ;
-    shader.sunSize = this.sun.sunSize.value;
-    shader.sunFalloff = this.sun.sunFalloff.value;
+    shader.sun.useSun = this.sun.show && !isSunDown ;
+    shader.moon.useMoon = this.moon.show && isSunDown ;
+    shader.sun.sunSize = this.sun.sunSize.value;
+    shader.sun.sunFalloff = this.sun.sunFalloff.value;
 
     const normalizedDir = vec3.normalize(
       vec3.create(),
       this.transform.worldPosition,
     );
-    shader.sunDirection.set(
+    shader.sun.sunDirection.set(
       normalizedDir[0],
       normalizedDir[1],
       normalizedDir[2],
     );
-    shader.sunColor = light.color;
+    shader.sun.sunColor = light.color;
 
     if (this.moon.show) {
       // Place the moon exactly opposite to the sun
-      shader.moonDirection.set(
+      shader.moon.moonDirection.set(
         -normalizedDir[0],
         -normalizedDir[1],
         -normalizedDir[2],
       );
-      shader.moonPhase = this.moon.phase.value;
-      shader.moonColor = Color.lerp(this.moon.color, light.color, 0.4);
-      shader.moonEarthshine = this.moon.earthshine.value;
-      shader.moonTerminatorSoftness = this.moon.terminatorSoftness.value;
-      shader.moonEnableRotation = this.moon.enableRotation ? 1 : 0;
-      shader.moonRotationSpeed = this.moon.rotationSpeed.value;
+      shader.moon.moonPhase = this.moon.phase.value;
+      shader.moon.moonColor = Color.lerp(this.moon.color, light.color, 0.4);
+      shader.moon.moonEarthshine = this.moon.earthshine.value;
+      shader.moon.moonTerminatorSoftness = this.moon.terminatorSoftness.value;
+      shader.moon.moonEnableRotation = this.moon.enableRotation ? 1 : 0;
+      shader.moon.moonRotationSpeed = this.moon.rotationSpeed.value;
     }
 
-    shader.useClouds = this.clouds.show;
+    shader.clouds.useClouds = this.clouds.show;
     if (this.clouds.show) {
-      shader.cloudSpeed = this.clouds.speed.value;
-      shader.cloudTiling = this.clouds.tiling.value;
-      shader.cloudSparsity = this.clouds.sparsity.value;
-      shader.cloudRepetition = this.clouds.repetition.value;
-      shader.wheatherCondition = this.clouds.weather.value;
+      shader.clouds.cloudSpeed = this.clouds.speed.value;
+      shader.clouds.cloudTiling = this.clouds.tiling.value;
+      shader.clouds.cloudSparsity = this.clouds.sparsity.value;
+      shader.clouds.cloudRepetition = this.clouds.repetition.value;
+      shader.clouds.wheatherCondition = this.clouds.weather.value;
     }
-    shader.useStars = this.stars.show;
+    shader.stars.useStars = this.stars.show;
     if (this.stars.show) {
-      shader.starIntensity = this.stars.intensity.value;
-      shader.starScale = this.stars.scale.value;
-      shader.starSparsity = this.stars.sparsity.value;
-      shader.starSpeed = this.stars.speed.value;
+      shader.stars.starIntensity = this.stars.intensity.value;
+      shader.stars.starScale = this.stars.scale.value;
+      shader.stars.starSparsity = this.stars.sparsity.value;
+      shader.stars.starSpeed = this.stars.speed.value;
     }
   }
 

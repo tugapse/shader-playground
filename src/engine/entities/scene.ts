@@ -1,15 +1,14 @@
+import { RenderPipeline } from "@engine/core/render/render-pipeline";
 import { vec3 } from "gl-matrix";
-import { Color, Colors, ObjectInstanciator, SceneFog, ShadowMapRenderer } from "../core";
+import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
+import { Color, Colors, ObjectInstanciator, SceneFog } from "../core";
 import { EntityType } from "../enums/entity-type.enum";
 import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
 import { SceneEntityBehaviour } from "../interfaces/scene-behaviour.interface";
+import { CubemapTexture, Texture } from "../textures";
 import { Camera } from "./camera";
 import { GlEntity } from "./entity";
-import { Light ,DirectionalLight} from "./lights/light";
-import { RendererBehaviour } from "../behaviours/renderer/renderer-behaviour";
-import { RenderLayer } from "../enums";
-import { CubemapTexture, Texture } from "../textures";
-import { RenderPipeline } from "@engine/core/render/render-pipeline";
+import { Light } from "./lights/light";
 /**
   Represents a scene in the 3D world, acting as a container for entities and managing the main game loop operations like update and draw.
  * @augments {GlEntity}

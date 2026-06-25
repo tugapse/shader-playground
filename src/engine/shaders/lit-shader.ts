@@ -1,4 +1,4 @@
-import { JsonSerializedData } from "@engine";
+import { JsonSerializedData, ShaderSources } from "@engine";
 import { EngineCache } from "../core/engineCache";
 import { Camera } from "../entities/camera";
 import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
@@ -35,8 +35,8 @@ export class LitShader extends Shader {
     super(
       gl,
       material,
-      "assets/shaders/frag/phong.frag",
-      "assets/shaders/vertex/vertex.vert"
+      ShaderSources.frag.phong,
+      ShaderSources.vertex.vertex
     );
   }
 

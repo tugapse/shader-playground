@@ -8,6 +8,7 @@ import { ColorMaterial } from '../materials/color-material';
 import { Texture } from '../textures/texture';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectInstanciator } from '../core';
+import { ShaderSources } from './shader-sources';
 
 /**
   An interface defining the structure for WebGL buffers associated with a mesh.
@@ -33,8 +34,9 @@ export class Shader extends JsonSerializable {
    * @type {{ [key: string]: string }}
    */
   public static SHADER_FUNCTIONS: { [key: string]: string } = {
-    '//@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-    '//@INCLUDE_LIGHT_HEADER': 'assets/shaders/functions/light-header.frag',
+      '@INCLUDE_FOG_FUNC': ShaderSources.frag.fog,
+      '@INCLUDE_LIGHT_FUNC': ShaderSources.frag.light,
+      '@INCLUDE_UTIL_FUNC': ShaderSources.frag.functions,
   };
 
   public static preFetchFunctionsGlsl(): void {
@@ -78,8 +80,8 @@ export class Shader extends JsonSerializable {
   constructor(
     protected gl: WebGL2RenderingContext,
     public material: ColorMaterial,
-    public fragUri: string = 'assets/shaders/frag/color.frag',
-    public vertexUri: string = 'assets/shaders/vertex/vertex.vert',
+    public fragUri: string = ShaderSources.frag.color,
+    public vertexUri: string = ShaderSources.vertex.vertex,
   ) {
     super('Shader');
     this._uuid = uuidv4();

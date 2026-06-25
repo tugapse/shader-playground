@@ -58,11 +58,7 @@ export class App implements OnDestroy {
     this.editorService.onSceneLoaded.subscribe(
       this.onEditorLoadScene.bind(this),
     );
-    Shader.SHADER_FUNCTIONS = {
-      '@INCLUDE_FOG_FUNC': 'assets/shaders/functions/fog.frag',
-      '@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-      '@INCLUDE_UTIL_FUNC': 'assets/shaders/functions/functions.frag',
-    };
+
   }
 
   onEditorLoadScene(scene: Scene): any {
