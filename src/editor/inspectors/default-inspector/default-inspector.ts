@@ -6,7 +6,7 @@ import { Color, NumberRange, Vector2, Vector3, Vector4 } from '@engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
-import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
+import { NumberRangeInspector } from '../../components/inspector-components/number-range-inspector/number-range-inspector';
 import {
   ITargetObject,
   ITargetProperty,

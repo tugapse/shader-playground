@@ -1,11 +1,16 @@
 :host {
-    padding: 4px;
-    .vector-header{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+  padding: 4px;
+  display: block;
+
+  .vector-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 6px;
+  }
+
   .vector-editor-layout {
+    position: relative;
     display: flex;
     width: 100%;
     align-items: center;

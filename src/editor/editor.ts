@@ -35,6 +35,7 @@ import { DragHandleDirective } from './directives/mouse-drag.directive';
 import { MovableDirective } from './directives/moveable.directive';
 import { EngineStatsComponent } from './components/engine-stats/engine-stats';
 import { Icon } from "src/app/components/icon/icon";
+import { AddBehaviourMenuComponent } from "./components/add-behaviour-menu/add-behaviour-menu";
 
 @Component({
   selector: 'app-editor',
@@ -47,7 +48,8 @@ import { Icon } from "src/app/components/icon/icon";
     AssetExplorerWindow,
     MovableDirective,
     EngineStatsComponent,
-    Icon
+    Icon,
+    AddBehaviourMenuComponent
 ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
@@ -85,6 +87,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+
   }
 
   ngAfterViewInit(): void {

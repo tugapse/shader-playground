@@ -1,5 +1,9 @@
 @if (behaviour) {
-  <editor-inpector-toggle-panel [title]="label" [rightAlign]="true">
+  <editor-inpector-toggle-panel
+    [title]="label"
+    [rightAlign]="true"
+    [collapsed]="true"
+  >
     <div class="header-content" header-content>
       <app-boolean-inspector
         align="right"

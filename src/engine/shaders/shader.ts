@@ -407,7 +407,7 @@ export class Shader extends JsonSerializable {
       this.gl.STATIC_DRAW,
     );
   }
-
+  
   private compileShader(
     gl: WebGL2RenderingContext,
     type: number,
@@ -440,6 +440,10 @@ export class Shader extends JsonSerializable {
     if (!shaderProgram) {
       return null;
     }
+
+    if(this._shaderProgram)
+      this.gl.deleteProgram(this._shaderProgram);
+
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
@@ -465,7 +469,8 @@ export class Shader extends JsonSerializable {
   }
 
   public recompile(): void {
-    this.destroy();
+    // this.destroy();
+    this._initialized = false;
     this.initialize();
   }
 

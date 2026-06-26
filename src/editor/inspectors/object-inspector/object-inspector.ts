@@ -3,6 +3,7 @@ import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/in
 import { EditorService } from '@editor/services/editor.service';
 import { SceneTreeService } from '@editor/services/scene-tree.service';
 import {
+  CameraType,
   Color,
   ColorMaterial,
   EntityBehaviour,
@@ -26,7 +27,7 @@ import { TextInputInspector } from '../../components/inspector-components/text-i
 import { VectorInspector } from '../../components/inspector-components/vector-inspector/vector-inspector';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
-import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
+import { NumberRangeInspector } from '../../components/inspector-components/number-range-inspector/number-range-inspector';
 
 export interface ITargetObject {
   [key: string]: any;
@@ -94,10 +95,6 @@ export class ObjectInspector {
 
   constructor() {
     this._enums['fogType'] = this.convertEnumToObject(FogType);
-    // this._enums['minFilter'] = this.convertEnumToObject(TextureFilterMode);
-    // this._enums['magFilter'] = this.convertEnumToObject(TextureFilterMode);
-    // this._enums['wrapS'] = this.convertEnumToObject(TextureWrapMode);
-    // this._enums['wrapT'] = this.convertEnumToObject(TextureWrapMode);
   }
 
   // Event Handlers from template

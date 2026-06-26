@@ -1,12 +1,22 @@
 import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
-import { Color, NumberRange, Shader } from '@engine';
+import {
+  Color,
+  EngineCache,
+  NumberRange,
+  Shader,
+  ShaderSources,
+} from '@engine';
 import { DefaultInspector } from '../default-inspector/default-inspector';
 import { MaterialInspector } from '../material-inspector/material-inspector';
 import {
   ITargetProperty,
   ObjectInspector,
 } from '../object-inspector/object-inspector';
+import {
+  DropdownItem,
+  DropdownComponent,
+} from 'src/app/components/dropdown/dropdown';
 
 @Component({
   selector: 'editor-shader-inspector',
@@ -15,12 +25,23 @@ import {
     InpectorTogglePanel,
     DefaultInspector,
     ObjectInspector,
+    DropdownComponent,
   ],
   templateUrl: './shader-inspector.html',
   styleUrl: './shader-inspector.scss',
 })
 export class ShaderInspector extends ObjectInspector {
   _shader!: Shader;
+
+  _shaderFraList: DropdownItem[] = [];
+  _shaderVertList: DropdownItem[] = [];
+
+  get selectedFrag() {
+    return this._shaderFraList.find((f) => f.value == this._shader.fragUri);
+  }
+  get selectedVert() {
+    return this._shaderVertList.find((f) => f.value == this._shader.vertexUri);
+  }
 
   @Input() set shader(value: Shader) {
     this._shader = value;
@@ -30,7 +51,19 @@ export class ShaderInspector extends ObjectInspector {
       property: value,
     };
     this.loadProperties();
+    this._shaderFraList = Object.keys(ShaderSources.frag).map((key) => ({
+      key,
+      value: (ShaderSources.frag as any)[key],
+    }));
+    this._shaderVertList = Object.keys(ShaderSources.vertex).map((key) => ({
+      key,
+      value: (ShaderSources.vertex as any)[key],
+    }));
   }
+  get shader() {
+    return this._shader;
+  }
+
 
   protected override loadProperties(): void {
     if (!this._selectedObject?.property) {
@@ -51,5 +84,12 @@ export class ShaderInspector extends ObjectInspector {
   ) {
     if (value instanceof Event) return;
     this._shader[item.key] = value;
+  }
+
+  onShaderSelected(shaderIndex: number, $event: DropdownItem) {
+    const shaderKey = ['fragUri', 'vertexUri'][shaderIndex];
+    this._shader[shaderKey] = $event.value;
+      debugger;
+      this._shader.recompile();
   }
 }

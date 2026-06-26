@@ -1,9 +1,11 @@
 @if (vector) {
   <div class="vector-header">
+    <app-icon
+      [iconName]="'fa-solid fa-cube'"
+      (click)="showGizmo = !showGizmo"
+      [isButton]="true"
+    ></app-icon>
     <span>{{ label }}</span>
-    <button class="toggle-btn" (click)="showGizmo = !showGizmo">
-      {{ showGizmo ? "Hide Gizmo" : "Show Gizmo" }}
-    </button>
   </div>
 
   <div class="vector-editor-layout">
