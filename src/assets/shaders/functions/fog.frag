@@ -3,6 +3,8 @@ uniform float u_FogDensity;
 uniform int u_fogType; 
 uniform float u_FogHeightFalloff; 
 uniform float u_FogBaseHeight;    
+in float v_fogDistance;
+
 
 float calculateLinearFogFactor(float distance, float fogStart, float fogEnd) {
     float fogFactor = (distance - fogStart) / (fogEnd - fogStart);

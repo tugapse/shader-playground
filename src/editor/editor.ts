@@ -36,6 +36,7 @@ import { MovableDirective } from './directives/moveable.directive';
 import { EngineStatsComponent } from './components/engine-stats/engine-stats';
 import { Icon } from "src/app/components/icon/icon";
 import { AddBehaviourMenuComponent } from "./components/add-behaviour-menu/add-behaviour-menu";
+import { EntityInspector } from "./inspectors/entity-inspector/entity-inspector";
 
 @Component({
   selector: 'app-editor',
@@ -49,7 +50,8 @@ import { AddBehaviourMenuComponent } from "./components/add-behaviour-menu/add-b
     MovableDirective,
     EngineStatsComponent,
     Icon,
-    AddBehaviourMenuComponent
+    AddBehaviourMenuComponent,
+    EntityInspector
 ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',

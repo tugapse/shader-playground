@@ -39,6 +39,7 @@ export class MaterialInspector extends ObjectInspector {
       .filter((key) => this.isPropertyValid(key))
       .map((key) => super.createPropertyViewModel(key, object[key]))
       .filter((p) => !!p.key);
+      debugger
   }
 
   onDefaultChanged(
