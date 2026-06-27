@@ -35,7 +35,7 @@ export class PostProcessingPass
       gl,
       null as any,
       ShaderSources.frag.retro,
-      ShaderSources.vertex.screen_quad, 
+      ShaderSources.vertex.fullscreen, 
     );
     this.postShader.initialize();
 

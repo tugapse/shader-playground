@@ -35,8 +35,8 @@ export class LitShader extends Shader {
     super(
       gl,
       material,
-      ShaderSources.frag.phong,
-      ShaderSources.vertex.vertex
+      ShaderSources.frag.default_lit,
+      ShaderSources.vertex.default
     );
   }
 
@@ -118,5 +118,11 @@ export class LitShader extends Shader {
   override async fromJson(jsonObject: JsonSerializedData): Promise<void> {
     await super.fromJson(jsonObject);
     this.material.fromJson(jsonObject['material']);
+  }
+
+  public override destroy(): void {
+    super.destroy();
+    if (this.material.mainTex) this.material.mainTex.destroy();
+    if (this.material.normalTex) this.material.normalTex.destroy(); 
   }
 }

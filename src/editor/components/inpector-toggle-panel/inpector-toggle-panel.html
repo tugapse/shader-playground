@@ -8,7 +8,7 @@
     <app-icon
       class="chevron"
       [iconName]="collapsed ? 'fa-chevron-left' : 'fa-chevron-down'"
-      (click)="collapsed = !collapsed"
+      (click)="onToggle()"
     ></app-icon>
   }
 </div>

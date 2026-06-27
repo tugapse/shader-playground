@@ -182,8 +182,8 @@ export class ObjectInspector {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
-
-    return { key, type, value, name };
+    const property = this._enums[key] || {}
+    return { key, type, value, name , property};
   }
 
   protected getObjectType(value: object): string {

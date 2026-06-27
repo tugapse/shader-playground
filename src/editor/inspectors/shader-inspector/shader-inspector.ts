@@ -51,19 +51,42 @@ export class ShaderInspector extends ObjectInspector {
       property: value,
     };
     this.loadProperties();
-    this._shaderFraList = Object.keys(ShaderSources.frag).map((key) => ({
-      key,
-      value: (ShaderSources.frag as any)[key],
-    }));
-    this._shaderVertList = Object.keys(ShaderSources.vertex).map((key) => ({
-      key,
-      value: (ShaderSources.vertex as any)[key],
-    }));
+    const ignored = ['handle', 'entity', 'entity_picker', 'retro'];
+    const debug = false;
+
+    const fragKeys = Object.keys(ShaderSources.frag);
+    this._shaderFraList = fragKeys
+      .filter(
+        (e) =>
+          !(ShaderSources.frag as any)[e].includes('/tools/') &&
+          !(ShaderSources.frag as any)[e].includes('/functions/') &&
+          !ignored.includes(e),
+      )
+      .map((key) => ({
+        key,
+        value: (ShaderSources.frag as any)[key],
+      }));
+    const vertKeys = Object.keys(ShaderSources.vertex);
+
+    this._shaderVertList = vertKeys
+      .filter(
+        (e) =>
+          !(ShaderSources.vertex as any)[e].includes('/functions/') &&
+          !ignored.includes(e),
+      )
+      .map((key) => ({
+        key,
+        value: (ShaderSources.vertex as any)[key],
+      }));
   }
   get shader() {
     return this._shader;
   }
 
+  constructor() {
+    super();
+    this.denyProperties.push('fragUri', 'vertexUri');
+  }
 
   protected override loadProperties(): void {
     if (!this._selectedObject?.property) {
@@ -89,7 +112,7 @@ export class ShaderInspector extends ObjectInspector {
   onShaderSelected(shaderIndex: number, $event: DropdownItem) {
     const shaderKey = ['fragUri', 'vertexUri'][shaderIndex];
     this._shader[shaderKey] = $event.value;
-      debugger;
-      this._shader.recompile();
+    debugger;
+    this._shader.recompile();
   }
 }

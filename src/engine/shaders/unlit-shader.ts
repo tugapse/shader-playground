@@ -30,7 +30,7 @@ export class UnlitShader extends Shader {
    * @param {UnlitMaterial} material - The unlit material.
    */
   constructor(override gl: WebGL2RenderingContext, override material: UnlitMaterial) {
-    super(gl, material, ShaderSources.frag.color, ShaderSources.vertex.vertex);
+    super(gl, material, ShaderSources.frag.default_unlit, ShaderSources.vertex.default);
   }
 
   /**

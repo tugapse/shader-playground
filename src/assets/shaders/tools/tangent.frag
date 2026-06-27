@@ -23,16 +23,6 @@ in vec3 v_bitangent;
 out vec4 fragColor;
 
 void main() {
-  vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
-
-  vec4 sampledTexColor = texture(u_mainTex, uv);
-  vec4 baseColor = sampledTexColor * u_matColor;
-
-
-  fragColor = vec4(uv,0,1);
-  // fragColor = vec4(v_normal,1);
-  // fragColor = vec4(v_bitangent,1);
-  // fragColor = vec4(v_tangent * 0.5 + 0.5, 1.0);
-  // fragColor = vec4(v_bitangent * 0.5 + 0.5, 1.0);
-
+  vec2 uv = (v_uv * u_uvScale) + u_uvOffset;
+  fragColor = vec4(v_tangent, 1.0);
 }

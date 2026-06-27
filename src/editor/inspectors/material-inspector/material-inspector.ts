@@ -7,10 +7,11 @@ import {
   ObjectInspector,
 } from '../object-inspector/object-inspector';
 import { Color, NumberRange } from '@engine';
+import { TextureInspector } from "../texture-inspector/texture-inspector";
 
 @Component({
   selector: 'editor-material-inspector',
-  imports: [DefaultInspector, InpectorTogglePanel, ObjectInspector],
+  imports: [DefaultInspector, InpectorTogglePanel, ObjectInspector, TextureInspector],
   templateUrl: './material-inspector.html',
   styleUrl: './material-inspector.scss',
 })

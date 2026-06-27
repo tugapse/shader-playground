@@ -1,9 +1,33 @@
-<editor-inpector-toggle-panel [collapsed]="true" [isChild]="true">
-  <div class="line-item">
-    <div class="texture-container">
-      @if (texture) {
+@if (_selectedObject) {
+  <editor-inpector-toggle-panel
+    [title]="_selectedObject.property.name || 'Material'"
+    [collapsed]="true"
+  >
+    @if (texture) {
+      <div class="texture-preview">
         <img [src]="texture.textureUri" />
+      </div>
+    }
+    @for (item of _properties; track $index) {
+      @switch (item.type) {
+        @case ("object") {
+          <editor-object-inspector
+            [label]="item.key.capitalize() + ' ' + item.value.name"
+            [isChild]="true"
+            [targetObject]="{
+              key: item.key,
+              type: item.type,
+              property: item.value,
+            }"
+          ></editor-object-inspector>
+        }
+        @default {
+          <editor-default-inspector
+            [item]="item"
+            (change)="onDefaultChanged(item, $event)"
+          ></editor-default-inspector>
+        }
       }
-    </div>
-  </div>
-</editor-inpector-toggle-panel>
+    }
+  </editor-inpector-toggle-panel>
+}

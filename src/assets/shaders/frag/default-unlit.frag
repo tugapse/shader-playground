@@ -14,6 +14,6 @@ out vec4 fragColor;
 
 
 void main() {
-  vec2 uv = fract(v_uv * u_uvScale) + u_uvOffset;
+  vec2 uv = v_uv * u_uvScale + u_uvOffset;
   fragColor = texture(u_mainTex, uv) * u_matColor;
 }

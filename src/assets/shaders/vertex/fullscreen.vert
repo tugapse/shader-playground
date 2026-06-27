@@ -1,27 +1,14 @@
 #version 300 es
-
-uniform mat4 u_mvpMatrix;
-uniform float u_time;
-uniform vec2 u_screenResolution;
-
-in vec3 a_position;
-in vec3 a_normal;
-in vec2 a_uv;
-in vec2 a_texCoord;
-
-
 out vec2 v_uv;
-out vec3 v_normal;
-out vec3 v_position;
-out vec2 v_texCoord;
 
-
-
+// Generate a full-screen triangle using the gl_VertexID trick
 void main() {
-  v_uv = a_uv;
-  v_normal = a_normal;
-  v_position = a_position;
-  v_texCoord = a_texCoord;
-
-  gl_Position =   vec4(a_position, 1.0);
+    // Calculate vertices entirely on the GPU
+    float x = float((gl_VertexID & 1) << 2) - 1.0;
+    float y = float((gl_VertexID & 2) << 1) - 1.0;
+    
+    // Map the -1.0 to 1.0 NDC space to 0.0 to 1.0 UV space
+    v_uv = vec2(x * 0.5 + 0.5, y * 0.5 + 0.5);
+    
+    gl_Position = vec4(x, y, 0.0, 1.0);
 }

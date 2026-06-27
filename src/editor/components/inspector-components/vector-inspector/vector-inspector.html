@@ -1,36 +1,44 @@
 @if (vector) {
-  <div class="vector-header">
-    <app-icon
-      [iconName]="'fa-solid fa-cube'"
-      (click)="showGizmo = !showGizmo"
-      [isButton]="true"
-    ></app-icon>
-    <span>{{ label }}</span>
-  </div>
-
-  <div class="vector-editor-layout">
-    @if (showGizmo) {
-      <div class="gizmo-column">
-        <editor-vector-gizmo
-          [x]="vector.vector[0]"
-          [y]="vector.vector[1]"
-          [z]="vector.vector[2] || 0"
-          (valueChange)="onGizmoChanged($event)"
-        ></editor-vector-gizmo>
-      </div>
-    }
-
-    <div class="inputs-column">
-      @for (vectorComponent of vector.vector; track $index) {
-        <editor-text-input-inspector
-          [label]="vectorKeys[$index]"
-          [isNumber]="true"
-          [value]="vectorComponent"
-          [dragScale]="scale"
-          [numberDecimals]="4"
-          (change)="onVectorChanged($index, $event)"
-        ></editor-text-input-inspector>
+  <editor-inpector-toggle-panel
+    [title]="label.capitalize()"
+    [collapsed]="collapsed"
+    [isChild]="true"
+    (toggle)="collapsed = !collapsed"
+  >
+    <div class="vector-header" header-content>
+      @if (!collapsed) {
+        <app-icon
+          [iconName]="'fa-solid fa-cube'"
+          (click)="showGizmo = !showGizmo"
+          [isButton]="true"
+        ></app-icon>
       }
     </div>
-  </div>
+
+    <div class="vector-editor-layout">
+      @if (showGizmo) {
+        <div class="gizmo-column">
+          <editor-vector-gizmo
+            [x]="vector.vector[0]"
+            [y]="vector.vector[1]"
+            [z]="vector.vector[2] || 0"
+            (valueChange)="onGizmoChanged($event)"
+          ></editor-vector-gizmo>
+        </div>
+      }
+
+      <div class="inputs-column">
+        @for (vectorComponent of vector.vector; track $index) {
+          <editor-text-input-inspector
+            [label]="vectorKeys[$index]"
+            [isNumber]="true"
+            [value]="vectorComponent"
+            [dragScale]="scale"
+            [numberDecimals]="4"
+            (change)="onVectorChanged($index, $event)"
+          ></editor-text-input-inspector>
+        }
+      </div>
+    </div>
+  </editor-inpector-toggle-panel>
 }

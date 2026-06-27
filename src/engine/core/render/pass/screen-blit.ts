@@ -22,7 +22,7 @@ export class ScreenBlitPass extends JsonSerializable implements IRenderPass {
     this.screenQuadShader = new UnlitShader(gl, new UnlitMaterial());
 
     this.screenQuadShader.fragUri = ShaderSources.frag.screen_blit;
-    this.screenQuadShader.vertexUri = ShaderSources.vertex.screen_quad;
+    this.screenQuadShader.vertexUri = ShaderSources.vertex.fullscreen;
   }
 
   setGl(gl: WebGL2RenderingContext): void {

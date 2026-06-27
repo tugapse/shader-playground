@@ -3,16 +3,18 @@ import { TextInputInspector } from '../text-input-inspector/text-input-inspector
 import { Vector4, Vector3, Vector2 } from '@engine';
 import { EditorVectorGizmoComponent } from './component/vector-gizmo';
 import { Icon } from "src/app/components/icon/icon";
+import { InpectorTogglePanel } from "@editor/components/inpector-toggle-panel/inpector-toggle-panel";
 
 @Component({
   selector: 'editor-vector-inspector',
-  imports: [TextInputInspector, EditorVectorGizmoComponent, Icon],
+  imports: [TextInputInspector, EditorVectorGizmoComponent, Icon, InpectorTogglePanel],
   templateUrl: './vector-inspector.html',
   styleUrl: './vector-inspector.scss',
 })
 export class VectorInspector {
   isGizmoMode: boolean = false;
   showGizmo: boolean = false;
+  collapsed: boolean=true;
 
   @Input() vectorKeys = ['x', 'y', 'z', 'w'];
   @Input() vector!: Vector4 | Vector3 | Vector2;
