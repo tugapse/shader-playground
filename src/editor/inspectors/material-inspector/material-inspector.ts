@@ -25,7 +25,7 @@ export class MaterialInspector extends ObjectInspector {
     this._material = value;
     this.loadProperties();
   }
-s
+
   _material!: ColorMaterial;
 
   protected override loadProperties(): void {
