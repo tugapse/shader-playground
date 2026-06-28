@@ -1,0 +1,31 @@
+:host {
+
+
+  .vector-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 6px;
+  }
+
+  .vector-editor-layout {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start; /* Keeps items packed to the left */
+    gap: 12px; /* Smaller gap between gizmo and inputs */
+  }
+
+  .gizmo-column {
+    flex-shrink: 0;
+  }
+
+  .inputs-column {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Tighter vertical spacing between X, Y, Z */
+    /* Remove flex-grow: 1 if it was pushing the inputs too far right */
+  }
+}

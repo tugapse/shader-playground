@@ -2,6 +2,7 @@ import { ShaderUniformsEnum } from "../enums/shader-uniforms.enum";
 import { UnlitMaterial } from "../materials/unlit-material";
 import { Texture } from "../textures/texture";
 import { Shader } from "./shader";
+import { ShaderSources } from "./shader-sources";
 
 /**
   Represents a shader specifically designed for rendering objects with an unlit material. It handles uniforms for color, texture, and UV transformations.
@@ -29,7 +30,7 @@ export class UnlitShader extends Shader {
    * @param {UnlitMaterial} material - The unlit material.
    */
   constructor(override gl: WebGL2RenderingContext, override material: UnlitMaterial) {
-    super(gl, material, "assets/shaders/frag/unlit.frag", "assets/shaders/vertex/vertex.vert");
+    super(gl, material, ShaderSources.frag.default_unlit, ShaderSources.vertex.default);
   }
 
   /**

@@ -8,6 +8,7 @@ import { ColorMaterial } from '../materials/color-material';
 import { Texture } from '../textures/texture';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectInstanciator } from '../core';
+import { ShaderSources } from './shader-sources';
 
 /**
   An interface defining the structure for WebGL buffers associated with a mesh.
@@ -33,8 +34,9 @@ export class Shader extends JsonSerializable {
    * @type {{ [key: string]: string }}
    */
   public static SHADER_FUNCTIONS: { [key: string]: string } = {
-    '//@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-    '//@INCLUDE_LIGHT_HEADER': 'assets/shaders/functions/light-header.frag',
+      '@INCLUDE_FOG_FUNC': ShaderSources.frag.fog,
+      '@INCLUDE_LIGHT_FUNC': ShaderSources.frag.light,
+      '@INCLUDE_UTIL_FUNC': ShaderSources.frag.functions,
   };
 
   public static preFetchFunctionsGlsl(): void {
@@ -78,8 +80,8 @@ export class Shader extends JsonSerializable {
   constructor(
     protected gl: WebGL2RenderingContext,
     public material: ColorMaterial,
-    public fragUri: string = 'assets/shaders/frag/color.frag',
-    public vertexUri: string = 'assets/shaders/vertex/vertex.vert',
+    public fragUri: string = ShaderSources.frag.color,
+    public vertexUri: string = ShaderSources.vertex.default,
   ) {
     super('Shader');
     this._uuid = uuidv4();
@@ -94,6 +96,13 @@ export class Shader extends JsonSerializable {
     let vsSource = await EngineCache.loadShaderSource(this.vertexUri);
     let fsSource = await EngineCache.loadShaderSource(this.fragUri);
 
+    if (vsSource.trim().startsWith('<')) {
+      console.warn(`[Shader Warning] Vertex source from ${this.vertexUri} starts with '<'. It may be HTML.`);
+    }
+    if (fsSource.trim().startsWith('<')) {
+      console.warn(`[Shader Warning] Fragment source from ${this.fragUri} starts with '<'. It may be HTML.`);
+    }
+
     for (const obkey of keys) {
       if (fsSource.includes(obkey)) {
         const url: string = Shader.SHADER_FUNCTIONS[obkey] as string;
@@ -101,17 +110,18 @@ export class Shader extends JsonSerializable {
         fsSource = fsSource.replace(obkey, text);
       }
     }
-    debugger;
-
+    
     const vertexShader = this.compileShader(
       this.gl,
       this.gl.VERTEX_SHADER,
       vsSource,
+      this.vertexUri
     );
     const fragmentShader = this.compileShader(
       this.gl,
       this.gl.FRAGMENT_SHADER,
       fsSource,
+      this.fragUri
     );
 
     if (!vertexShader || !fragmentShader) {
@@ -365,7 +375,6 @@ export class Shader extends JsonSerializable {
   }
 
   setInt(name: string, num: number) {
-    debugger;
     this.use();
     const location = this.gl.getUniformLocation(this._shaderProgram, name);
     if (location) {
@@ -405,11 +414,12 @@ export class Shader extends JsonSerializable {
       this.gl.STATIC_DRAW,
     );
   }
-
+  
   private compileShader(
     gl: WebGL2RenderingContext,
     type: number,
     source: string,
+    uri: string
   ): WebGLShader | null {
     const shader = gl.createShader(type);
     if (!shader) {
@@ -419,10 +429,16 @@ export class Shader extends JsonSerializable {
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error(
-        'An error occurred compiling the shader:',
-        gl.getShaderInfoLog(shader),
-      );
+      const shaderType = type === gl.VERTEX_SHADER ? 'Vertex' : 'Fragment';
+      const infoLog = gl.getShaderInfoLog(shader);
+      
+      const sourceLines = source.split('\n');
+      const sourcePreview = sourceLines.slice(0, 15).join('\n') + (sourceLines.length > 15 ? '\n...' : '');
+
+      console.error(`[Shader Compilation Error] ${shaderType} Shader failed: ${uri}`);
+      console.error(`Info Log:\n${infoLog}`);
+      console.error(`Source Preview:\n${sourcePreview}`);
+
       gl.deleteShader(shader);
       return null;
     }
@@ -438,6 +454,10 @@ export class Shader extends JsonSerializable {
     if (!shaderProgram) {
       return null;
     }
+
+    if(this._shaderProgram)
+      this.gl.deleteProgram(this._shaderProgram);
+
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
     gl.linkProgram(shaderProgram);
@@ -450,11 +470,8 @@ export class Shader extends JsonSerializable {
       return null;
     }
 
-    // --- UBO BINDING LOGIC ADDED HERE ---
-    // Look for the "CameraBlock" uniform block in this newly compiled shader
     const blockIndex = gl.getUniformBlockIndex(shaderProgram, 'CameraBlock');
 
-    // If this specific shader actually uses the CameraBlock, bind it to global slot 0
     if (blockIndex !== gl.INVALID_INDEX) {
       gl.uniformBlockBinding(shaderProgram, blockIndex, 0);
     }
@@ -463,7 +480,7 @@ export class Shader extends JsonSerializable {
   }
 
   public recompile(): void {
-    this.destroy();
+    this._initialized = false;
     this.initialize();
   }
 

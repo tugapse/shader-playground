@@ -1,5 +1,8 @@
 @if (entity) {
-  <editor-inpector-toggle-panel [title]="entity.name" [collapsed]="false">
+  <editor-inpector-toggle-panel
+    [title]="'Entity: ' + entity.name"
+    [collapsed]="true"
+  >
     @if (!_isScene) {
       <section>
         <span>Update in Editor</span
@@ -28,61 +31,17 @@
 
     @for (entityProperty of objectsToshow; track $index) {
       @switch (entityProperty.type) {
-        @case ("string") {
-          <editor-text-input-inspector
-            [label]="entityProperty.key.capitalize()"
-            [value]="entityProperty.property"
-            (change)="onValueChanged(entityProperty, $event)"
-          ></editor-text-input-inspector>
-        }
-
-        @case ("number") {
-          <editor-text-input-inspector
-            [isNumber]="true"
-            [label]="entityProperty.key.capitalize()"
-            [value]="entityProperty.property"
-            (change)="onValueChanged(entityProperty, +$event)"
-            [dragScale]="0.1"
-          ></editor-text-input-inspector>
-        }
-
-        @case ("boolean") {
-          <app-boolean-inspector
-            [label]="entityProperty.key.capitalize()"
-            [active]="entity[entityProperty.key]"
-            (change)="onValueChanged(entityProperty, $event)"
-          ></app-boolean-inspector>
-        }
-
-        @case ("_Vector234") {
-          <editor-vector-inspector
-            [vector]="entityProperty.property"
-            (vectorChanged)="onVectorChanged(entityProperty, $event)"
-          ></editor-vector-inspector>
-        }
-
-        @case ("enum") {
-          <editor-enum-inspector
-            [label]="entityProperty.key.capitalize()"
-            [items]="_enums[entityProperty.key]"
-            [selected]="entityProperty.property"
-            (change)="onEnumChange(entityProperty.key, $event)"
-          ></editor-enum-inspector>
-        }
-
-        @case ("color") {
-          <editor-color-inspector
-            [label]="entityProperty.key"
-            [selectedColor]="entity[entityProperty.key]"
-            (colorChange)="onColorChanged(entityProperty, $event)"
-          ></editor-color-inspector>
-        }
-
         @case ("object") {
           <editor-object-inspector
             [label]="entityProperty.key.capitalize()"
             [targetObject]="entityProperty"
           ></editor-object-inspector>
+        }
+        @default {
+          <editor-default-inspector
+            [item]="entityProperty"
+            (change)="onDefaultChanged(entityProperty, $event)"
+          ></editor-default-inspector>
         }
       }
     }
@@ -93,11 +52,13 @@
       [entity]="entity"
       [collapsed]="true"
     ></editor-transform-inspector>
-    <div class="behaviours-header-container" style="position: relative">
+
+    <div class="behaviours-header-container">
       <h4 class="behaviours-header">Behaviours</h4>
       <app-icon
         class="icon"
         iconName="fa-add"
+        [isButton]="true"
         (click)="onAddBehaviourRequested($event)"
       ></app-icon>
       <editor-add-behaviour-menu
@@ -115,7 +76,10 @@
       @for (behaviour of entity.behaviours; track $index) {
         <editor-behaviour-inspector
           [behaviour]="behaviour"
-          [label]="behaviour.name || behaviour.className.capitalize()"
+          [label]="
+            behaviour.className.capitalize() +
+            (behaviour.name ? ': ' + behaviour.name : '')
+          "
         ></editor-behaviour-inspector>
       }
     }

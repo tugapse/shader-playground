@@ -1,12 +1,13 @@
 :host {
   min-width: 200px;
+  padding: 4px;
+  display: block;
 
   section {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 4px;
-    padding-top: 4px;
   }
 
   section span {
@@ -22,7 +23,6 @@
     border: var(--editor-panel-text-input-border);
     padding: 4px;
     text-align: right;
-    margin-right: 12px;
   }
   section.tag{
     padding-bottom: 8px;
@@ -30,15 +30,21 @@
     border-bottom: var(--editor-panel-border);
   }
 
-  .behaviours-header {
 
-    color:rgb(57, 148, 190)
-  }
   .behaviours-header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 4px;
+    margin-top :24px;
+  }  
+  
+  .behaviours-header {
+
+    color:var(--editor-panel-text-input-color);
+    flex-grow: 1;
   }
+  
   .icon {
     cursor: pointer;
     color: var(--editor-panel-text-input-color);

@@ -31,10 +31,16 @@ export class LitMaterial extends UnlitMaterial {
    * @type {Texture}
    */
   public normalTex?: Texture;
+  public specularTex?: Texture;
+  public roughnessTex?: Texture;
+  public aoTex?: Texture;
+  public emissiveTex?: Texture;
+
 
   constructor() {
     super();
   }
+  
 
 
   /**

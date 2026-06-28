@@ -4,6 +4,7 @@ import { JsonSerializedData } from '../interfaces/json-serialized-data.interface
   An abstract base class providing a common interface for objects that can be serialized to and deserialized from a JSON object.
  */
 export class JsonSerializable {
+  [key: string]: any;
   public name: string = '';
   protected _className: string;
   protected _uuid: string;
@@ -19,9 +20,13 @@ export class JsonSerializable {
   constructor(className: string) {
     if (!className) throw new Error('className is required');
     this._className = className;
-    this.name = this.name || this._className;
+    this.name = this.name;
     this._uuid = uuidV4();
-    this._serializationIgnoreKeys = ['_serializationIgnoreKeys', "scene", "parent"];
+    this._serializationIgnoreKeys = [
+      '_serializationIgnoreKeys',
+      'scene',
+      'parent',
+    ];
   }
 
   private loopAndSaveProperties(value: any): any {
@@ -157,5 +162,4 @@ export class JsonSerializable {
     this.name = jsonObject['name'];
     if (jsonObject['uuid']) this._uuid = jsonObject['uuid'];
   }
-
 }

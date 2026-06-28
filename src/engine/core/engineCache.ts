@@ -1,11 +1,11 @@
-import { ICubemapSides } from "../interfaces/cubemap.interface";
-import { ObjParser } from "../parsers/obj-parser";
-import { ShaderUniformsEnum } from "../enums";
-import { LitShader } from "../shaders";
-import { LitMaterial } from "../materials";
-import { CubemapTexture } from "../textures";
-import { Texture } from "../textures/texture";
-import { MeshData } from "./mesh";
+import { ICubemapSides } from '../interfaces/cubemap.interface';
+import { ObjParser } from '../parsers/obj-parser';
+import { ShaderUniformsEnum } from '../enums';
+import { LitShader } from '../shaders';
+import { LitMaterial } from '../materials';
+import { CubemapTexture } from '../textures';
+import { Texture } from '../textures/texture';
+import { MeshData } from './mesh';
 
 /**
   The structure for storing cached assets.
@@ -59,8 +59,8 @@ export abstract class EngineCache {
   private static objPArser: ObjParser = new ObjParser();
 
   public static set(key: string, value: any): void {
-    if (key === "__white_texture__" || key === "__normal_texture__") {
-      console.warn("Attempted to set reserved cache key:", key);
+    if (key === '__white_texture__' || key === '__normal_texture__') {
+      console.warn('Attempted to set reserved cache key:', key);
     }
     EngineCache.__cache.generic[key] = value;
   }
@@ -78,7 +78,7 @@ export abstract class EngineCache {
    */
   public static async getTexture2D(
     uri: string,
-    gl?: WebGL2RenderingContext
+    gl?: WebGL2RenderingContext,
   ): Promise<Texture> {
     let result = EngineCache.__cache.textures[uri] as Texture;
     if (!result) {
@@ -101,10 +101,10 @@ export abstract class EngineCache {
  */
   public static async getTextureCube(
     uris: ICubemapSides,
-    gl?: WebGL2RenderingContext
+    gl?: WebGL2RenderingContext,
   ): Promise<CubemapTexture> {
     const { right, left, up, bottom, front, back } = uris;
-    const key = [right, left, up, bottom, front, back].join("|");
+    const key = [right, left, up, bottom, front, back].join('|');
 
     let result = EngineCache.__cache.textures[key] as CubemapTexture;
     if (!result) {
@@ -125,14 +125,23 @@ export abstract class EngineCache {
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @returns {Promise<CubemapTexture>} - A promise that resolves with the cached or newly created white CubemapTexture instance.
    */
-  public static async getWhiteTextureCube(gl?: WebGL2RenderingContext): Promise<CubemapTexture> {
-    const keyUrl = "assets/images/default/white.jpg";
-    const uris = { right: keyUrl, left: keyUrl, up: keyUrl, bottom: keyUrl, front: keyUrl, back: keyUrl }
-    const key = [keyUrl, keyUrl, keyUrl, keyUrl, keyUrl, keyUrl].join("|");
-    
+  public static async getWhiteTextureCube(
+    gl?: WebGL2RenderingContext,
+  ): Promise<CubemapTexture> {
+    const keyUrl = 'assets/images/default/white.jpg';
+    const uris = {
+      right: keyUrl,
+      left: keyUrl,
+      up: keyUrl,
+      bottom: keyUrl,
+      front: keyUrl,
+      back: keyUrl,
+    };
+    const key = [keyUrl, keyUrl, keyUrl, keyUrl, keyUrl, keyUrl].join('|');
+
     let result = EngineCache.__cache.textures[key] as CubemapTexture;
     if (!result) {
-      result = await EngineCache.getTextureCube(uris, gl)
+      result = await EngineCache.getTextureCube(uris, gl);
       EngineCache.__cache.textures[key] = result;
       EngineCache.__cache.textureCounter[key] = 1;
     } else {
@@ -147,28 +156,21 @@ export abstract class EngineCache {
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @returns {Promise<Texture>} - A promise that resolves with the cached or newly loaded white Texture instance.
    */
-  public static async getWhiteTexture(gl: WebGL2RenderingContext): Promise<Texture> {
-    const DEFAULT_WHITE_TEXTURE_URI = "assets/images/default/white.jpg";
-    return EngineCache.getTexture2D(DEFAULT_WHITE_TEXTURE_URI, gl);
+  public static async getWhiteTexture(
+    gl: WebGL2RenderingContext,
+  ): Promise<Texture> {
+    return EngineCache.getTexture2D('assets/images/default/white.jpg', gl);
   }
 
-  /**
-   * Retrieves a default normal map texture (flat normal, pointing up) from the cache or creates it if not present.
-   * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
-   * @returns {Texture} - The cached or newly created normal map Texture instance.
-   */
-  public static getNormalTexture(gl: WebGL2RenderingContext): Texture {
-    const key = "__white_texture__";
-    let result = EngineCache.__cache.textures[key];
-    if (!result) {
-      result = Texture.create(gl, 1, 1, new Uint8Array([128, 128, 255, 255])); // Flat normal map (R=0.5, G=0.5, B=1.0)
-      EngineCache.__cache.textures[key] = result;
-      EngineCache.__cache.textureCounter[key] = 1;
-    }
-    else {
-      EngineCache.__cache.textureCounter[key]++; // Added missing increment
-    }
-    return result as Texture;
+  public static async getBlackTexture(
+    gl: WebGL2RenderingContext,
+  ): Promise<Texture> {
+    return EngineCache.getTexture2D('assets/images/default/black.jpg', gl);
+  }
+  public static async getNormalTexture(
+    gl: WebGL2RenderingContext,
+  ): Promise<Texture> {
+    return EngineCache.getTexture2D('assets/images/default/normal.jpg', gl);
   }
 
   public static releaseTexture(texture: Texture): void {

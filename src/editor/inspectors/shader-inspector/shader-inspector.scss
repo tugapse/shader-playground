@@ -1,19 +1,14 @@
 :host {
-
   .line-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    padding: 4px;
   }
 
-  .line-item>span {
+  .line-item > span {
     min-width: 90px;
     max-width: 150px;
-
-    &:hover {
-      cursor: col-resize;
-    }
+    margin: 4px;
   }
 }

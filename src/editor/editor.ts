@@ -35,6 +35,8 @@ import { DragHandleDirective } from './directives/mouse-drag.directive';
 import { MovableDirective } from './directives/moveable.directive';
 import { EngineStatsComponent } from './components/engine-stats/engine-stats';
 import { Icon } from "src/app/components/icon/icon";
+import { AddBehaviourMenuComponent } from "./components/add-behaviour-menu/add-behaviour-menu";
+import { EntityInspector } from "./inspectors/entity-inspector/entity-inspector";
 
 @Component({
   selector: 'app-editor',
@@ -47,7 +49,9 @@ import { Icon } from "src/app/components/icon/icon";
     AssetExplorerWindow,
     MovableDirective,
     EngineStatsComponent,
-    Icon
+    Icon,
+    AddBehaviourMenuComponent,
+    EntityInspector
 ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
@@ -85,6 +89,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+
   }
 
   ngAfterViewInit(): void {
@@ -211,7 +216,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   private onCanvasResize(size: { width: number; height: number }) {
-    debugger
     if (this.scene) {
       this.scene.renderPipeline.resize(size.width, size.height);
     }

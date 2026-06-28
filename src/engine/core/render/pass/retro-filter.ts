@@ -1,6 +1,6 @@
 import { Scene } from '@engine/entities';
 import { JsonSerializable } from '@engine/interfaces';
-import { Shader } from '@engine/shaders';
+import { Shader, ShaderSources } from '@engine/shaders';
 import { Texture } from '@engine/textures';
 import { IRenderPass } from './render-pass.interface';
 
@@ -34,8 +34,8 @@ export class PostProcessingPass
     this.postShader = new Shader(
       gl,
       null as any,
-      'assets/shaders/post-processing/retro.frag',
-      'assets/shaders/vertex/screen-quad.vert', 
+      ShaderSources.frag.retro,
+      ShaderSources.vertex.fullscreen, 
     );
     this.postShader.initialize();
 

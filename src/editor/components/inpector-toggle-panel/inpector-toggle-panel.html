@@ -1,9 +1,20 @@
-<div class="header">
-  <span class="title">{{title}}</span>
+<div
+  class="header"
+  [ngClass]="{ expanded: !collapsed && isChild, child: isChild }"
+>
+  <span class="title">{{ title }}</span>
   <ng-content select="[header-content]"></ng-content>
-  @if(isAbleToCollapse){<app-icon class="chevron" [iconName]="collapsed ? 'fa-chevron-left' :'fa-chevron-down'"
-    (click)="collapsed=!collapsed"></app-icon> }
+  @if (isAbleToCollapse) {
+    <app-icon
+      class="chevron"
+      [iconName]="collapsed ? 'fa-chevron-left' : 'fa-chevron-down'"
+      (click)="onToggle()"
+    ></app-icon>
+  }
 </div>
-<div class="container" [ngClass]="{collapsed:(collapsed && isAbleToCollapse),child:isChild}">
+<div
+  class="container"
+  [ngClass]="{ collapsed: collapsed && isAbleToCollapse, child: isChild }"
+>
   <ng-content></ng-content>
 </div>

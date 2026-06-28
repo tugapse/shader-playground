@@ -1,18 +1,24 @@
 :host {
+  display: block;
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background-color 0.3s;
+    padding: 4px;
 
     & > .title {
       font-weight: 600;
-      padding-left: 4px;
+    }
+    &.expanded{
+      background-color: var(--editor-panel-background-50);
+    }
+    &.child{
     }
 
   }
 
   .header .title {
-    color: var(--editor-panel-section-header);
     flex-grow: 1;
   }
 
@@ -25,19 +31,16 @@
   .container {
     transition: all 0.3s;
     border-bottom: var(--editor-panel-border);
-    padding: var(--editor-panel-outer-padding);
 
     // background-color: #283549;
-
-    &.child {
+    
+    &.child { 
       display: flex;
       flex-direction: column;
-      row-gap: 8px;
-      margin-left: 4px;
       margin-bottom: 4px;
       overflow-y: hidden;
       border: none;
-      background-color: var(--editor-panel-background-50)
+      background-color: var(--editor-panel-background-50);
     }
 
     &.collapsed {

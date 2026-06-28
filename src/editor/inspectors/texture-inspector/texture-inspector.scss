@@ -11,5 +11,17 @@
     max-width: 40%; 
 
   }
+
+  .texture-preview{
+    position: relative;
+    max-width: 64px;
+    max-height: 64px
+
+  }
+  .texture-preview img{
+    max-width: 64px;
+    max-height: 64px;
+
+  }
  
 }

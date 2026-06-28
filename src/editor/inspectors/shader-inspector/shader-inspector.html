@@ -1,0 +1,53 @@
+<editor-inpector-toggle-panel
+  [title]="_shader.name || label"
+  [collapsed]="false"
+  [isChild]="true"
+>
+  @if (_shader) {
+    <div class="line-item">
+      <span>frag source </span>
+      <app-dropdown
+        [items]="_shaderFraList"
+        [selectedItem]="selectedFrag!"
+        (itemSelected)="onShaderSelected(0, $event)"
+      ></app-dropdown>
+    </div>
+    <div class="line-item">
+      <span>Vert source </span>
+      <app-dropdown
+        [items]="_shaderVertList"
+        [selectedItem]="selectedVert!"
+        (itemSelected)="onShaderSelected(1, $event)"
+      ></app-dropdown>
+    </div>
+  }
+  @for (item of _properties; track $index) {
+    @switch (item.type) {
+      @default {
+        <editor-default-inspector
+          [item]="item"
+          (change)="onDefaultChanged(item, $event)"
+        ></editor-default-inspector>
+      }
+      @case ("object") {
+        <editor-object-inspector
+          [isChild]="true"
+          [label]="item.value.name || item.key.capitalize()"
+          [targetObject]="{
+            key: item.key,
+            type: item.type,
+            property: item.value,
+          }"
+        ></editor-object-inspector>
+      }
+      @case ("material") {
+        <editor-material-inspector
+          [isChild]="true"
+          [material]="item.value"
+          [label]="item.value.name || item.key.capitalize()"
+        >
+        </editor-material-inspector>
+      }
+    }
+  }
+</editor-inpector-toggle-panel>

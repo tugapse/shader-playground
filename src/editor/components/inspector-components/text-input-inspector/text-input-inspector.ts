@@ -20,6 +20,7 @@ export class TextInputInspector {
   @Output() change = new EventEmitter<string | number>();
 
   onChange($event: Event) {
+
     const newValue = ($event.target as any).value;
     this.value = this.isNumber ? Number(newValue) : newValue;
     this.change.emit(this.value);

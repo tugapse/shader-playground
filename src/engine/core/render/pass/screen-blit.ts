@@ -1,7 +1,7 @@
 import { Scene } from '@engine/entities';
 import { IRenderPass } from './render-pass.interface';
 import { Texture } from '@engine/textures';
-import { Shader, UnlitShader } from '@engine/shaders';
+import { Shader, ShaderSources, UnlitShader } from '@engine/shaders';
 import { CanvasViewport } from '@engine/core/canvas-viewport';
 import { JsonSerializable } from '../../json-serializable';
 import { ColorMaterial, UnlitMaterial } from '@engine/materials';
@@ -21,8 +21,8 @@ export class ScreenBlitPass extends JsonSerializable implements IRenderPass {
     // Initialize a dedicated screen quad shader to blit the texture
     this.screenQuadShader = new UnlitShader(gl, new UnlitMaterial());
 
-    this.screenQuadShader.fragUri = 'assets/shaders/frag/screen-blit.frag';
-    this.screenQuadShader.vertexUri = 'assets/shaders/vertex/screen-quad.vert';
+    this.screenQuadShader.fragUri = ShaderSources.frag.screen_blit;
+    this.screenQuadShader.vertexUri = ShaderSources.vertex.fullscreen;
   }
 
   setGl(gl: WebGL2RenderingContext): void {

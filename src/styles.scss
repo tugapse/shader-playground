@@ -1,4 +1,4 @@
-@use './theme.scss';
+@use "./theme.scss";
 
 /* You can add global styles to this file, and also import other style files */
 html,
@@ -10,7 +10,6 @@ body {
   box-sizing: border-box;
   background-color: var(--global-background-color);
 }
-
 
 h5,
 h4,
@@ -31,9 +30,9 @@ h1 {
   /* Internet Explorer/Edge */
 }
 
-  .editor-inspector-line-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
+.editor-inspector-line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}

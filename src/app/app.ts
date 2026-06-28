@@ -58,11 +58,7 @@ export class App implements OnDestroy {
     this.editorService.onSceneLoaded.subscribe(
       this.onEditorLoadScene.bind(this),
     );
-    Shader.SHADER_FUNCTIONS = {
-      '@INCLUDE_FOG_FUNC': 'assets/shaders/functions/fog.frag',
-      '@INCLUDE_LIGHT_FUNC': 'assets/shaders/functions/light.frag',
-      '@INCLUDE_UTIL_FUNC': 'assets/shaders/functions/functions.frag',
-    };
+
   }
 
   onEditorLoadScene(scene: Scene): any {
@@ -159,7 +155,6 @@ export class App implements OnDestroy {
     const shader = new LitShader(this.gl, material);
 
     const renderer = new MeshRendererBehaviour(this.gl);
-    renderer.name = 'Renderer';
     renderer.castShadows = false;
     
     material.mainTex = await EngineCache.getTexture2D(
@@ -254,7 +249,6 @@ export class App implements OnDestroy {
         this.gl,
       );
 
-      material.name = 'Lit Material';
       material.mainTex = wallstoneTexture;
       material.normalTex = wallNormalTexture;
       material.normalMapStrength = 1;
@@ -264,10 +258,8 @@ export class App implements OnDestroy {
       meshRenderer.mesh = mesh;
       meshRenderer.shader =
         shader || new LitShader(this.gl, material as LitMaterial);
-      meshRenderer.shader.name = 'Lit Shader';
     }
-
-    meshRenderer.name = meshRenderer.name || 'Renderer';
+  
     entity.addBehaviour(meshRenderer);
 
     return entity;
@@ -282,8 +274,6 @@ export class App implements OnDestroy {
     renderer.shader = shader;
     renderer.mesh.meshData = cubePrimitive;
 
-    material.name = 'Skybox' + (useWhiteTexture ? '_white' : '');
-    (window as any )['mat'] = material;
 
     // const skyboxTextures = {
     //   right: "assets/images/skybox/blue/right.jpeg",  
@@ -298,7 +288,7 @@ export class App implements OnDestroy {
     // material.mainTex = texture;
 
     material.mainTex = await EngineCache.getWhiteTextureCube(this.gl);
-    const skyboxEntity = new GlEntity(material.name);
+    const skyboxEntity = new GlEntity("Skybox");
 
     skyboxEntity.addBehaviour(renderer);
     scene.addEntity(skyboxEntity);

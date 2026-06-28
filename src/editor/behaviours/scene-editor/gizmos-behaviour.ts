@@ -13,6 +13,7 @@ import {
   Mouse,
   RendererBehaviour,
   Shader,
+  ShaderSources,
   ShaderUniformsEnum,
   Texture,
   Transform,
@@ -145,7 +146,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     this.pickingShader = new Shader(
       this._gl,
       new ColorMaterial(),
-      'assets/shaders/frag/entity-picker.frag',
+      ShaderSources.frag.entity_picker,
     );
     this.pickingShader.initialize();
 

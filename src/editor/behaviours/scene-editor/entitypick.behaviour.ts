@@ -1,5 +1,5 @@
 import { SceneTreeService } from "@editor/services/scene-tree.service";
-import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderUniformsEnum, Texture, Transform } from "@engine";
+import { Camera, CanvasViewport, ColorMaterial, Keybord, MeshData, Mouse, RendererBehaviour, Scene, Shader, ShaderSources, ShaderUniformsEnum, Texture, Transform } from "@engine";
 import { GizmosBoxBehaviour } from "./gizmos-behaviour";
 
 export class EntityPicker extends RendererBehaviour {
@@ -18,7 +18,7 @@ export class EntityPicker extends RendererBehaviour {
     super(gl);
     this.renderTexture = Texture.create(gl, 1024, 1024, null);
     
-    this.shader = new Shader(gl, new ColorMaterial(), "assets/shaders/frag/entity-picker.frag");
+    this.shader = new Shader(gl, new ColorMaterial(), ShaderSources.frag.entity_picker);
     this.shader.initialize();
     this.mesh.meshData = new MeshData([]);
   }

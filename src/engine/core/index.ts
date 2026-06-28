@@ -11,7 +11,6 @@ export * from './object-instanciator';
 export * from './vector';
 export * from './bounding-box';
 export * from './scene-fog';
-export * from './shadowmap-renderer';
 export * from './range';
 
 

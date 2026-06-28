@@ -3,30 +3,31 @@ import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/in
 import { EditorService } from '@editor/services/editor.service';
 import { SceneTreeService } from '@editor/services/scene-tree.service';
 import {
+  CameraType,
   Color,
   ColorMaterial,
   EntityBehaviour,
   FogType,
   GlEntity,
   LitMaterial,
+  LitShader,
   NumberRange,
   Shader,
   Texture,
-  TextureFilterMode,
-  TextureWrapMode,
   Transform,
   UnlitMaterial,
+  UnlitShader,
   Vector2,
   Vector3,
-  Vector4,
+  Vector4
 } from '@engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
-import { BooleanInspector } from '../../components/inspector/boolean-inspector/boolean-inspector';
-import { TextInputInspector } from '../../components/inspector/text-input-inspector/text-input-inspector';
-import { VectorInspector } from '../../components/inspector/vector-inspector/vector-inspector';
+import { BooleanInspector } from '../../components/inspector-components/boolean-inspector/boolean-inspector';
+import { TextInputInspector } from '../../components/inspector-components/text-input-inspector/text-input-inspector';
+import { VectorInspector } from '../../components/inspector-components/vector-inspector/vector-inspector';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
-import { NumberRangeInspector } from '../number-range-inspector/number-range-inspector';
+import { NumberRangeInspector } from '../../components/inspector-components/number-range-inspector/number-range-inspector';
 
 export interface ITargetObject {
   [key: string]: any;
@@ -34,6 +35,7 @@ export interface ITargetObject {
   type: string;
   property?: any;
   name?: string;
+  value?: any;
 }
 
 export interface ITargetProperty extends ITargetObject {
@@ -49,8 +51,8 @@ export interface ITargetProperty extends ITargetObject {
     VectorInspector,
     BooleanInspector,
     EnumInspector,
-    NumberRangeInspector,
-  ],
+    NumberRangeInspector
+],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss',
 })
@@ -93,10 +95,6 @@ export class ObjectInspector {
 
   constructor() {
     this._enums['fogType'] = this.convertEnumToObject(FogType);
-    // this._enums['minFilter'] = this.convertEnumToObject(TextureFilterMode);
-    // this._enums['magFilter'] = this.convertEnumToObject(TextureFilterMode);
-    // this._enums['wrapS'] = this.convertEnumToObject(TextureWrapMode);
-    // this._enums['wrapT'] = this.convertEnumToObject(TextureWrapMode);
   }
 
   // Event Handlers from template
@@ -146,6 +144,7 @@ export class ObjectInspector {
 
   // Private and protected helpers
   private _onPropertyChanged(propertyKey: string, value: any): void {
+    
     if (!this._selectedObject?.property || value instanceof Event) return;
 
     this._selectedObject.property[propertyKey] = value;
@@ -162,16 +161,16 @@ export class ObjectInspector {
     const object = this._selectedObject.property;
     this._properties = Object.keys(object)
       .filter((key) => this.isPropertyValid(key))
-      .map((key) => this._createPropertyViewModel(key, object[key]))
-      .filter((p): p is ITargetProperty => !!p);
+      .map((key) => this.createPropertyViewModel(key, object[key]))
+      .filter((p) => !!p.key);
   }
 
-  private _createPropertyViewModel(
+  protected createPropertyViewModel(
     key: string,
     value: any,
-  ): ITargetProperty | null {
+  ): ITargetProperty {
     if (value === undefined || value === null) {
-      return null;
+      return {} as ITargetProperty;
     }
 
     let type: string = typeof value;
@@ -183,8 +182,8 @@ export class ObjectInspector {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
-
-    return { key, type, value, name };
+    const property = this._enums[key] || {}
+    return { key, type, value, name , property};
   }
 
   protected getObjectType(value: object): string {
@@ -249,8 +248,12 @@ export class ObjectInspector {
     this.editorService.onSceneUpdated.emit(scene);
   }
 
-  onEnumChange(key: string, menuItem: DropdownItem) {
+  protected onEnumChange(key: string, menuItem: DropdownItem) {
     this._selectedObject!.property[key] = menuItem.value;
     this.editorService.requestCanvasResize();
+  }
+
+  protected onRangeChange(item:ITargetProperty, $event:NumberRange){
+    this._selectedObject!.property[item.key] = $event
   }
 }

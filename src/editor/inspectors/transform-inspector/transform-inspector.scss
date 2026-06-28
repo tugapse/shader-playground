@@ -1,9 +1,10 @@
 :host {
 
 
-  section {
-    padding-top: 4px;
 
+  section {
+  display: block;
+  margin: 4px;
     &>.title {
       font-size: 12px;
       font-weight: 500;
@@ -14,7 +15,8 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-
+    column-gap: 12px;
+    margin-bottom: 8px;
   }
 
   .line-item>span {
@@ -30,8 +32,6 @@
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
-    margin-right: 6px;
-
   }
 
 }

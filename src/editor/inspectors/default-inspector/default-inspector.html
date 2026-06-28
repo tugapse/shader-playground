@@ -1,0 +1,61 @@
+@if (item) {
+  @switch (item.type) {
+    @case ("string") {
+      <editor-text-input-inspector
+        [label]="item.key.capitalize()"
+        [value]="item.value"
+        (change)="onValueChanged(item, $event)"
+      ></editor-text-input-inspector>
+    }
+
+    @case ("number") {
+      <editor-text-input-inspector
+        [isNumber]="true"
+        [label]="item.key.capitalize()"
+        [value]="item.value"
+        (change)="onValueChanged(item, $event)"
+        [dragScale]="0.001"
+      ></editor-text-input-inspector>
+    }
+
+    @case ("boolean") {
+      <app-boolean-inspector
+        [label]="item.key.capitalize()"
+        [active]="item.value"
+        (change)="onValueChanged(item, $event)"
+      ></app-boolean-inspector>
+    }
+
+    @case ("color") {
+      <editor-color-inspector
+        [label]="item.key"
+        [selectedColor]="item.value"
+        (colorChange)="onColorChanged(item, $event)"
+      ></editor-color-inspector>
+    }
+
+    @case ("vector234") {
+      <editor-vector-inspector
+        [label]="item.key"
+        [vector]="item.value"
+        (vectorChanged)="onVectorChanged(item, $event)"
+      ></editor-vector-inspector>
+    }
+
+    @case ("enum") {
+      <editor-enum-inspector
+        [label]="item.key"
+        [items]="item.property"
+        [selected]="item.value"
+        (change)="onEnumChange(item.key, $event)"
+      ></editor-enum-inspector>
+    }
+    @case ("range") {
+      <editor-number-range-inspector
+        [label]="item.key.capitalize()"
+        [range]="item.value"
+        (rangeChange)="onRangeChange(item, $event)"
+      ></editor-number-range-inspector>
+    }
+  }
+}
