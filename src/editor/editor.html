@@ -2,33 +2,56 @@
   [scene]="scene"
   [isEditorPaused]="isPaused"
   (toggleFullscreen)="toggleFullscreen()"
-></editor-top-bar>
+>
+  <div>
+    @for (menuItem of menuItems; track menuItem.id) {
+      <app-menu-item
+        [item]="menuItem"
+        [isRoot]="true"
+        (onItemClick)="onMenuItemClick($event)"
+      ></app-menu-item>
+    }
+  </div>
+</editor-top-bar>
 
-<div class="container">
-  <aside class="sidebar">
+<workspace
+  [showLeft]="!isFullScreen && isLeftVisible"
+  [showRight]="!isFullScreen && isRightVisible"
+  [showFooter]="!isFullScreen && isFooterVisible"
+>
+  <div leftSidebar>
+    <span>Scene Tree</span>
     <app-scene-tree [targetScene]="scene"></app-scene-tree>
-  </aside>
+  </div>
 
-  @switch (editorState.centralView()) {
-    @case ("canvas") {
-      <editor-canvas
-        tabindex="0"
-        class="canvas"
-        [ngClass]="{ fullscreen: isFullScreen }"
-        [scene]="scene"
-        (stats)="onFpsUpdated($event)"
-        (onGlContextCreated)="onGlContextCreated($event)"
-      ></editor-canvas>
-      <editor-engine-stats [stats]="stats"></editor-engine-stats>
+  <div class="container" main>
+    @switch (editorState.centralView()) {
+      @case ("canvas") {
+        <editor-canvas
+          tabindex="0"
+          class="canvas"
+          [scene]="scene"
+          (stats)="onFpsUpdated($event)"
+          (onGlContextCreated)="onGlContextCreated($event)"
+        ></editor-canvas>
+      }
     }
-    <!-- @case ("assets") {
-      <app-assets-explorer></app-assets-explorer>
-    }
-    @case ("code-editor") {
-      <editor-code-editor></editor-code-editor>
-    } -->
-  }
-</div>
+  </div>
+
+  <div rightSidebar></div>
+
+  <div footer>
+    <app-assets-explorer></app-assets-explorer>
+  </div>
+</workspace>
+
+@if (isEngineStatsVisible) {
+  <editor-engine-stats
+    class="canvas-info"
+    [stats]="stats"
+    (closeRequested)="isEngineStatsVisible = false"
+  ></editor-engine-stats>
+}
 
 <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
 

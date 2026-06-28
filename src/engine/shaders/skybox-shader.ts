@@ -96,7 +96,6 @@ export class SkyboxShader extends Shader {
   public override async loadDataIntoShader(): Promise<void> {
     if (!this.material) return; // Material must be present
     this.use()
-
     // Await texture loading
     if (this.material.mainTex) {
       if (!this.material.mainTex.isImageLoaded) {

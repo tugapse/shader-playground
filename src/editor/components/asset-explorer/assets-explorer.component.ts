@@ -23,19 +23,15 @@ export class AssetsExplorerComponent {
   treeData = signal<IAsset | null>(null);
   selectedNodeId = signal<string | null>(null);
   expandedNodes = signal<Set<string>>(new Set<string>());
+  activeFolder = signal<IAsset | null>(null);
+  createMenuOpen = signal<boolean>(false);
+  
   contextMenu = signal({
     visible: false,
     x: 0,
     y: 0,
     targetNode: null as IAsset | null
   });
-
-  @HostListener('document:click')
-  onDocumentClick() {
-    if (this.contextMenu().visible) {
-      this.closeContextMenu();
-    }
-  }
 
   constructor() {
     effect(() => {
@@ -46,15 +42,93 @@ export class AssetsExplorerComponent {
     });
   }
 
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.contextMenu().visible) {
+      this.closeContextMenu();
+    }
+    if (this.createMenuOpen()) {
+      this.createMenuOpen.set(false);
+    }
+  }
+
+  toggleCreateMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.createMenuOpen.update(v => !v);
+    if (this.contextMenu().visible) this.closeContextMenu();
+  }
+
+  createNewAsset(type: 'folder' | 'scene' | 'code' | 'material') {
+    this.createMenuOpen.set(false);
+    
+    const project = this.projectId();
+    if (!project) return;
+
+    const name = prompt(`Enter ${type} name:`);
+    if (!name) return;
+
+    const targetFolder = this.activeFolder();
+    const basePath = targetFolder?.virtualPath ? `${targetFolder.virtualPath}/` : '';
+    const fullVirtualPath = `${basePath}${name}`;
+
+    switch(type) {
+      case 'scene': {
+        const fileName = name.endsWith('.scene') ? name : `${name}.scene`;
+        const content = JSON.stringify({ entities: [] }, null, 2);
+        this.uploadVirtualAsset(project.id, fileName, content, 'application/json', 'scene');
+        break;
+      }
+      case 'code': {
+        const fileName = name.endsWith('.py') ? name : `${name}.py`;
+        const content = '# Sentinel Script\n';
+        this.uploadVirtualAsset(project.id, fileName, content, 'text/plain', 'code');
+        break;
+      }
+      case 'material': {
+        const fileName = name.endsWith('.mat') ? name : `${name}.mat`;
+        const content = JSON.stringify({ shader: 'Standard', properties: {} }, null, 2);
+        this.uploadVirtualAsset(project.id, fileName, content, 'application/json', 'raw');
+        break;
+      }
+      case 'folder': {
+        console.log(`Requires backend support to create empty directory at: ${fullVirtualPath}`);
+        break;
+      }
+    }
+  }
+
+  private uploadVirtualAsset(projectId: string, fileName: string, content: string, mimeType: string, assetType: string) {
+    const file = new File([content], fileName, { type: mimeType });
+    this.assetService.uploadAsset(projectId, file, fileName, assetType as any).subscribe({
+      next: () => this.refreshTree(),
+      error: (err) => {
+        console.error(`Error creating ${fileName}:`, err);
+        alert('Failed to create asset.');
+      }
+    });
+  }
+
   refreshTree() {
     const project = this.projectId();
     if (!project) return;
+    
     this.assetService.listAssets(project.id).pipe(
-      map(response => this.buildAssetTree(response.assets, { id: project.id, name: 'project.name' }))
+      map(response => this.buildAssetTree(response.assets, { 
+        id: project.id, 
+        name: project.name || 'Project Root' 
+      }))
     ).subscribe(tree => {
       this.treeData.set(tree);
-      // Ensure root is expanded
-      if(tree){
+      
+      if(tree) {
+        if (this.activeFolder()) {
+          const currentPath = this.activeFolder()!.virtualPath;
+          const reSyncedFolder = this.findNodeByPath(tree, currentPath);
+          this.activeFolder.set(reSyncedFolder || tree);
+        } else {
+          this.activeFolder.set(tree);
+        }
+
         this.expandedNodes.update(current => {
           const newSet = new Set(current);
           newSet.add(tree.id);
@@ -67,19 +141,52 @@ export class AssetsExplorerComponent {
   handleNodeClick(node: IAsset) {
     if (node.type === 'folder' || node.type === 'project') {
       this.toggleExpand(node);
+      this.activeFolder.set(node);
     } else {
       this.selectedNodeId.set(node.id);
       this.editorState.setSelectedAsset(node);
     }
   }
 
+  handleGridItemClick(item: IAsset) {
+    this.selectedNodeId.set(item.id);
+    if (item.type !== 'folder' && item.type !== 'project') {
+      this.editorState.setSelectedAsset(item);
+    }
+  }
+
+  handleGridItemDoubleClick(item: IAsset) {
+    if (item.type === 'folder' || item.type === 'project') {
+      this.activeFolder.set(item);
+      
+      const current = new Set(this.expandedNodes());
+      current.add(item.id || item.name);
+      this.expandedNodes.set(current);
+    }
+  }
+
+  getBreadcrumbPath(node: IAsset): string {
+    if (node.type === 'project') return node.name;
+    const project = this.projectId();
+    const rootName = project ? project.name : 'Assets';
+    return `${rootName} > ${node.virtualPath.replace(/\//g, ' > ')}`;
+  }
+
   onContextMenu(event: MouseEvent, node: IAsset) {
     event.preventDefault();
     event.stopPropagation();
+
+    const menuWidth = 150; 
+    const menuHeight = 80; 
+    const x = Math.min(event.clientX, window.innerWidth - menuWidth);
+    const y = Math.min(event.clientY, window.innerHeight - menuHeight);
+
+    this.selectedNodeId.set(node.id);
+
     this.contextMenu.set({
       visible: true,
-      x: event.clientX,
-      y: event.clientY,
+      x,
+      y,
       targetNode: node
     });
   }
@@ -97,7 +204,7 @@ export class AssetsExplorerComponent {
     if (!newName || newName === node.name) return;
 
     const pathParts = node.virtualPath.split('/');
-    pathParts.pop(); // remove old name
+    pathParts.pop(); 
     const newVirtualPath = [...pathParts, newName].join('/');
 
     const project = this.projectId();
@@ -120,32 +227,15 @@ export class AssetsExplorerComponent {
         if (this.editorState.selectedAsset()?.id === node.id) {
           this.editorState.setSelectedAsset(null);
         }
+        
+        if (this.activeFolder()?.id === node.id) {
+          this.activeFolder.set(this.treeData());
+        }
+        
         this.refreshTree();
       });
     }
     this.closeContextMenu();
-  }
-
-  createScene() {
-    const project = this.projectId();
-    if (!project) return;
-
-    const sceneName = prompt('Enter scene name:');
-    if (!sceneName) return;
-
-    const fileName = sceneName.endsWith('.scene') ? sceneName : `${sceneName}.scene`;
-    const sceneContent = JSON.stringify({ entities: [] }, null, 2);
-    const sceneFile = new File([sceneContent], fileName, { type: 'application/json' });
-
-    this.assetService.uploadAsset(project.id, sceneFile, fileName, 'scene').subscribe({
-      next: () => {
-        this.refreshTree();
-      },
-      error: (err) => {
-        console.error('Error creating scene:', err);
-        alert('Failed to create scene. See console for details.');
-      }
-    });
   }
 
   private toggleExpand(node: IAsset) {
@@ -159,6 +249,20 @@ export class AssetsExplorerComponent {
     return this.expandedNodes().has(node.id || node.name);
   }
 
+  // Parses tree structure and restricts deep search to folder nodes to preserve performance
+  private findNodeByPath(root: IAsset, path: string): IAsset | null {
+    if (root.virtualPath === path) return root;
+    if (root.children) {
+      for (const child of root.children) {
+        if (child.type === 'folder' || child.type === 'project') {
+          const found = this.findNodeByPath(child, path);
+          if (found) return found;
+        }
+      }
+    }
+    return null;
+  }
+
   private buildAssetTree(assets: AssetResponse[], project: { id: string, name: string }): IAsset {
     const root: IAsset = {
       id: project.id,
@@ -170,9 +274,8 @@ export class AssetsExplorerComponent {
     };
 
     const nodeMap = new Map<string, IAsset>();
-    nodeMap.set('', root); // Root is identified by an empty path
+    nodeMap.set('', root); 
 
-    // Sort assets by path depth to ensure parents are created before children
     assets.sort((a, b) => a.virtual_path.split('/').length - b.virtual_path.split('/').length);
 
     assets.forEach(asset => {
@@ -180,7 +283,6 @@ export class AssetsExplorerComponent {
       let parent = root;
       let currentPath = '';
 
-      // Find or create folder structure
       for (let i = 0; i < pathParts.length - 1; i++) {
         const part = pathParts[i];
         currentPath = currentPath ? `${currentPath}/${part}` : part;
@@ -188,7 +290,7 @@ export class AssetsExplorerComponent {
         let childNode = nodeMap.get(currentPath);
         if (!childNode) {
           childNode = {
-            id: currentPath, // Use path as ID for folders
+            id: currentPath,
             name: part,
             type: 'folder',
             virtualPath: currentPath,
@@ -201,7 +303,6 @@ export class AssetsExplorerComponent {
         parent = childNode;
       }
 
-      // Create file node
       const fileNode: IAsset = {
         id: asset.id,
         name: asset.filename,
@@ -209,11 +310,11 @@ export class AssetsExplorerComponent {
         virtualPath: asset.virtual_path,
         projectId: project.id
       };
+      
       parent.children!.push(fileNode);
       nodeMap.set(asset.virtual_path, fileNode);
     });
 
-    // Sort all children recursively
     const sortChildren = (node: IAsset) => {
       if (node.children) {
         node.children.sort((a, b) => {
@@ -230,7 +331,6 @@ export class AssetsExplorerComponent {
   }
 
   private mapAssetType(type: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene'): string {
-    // This can be expanded if specific icons/logic are needed per type
     return type;
   }
 }

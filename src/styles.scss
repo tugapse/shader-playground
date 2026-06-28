@@ -9,14 +9,9 @@ body {
   font-weight: 500;
   box-sizing: border-box;
   background-color: var(--global-background-color);
-}
-
-h5,
-h4,
-h3,
-h2,
-h1 {
-  margin: 4px 2px;
+  width: 100vw;
+  height: 100vh;
+  overflow: clip;
 }
 
 .no-select {

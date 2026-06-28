@@ -17,6 +17,13 @@
         "htmlWhitespaceSensitivity": "ignore",
         "bracketSameLine": false
       }
+    }, {
+      "files": "*.ts",
+      "options": {
+        "parser": "angular",
+        "htmlWhitespaceSensitivity": "ignore",
+        "bracketSameLine": false
+      }
     }
   ]
 }

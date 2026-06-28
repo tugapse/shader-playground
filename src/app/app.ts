@@ -31,13 +31,14 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
+import { AssetsExplorerComponent } from "@editor/components/asset-explorer/assets-explorer.component";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
   standalone: true,
-  imports: [RouterModule, ConfirmationModalComponent],
+  imports: [RouterModule, ConfirmationModalComponent, AssetsExplorerComponent],
 })
 export class App implements OnDestroy {
   private gl!: WebGL2RenderingContext;

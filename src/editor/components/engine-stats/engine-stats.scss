@@ -1,7 +1,12 @@
 .engine-stats-panel {
   position: absolute;
-  top: 40px;
-  right: 40px;
+  left:0;
+  top:30px;
+  transform: translateX(calc(50vw - 140px));
+  opacity: 0.5;
+  &:hover {
+    opacity: 1;
+  }
   
   /* Using your theme variables */
   background-color: var(--editor-panel-background-10);
@@ -12,9 +17,8 @@
   padding: 8px 12px;
   border-radius: 4px;
   min-width: 140px;
-  z-index: 1;
-  pointer-events: none; /* Let clicks pass through to the canvas */
-  user-select: none;
+  z-index: 10;
+
   
   /* Use a monospaced font or tabular numbers so the width doesn't jitter */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

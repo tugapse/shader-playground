@@ -48,6 +48,7 @@ export class MovableDirective implements OnInit, OnDestroy {
    * a default resize handle will be created.
    */
   @Input() resizeHandleId?: string;
+  @Input() showResize = true;
 
   private isDragging = signal(false);
   private startDragX = signal(0);
@@ -87,7 +88,7 @@ export class MovableDirective implements OnInit, OnDestroy {
       }
     }
 
-    if (!foundResizeHandle) {
+    if (!foundResizeHandle && this.showResize) {
       const defaultResizeId = this.el.nativeElement.id
         ? `${this.el.nativeElement.id}-default-resize-handle`
         : `movable-resize-handle-${crypto.randomUUID()}`;

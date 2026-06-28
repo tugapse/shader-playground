@@ -1,5 +1,5 @@
 :host {
-
+  z-index: 15;
   .inspector {
     display: flex;
     height: 100%;
@@ -20,14 +20,13 @@
     overflow-y: scroll;
   }
 
-
   .inspector .footer {
     display: flex;
     position: sticky;
     margin-top: auto;
     bottom: 0;
     padding: 10px;
-    border-top:  var(--editor-panel-border);
+    border-top: var(--editor-panel-border);
     background: var(--editor-panel-background-10);
   }
 

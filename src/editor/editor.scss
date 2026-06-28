@@ -15,36 +15,21 @@
 .container {
   display: flex;
   width: 100%;
-  height: calc(100% - 32px);
-}
-
-.container .canvas-info{
-  cursor: pointer;
-  position: fixed;
-  padding: 12px;
-  border-radius: 12px;
-  background-color: rgba(0, 0, 0, 0.486);
-  left:50vw;
-  margin-top: 10px;
-}
-.container .canvas.fullscreen{
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  position:fixed;
-}
-
-// Left Sidebar styling
-.sidebar {
-  width: 280px;
-  min-width: 280px;
-  background-color: var(--editor-panel-background);
-  border-right: var(--editor-panel-border);
-  box-shadow: var(--editor-panel-box-shadow);
-  flex-direction: column;
   height: 100%;
 }
+
+
+
+// // Left Sidebar styling
+// .sidebar {
+//   width: 280px;
+//   min-width: 280px;
+//   background-color: var(--editor-panel-background);
+//   border-right: var(--editor-panel-border);
+//   box-shadow: var(--editor-panel-box-shadow);
+//   flex-direction: column;
+//   height: 100%;
+// }
 
 .toast-notification {
   position: fixed;

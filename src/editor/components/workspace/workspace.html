@@ -1,0 +1,37 @@
+<div class="workspace-layout">
+  @if (showLeft) {
+    <aside class="panel" [style.width.px]="leftWidth">
+      <ng-content select="[leftSidebar]"></ng-content>
+    </aside>
+    <div
+      class="resizer vertical"
+      (mousedown)="startResize('left', $event)"
+    ></div>
+  }
+
+  <section class="center-stack">
+    <div class="main-panel">
+      <ng-content select="[main]"></ng-content>
+    </div>
+
+    @if (showFooter) {
+      <div
+        class="resizer horizontal"
+        (mousedown)="startResize('footer', $event)"
+      ></div>
+      <footer class="panel" [style.height.px]="footerHeight">
+        <ng-content select="[footer]"></ng-content>
+      </footer>
+    }
+  </section>
+
+  @if (showRight) {
+    <div
+      class="resizer vertical"
+      (mousedown)="startResize('right', $event)"
+    ></div>
+    <aside class="panel" [style.width.px]="rightWidth">
+      <ng-content select="[rightSidebar]"></ng-content>
+    </aside>
+  }
+</div>

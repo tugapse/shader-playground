@@ -1,7 +1,18 @@
-<div class="engine-stats-panel" *ngIf="stats">
-  <div class="stat-row fps-row">
+<div
+  class="engine-stats-panel"
+  appMovable
+  movableHandleId="header"
+  [showResize]="false"
+  *ngIf="stats"
+>
+  <div id="header" class="stat-row fps-row">
     <span class="label">FPS</span>
     <span class="value" [class.warning]="stats.fps < 50">{{ stats.fps }}</span>
+    <app-icon
+      iconName="fa-close"
+      [isButton]="true"
+      (click)="closeRequested.emit()"
+    ></app-icon>
   </div>
 
   <div class="stat-row">

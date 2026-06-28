@@ -1,0 +1,29 @@
+<div
+  class="menu-item-container"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <button
+    class="menu-button"
+    [ngClass]="{ 'root-item': isRoot, active: isOpen }"
+    (click)="onItemClickHandler(item)"
+  >
+    <span class="label">{{ item.label }}</span>
+
+    @if (!isRoot && item.items && item.items.length > 0) {
+      <span class="chevron">▶</span>
+    }
+  </button>
+
+  @if (item.items && item.items.length > 0 && isOpen) {
+    <div class="submenu" [ngClass]="isRoot ? 'dropdown' : 'flyout'">
+      @for (child of item.items; track child.id) {
+        <app-menu-item
+          [item]="child"
+          [isRoot]="false"
+          (onItemClick)="onItemClickHandler($event)"
+        ></app-menu-item>
+      }
+    </div>
+  }
+</div>

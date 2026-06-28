@@ -20,10 +20,14 @@ import { AssetService } from 'src/app/api/services/asset.service';
 import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
 import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
 import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
+import { AssetsExplorerComponent } from './components/asset-explorer/assets-explorer.component';
 import { Canvas, EngineStats } from './components/canvas/canvas';
+import { EngineStatsComponent } from './components/engine-stats/engine-stats';
+import { MenuItem, MenuItemComponent } from './components/menu-item/menu-item';
 import { SceneTree } from './components/scene-tree/scene-tree';
 import { TopBar } from './components/top-bar/top-bar';
 import { AssetExplorerWindow } from './components/window/window';
+import { WorkspaceComponent } from './components/workspace/workspace';
 import { EditorInpector } from './inspectors/inpector-window/inpector';
 import { IEditorSettings } from './interfaces/editor-settings';
 import { EditorStateService } from './services/editor-state.service';
@@ -31,12 +35,6 @@ import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
-import { DragHandleDirective } from './directives/mouse-drag.directive';
-import { MovableDirective } from './directives/moveable.directive';
-import { EngineStatsComponent } from './components/engine-stats/engine-stats';
-import { Icon } from "src/app/components/icon/icon";
-import { AddBehaviourMenuComponent } from "./components/add-behaviour-menu/add-behaviour-menu";
-import { EntityInspector } from "./inspectors/entity-inspector/entity-inspector";
 
 @Component({
   selector: 'app-editor',
@@ -47,12 +45,12 @@ import { EntityInspector } from "./inspectors/entity-inspector/entity-inspector"
     TopBar,
     SceneTree,
     AssetExplorerWindow,
-    MovableDirective,
     EngineStatsComponent,
-    Icon,
-    AddBehaviourMenuComponent,
-    EntityInspector
-],
+
+    AssetsExplorerComponent,
+    WorkspaceComponent,
+    MenuItemComponent,
+  ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
 })
@@ -76,6 +74,12 @@ export class Editor implements OnDestroy, AfterViewInit {
   private settings!: IEditorSettings;
   private destroy$ = new Subject<void>();
 
+  isLeftVisible: boolean = true;
+  isRightVisible: boolean = true;
+  isFooterVisible: boolean = true;
+  isEngineStatsVisible: boolean = false;
+  menuItems: MenuItem[] = [];
+
   constructor(
     protected editorService: EditorService,
     protected sceneTreeService: SceneTreeService,
@@ -89,7 +93,53 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+    this.menuItems.push({
+      id: 'view',
+      label: 'View',
+      items: [
+        {
+          id: 'windows',
+          label: 'Windows',
+          items: [{ id: 'engineStats', label: 'Engine Stats' }],
+        },
+        {
+          id: 'panels',
+          label: 'Panels',
+          items: [
+            { id: 'leftSidebar', label: 'Left Sidebar' },
+            { id: 'rightSidebar', label: 'Right Sidebar' },
+            { id: 'footer', label: 'Footer' },
+          ],
+        },
+      ],
+    });
+    this.menuItems.push({ id: 'edit', label: 'Edit' });
+    this.menuItems.push({ id: 'help', label: 'Help' });
+    this.menuItems.push({ id: 'settings', label: 'Settings' });
+  }
 
+  onMenuItemClick(_t4: MenuItem) {
+    console.debug(_t4);
+    switch (_t4.id) {
+      case 'leftSidebar':
+        this.isLeftVisible = !this.isLeftVisible;
+        this.editorService.requestCanvasResize();
+        break;
+      case 'rightSidebar':
+        this.isRightVisible = !this.isRightVisible;
+        this.editorService.requestCanvasResize();
+        break;
+      case 'footer':
+        this.isFooterVisible = !this.isFooterVisible;
+        this.editorService.requestCanvasResize();
+        break;
+        case 'engineStats':
+        this.isEngineStatsVisible = !this.isEngineStatsVisible;
+        break;
+     
+      default:
+        break;
+    }
   }
 
   ngAfterViewInit(): void {

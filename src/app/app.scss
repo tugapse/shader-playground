@@ -1,3 +1,9 @@
 // Container for the entire page
 
 
+:host{
+    width: 100vw;
+    height: 100vh;
+    overflow: clip;
+    
+}

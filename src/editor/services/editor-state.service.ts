@@ -22,14 +22,14 @@ export class EditorStateService {
 
   public setSelectedAsset(asset: IAsset | null): void {
     this.selectedAsset.set(asset);
-    if (asset && asset.type !== 'folder') {
-      if (!this.openedFiles().find(f => f.id === asset.id)) {
-        this.addOpenedFile(asset);
-      }
-      this.setCentralView('code-editor');
-    } else if (!asset) {
-      this.setCentralView('canvas');
-    }
+    // if (asset && asset.type !== 'folder') {
+    //   if (!this.openedFiles().find(f => f.id === asset.id)) {
+    //     this.addOpenedFile(asset);
+    //   }
+    //   this.setCentralView('code-editor');
+    // } else if (!asset) {
+    //   this.setCentralView('canvas');
+    // }
   }
 
   public setOpenedFiles(files: IAsset[]): void {

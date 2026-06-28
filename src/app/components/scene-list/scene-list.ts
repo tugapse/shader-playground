@@ -77,7 +77,7 @@ export class SceneList implements OnChanges {
     sceneObject.name = sceneName;
 
     
-    const virtualPath = `/${sceneName}`;
+    const virtualPath = `/Scenes/${sceneName}`;
     const sceneContent = JSON.stringify(sceneObject.toJsonObject());
     const sceneFile = new File([sceneContent], sceneName, { type: 'application/json' });
 
