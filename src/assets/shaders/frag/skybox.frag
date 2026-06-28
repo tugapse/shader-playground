@@ -70,16 +70,28 @@ vec3 drawMoon(vec3 currentSkyColor, vec3 viewDir);
 void main() {
     vec3 viewDir = normalize(v_viewDirection);
 
-    float y = viewDir.y;
-    vec3 gradientColor = vec3(0.0);
+    // 1. Sample the background cubemap
+    vec4 sampledTexColor = texture(u_mainTex, viewDir);
+    
+    // 2. Convert from sRGB to Linear Space (Gamma Correction In)
+    vec3 linearTexColor = pow(sampledTexColor.rgb + 0.0001, vec3(2.2));
+    vec3 linearMatColor = pow(u_matColor.rgb + 0.0001, vec3(2.2));
+    vec3 baseTexColor = linearTexColor * linearMatColor;
 
+    // 3. Calculate Procedural Sky Gradient
+    float y = viewDir.y;
     float absY = abs(y);
     float p = pow(absY, u_exponent);
     vec3 targetColor = (y > 0.0) ? u_skyColor.rgb : u_groundColor.rgb;
-    gradientColor = mix(u_horizonColor.rgb, targetColor, p);
+    vec3 gradientColor = mix(u_horizonColor.rgb, targetColor, p);
 
-    vec3 finalColor = gradientColor;
+    // 4. Blend the Texture and the Procedural Gradient
+    // Multiplying them tints the cubemap with your procedural sky colors.
+    // (If you want the texture to completely overwrite the sky gradient, 
+    // change this to: vec3 finalColor = mix(gradientColor, baseTexColor, u_matColor.a);)
+    vec3 finalColor = gradientColor * baseTexColor;
 
+    // 5. Apply Procedural Elements
     if(u_useStars == 1 && u_sunDirection.y < 0.0){
        finalColor = drawStars(finalColor, viewDir);
     }
@@ -97,7 +109,10 @@ void main() {
         finalColor = drawMoon(finalColor, viewDir);
     }
 
-    fragColor = vec4(clamp(finalColor, 0.0, 1.0), 1.0);
+    // 6. Gamma Correction (Linear back to sRGB Out)
+    vec3 gammaCorrectedRGB = pow(finalColor, vec3(1.0 / 2.2));
+
+    fragColor = vec4(clamp(gammaCorrectedRGB, 0.0, 1.0), 1.0);
 }
 
 // --- RENDERING SUBSYSTEM IMPLEMENTATIONS ---

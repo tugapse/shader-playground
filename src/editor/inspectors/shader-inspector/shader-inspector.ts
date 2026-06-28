@@ -112,7 +112,7 @@ export class ShaderInspector extends ObjectInspector {
   onShaderSelected(shaderIndex: number, $event: DropdownItem) {
     const shaderKey = ['fragUri', 'vertexUri'][shaderIndex];
     this._shader[shaderKey] = $event.value;
-    debugger;
+    
     this._shader.recompile();
   }
 }

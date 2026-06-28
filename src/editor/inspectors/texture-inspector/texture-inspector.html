@@ -1,6 +1,8 @@
 @if (_selectedObject) {
   <editor-inpector-toggle-panel
-    [title]="_selectedObject.property.name || 'Material'"
+    [title]="
+      _selectedObject.key.capitalize() + ' ' + _selectedObject.property.name
+    "
     [collapsed]="true"
   >
     @if (texture) {

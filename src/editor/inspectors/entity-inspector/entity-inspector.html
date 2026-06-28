@@ -76,7 +76,10 @@
       @for (behaviour of entity.behaviours; track $index) {
         <editor-behaviour-inspector
           [behaviour]="behaviour"
-          [label]="behaviour.name || behaviour.className.capitalize()"
+          [label]="
+            behaviour.className.capitalize() +
+            (behaviour.name ? ': ' + behaviour.name : '')
+          "
         ></editor-behaviour-inspector>
       }
     }

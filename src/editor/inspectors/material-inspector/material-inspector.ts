@@ -25,7 +25,7 @@ export class MaterialInspector extends ObjectInspector {
     this._material = value;
     this.loadProperties();
   }
-
+s
   _material!: ColorMaterial;
 
   protected override loadProperties(): void {
@@ -35,11 +35,15 @@ export class MaterialInspector extends ObjectInspector {
     }
 
     const object = this._selectedObject.property;
-    this._properties = Object.keys(object)
+    const properties = Object.keys(object)
       .filter((key) => this.isPropertyValid(key))
       .map((key) => super.createPropertyViewModel(key, object[key]))
       .filter((p) => !!p.key);
-      debugger
+    const textures = properties.filter((p) => p.type === 'texture');
+    const others = properties.filter((p) => p.type !== 'texture');
+    this._properties = [...textures, ...others];
+
+      
   }
 
   onDefaultChanged(

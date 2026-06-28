@@ -135,7 +135,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
       this._worldInverseTransposeMatrixUniformLocation = this._gl.getUniformLocation(this.shader._shaderProgram, ShaderUniformsEnum.U_WORLD_INVERSE_TRANSPOSE_MATRIX);
       this._tangentAttributeLocation = this._gl.getAttribLocation(this.shader._shaderProgram, ShaderUniformsEnum.A_TANGENT);
       this._bitangentAttributeLocation = this._gl.getAttribLocation(this.shader._shaderProgram, ShaderUniformsEnum.A_BITANGENT);
-      debugger
+      
     }
   }
 
@@ -188,7 +188,7 @@ export class MeshRendererBehaviour extends RendererBehaviour {
     this.bindMap(material.roughnessTex, this._roughnessMapUniformLocation, 4, 'white');
     this.bindMap(material.aoTex, this._aoMapUniformLocation, 5, 'white');
     this.bindMap(material.emissiveTex, this._emissiveMapUniformLocation, 6, 'black');
-    debugger
+    
   }
 
   protected setLightInformation(): void {

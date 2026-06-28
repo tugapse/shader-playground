@@ -117,7 +117,7 @@ throw new Error('Method not implemented.');
 
   private mapProperty(entity: GlEntity, key: string) : ITargetProperty {
     const isEnum = !!this._enums[key];
-    debugger
+    
     const type = isEnum ? 'enum' : this.getObjectType(entity[key]);
     const property = entity[key];
 

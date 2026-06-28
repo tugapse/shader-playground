@@ -35,8 +35,8 @@ export class SkyboxShader extends Shader {
   public declare material: SkyboxMaterial;
 
   public sun = {
-    useSun:true,
-    sunDirection: new Vector3(0, 1, 0),
+    useSun:false,
+    sunDirection: new Vector3(0, 0.3, -10),
     sunColor: new Color(1, 1, 1, 1),
     sunSize: 0.999,
     sunFalloff: 0.03,
@@ -44,7 +44,7 @@ export class SkyboxShader extends Shader {
   }
 
   public moon = {
-    useMoon:true,
+    useMoon:false,
     moonDirection: new Vector3(0, -1, 0),
     moonColor: new Color(0.8, 0.9, 1.0, 1.0), // Pale bluish-white
     moonSize: 0.998,     // Slightly smaller than the sun
@@ -57,7 +57,7 @@ export class SkyboxShader extends Shader {
   }
 
   clouds = {
-    useClouds:true,
+    useClouds:false,
     cloudSpeed: 0.1,
     cloudRepetition: 0,
     cloudTiling: 0.4,
@@ -67,7 +67,7 @@ export class SkyboxShader extends Shader {
   }
 
   stars = {
-    useStars:true,
+    useStars:false,
     starIntensity: 3.0,
     starScale: 200.0,
     starSparsity: 34.0,

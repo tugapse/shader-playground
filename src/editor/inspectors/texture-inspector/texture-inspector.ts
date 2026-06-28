@@ -15,7 +15,11 @@ import { DefaultInspector } from '../default-inspector/default-inspector';
 })
 export class TextureInspector extends ObjectInspector {
 
-  @Input() texture!: Texture;
+  get texture() {
+    return this._selectedObject?.property as Texture;
+  }
+
+  
 
   constructor() {
     super();
@@ -32,5 +36,13 @@ export class TextureInspector extends ObjectInspector {
   onDefaultChanged(
     targetProperty: ITargetProperty,
     $event: string | number | boolean | NumberRange | Color,
-  ) {}
+  ) {
+    if ($event instanceof Event) return;
+    this.texture[targetProperty.key] = $event;
+    if( Object.keys(this._enums).includes( targetProperty.key) ){
+      this.texture.rebuild()
+    }
+  }
+
+
 }

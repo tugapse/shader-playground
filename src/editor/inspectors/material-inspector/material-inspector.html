@@ -7,9 +7,8 @@
       @switch (item.type) {
         @case ("texture") {
           <editor-texture-inspector
-            [label]="'coiso'"
+            [label]="item.key.capitalize() + ' ' + item.value.name"
             [isChild]="true"
-            [texture]="item.value"
             [targetObject]="{
               key: item.key,
               type: item.type,

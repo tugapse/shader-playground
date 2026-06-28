@@ -32,7 +32,7 @@ export class VectorInspector {
   onVectorChanged(index: number, value: any) {
     if (value instanceof Event) return;
     this.vector.vector[index] = +(+value).toFixed(3);
-    debugger;
+    
     this.vectorChanged.emit(this.vector);
   }
 }
