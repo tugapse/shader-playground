@@ -35,6 +35,7 @@ import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
+import { SoundMixerComponent } from './components/sound-mixer/sound-mixer';
 
 @Component({
   selector: 'app-editor',
@@ -100,7 +101,10 @@ export class Editor implements OnDestroy, AfterViewInit {
         {
           id: 'windows',
           label: 'Windows',
-          items: [{ id: 'engineStats', label: 'Engine Stats' }],
+          items: [
+            { id: 'engineStats', label: 'Engine Stats' },
+            { id: 'mixer', label: 'Sounds Mixer' },
+          ],
         },
         {
           id: 'panels',
@@ -136,6 +140,13 @@ export class Editor implements OnDestroy, AfterViewInit {
       case 'engineStats':
         this.isEngineStatsVisible = !this.isEngineStatsVisible;
         break;
+      case 'mixer':
+        this.windowService.open({
+          component: SoundMixerComponent,
+          "title": "Sounds Mixer",
+          iconName: 'fa-sound'
+        })
+        break;
 
       default:
         break;
@@ -159,9 +170,10 @@ export class Editor implements OnDestroy, AfterViewInit {
           .subscribe((textContent) => {
             const sceneData = JSON.parse(textContent) as JsonSerializedData;
 
-            SceneManager.loadScene(this.gl, sceneData).then((scene) =>
-              this.editorService.loadScene(scene),
-            );
+            SceneManager.loadScene(this.gl, sceneData).then((scene) => {
+              this.editorService.loadScene(scene);
+              this.editorService.requestCanvasResize();
+            });
           });
       }
     } else {

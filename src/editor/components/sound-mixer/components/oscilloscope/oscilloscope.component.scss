@@ -1,0 +1,19 @@
+.oscilloscope-container {
+  position: relative;
+  height: 100%;
+  background-color: var(--editor-panel-text-input-background);
+  border: var(--editor-panel-border);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4);
+
+  /* CSS variables exposed for the canvas 2D context drawing operations */
+  --canvas-bg: var(--editor-panel-text-input-background);
+  --canvas-stroke: var(--editor-panel-H-color);
+}
+
+.oscilloscope-canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}

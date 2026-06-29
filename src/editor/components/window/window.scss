@@ -8,14 +8,18 @@
     flex-direction: column;
     min-width: 200px;
     min-height: 100px;
-    width: 500px;
-    height: 300px;
+    width: 80vw;
+    height: 80vh;
+    max-width: 100%;
+    max-height: 100%;
     box-sizing: border-box;
     background: var(--editor-panel-background);
     border: var(--editor-panel-border);
     box-shadow: var(--editor-panel-box-shadow);
     color: var(--editor-panel-color);
     z-index: 10;
+    transform: translate(10vw,10vh);
+
 
     &.focused {
       border: var(--editor-panel-border);
@@ -50,6 +54,13 @@
       color: var(--editor-icon-button-hover-color);
     }
   }
+  
+  .window .content{
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+    flex-grow: 1;
+  }
 
   .window .footer {
     display: flex;
@@ -59,6 +70,7 @@
     padding: 10px;
     border-top: var(--editor-panel-border);
     background: var(--editor-panel-background-10);
+    z-index: 20;
   }
 
   .window .footer span {
