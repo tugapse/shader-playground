@@ -94,10 +94,11 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+    this.menuItems.push({ id: 'edit', label: 'Edit' });
     this.menuItems.push({
       id: 'view',
       label: 'View',
-      items: [
+      items: [ 
         {
           id: 'windows',
           label: 'Windows',
@@ -117,9 +118,6 @@ export class Editor implements OnDestroy, AfterViewInit {
         },
       ],
     });
-    this.menuItems.push({ id: 'edit', label: 'Edit' });
-    this.menuItems.push({ id: 'help', label: 'Help' });
-    this.menuItems.push({ id: 'settings', label: 'Settings' });
   }
 
   onMenuItemClick(menuItem: MenuItem) {

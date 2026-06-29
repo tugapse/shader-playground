@@ -4,6 +4,13 @@ import { PresetListComponent } from './components/preset-list/preset-list.compon
 import { OscilloscopeComponent } from './components/oscilloscope/oscilloscope.component';
 import { SoundDesignerComponent } from '../sound-designer/sound-designer.component';
 import { AudioService } from '../../services/audio.service';
+import { AudioCache } from '@engine/audio/audio-cache';
+import { AudioEngine } from '@engine/audio/audio-engine';
+import { SequencerClock } from '@engine/audio/sequencer-clock';
+import { VoiceFactory } from '@engine/audio/voice-factory';
+
+// Import decoupled framework-agnostic audio engine modules
+
 
 @Component({
   selector: 'editor-sound-mixer',
@@ -64,19 +71,17 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
   isPaused = false;
   private playbackTime = 0; 
   private playStartTime = 0; 
-  private activeNodes: (OscillatorNode | AudioBufferSourceNode)[] = []; 
+  private activeNodes: any[] = []; 
 
   private dragPayload: { type: 'new' | 'existing', data: any } | null = null;
-  private audioCtx: AudioContext | null = null;
-  analyser: AnalyserNode | null = null;
-  private masterGain: GainNode | null = null;
+  
+  // Decoupled Audio Engine References
+  private engine!: AudioEngine;
+  private cache!: AudioCache;
+  private clock!: SequencerClock;
+  private factory!: VoiceFactory;
   private playheadAnimationId: number | null = null;
-  private cachedReverbIR: AudioBuffer | null = null;
-  private cachedNoiseBuffer: AudioBuffer | null = null;
   private lastFreqByTrack: Record<number, number> = {};
-
-  private sharedReverbBus: ConvolverNode | null = null;
-  private sharedDelayBus: DelayNode | null = null;
 
   timelineWidth = computed(() => {
     const seq = this.sequence();
@@ -95,7 +100,6 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopSequence();
-    if (this.audioCtx) this.audioCtx.close();
   }
 
   gridPattern() { return `linear-gradient(to right, rgba(51, 65, 85, 0.5) 1px, transparent 1px)`; }
@@ -217,6 +221,7 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     this.activeNodes.forEach(node => { try { node.stop(); } catch (e) {} });
     this.activeNodes = [];
     if (this.playheadAnimationId) cancelAnimationFrame(this.playheadAnimationId);
+    if (this.clock) this.clock.stop();
 
     this.playbackTime = time;
     this.updatePlayheadVisual(time);
@@ -236,218 +241,39 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     playhead.style.transform = `translateX(${xPosition}px)`;
   }
 
+  /**
+   * Initializes decoupled core dependencies via the shared Angular bridge service.
+   */
   private initAudio() {
     this.audioService.init();
-    this.audioCtx = this.audioService.getAudioContext();
-    this.analyser = this.audioService.getAnalyserNode();
-    this.masterGain = this.audioService.getMasterGainNode();
 
-    if (this.audioCtx && !this.sharedReverbBus) {
-      this.sharedReverbBus = this.audioCtx.createConvolver();
-      this.sharedReverbBus.buffer = this.getReverbIR(this.audioCtx);
-      this.sharedReverbBus.connect(this.masterGain!);
+    // Bind clean structural references from the shared singleton bridge
+    this.engine = (this.audioService as any).engine || new AudioEngine();
+    const audioCtx = this.engine.getContext();
 
-      this.sharedDelayBus = this.audioCtx.createDelay();
-      this.sharedDelayBus.delayTime.value = 0.25;
-      const delayFeedback = this.audioCtx.createGain();
-      delayFeedback.gain.value = 0.4;
-      
-      this.sharedDelayBus.connect(delayFeedback);
-      delayFeedback.connect(this.sharedDelayBus);
-      this.sharedDelayBus.connect(this.masterGain!);
-    }
-  }
-
-  private getNoiseBuffer(ctx: BaseAudioContext): AudioBuffer {
-    if (this.cachedNoiseBuffer && this.cachedNoiseBuffer.sampleRate === ctx.sampleRate) return this.cachedNoiseBuffer;
-    const bufferSize = ctx.sampleRate * 2.0; 
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    this.cachedNoiseBuffer = buffer;
-    return buffer;
-  }
-
-  private getReverbIR(ctx: BaseAudioContext): AudioBuffer {
-    if (this.cachedReverbIR && this.cachedReverbIR.sampleRate === ctx.sampleRate) return this.cachedReverbIR;
-    const sampleRate = ctx.sampleRate;
-    const length = sampleRate * 2.0; 
-    const impulse = ctx.createBuffer(2, length, sampleRate);
-    const left = impulse.getChannelData(0);
-    const right = impulse.getChannelData(1);
-    for (let i = 0; i < length; i++) {
-      const decayEnvelope = Math.pow(1 - i / length, 3); 
-      left[i] = (Math.random() * 2 - 1) * decayEnvelope;
-      right[i] = (Math.random() * 2 - 1) * decayEnvelope;
-    }
-    this.cachedReverbIR = impulse;
-    return impulse;
-  }
-
-  private makeDistortionCurve(amount: number): Float32Array {
-    const k = amount;
-    const n_samples = 44100;
-    const curve = new Float32Array(n_samples);
-    const deg = Math.PI / 180;
-    for (let i = 0; i < n_samples; ++i) {
-      const x = i * 2 / n_samples - 1;
-      curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
-    }
-    return curve;
-  }
-
-  private buildAudioGraph(
-    note: SynthNote, 
-    globalStartTime: number, 
-    ctx: BaseAudioContext, 
-    destination: AudioNode, 
-    playheadOffset = 0,
-    customReverbBus?: AudioNode,
-    customDelayBus?: AudioNode
-  ) {
-    const noteStart = globalStartTime + Math.max(0, note.startTime - playheadOffset);
-    const isRemainder = note.startTime < playheadOffset;
-    const noteDuration = isRemainder 
-      ? (note.startTime + note.duration - playheadOffset) 
-      : note.duration;
+    this.cache = (this.audioService as any).cache || new AudioCache(audioCtx);
+    this.clock = (this.audioService as any).clock || new SequencerClock(audioCtx);
     
-    if (noteDuration <= 0) return;
-
-    const noteEnd = noteStart + noteDuration;
-    
-    const filter = ctx.createBiquadFilter();
-    const envelopeGain = ctx.createGain();
-    const panner = ctx.createStereoPanner();
-    panner.pan.value = note.pan || 0;
-
-    let source: OscillatorNode | AudioBufferSourceNode;
-
-    if (note.waveform === 'noise') {
-      source = ctx.createBufferSource();
-      source.buffer = this.getNoiseBuffer(ctx);
-      source.loop = true;
-      filter.type = 'highpass'; 
-    } else {
-      source = ctx.createOscillator();
-      source.type = note.waveform;
-      filter.type = 'lowpass';
-      
-      const prevFreq = this.lastFreqByTrack[note.trackIndex];
-      if (note.name === 'Laser FX') {
-        source.frequency.setValueAtTime(note.frequency, noteStart);
-        source.frequency.exponentialRampToValueAtTime(50, noteStart + noteDuration);
-      } else if (note.glideTime > 0 && prevFreq) {
-        source.frequency.setValueAtTime(prevFreq, noteStart);
-        source.frequency.exponentialRampToValueAtTime(note.frequency, noteStart + note.glideTime);
-      } else {
-        source.frequency.value = note.frequency;
-      }
-      this.lastFreqByTrack[note.trackIndex] = note.frequency;
-
-      if (note.lfoDepth > 0) {
-        const lfo = ctx.createOscillator();
-        const lfoGain = ctx.createGain();
-        lfo.type = 'sine';
-        lfo.frequency.value = note.lfoRate;
-        lfoGain.gain.value = note.lfoDepth; 
-        lfo.connect(lfoGain);
-        lfoGain.connect(source.frequency);
-        lfo.start(noteStart);
-        lfo.stop(noteEnd + 0.1);
-        if (ctx instanceof AudioContext) this.activeNodes.push(lfo);
-      }
-    }
-
-    filter.frequency.value = note.cutoff;
-    filter.Q.value = note.name.includes('Bass') ? 10 : 2;
-
-    const attackTime = isRemainder ? 0.01 : (note.name.includes('Pad') ? 0.5 : 0.02);
-    const releaseTime = note.name.includes('Pad') ? 1.0 : 0.1;
-    
-    envelopeGain.gain.setValueAtTime(0, noteStart);
-    envelopeGain.gain.linearRampToValueAtTime(0.8, noteStart + attackTime);
-    envelopeGain.gain.setValueAtTime(0.8, Math.max(noteStart + attackTime, noteEnd - releaseTime));
-    envelopeGain.gain.linearRampToValueAtTime(0.001, noteEnd);
-
-    source.connect(filter);
-    filter.connect(envelopeGain);
-    envelopeGain.connect(panner);
-    panner.connect(destination); 
-
-    const targetReverb = customReverbBus || this.sharedReverbBus;
-    const targetDelay = customDelayBus || this.sharedDelayBus;
-    this.applyEffects(note, panner, destination, ctx, noteStart, noteEnd, targetReverb, targetDelay);
-
-    source.start(noteStart);
-    source.stop(noteEnd + 0.1);
-    if (ctx instanceof AudioContext) this.activeNodes.push(source);
-  }
-
-  private applyEffects(
-    note: SynthNote, 
-    panner: StereoPannerNode, 
-    destination: AudioNode, 
-    ctx: BaseAudioContext, 
-    noteStart: number, 
-    noteEnd: number,
-    reverbBus: AudioNode | null,
-    delayBus: AudioNode | null
-  ) {
-    if (note.delayMix && note.delayMix > 0 && delayBus) {
-      const delaySendGain = ctx.createGain();
-      delaySendGain.gain.value = note.delayMix * 0.6;
-      panner.connect(delaySendGain);
-      delaySendGain.connect(delayBus);
-    }
-
-    if (note.reverbMix && note.reverbMix > 0 && reverbBus) {
-      const reverbSendGain = ctx.createGain();
-      reverbSendGain.gain.value = note.reverbMix * 0.7;
-      panner.connect(reverbSendGain);
-      reverbSendGain.connect(reverbBus);
-    }
-
-    if (note.distortionMix && note.distortionMix > 0) {
-      const shaper = ctx.createWaveShaper();
-      shaper.curve = this.makeDistortionCurve(note.distortionMix * 100); 
-      shaper.oversample = '4x';
-      const distGain = ctx.createGain();
-      distGain.gain.value = note.distortionMix * 0.5; 
-      panner.connect(shaper);
-      shaper.connect(distGain);
-      distGain.connect(destination);
-    }
-
-    if (note.chorusMix && note.chorusMix > 0) {
-      const chorusDelay = ctx.createDelay();
-      chorusDelay.delayTime.value = 0.03; 
-      const chorusLFO = ctx.createOscillator();
-      const chorusLfoGain = ctx.createGain();
-      chorusLFO.frequency.value = 1.5;
-      chorusLfoGain.gain.value = 0.005;
-      
-      chorusLFO.connect(chorusLfoGain);
-      chorusLfoGain.connect(chorusDelay.delayTime);
-      
-      const chorusOut = ctx.createGain();
-      chorusOut.gain.value = note.chorusMix;
-      
-      panner.connect(chorusDelay);
-      chorusDelay.connect(chorusOut);
-      chorusOut.connect(destination);
-      
-      chorusLFO.start(noteStart);
-      chorusLFO.stop(noteEnd + 0.1);
-      if (ctx instanceof AudioContext) this.activeNodes.push(chorusLFO);
-    }
+    this.factory = (this.audioService as any).factory || new VoiceFactory(
+      audioCtx,
+      this.cache,
+      this.engine.getSynthBus(),
+      this.engine.getReverbBus(),
+      this.engine.getDelayBus()
+    );
   }
 
   previewPreset(preset: SynthPreset) {
     this.initAudio();
     this.lastFreqByTrack = {};
-    this.buildAudioGraph({ ...preset, id: 'preview', startTime: 0, trackIndex: 0 }, this.audioCtx!.currentTime, this.audioCtx!, this.masterGain!);
+    
+    const now = this.engine.getContext().currentTime;
+    this.factory.triggerSynthVoice(preset.waveform as OscillatorType, { ...preset, duration: preset.duration }, now);
   }
 
+  /**
+   * Runs the off-thread worker sequencer clock.
+   */
   playSequence() {
     if (this.sequence().length === 0) return;
     this.initAudio();
@@ -458,16 +284,48 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     this.isPaused = false;
     this.lastFreqByTrack = {}; 
     
-    const globalStartTime = this.audioCtx!.currentTime + 0.1; 
+    const ctx = this.engine.getContext();
+    const globalStartTime = ctx.currentTime + 0.05; 
     this.playStartTime = globalStartTime; 
 
     const maxTime = this.sequence().reduce((max, note) => Math.max(max, note.startTime + note.duration), 0);
+    const stepResolution = 4; // Quantize calculations based on 16th notes
+    
+    // Set tempo configurations dynamically
+    this.clock.setBpm(60);
 
-    const sortedSeq = [...this.sequence()].sort((a, b) => a.startTime - b.startTime);
-    sortedSeq.forEach(note => {
-      this.buildAudioGraph(note, globalStartTime, this.audioCtx!, this.masterGain!, this.playbackTime);
+    // Convert current seek translation point to steps to align sequence scheduler
+    const secondsPerBeat = 60.0 / 120;
+    const stepDuration = secondsPerBeat / stepResolution;
+    const startingStep = Math.round(this.playbackTime / stepDuration);
+
+    this.clock.start((tick, schedulerTime, currentStepDuration) => {
+      const activeTick = startingStep + tick;
+      const computedTimelineSeconds = activeTick * currentStepDuration;
+
+      // Find any notes matched exactly to this step
+      const stepNotes = this.sequence().filter(note => {
+        const noteStep = Math.round(note.startTime / currentStepDuration);
+        return noteStep === activeTick;
+      });
+
+      // Delegate synthesis entirely to the Voice Factory
+      stepNotes.forEach(note => {
+        const prevFreq = this.lastFreqByTrack[note.trackIndex];
+        let node: any;
+
+        if (note.waveform === 'noise') {
+          node = this.factory.triggerNoiseVoice(note, schedulerTime);
+        } else {
+          node = this.factory.triggerSynthVoice(note.waveform as OscillatorType, note, schedulerTime, prevFreq);
+        }
+
+        this.lastFreqByTrack[note.trackIndex] = note.frequency;
+        this.activeNodes.push(node);
+      });
     });
 
+    // Run parallel rendering frame animation loop to handle playhead graphics (no audio logic here)
     this.animatePlayhead(globalStartTime, maxTime);
   }
 
@@ -476,9 +334,11 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
 
     this.isPaused = true;
     
-    const elapsed = this.audioCtx!.currentTime - this.playStartTime;
+    const elapsed = this.engine.getContext().currentTime - this.playStartTime;
     this.playbackTime += Math.max(0, elapsed);
 
+    // Halt timing threads and reset dynamic voice pools
+    if (this.clock) this.clock.stop();
     this.activeNodes.forEach(node => { try { node.stop(); } catch (e) {} });
     this.activeNodes = [];
     
@@ -490,6 +350,7 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     this.isPaused = false;
     this.playbackTime = 0;
 
+    if (this.clock) this.clock.stop();
     this.activeNodes.forEach(node => { try { node.stop(); } catch (e) {} });
     this.activeNodes = [];
     
@@ -501,16 +362,12 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
   }
 
   private animatePlayhead(startTime: number, totalDuration: number) {
-    if (!this.playheadRef || !this.audioCtx) return;
-    const playhead = this.playheadRef.nativeElement;
-    playhead.style.display = 'block';
-
     const baseOffset = this.playbackTime;
 
     const update = () => {
       if (!this.isPlaying || this.isPaused) return;
       
-      const elapsed = this.audioCtx!.currentTime - startTime;
+      const elapsed = this.engine.getContext().currentTime - startTime;
       const currentPos = baseOffset + elapsed;
       
       if (currentPos >= totalDuration + 0.2) {
@@ -518,13 +375,12 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
         return;
       }
 
-      const clampedPos = Math.max(0, currentPos);
-      const xPosition = clampedPos * this.pixelsPerSecond();
-      playhead.style.transform = `translateX(${xPosition}px)`;
+      this.playbackTime = Math.max(0, currentPos);
+      this.updatePlayheadVisual(this.playbackTime);
 
       if (this.timelineRef) {
          const container = this.timelineRef.nativeElement;
-         const playheadAbsoluteX = xPosition + this.trackHeaderWidth;
+         const playheadAbsoluteX = (this.playbackTime * this.pixelsPerSecond()) + this.trackHeaderWidth;
          if (playheadAbsoluteX > container.scrollLeft + container.clientWidth - 100) {
             container.scrollLeft = playheadAbsoluteX - container.clientWidth + 150;
          }
@@ -561,6 +417,7 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
       offlineMaster.connect(offlineCompressor);
       offlineCompressor.connect(offlineCtx.destination);
 
+      // Create offline return lines using the VoiceFactory architectural pattern
       const offlineReverb = offlineCtx.createConvolver();
       offlineReverb.buffer = this.getReverbIR(offlineCtx);
       offlineReverb.connect(offlineMaster);
@@ -573,8 +430,26 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
       offlineDelayFb.connect(offlineDelay);
       offlineDelay.connect(offlineMaster);
 
+      // Instantiates local offline factory instances
+      const offlineCache = new AudioCache(offlineCtx as any);
+      const offlineFactory = new VoiceFactory(
+        offlineCtx as any,
+        offlineCache,
+        offlineMaster,
+        offlineReverb,
+        offlineDelay
+      );
+
       const sortedSeq = [...seq].sort((a, b) => a.startTime - b.startTime);
-      sortedSeq.forEach(note => this.buildAudioGraph(note, 0, offlineCtx, offlineMaster, 0, offlineReverb, offlineDelay));
+      sortedSeq.forEach(note => {
+        const prevFreq = this.lastFreqByTrack[note.trackIndex];
+        if (note.waveform === 'noise') {
+          offlineFactory.triggerNoiseVoice(note, note.startTime);
+        } else {
+          offlineFactory.triggerSynthVoice(note.waveform as OscillatorType, note, note.startTime, prevFreq);
+        }
+        this.lastFreqByTrack[note.trackIndex] = note.frequency;
+      });
 
       const renderedBuffer = await offlineCtx.startRendering();
       const wavBlob = this.audioBufferToWav(renderedBuffer);
@@ -594,6 +469,20 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     } finally {
       this.isExporting.set(false);
     }
+  }
+
+  private getReverbIR(ctx: BaseAudioContext): AudioBuffer {
+    const sampleRate = ctx.sampleRate;
+    const length = sampleRate * 2.0; 
+    const impulse = ctx.createBuffer(2, length, sampleRate);
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+    for (let i = 0; i < length; i++) {
+      const decayEnvelope = Math.pow(1 - i / length, 3); 
+      left[i] = (Math.random() * 2 - 1) * decayEnvelope;
+      right[i] = (Math.random() * 2 - 1) * decayEnvelope;
+    }
+    return impulse;
   }
 
   private audioBufferToWav(abuffer: AudioBuffer) {

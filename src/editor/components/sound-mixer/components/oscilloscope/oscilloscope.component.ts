@@ -25,7 +25,7 @@ export class OscilloscopeComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.analyser = this.audioService.getAnalyserNode();
+    this.initAnalyser();
     this.resizeCanvas();
     this.start();
   }
@@ -35,6 +35,16 @@ export class OscilloscopeComponent implements AfterViewInit, OnDestroy {
       cancelAnimationFrame(this.animationId);
     }
     window.removeEventListener('resize', this.resizeCanvas.bind(this));
+  }
+
+  private initAnalyser() {
+    // Attempt to pull the analyser from the decoupled core engine hosted on the service bridge
+    const engine = (this.audioService as any).engine;
+    if (engine) {
+      this.analyser = engine.getAnalyser();
+    } else if (typeof this.audioService.getAnalyserNode === 'function') {
+      this.analyser = this.audioService.getAnalyserNode();
+    }
   }
 
   private resizeCanvas() {

@@ -1,41 +1,44 @@
 import { Injectable } from '@angular/core';
+import { AudioCache } from '@engine/audio/audio-cache';
+import { AudioEngine } from '@engine/audio/audio-engine';
+import { SequencerClock } from '@engine/audio/sequencer-clock';
+import { VoiceFactory } from '@engine/audio/voice-factory';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AudioService {
-  private audioCtx: AudioContext | null = null;
-  private analyser: AnalyserNode | null = null;
-  private masterGain: GainNode | null = null;
-  private compressor: DynamicsCompressorNode | null = null;
+  // Instantiates the pure TypeScript modules
+  public readonly engine = new AudioEngine();
+  public readonly cache = new AudioCache(this.engine.getContext());
+  public readonly clock = new SequencerClock(this.engine.getContext());
+  public readonly factory = new VoiceFactory(
+    this.engine.getContext(),
+    this.cache,
+    this.engine.getSynthBus(),
+    this.engine.getReverbBus(),
+    this.engine.getDelayBus()
+  );
 
-  init() {
-    if (this.audioCtx) {
-      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-      return;
-    }
-
-    this.audioCtx = new AudioContext();
-    this.masterGain = this.audioCtx.createGain();
-    this.masterGain.gain.value = 0.8;
-
-    this.compressor = this.audioCtx.createDynamicsCompressor();
-    this.compressor.threshold.value = -12;
-    this.compressor.knee.value = 30;
-    this.compressor.ratio.value = 12;
-    this.compressor.attack.value = 0.003;
-    this.compressor.release.value = 0.25;
-
-    this.analyser = this.audioCtx.createAnalyser();
-    this.analyser.fftSize = 1024;
-
-    // Connect the shared graph
-    this.masterGain.connect(this.compressor);
-    this.compressor.connect(this.analyser);
-    this.analyser.connect(this.audioCtx.destination);
+  /**
+   * Resumes the suspended context on user gesture.
+   */
+  public init(): void {
+    this.engine.initialize();
   }
 
-  getAudioContext() { return this.audioCtx; }
-  getAnalyserNode() { return this.analyser; }
-  getMasterGainNode() { return this.masterGain; }
+  // --- Backwards Compatibility Getters ---
+
+  public getAudioContext(): AudioContext {
+    return this.engine.getContext();
+  }
+
+  public getAnalyserNode(): AnalyserNode {
+    return this.engine.getAnalyser();
+  }
+
+  public getMasterGainNode(): GainNode {
+    return this.engine.getSynthBus();
+  }
 }

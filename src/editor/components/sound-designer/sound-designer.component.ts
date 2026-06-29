@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { SynthPreset } from '../../models/synth.types';
+import { SynthPreset } from '@editor/models/synth.types';
 
 @Component({
   selector: 'app-sound-designer',

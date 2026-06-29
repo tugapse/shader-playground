@@ -31,7 +31,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
-import { AssetsExplorerComponent } from "@editor/components/asset-explorer/assets-explorer.component";
+import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
+import { AudioCache } from '@engine/audio/audio-cache';
+import { AudioEngineDiagnostics } from '@engine/audio/audio-dianostics';
+import { AudioEngine } from '@engine/audio/audio-engine';
+import { SequencerClock } from '@engine/audio/sequencer-clock';
+import { VoiceFactory } from '@engine/audio/voice-factory';
 
 @Component({
   selector: 'app-root',
@@ -99,6 +104,22 @@ export class App implements OnDestroy {
     this.scene = scene;
     this.scene.initialize();
     this.setupCamera();
+        const engine = new AudioEngine();
+    const cache = new AudioCache(engine.getContext() || new AudioContext());
+    const clock = new SequencerClock(engine.getContext() || new AudioContext());
+
+    // Connect voice factory to output to the Synth sub-bus
+    const factory = new VoiceFactory(
+      engine.getContext() || new AudioContext(),
+      cache,
+      engine.getSynthBus(), // Procedural synth bus inside the main engine
+      engine.getReverbBus(),
+      engine.getDelayBus(),
+    );
+
+    // 2. Set up the tester
+    const testSuite = new AudioEngineDiagnostics(engine, cache, clock, factory);
+    testSuite.runDiagnosticSuite();
   }
 
   private setupCamera() {
@@ -157,7 +178,7 @@ export class App implements OnDestroy {
 
     const renderer = new MeshRendererBehaviour(this.gl);
     renderer.castShadows = false;
-    
+
     material.mainTex = await EngineCache.getTexture2D(
       'assets/images/wood-texture.jpg',
       this.gl,
@@ -170,10 +191,10 @@ export class App implements OnDestroy {
     renderer.castShadows = false;
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
- 
+
     const planeEntity = new GlEntity('Floor');
     planeEntity.transform.scale(10, 0.2, 10);
-    planeEntity.transform.translate(0,-1,0);
+    planeEntity.transform.translate(0, -1, 0);
     planeEntity.addBehaviour(renderer);
     scene.addEntity(planeEntity);
     // material.mainTex = await EngineCache.getWhiteTexture(this.gl);
@@ -192,7 +213,7 @@ export class App implements OnDestroy {
     const spotLight = new SpotLight('Spot light 1');
     spotLight.color = Colors.azure;
 
-    scene.addEntity(new Light("Ambient light"));
+    scene.addEntity(new Light('Ambient light'));
     // scene.addEntity(plight);
     // scene.addEntity(spotLight);
     scene.addEntity(dlight);
@@ -260,7 +281,7 @@ export class App implements OnDestroy {
       meshRenderer.shader =
         shader || new LitShader(this.gl, material as LitMaterial);
     }
-  
+
     entity.addBehaviour(meshRenderer);
 
     return entity;
@@ -275,9 +296,8 @@ export class App implements OnDestroy {
     renderer.shader = shader;
     renderer.mesh.meshData = cubePrimitive;
 
-
     // const skyboxTextures = {
-    //   right: "assets/images/skybox/blue/right.jpeg",  
+    //   right: "assets/images/skybox/blue/right.jpeg",
     //   left: "assets/images/skybox/blue/left.jpeg",
     //   up: "assets/images/skybox/blue/top.jpeg",
     //   bottom: "assets/images/skybox/blue/bottom.jpeg",
@@ -289,7 +309,7 @@ export class App implements OnDestroy {
     // material.mainTex = texture;
 
     material.mainTex = await EngineCache.getWhiteTextureCube(this.gl);
-    const skyboxEntity = new GlEntity("Skybox");
+    const skyboxEntity = new GlEntity('Skybox');
 
     skyboxEntity.addBehaviour(renderer);
     scene.addEntity(skyboxEntity);
