@@ -44,7 +44,7 @@ To run the Omega Editor locally, you must also have the Omega API running.
 Clone and run the API service:
 
 ```bash
-git clone [https://github.com/tugapse/omega-api.git](https://github.com/tugapse/omega-api.git)
+git clone https://github.com/tugapse/omega-api.git
 # Follow the setup instructions in the omega-api repository
 ```
 
@@ -52,7 +52,7 @@ git clone [https://github.com/tugapse/omega-api.git](https://github.com/tugapse/
 Once the API is running, clone this repository and install the dependencies (this will automatically pull in the `omega-game-engine` npm package).
 
 ```bash
-git clone [https://github.com/tugapse/omega-editor.git](https://github.com/tugapse/omega-editor.git)
+git clone https://github.com/tugapse/omega-editor.git
 cd omega-editor
 npm install
 ng serve
