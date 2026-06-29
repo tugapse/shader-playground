@@ -31,7 +31,6 @@ import { TransformInspector } from '../transform-inspector/transform-inspector';
   imports: [
     InpectorTogglePanel,
     TransformInspector,
-    ColorInspector,
     ObjectInspector,
     BehaviourInspector,
     Toggle,

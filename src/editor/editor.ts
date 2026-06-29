@@ -35,6 +35,7 @@ import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
+import { SoundMixerComponent } from './components/sound-mixer/sound-mixer';
 
 @Component({
   selector: 'app-editor',
@@ -93,14 +94,18 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+    this.menuItems.push({ id: 'edit', label: 'Edit' });
     this.menuItems.push({
       id: 'view',
       label: 'View',
-      items: [
+      items: [ 
         {
           id: 'windows',
           label: 'Windows',
-          items: [{ id: 'engineStats', label: 'Engine Stats' }],
+          items: [
+            { id: 'engineStats', label: 'Engine Stats' },
+            { id: 'mixer', label: 'Sounds Mixer' },
+          ],
         },
         {
           id: 'panels',
@@ -113,9 +118,6 @@ export class Editor implements OnDestroy, AfterViewInit {
         },
       ],
     });
-    this.menuItems.push({ id: 'edit', label: 'Edit' });
-    this.menuItems.push({ id: 'help', label: 'Help' });
-    this.menuItems.push({ id: 'settings', label: 'Settings' });
   }
 
   onMenuItemClick(menuItem: MenuItem) {
@@ -135,6 +137,13 @@ export class Editor implements OnDestroy, AfterViewInit {
         break;
       case 'engineStats':
         this.isEngineStatsVisible = !this.isEngineStatsVisible;
+        break;
+      case 'mixer':
+        this.windowService.open({
+          component: SoundMixerComponent,
+          "title": "Sounds Mixer",
+          iconName: 'fa-sound'
+        })
         break;
 
       default:
@@ -161,6 +170,7 @@ export class Editor implements OnDestroy, AfterViewInit {
 
             SceneManager.loadScene(this.gl, sceneData).then((scene) => {
               this.editorService.loadScene(scene);
+              this.editorService.requestCanvasResize();
             });
           });
       }

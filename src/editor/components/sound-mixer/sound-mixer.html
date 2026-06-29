@@ -1,0 +1,198 @@
+<div class="mixer-layout">
+  <aside class="mixer-sidebar">
+    <div class="sidebar-brand">
+      <h1 class="brand-title">Omega <span class="brand-tag">Mixer</span></h1>
+      <p class="brand-subtitle">Drag sounds to the timeline</p>
+    </div>
+
+    <app-preset-list
+      [presets]="presets()"
+      (dragStart)="onDragStartPreset($event.event, $event.preset)"
+      (preview)="previewPreset($event)"
+      (edit)="openDesigner($event)"
+      (add)="openDesigner()"
+    ></app-preset-list>
+
+    <app-oscilloscope></app-oscilloscope>
+  </aside>
+
+  <main class="mixer-workspace">
+    <header class="workspace-toolbar">
+      <div class="toolbar-group-left">
+        <button
+          (click)="playSequence()"
+          class="btn-transport btn-play"
+          [class.active-ring]="isPlaying && !isPaused"
+        >
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg> Play
+        </button>
+        <button
+          (click)="pauseSequence()"
+          class="btn-transport btn-pause"
+          [class.active-ring]="isPaused"
+        >
+          <svg viewBox="0 0 24 24">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
+          Pause
+        </button>
+        <button (click)="stopSequence()" class="btn-transport btn-stop">
+          <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z" /></svg> Stop
+        </button>
+        <div class="toolbar-divider"></div>
+        <div class="zoom-control">
+          <label>Zoom</label>
+          <input
+            type="range"
+            min="50"
+            max="300"
+            [value]="pixelsPerSecond()"
+            (input)="updateZoom($event)"
+          />
+        </div>
+      </div>
+
+      <div class="toolbar-group-right">
+        <button
+          (click)="exportWav()"
+          [disabled]="isExporting()"
+          class="btn-export"
+        >
+          @if (isExporting()) {
+            <span class="animate-pulse">Rendering...</span>
+          } @else {
+            <span>Export WAV</span>
+          }
+        </button>
+        <div class="toolbar-divider"></div>
+        <div class="demo-selector-container">
+          <select #demoSelect>
+            <option value="techno">Techno Groove</option>
+            <option value="synthwave">Synthwave Arp</option>
+            <option value="ambient">Ambient Chill</option>
+            <option value="house">Deep House</option>
+            <option value="trance">Epic Trance</option>
+            <option value="dnb">Liquid Drum & Bass</option>
+            <option value="lofi">Lo-Fi Hip Hop</option>
+            <option value="synthpop">Retro Synth-Pop</option>
+          </select>
+          <button
+            (click)="loadDemoSong(demoSelect.value)"
+            class="btn-text-action sky"
+          >
+            Load
+          </button>
+        </div>
+        <button (click)="clearTimeline()" class="btn-text-action rose">
+          Clear All
+        </button>
+      </div>
+    </header>
+
+    <div
+      #timelineContainer
+      class="timeline-viewport"
+      (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)"
+    >
+      <div class="timeline-canvas-area" [style.width.px]="timelineWidth()">
+        <div
+          class="timeline-grid-overlay"
+          [style.background-image]="gridPattern()"
+          [style.background-size.px]="pixelsPerSecond() * snapResolution"
+        ></div>
+
+        <div
+          (click)="onRulerClick($event)"
+          class="timeline-ruler"
+          [style.width.px]="timelineWidth()"
+        >
+          <div class="ruler-axis-header" (click)="$event.stopPropagation()">
+            <span>Time</span>
+          </div>
+          <div class="ruler-ticks-container" [style.left.px]="trackHeaderWidth">
+            @for (tick of rulerTicks(); track tick) {
+              <div
+                class="ruler-tick"
+                [style.left.px]="tick * pixelsPerSecond()"
+              >
+                <span>{{ tick }}s</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        @for (track of tracks; track track.id; let i = $index) {
+          <div
+            class="track-row"
+            [style.top.px]="i * trackHeight + rulerHeight"
+            [style.height.px]="trackHeight"
+          >
+            <div class="track-header">
+              <span>Track {{ i + 1 }}</span>
+            </div>
+          </div>
+        }
+
+        @for (note of sequence(); track note.id) {
+          <div
+            draggable="true"
+            (dragstart)="onDragStartExistingNote($event, note)"
+            (click)="
+              openDesignerForTimelineNote(note); $event.stopPropagation()
+            "
+            class="note-block"
+            [class]="note.colorClass"
+            [style.left.px]="
+              note.startTime * pixelsPerSecond() + trackHeaderWidth
+            "
+            [style.top.px]="note.trackIndex * trackHeight + rulerHeight + 6"
+            [style.height.px]="trackHeight - 12"
+            [style.width.px]="note.duration * pixelsPerSecond()"
+          >
+            <div class="note-header">
+              <span class="note-title">{{ note.name }}</span>
+              <button
+                (click)="removeNote(note.id); $event.stopPropagation()"
+                class="btn-note-delete"
+                title="Delete Note"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+            <div class="note-waveform-decorator"></div>
+          </div>
+        }
+
+        <div #playhead class="playhead-line" [style.left.px]="trackHeaderWidth">
+          <div class="playhead-marker"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  @if (isDesignerOpen()) {
+    <app-sound-designer
+      [title]="designerTitle()"
+      [preset]="designerDraft()"
+      [isEditingTimelineNote]="!!editingTimelineNoteId()"
+      [isEditingPreset]="!!editingPresetId()"
+      [presetColors]="presetColors"
+      (close)="closeDesigner()"
+      (save)="savePreset($event)"
+      (preview)="previewPreset($event)"
+    ></app-sound-designer>
+  }
+</div>
