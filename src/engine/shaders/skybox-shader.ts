@@ -128,7 +128,7 @@ export class SkyboxShader extends Shader {
     this.setFloat(ShaderUniformsEnum.U_MOON_ROTATION_SPEED, this.moon.moonRotationSpeed);
     this.setInt(ShaderUniformsEnum.U_USE_MOON, this.moon.useMoon ? 1 : 0);
     
-    this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.material.color.toVec4());
+    this.setVec4(ShaderUniformsEnum.U_SKY_COLOR, this.material.skyColor.toVec4());
     this.setVec4(ShaderUniformsEnum.U_HORIZON_COLOR, this.material.horizonColor.toVec4());
     this.setVec4(ShaderUniformsEnum.U_GROUND_COLOR, this.material.groundColor.toVec4());
     this.setFloat(ShaderUniformsEnum.U_EXPONENT, this.material.exponent);

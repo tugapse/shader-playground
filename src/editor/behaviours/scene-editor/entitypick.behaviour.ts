@@ -52,9 +52,7 @@ export class EntityPicker extends RendererBehaviour {
 
     this.refreshTexture();
     this.startPass(this.renderTexture.glTexture!, this.width, this.height);
-
-    // CRITICAL FIX 1: Clear the off-screen buffer before drawing!
-    // If we don't clear depth, WebGL will reject the pixels based on old data.
+    
     this._gl.clearColor(0, 0, 0, 0);
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
 

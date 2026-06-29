@@ -11,7 +11,7 @@ export class EditorSettings extends JsonSerializable implements IEditorSettings 
 
   constructor() {
     super("EditorSettings");
-    this.gridColor = Colors.grey;
+    this.gridColor = Colors.black;
     this.selectedBoundingBoxColor = Colors.aliceBlue;
     this.hoveredBoundingBoxColor = Colors.aliceBlue;
   }

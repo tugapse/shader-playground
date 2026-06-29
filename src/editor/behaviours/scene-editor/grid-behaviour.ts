@@ -18,7 +18,7 @@ export class EditorGridBehaviour extends RendererBehaviour {
     this.dephMode = DephFunction.Less;
     this.renderLayer = RenderLayer.POST_SCENE;
     this.createMesh();
-    this._gl.lineWidth(1.0);
+    this._gl.lineWidth(10.0);
     // this.active = false;
 
   }
@@ -44,6 +44,8 @@ export class EditorGridBehaviour extends RendererBehaviour {
     this.shader.material.color.set(...this.gridColor.toVec4())
     this.drawHorizontalLines(count);
     this.drawVerticalLines(count);
+    this.shader.release();
+
   }
 
 
