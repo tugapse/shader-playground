@@ -5,36 +5,25 @@ import { BehaviorSubject } from "rxjs";
 
 
 export class EditorSettings extends JsonSerializable implements IEditorSettings {
-  sceneEditor!: { gridColor: Color; selectedBoundingBoxColor: Color; hoveredBoundingBoxColor: Color; };
+  gridColor: Color; 
+  selectedBoundingBoxColor: Color; 
+  hoveredBoundingBoxColor: Color;
+
   constructor() {
     super("EditorSettings");
-    this.sceneEditor = {
-      gridColor: Colors.black,
-      hoveredBoundingBoxColor: Colors.green,
-      selectedBoundingBoxColor: Colors.darkBlue
-    }
+    this.gridColor = Colors.grey;
+    this.selectedBoundingBoxColor = Colors.aliceBlue;
+    this.hoveredBoundingBoxColor = Colors.aliceBlue;
   }
+
   override toJsonObject(): JsonSerializedData {
-    return {
-      ...super.toJsonObject(),
-      sceneEditor: {
-        gridColor: this.sceneEditor.gridColor.toJsonObject(),
-        hoveredBoundingBoxColor: this.sceneEditor.hoveredBoundingBoxColor.toJsonObject(),
-        selectedBoundingBoxColor: this.sceneEditor.selectedBoundingBoxColor.toJsonObject()
-      }
-    }
+    return this.serializeAutomatically();
   }
 
   override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.sceneEditor = {
-      gridColor: Color.createFromJsonData(jsonObject['sceneEditor']["gridColor"]),
-      hoveredBoundingBoxColor: Color.createFromJsonData(jsonObject['sceneEditor']["hoveredBoundingBoxColor"]),
-      selectedBoundingBoxColor: Color.createFromJsonData(jsonObject['sceneEditor']["selectedBoundingBoxColor"])
-    }
+    this.deserializeAutomatically(jsonObject);
   }
-
-
 }
 
 @Injectable({ providedIn: 'root' })

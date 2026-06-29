@@ -75,8 +75,8 @@ export class Editor implements OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
 
   isLeftVisible: boolean = true;
-  isRightVisible: boolean = true;
-  isFooterVisible: boolean = true;
+  isRightVisible: boolean = false;
+  isFooterVisible: boolean = false;
   isEngineStatsVisible: boolean = false;
   menuItems: MenuItem[] = [];
 
@@ -118,9 +118,9 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.menuItems.push({ id: 'settings', label: 'Settings' });
   }
 
-  onMenuItemClick(_t4: MenuItem) {
-    console.debug(_t4);
-    switch (_t4.id) {
+  onMenuItemClick(menuItem: MenuItem) {
+    console.debug(menuItem);
+    switch (menuItem.id) {
       case 'leftSidebar':
         this.isLeftVisible = !this.isLeftVisible;
         this.editorService.requestCanvasResize();
@@ -133,10 +133,10 @@ export class Editor implements OnDestroy, AfterViewInit {
         this.isFooterVisible = !this.isFooterVisible;
         this.editorService.requestCanvasResize();
         break;
-        case 'engineStats':
+      case 'engineStats':
         this.isEngineStatsVisible = !this.isEngineStatsVisible;
         break;
-     
+
       default:
         break;
     }
@@ -272,7 +272,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   private onRenderFrame(): void {
-    // this.editorGridBehaviour?.draw();
+    this.editorGridBehaviour?.draw();
     this.gizmosBehaviour?.draw();
     this.editorPickerBehaviour?.draw();
     // (window as any)['mat'].mainTex =
@@ -329,13 +329,13 @@ export class Editor implements OnDestroy, AfterViewInit {
 
     this.settings = newSettings;
     if (this.editorGridBehaviour) {
-      this.editorGridBehaviour.gridColor = this.settings.sceneEditor.gridColor;
+      this.editorGridBehaviour.gridColor = this.settings.gridColor;
     }
     if (this.gizmosBehaviour) {
       this.gizmosBehaviour.selectedBoundingBoxColor =
-        this.settings.sceneEditor.selectedBoundingBoxColor;
+        this.settings.selectedBoundingBoxColor;
       this.gizmosBehaviour.hoveredBoundingBoxColor =
-        this.settings.sceneEditor.hoveredBoundingBoxColor;
+        this.settings.hoveredBoundingBoxColor;
     }
   }
 
