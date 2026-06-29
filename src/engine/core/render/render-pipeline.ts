@@ -53,6 +53,7 @@ export class RenderPipeline extends JsonSerializable {
   public setGlRenderingContext(gl: WebGL2RenderingContext): void {
     this._gl = gl;
     this.ubo = new CameraUBO(this._gl);
+
     if (!this._shadowmapPass) {
       this._shadowmapPass = new ShadowMapPass(this._gl);
       this.addPass(this._shadowmapPass);
@@ -78,8 +79,8 @@ export class RenderPipeline extends JsonSerializable {
       }
     });
 
-    const width = gl.canvas.width || 1024;
-    const height = gl.canvas.height || 768;
+    const width = CanvasViewport.rendererWidth || 1024;
+    const height = CanvasViewport.rendererHeight || 768;
     this.recreateSingleBuffer(width, height);
   }
 
@@ -130,7 +131,7 @@ export class RenderPipeline extends JsonSerializable {
       this._depthRenderbuffer,
     );
 
-    // this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
+    this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
   }
 
   public draw() {
@@ -149,6 +150,7 @@ export class RenderPipeline extends JsonSerializable {
         pass.execute(this.scene);
         continue;
       }
+      
       this.ubo.update(camera.viewMatrix,camera.projectionMatrix);
       this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
       this._gl.viewport(0, 0, this._gl.canvas.width, this._gl.canvas.height);

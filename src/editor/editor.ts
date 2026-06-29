@@ -159,9 +159,9 @@ export class Editor implements OnDestroy, AfterViewInit {
           .subscribe((textContent) => {
             const sceneData = JSON.parse(textContent) as JsonSerializedData;
 
-            SceneManager.loadScene(this.gl, sceneData).then((scene) =>
-              this.editorService.loadScene(scene),
-            );
+            SceneManager.loadScene(this.gl, sceneData).then((scene) => {
+              this.editorService.loadScene(scene);
+            });
           });
       }
     } else {
@@ -189,6 +189,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.scene.setGlRenderingContext(this.gl);
     this.scene.inEditMode = true;
     this.addEditorBehaviours();
+    this.editorService.requestCanvasResize(); 
   }
 
   protected onScenePlay(scene: Scene): void {

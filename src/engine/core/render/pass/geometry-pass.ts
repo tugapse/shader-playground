@@ -38,7 +38,7 @@ export class GeometryPass extends JsonSerializable implements IRenderPass {
     // );
 
     // Fetch and sort scene objects by distance for correct layering
-    const activeObjects = scene.objects.filter((o) => o.active);
+    const activeObjects = scene.objects.filter((o) => o.active && o.show);
 
     // Sort transparent objects back-to-front
     const sortedObjects = [...activeObjects].sort((a, b) => {
