@@ -9,24 +9,27 @@
   </a>
 </p>
 
-**Omega Editor** is a comprehensive, web-based 2D/3D Game Engine and Editor. Built with Angular and WebGL, it provides a highly structured environment for real-time scene manipulation, entity management, and dynamic rendering. 
+**Omega Editor** is a web-based 2D/3D Game Engine and Editor built with Angular and WebGL. 
 
-This project began as a dedicated space to apply and consolidate years of full-stack architectural learning, rendering math, and engine design into a unified, professional-grade toolset.
+This is an ongoing personal project rather than a commercial product. I built it as a practical sandbox to apply and consolidate years of learning in Angular architecture, game systems design, and low-level engine development. While it is very much a work in progress, it already features a robust rendering pipeline supporting custom shaders, complex materials, dynamic lighting, and shadows. Beyond rendering, the editor provides deep visibility into the engine's state, allowing for live inspection of entities, components, and underlying engine code directly through the UI.
 
 ## 🌌 The Omega Ecosystem
 
 Omega is designed with a strict separation of concerns, split across three primary pillars:
 
-1. **Omega Editor (This Repository):** The complex Angular-driven user interface, inspector panels, and scene management tools.
+1. **Omega Editor (This Repository):** The Angular-driven user interface, inspector panels, and scene management tools.
 2. **Omega Engine:** The core WebGL rendering and ECS logic. It is consumed by the editor as an npm package ([`omega-game-engine`](https://www.npmjs.com/package/omega-game-engine)).
 3. **Omega API:** The backend service required for advanced local operations. Available at [`tugapse/omega-api`](https://github.com/tugapse/omega-api).
 
 ## ✨ Key Features
 
-* **Entity-Component-System (ECS):** Granular control over entities through a modular behavior system (e.g., `SunBehaviour`).
+* **Entity-Component-System (ECS) & Live Inspection:** Granular control over entities through a modular behavior system. The editor interface allows for real-time inspection and modification of entities, attached components, and raw engine code.
+* **Advanced WebGL Rendering:** Full support for custom shaders, complex material properties, dynamic lighting (ambient, directional, spot), and real-time shadow mapping.
+* **Custom User Logic & Scripting:** The engine is fully capable of handling and executing user-created code. The advanced day/night cycle pipeline shown in the screenshots (with configurable moon phases and shadow transitions) is just one example of a custom behavior running live in the engine.
 * **Professional Editor Tooling:**
   * Interactive 3D transform gizmos (Translation, Rotation, Scaling).
   * Real-time performance profiling (FPS, Update, Render, and Idle ms tracking).
+  * Integrated asset and project management.
   * UI theming support (e.g., "Autumn Rust" and "Default").
 
 ---
