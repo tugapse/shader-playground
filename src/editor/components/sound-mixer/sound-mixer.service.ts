@@ -3,8 +3,8 @@ import { AudioCache } from '@engine/audio/audio-cache';
 import { AudioEngine } from '@engine/audio/audio-engine';
 import { SequencerClock } from '@engine/audio/sequencer-clock';
 import { VoiceFactory } from '@engine/audio/voice-factory';
-import { AudioService } from './audio.service';
 import { SynthNote, SynthPreset } from '@editor/models/synth.types';
+import { AudioService } from '@editor/services/audio.service';
 
 @Injectable()
 export class SoundMixerPlaybackService {

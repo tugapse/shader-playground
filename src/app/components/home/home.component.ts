@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BackgroundVisualizationComponent } from '../background-visualization/background-visualization.component';
@@ -6,36 +6,47 @@ import { UserBarComponent } from '../user-bar/user-bar.component';
 import { ProjectDetails } from '../project-details/project-details';
 import { SceneList } from '../scene-list/scene-list';
 import { ProjectService } from '../../api/services/project.service';
-import { ProjectResponse, CreateProjectRequest, UpdateProjectRequest } from '../../api/models/omega-api.models';
+import {
+  ProjectResponse,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+} from '../../api/models/omega-api.models';
+import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, BackgroundVisualizationComponent, UserBarComponent, ProjectDetails, SceneList],
+  imports: [
+    CommonModule,
+    FormsModule,
+    BackgroundVisualizationComponent,
+    UserBarComponent,
+    ProjectDetails,
+    SceneList,
+    AssetsExplorerComponent,
+  ],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements AfterViewInit {
   private readonly projectService = inject(ProjectService);
 
   selectedProject: ProjectResponse | null = null;
   projects: ProjectResponse[] = [];
-  
+
   isModalOpen = false;
   newProjectName = '';
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this.loadProjects();
   }
-
-  
 
   private loadProjects(): void {
     this.projectService.listProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
       },
-      error: (err) => console.error('Failed to load projects', err)
+      error: (err) => console.error('Failed to load projects', err),
     });
   }
 
@@ -69,7 +80,7 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         console.error('Failed to create project', err);
         // Optionally, show an error message in the UI
-      }
+      },
     });
   }
 
@@ -81,28 +92,35 @@ export class HomeComponent implements OnInit {
 
     const payload: UpdateProjectRequest = {
       name: updatedProjectData.name,
-      description: updatedProjectData.description ?? undefined
+      description: updatedProjectData.description ?? undefined,
     };
 
-    this.projectService.updateProject(updatedProjectData.id, payload).subscribe({
-      next: (savedProject) => {
-        // Update the project in the main list
-        const index = this.projects.findIndex(p => p.id === savedProject.id);
-        if (index !== -1) {
-          this.projects[index] = savedProject;
-        }
-        
-        // If the updated project is the currently selected one, update it
-        if (this.selectedProject && this.selectedProject.id === savedProject.id) {
-          this.selectedProject = { ...this.selectedProject, ...savedProject };
-        }
-        
-        console.log('Project updated successfully', savedProject);
-      },
-      error: (err) => {
-        console.error('Failed to update project', err);
-        // Optionally, revert optimistic updates or show an error toast
-      }
-    });
+    this.projectService
+      .updateProject(updatedProjectData.id, payload)
+      .subscribe({
+        next: (savedProject) => {
+          // Update the project in the main list
+          const index = this.projects.findIndex(
+            (p) => p.id === savedProject.id,
+          );
+          if (index !== -1) {
+            this.projects[index] = savedProject;
+          }
+
+          // If the updated project is the currently selected one, update it
+          if (
+            this.selectedProject &&
+            this.selectedProject.id === savedProject.id
+          ) {
+            this.selectedProject = { ...this.selectedProject, ...savedProject };
+          }
+
+          console.log('Project updated successfully', savedProject);
+        },
+        error: (err) => {
+          console.error('Failed to update project', err);
+          // Optionally, revert optimistic updates or show an error toast
+        },
+      });
   }
 }

@@ -1,0 +1,7 @@
+@for (menuItem of displayItems; track menuItem.id) {
+  <app-menu-item
+    [item]="menuItem"
+    [isRoot]="true"
+    (onItemClick)="onMenuItemClick($event)"
+  ></app-menu-item>
+}

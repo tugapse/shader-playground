@@ -7,7 +7,7 @@ import { EditorService } from '@editor/services/editor.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './workspace.html',
-  styleUrls: ['./workspace.scss']
+  styleUrls: ['./workspace.scss'],
 })
 export class WorkspaceComponent {
   @Input() showLeft = true;
@@ -17,14 +17,29 @@ export class WorkspaceComponent {
   leftWidth = 250;
   rightWidth = 250;
   footerHeight = 200;
-  constructor(private editorService: EditorService) {}
-  
 
   private resizing: 'left' | 'right' | 'footer' | null = null;
+
+  // Track starting mouse coordinates and initial sizes
+  private startX = 0;
+  private startY = 0;
+  private startLeftWidth = 0;
+  private startRightWidth = 0;
+  private startFooterHeight = 0;
+
+  constructor(private editorService: EditorService) {}
 
   startResize(panel: 'left' | 'right' | 'footer', event: MouseEvent) {
     event.preventDefault();
     this.resizing = panel;
+
+    // Capture starting state
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.startLeftWidth = this.leftWidth;
+    this.startRightWidth = this.rightWidth;
+    this.startFooterHeight = this.footerHeight;
+
     document.body.style.cursor = panel === 'footer' ? 'ns-resize' : 'ew-resize';
   }
 
@@ -32,13 +47,19 @@ export class WorkspaceComponent {
   onMouseMove(event: MouseEvent) {
     if (!this.resizing) return;
 
-    // Constrains resizing to ensure panels don't collapse below 50px or exceed viewport bounds
+    // Calculate how far the mouse has moved from the initial click point
+    const deltaX = event.clientX - this.startX;
+    const deltaY = event.clientY - this.startY;
+
     if (this.resizing === 'left') {
-      this.leftWidth = Math.max(50, event.clientX);
+      // Moving right increases left width
+      this.leftWidth = Math.max(50, this.startLeftWidth + deltaX);
     } else if (this.resizing === 'right') {
-      this.rightWidth = Math.max(50, window.innerWidth - event.clientX);
+      // Moving left increases right width (hence subtracting deltaX)
+      this.rightWidth = Math.max(50, this.startRightWidth - deltaX);
     } else if (this.resizing === 'footer') {
-      this.footerHeight = Math.max(50, window.innerHeight - event.clientY);
+      // Moving up increases footer height (hence subtracting deltaY)
+      this.footerHeight = Math.max(50, this.startFooterHeight - deltaY);
     }
   }
 

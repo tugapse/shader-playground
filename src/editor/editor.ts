@@ -36,6 +36,7 @@ import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
 import { SoundMixerComponent } from './components/sound-mixer/sound-mixer';
+import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
 
 @Component({
   selector: 'app-editor',
@@ -47,10 +48,10 @@ import { SoundMixerComponent } from './components/sound-mixer/sound-mixer';
     SceneTree,
     AssetExplorerWindow,
     EngineStatsComponent,
-
     AssetsExplorerComponent,
     WorkspaceComponent,
     MenuItemComponent,
+    EditorMainMenu,
   ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
@@ -79,7 +80,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   isRightVisible: boolean = false;
   isFooterVisible: boolean = false;
   isEngineStatsVisible: boolean = false;
-  menuItems: MenuItem[] = [];
 
   constructor(
     protected editorService: EditorService,
@@ -94,61 +94,6 @@ export class Editor implements OnDestroy, AfterViewInit {
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
-    this.menuItems.push({ id: 'edit', label: 'Edit' });
-    this.menuItems.push({
-      id: 'view',
-      label: 'View',
-      items: [ 
-        {
-          id: 'windows',
-          label: 'Windows',
-          items: [
-            { id: 'engineStats', label: 'Engine Stats' },
-            { id: 'mixer', label: 'Sounds Mixer' },
-          ],
-        },
-        {
-          id: 'panels',
-          label: 'Panels',
-          items: [
-            { id: 'leftSidebar', label: 'Left Sidebar' },
-            { id: 'rightSidebar', label: 'Right Sidebar' },
-            { id: 'footer', label: 'Footer' },
-          ],
-        },
-      ],
-    });
-  }
-
-  onMenuItemClick(menuItem: MenuItem) {
-    console.debug(menuItem);
-    switch (menuItem.id) {
-      case 'leftSidebar':
-        this.isLeftVisible = !this.isLeftVisible;
-        this.editorService.requestCanvasResize();
-        break;
-      case 'rightSidebar':
-        this.isRightVisible = !this.isRightVisible;
-        this.editorService.requestCanvasResize();
-        break;
-      case 'footer':
-        this.isFooterVisible = !this.isFooterVisible;
-        this.editorService.requestCanvasResize();
-        break;
-      case 'engineStats':
-        this.isEngineStatsVisible = !this.isEngineStatsVisible;
-        break;
-      case 'mixer':
-        this.windowService.open({
-          component: SoundMixerComponent,
-          "title": "Sounds Mixer",
-          iconName: 'fa-sound'
-        })
-        break;
-
-      default:
-        break;
-    }
   }
 
   ngAfterViewInit(): void {
@@ -199,7 +144,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.scene.setGlRenderingContext(this.gl);
     this.scene.inEditMode = true;
     this.addEditorBehaviours();
-    this.editorService.requestCanvasResize(); 
+    this.editorService.requestCanvasResize();
   }
 
   protected onScenePlay(scene: Scene): void {

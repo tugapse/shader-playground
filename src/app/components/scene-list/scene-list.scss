@@ -46,8 +46,7 @@
   gap: 16px;
   padding: 16px;
   margin: 0;
-  overflow-y: auto;
-  flex-grow: 1;
+  overflow-y: scroll;
 }
 
 .scene-item {
@@ -56,7 +55,9 @@
   border-radius: 4px;
   cursor: pointer;
   background-color: var(--editor-icon-button-background);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
   overflow: hidden; // To contain the border-radius on the image
   border: 1px solid transparent; // for selected state
 
@@ -203,7 +204,6 @@
   font-size: 0.8rem;
   margin-top: 4px;
 }
-
 
 .modal-footer {
   padding: 16px 24px;

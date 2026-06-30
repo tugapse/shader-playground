@@ -4,9 +4,8 @@ import { AudioEngine } from '@engine/audio/audio-engine';
 import { SequencerClock } from '@engine/audio/sequencer-clock';
 import { VoiceFactory } from '@engine/audio/voice-factory';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AudioService {
   // Instantiates the pure TypeScript modules
@@ -18,7 +17,7 @@ export class AudioService {
     this.cache,
     this.engine.getSynthBus(),
     this.engine.getReverbBus(),
-    this.engine.getDelayBus()
+    this.engine.getDelayBus(),
   );
 
   /**

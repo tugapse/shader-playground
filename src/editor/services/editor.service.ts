@@ -1,41 +1,48 @@
-import { EventEmitter, Injectable } from "@angular/core";
-import { vec3 } from "gl-matrix";
-import { Camera, CameraFlyBehaviour, CameraType, CanvasViewport, Scene } from "@engine";
-import { BehaviorSubject } from "rxjs";
-import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
-import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
-
+import { EventEmitter, Injectable } from '@angular/core';
+import { vec3 } from 'gl-matrix';
+import {
+  Camera,
+  CameraFlyBehaviour,
+  CameraType,
+  CanvasViewport,
+  Scene,
+} from '@engine';
+import { BehaviorSubject } from 'rxjs';
+import { GizmoMode } from '../behaviours/scene-editor/gizmo-mode.enum';
+import { TransformSpace } from '../behaviours/scene-editor/transform-space.enum';
 
 @Injectable({ providedIn: 'root' })
 export class EditorService {
+  public onSceneLoaded = new EventEmitter<Scene>();
+  public onScenePlay = new EventEmitter<Scene>();
+  public onScenePause = new EventEmitter<Scene>();
+  public onSceneStop = new EventEmitter<Scene>();
+  public onSceneUpdated = new EventEmitter<Scene>();
+  public onEditorSaveStateRequest = new EventEmitter();
+  public editorRunningState = new EventEmitter<boolean>();
 
-  onSceneLoaded = new EventEmitter<Scene>();
-  onScenePlay = new EventEmitter<Scene>();
-  onScenePause = new EventEmitter<Scene>();
-  onSceneStop = new EventEmitter<Scene>();
-  onSceneUpdated = new EventEmitter<Scene>();
+  public onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
+  public onCanvasRequestResize = new BehaviorSubject<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
+  public onCanvasRequestReset = new EventEmitter();
 
-
-
-  onEditorSaveStateRequest = new EventEmitter();
-
-  editorRunningState = new EventEmitter<boolean>();
-
-  onRenderingContextCreated = new EventEmitter<WebGL2RenderingContext>();
-  onCanvasRequestResize = new BehaviorSubject<{width:number,height:number}>({width:0,height:0});
-  onCanvasRequestReset = new EventEmitter();
-
-  onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(null);
-  onUpdateFrame = new BehaviorSubject<number>(0);
+  public onRenderFrame = new BehaviorSubject<WebGL2RenderingContext | null>(
+    null,
+  );
+  public onUpdateFrame = new BehaviorSubject<number>(0);
 
   public gizmoMode = new BehaviorSubject<GizmoMode>(GizmoMode.Translate);
-  public transformSpace = new BehaviorSubject<TransformSpace>(TransformSpace.Local);
+  public transformSpace = new BehaviorSubject<TransformSpace>(
+    TransformSpace.Local,
+  );
   private _gl!: WebGL2RenderingContext;
-  
+
   public get scene(): Scene {
     return this.currentScene;
   }
-  
+
   public get camera(): Camera {
     return this._camera;
   }
@@ -43,30 +50,31 @@ export class EditorService {
   public get gl(): WebGL2RenderingContext {
     return this._gl;
   }
-  
+
   private currentScene!: Scene;
   private _camera!: Camera;
   constructor() {
     this.initializeEditorCamera();
-    this.onRenderingContextCreated.subscribe(this.onGlContextCreated.bind(this));
-
+    this.onRenderingContextCreated.subscribe(
+      this.onGlContextCreated.bind(this),
+    );
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext) {
-    console.log("onGlContextCreated");  
+    console.log('onGlContextCreated');
     this._gl = gl;
   }
-  
-
 
   loadScene(scene: Scene) {
-    
     this.currentScene = scene;
     this.onSceneLoaded.emit(scene);
   }
 
   requestCanvasResize() {
-    this.onCanvasRequestResize.next({width:CanvasViewport.rendererWidth,height:CanvasViewport.rendererHeight});
+    this.onCanvasRequestResize.next({
+      width: CanvasViewport.rendererWidth,
+      height: CanvasViewport.rendererHeight,
+    });
   }
 
   requestScenePlay(scene?: Scene) {
@@ -89,18 +97,20 @@ export class EditorService {
     this.transformSpace.next(space);
   }
 
+  public setToggleWorkspacePanel(
+    panel: 'left' | 'right' | 'footer',
+    visible: boolean,
+  ) {}
 
   protected initializeEditorCamera() {
     this._camera = new Camera();
-    this._camera.name = "Editor Camera"
+    this._camera.name = 'Editor Camera';
     this._camera.fieldOfView = 65;
     this._camera.transform.translate(2, 3, 10);
     this._camera.transform.rotate(0, 180, 0);
     this._camera.initialize();
-    this._camera.addBehaviour(new CameraFlyBehaviour())
+    this._camera.addBehaviour(new CameraFlyBehaviour());
     Camera.setMainCamera(this._camera);
     this._camera.updateInEditor = true;
   }
-
-
 }

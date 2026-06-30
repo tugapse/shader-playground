@@ -3,21 +3,15 @@
   [isEditorPaused]="isPaused"
   (toggleFullscreen)="toggleFullscreen()"
 >
-  <div>
-    @for (menuItem of menuItems; track menuItem.id) {
-      <app-menu-item
-        [item]="menuItem"
-        [isRoot]="true"
-        (onItemClick)="onMenuItemClick($event)"
-      ></app-menu-item>
-    }
-  </div>
+  <editor-main-menu></editor-main-menu>
 </editor-top-bar>
 
 <workspace
-  [showLeft]="!isFullScreen && isLeftVisible"
-  [showRight]="!isFullScreen && isRightVisible"
-  [showFooter]="!isFullScreen && isFooterVisible"
+  [showLeft]="!isFullScreen && editorSettings.settings.workspace.showLeftpanel"
+  [showRight]="
+    !isFullScreen && editorSettings.settings.workspace.showRightpanel
+  "
+  [showFooter]="!isFullScreen && editorSettings.settings.workspace.showFooter"
 >
   <div leftSidebar>
     <app-scene-tree [targetScene]="scene"></app-scene-tree>
@@ -66,6 +60,8 @@
       [windowId]="win.id"
       [windowtitle]="win.title"
       [windowIconName]="win.iconName"
+      [windowFooter]="win.footer"
+      [isMaximized]="!!win.isMaximized"
       [childComponentType]="win.component"
       [childInputs]="win.inputs"
       [isActive]="win.id === (windowService.activeWindowId$ | async)"

@@ -114,11 +114,9 @@
         </svg>
       </button>
     </div>
-    <span class="header-title">Explorador</span>
   </div>
-
-  <div class="workspace-area">
-    <div class="tree-pane">
+  <workspace>
+    <div leftSidebar class="tree-pane">
       <div class="tree-viewport">
         @if (treeData()) {
           <ng-container
@@ -136,7 +134,7 @@
       </div>
     </div>
 
-    <div class="content-pane">
+    <div main class="content-pane">
       <div class="breadcrumb-bar">
         @if (activeFolder()) {
           <span>{{ getBreadcrumbPath(activeFolder()!) }}</span>
@@ -166,7 +164,7 @@
         }
       </div>
     </div>
-  </div>
+  </workspace>
 </div>
 
 @if (contextMenu().visible) {

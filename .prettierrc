@@ -1,5 +1,5 @@
 {
-  "printWidth": 180,
+  "printWidth": 200,
   "tabWidth": 2,
   "useTabs": false,
   "singleQuote": true,
@@ -7,7 +7,6 @@
   "bracketSpacing": true,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "parser": "html",
   "plugins": ["prettier-plugin-angular"],
   "overrides": [
     {
@@ -17,12 +16,11 @@
         "htmlWhitespaceSensitivity": "ignore",
         "bracketSameLine": false
       }
-    }, {
+    },
+    {
       "files": "*.ts",
       "options": {
-        "parser": "angular",
-        "htmlWhitespaceSensitivity": "ignore",
-        "bracketSameLine": false
+        "parser": "typescript"
       }
     }
   ]

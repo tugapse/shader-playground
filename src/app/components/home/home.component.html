@@ -72,18 +72,22 @@
   <main class="main-content">
     <app-user-bar></app-user-bar>
     @if (selectedProject) {
-      <div class="flex">
+      <div class="top">
         <app-project-details
           [project]="selectedProject"
           (save)="handleProjectUpdate($event)"
         ></app-project-details>
         <app-scene-list [project]="selectedProject"></app-scene-list>
       </div>
+      <app-assets-explorer
+        class="assets-explorer"
+        [projectId]="selectedProject.id"
+      ></app-assets-explorer>
     } @else {
       <div class="dashboard-welcome">
         <div class="top-content">
           <div class="hero-section">
-            <h1>Welcome to the Engine</h1>
+            <h1>Welcome to Omega Editor</h1>
             <p>
               Select a project from the sidebar to start building, or choose an
               action below.

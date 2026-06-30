@@ -3,8 +3,8 @@ import { SynthPreset, SynthNote } from '../../models/synth.types';
 import { PresetListComponent } from './components/preset-list/preset-list.component';
 import { OscilloscopeComponent } from './components/oscilloscope/oscilloscope.component';
 import { SoundDesignerComponent } from './sound-designer/sound-designer.component';
-import { SoundMixerPlaybackService } from '@editor/services/sound-mixer.service';
 import { Icon } from "src/app/components/icon/icon";
+import { SoundMixerPlaybackService } from './sound-mixer.service';
 
 @Component({
   selector: 'editor-sound-mixer',

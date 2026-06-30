@@ -1,47 +1,57 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { signal, inject, ChangeDetectionStrategy, Component, effect, HostListener, AfterViewInit } from '@angular/core';
+import {
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  HostListener,
+  AfterViewInit,
+  Input,
+} from '@angular/core';
 import { EditorStateService } from '../../services/editor-state.service';
 import { IAsset } from '../../interfaces/asset.interface';
 import { AssetService } from '../../../app/api/services/asset.service';
 import { map } from 'rxjs';
 import { AssetResponse } from '../../../app/api/models/omega-api.models';
+import { WorkspaceComponent } from '../workspace/workspace';
 
 @Component({
   selector: 'app-assets-explorer',
   standalone: true,
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, WorkspaceComponent],
   templateUrl: './assets-explorer.component.html',
   styleUrl: './assets-explorer.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetsExplorerComponent implements AfterViewInit {
+  @Input() projectId?: string;
   private assetService = inject(AssetService);
   private editorState = inject(EditorStateService);
 
-  projectId = this.editorState.activeProject;
+  _projectId = this.editorState.activeProject;
 
   treeData = signal<IAsset | null>(null);
   selectedNodeId = signal<string | null>(null);
   expandedNodes = signal<Set<string>>(new Set<string>());
   activeFolder = signal<IAsset | null>(null);
   createMenuOpen = signal<boolean>(false);
-  
+
   contextMenu = signal({
     visible: false,
     x: 0,
     y: 0,
-    targetNode: null as IAsset | null
+    targetNode: null as IAsset | null,
   });
 
   constructor() {
     effect(() => {
-      const project = this.projectId();
+      const project = this._projectId();
       if (project && this.editorState.centralView() === 'assets') {
         this.refreshTree();
       }
     });
   }
-
 
   ngAfterViewInit(): void {
     this.refreshTree();
@@ -59,88 +69,127 @@ export class AssetsExplorerComponent implements AfterViewInit {
 
   toggleCreateMenu(event: MouseEvent) {
     event.stopPropagation();
-    this.createMenuOpen.update(v => !v);
+    this.createMenuOpen.update((v) => !v);
     if (this.contextMenu().visible) this.closeContextMenu();
   }
 
   createNewAsset(type: 'folder' | 'scene' | 'code' | 'material') {
     this.createMenuOpen.set(false);
-    
-    const project = this.projectId();
+
+    const project = this._projectId();
     if (!project) return;
 
     const name = prompt(`Enter ${type} name:`);
     if (!name) return;
 
     const targetFolder = this.activeFolder();
-    const basePath = targetFolder?.virtualPath ? `${targetFolder.virtualPath}/` : '';
+    const basePath = targetFolder?.virtualPath
+      ? `${targetFolder.virtualPath}/`
+      : '';
     const fullVirtualPath = `${basePath}${name}`;
 
-    switch(type) {
+    switch (type) {
       case 'scene': {
         const fileName = name.endsWith('.scene') ? name : `${name}.scene`;
         const content = JSON.stringify({ entities: [] }, null, 2);
-        this.uploadVirtualAsset(project.id, fileName, content, 'application/json', 'scene');
+        this.uploadVirtualAsset(
+          project.id,
+          fileName,
+          content,
+          'application/json',
+          'scene',
+        );
         break;
       }
       case 'code': {
         const fileName = name.endsWith('.py') ? name : `${name}.py`;
         const content = '# Sentinel Script\n';
-        this.uploadVirtualAsset(project.id, fileName, content, 'text/plain', 'code');
+        this.uploadVirtualAsset(
+          project.id,
+          fileName,
+          content,
+          'text/plain',
+          'code',
+        );
         break;
       }
       case 'material': {
         const fileName = name.endsWith('.mat') ? name : `${name}.mat`;
-        const content = JSON.stringify({ shader: 'Standard', properties: {} }, null, 2);
-        this.uploadVirtualAsset(project.id, fileName, content, 'application/json', 'raw');
+        const content = JSON.stringify(
+          { shader: 'Standard', properties: {} },
+          null,
+          2,
+        );
+        this.uploadVirtualAsset(
+          project.id,
+          fileName,
+          content,
+          'application/json',
+          'raw',
+        );
         break;
       }
       case 'folder': {
-        console.log(`Requires backend support to create empty directory at: ${fullVirtualPath}`);
+        console.log(
+          `Requires backend support to create empty directory at: ${fullVirtualPath}`,
+        );
         break;
       }
     }
   }
 
-  private uploadVirtualAsset(projectId: string, fileName: string, content: string, mimeType: string, assetType: string) {
+  private uploadVirtualAsset(
+    projectId: string,
+    fileName: string,
+    content: string,
+    mimeType: string,
+    assetType: string,
+  ) {
     const file = new File([content], fileName, { type: mimeType });
-    this.assetService.uploadAsset(projectId, file, fileName, assetType as any).subscribe({
-      next: () => this.refreshTree(),
-      error: (err) => {
-        console.error(`Error creating ${fileName}:`, err);
-        alert('Failed to create asset.');
-      }
-    });
+    this.assetService
+      .uploadAsset(projectId, file, fileName, assetType as any)
+      .subscribe({
+        next: () => this.refreshTree(),
+        error: (err) => {
+          console.error(`Error creating ${fileName}:`, err);
+          alert('Failed to create asset.');
+        },
+      });
   }
 
   refreshTree() {
-    const project = this.projectId();
-    if (!project) return;
-    
-    this.assetService.listAssets(project.id).pipe(
-      map(response => this.buildAssetTree(response.assets, { 
-        id: project.id, 
-        name: project.name || 'Project Root' 
-      }))
-    ).subscribe(tree => {
-      this.treeData.set(tree);
-      
-      if(tree) {
-        if (this.activeFolder()) {
-          const currentPath = this.activeFolder()!.virtualPath;
-          const reSyncedFolder = this.findNodeByPath(tree, currentPath);
-          this.activeFolder.set(reSyncedFolder || tree);
-        } else {
-          this.activeFolder.set(tree);
-        }
+    const projectId = this.projectId || this._projectId()?.id;
+    if (!projectId) return;
 
-        this.expandedNodes.update(current => {
-          const newSet = new Set(current);
-          newSet.add(tree.id);
-          return newSet;
-        });
-      }
-    });
+    this.assetService
+      .listAssets(projectId)
+      .pipe(
+        map((response) =>
+          this.buildAssetTree(response.assets, {
+            id: projectId,
+            name: 'Project Root',
+          }),
+        ),
+      )
+      .subscribe((tree) => {
+        this.treeData.set(tree);
+
+        if (tree) {
+          if (this.activeFolder()) {
+            const currentPath = this.activeFolder()!.virtualPath;
+            const reSyncedFolder = this.findNodeByPath(tree, currentPath);
+            this.activeFolder.set(reSyncedFolder || tree);
+          } else {
+            this.activeFolder.set(tree);
+          }
+
+          this.expandedNodes.update((current) => {
+            const newSet = new Set(current);
+            newSet.add(tree.id);
+            return newSet;
+          });
+        }
+      });
   }
 
   handleNodeClick(node: IAsset) {
@@ -163,7 +212,7 @@ export class AssetsExplorerComponent implements AfterViewInit {
   handleGridItemDoubleClick(item: IAsset) {
     if (item.type === 'folder' || item.type === 'project') {
       this.activeFolder.set(item);
-      
+
       const current = new Set(this.expandedNodes());
       current.add(item.id || item.name);
       this.expandedNodes.set(current);
@@ -172,7 +221,7 @@ export class AssetsExplorerComponent implements AfterViewInit {
 
   getBreadcrumbPath(node: IAsset): string {
     if (node.type === 'project') return node.name;
-    const project = this.projectId();
+    const project = this._projectId();
     const rootName = project ? project.name : 'Assets';
     return `${rootName} > ${node.virtualPath.replace(/\//g, ' > ')}`;
   }
@@ -181,8 +230,8 @@ export class AssetsExplorerComponent implements AfterViewInit {
     event.preventDefault();
     event.stopPropagation();
 
-    const menuWidth = 150; 
-    const menuHeight = 80; 
+    const menuWidth = 150;
+    const menuHeight = 80;
     const x = Math.min(event.clientX, window.innerWidth - menuWidth);
     const y = Math.min(event.clientY, window.innerHeight - menuHeight);
 
@@ -192,7 +241,7 @@ export class AssetsExplorerComponent implements AfterViewInit {
       visible: true,
       x,
       y,
-      targetNode: node
+      targetNode: node,
     });
   }
 
@@ -209,15 +258,17 @@ export class AssetsExplorerComponent implements AfterViewInit {
     if (!newName || newName === node.name) return;
 
     const pathParts = node.virtualPath.split('/');
-    pathParts.pop(); 
+    pathParts.pop();
     const newVirtualPath = [...pathParts, newName].join('/');
 
-    const project = this.projectId();
+    const project = this._projectId();
     if (!project) return;
 
-    this.assetService.updateAsset(project.id, node.id, { virtual_path: newVirtualPath }).subscribe(() => {
-      this.refreshTree();
-    });
+    this.assetService
+      .updateAsset(project.id, node.id, { virtual_path: newVirtualPath })
+      .subscribe(() => {
+        this.refreshTree();
+      });
   }
 
   deleteAsset() {
@@ -225,18 +276,18 @@ export class AssetsExplorerComponent implements AfterViewInit {
     if (!node) return;
 
     if (confirm(`Are you sure you want to delete ${node.name}?`)) {
-      const project = this.projectId();
+      const project = this._projectId();
       if (!project) return;
 
       this.assetService.deleteAsset(project.id, node.id).subscribe(() => {
         if (this.editorState.selectedAsset()?.id === node.id) {
           this.editorState.setSelectedAsset(null);
         }
-        
+
         if (this.activeFolder()?.id === node.id) {
           this.activeFolder.set(this.treeData());
         }
-        
+
         this.refreshTree();
       });
     }
@@ -268,22 +319,28 @@ export class AssetsExplorerComponent implements AfterViewInit {
     return null;
   }
 
-  private buildAssetTree(assets: AssetResponse[], project: { id: string, name: string }): IAsset {
+  private buildAssetTree(
+    assets: AssetResponse[],
+    project: { id: string; name: string },
+  ): IAsset {
     const root: IAsset = {
       id: project.id,
       name: project.name,
       type: 'project',
       virtualPath: '',
       projectId: project.id,
-      children: []
+      children: [],
     };
 
     const nodeMap = new Map<string, IAsset>();
-    nodeMap.set('', root); 
+    nodeMap.set('', root);
 
-    assets.sort((a, b) => a.virtual_path.split('/').length - b.virtual_path.split('/').length);
+    assets.sort(
+      (a, b) =>
+        a.virtual_path.split('/').length - b.virtual_path.split('/').length,
+    );
 
-    assets.forEach(asset => {
+    assets.forEach((asset) => {
       const pathParts = asset.virtual_path.split('/');
       let parent = root;
       let currentPath = '';
@@ -300,7 +357,7 @@ export class AssetsExplorerComponent implements AfterViewInit {
             type: 'folder',
             virtualPath: currentPath,
             projectId: project.id,
-            children: []
+            children: [],
           };
           nodeMap.set(currentPath, childNode);
           parent.children!.push(childNode);
@@ -313,9 +370,9 @@ export class AssetsExplorerComponent implements AfterViewInit {
         name: asset.filename,
         type: this.mapAssetType(asset.asset_type),
         virtualPath: asset.virtual_path,
-        projectId: project.id
+        projectId: project.id,
       };
-      
+
       parent.children!.push(fileNode);
       nodeMap.set(asset.virtual_path, fileNode);
     });
@@ -323,8 +380,18 @@ export class AssetsExplorerComponent implements AfterViewInit {
     const sortChildren = (node: IAsset) => {
       if (node.children) {
         node.children.sort((a, b) => {
-          if ((a.type === 'folder' || a.type === 'project') && b.type !== 'folder' && b.type !== 'project') return -1;
-          if ((b.type === 'folder' || b.type === 'project') && a.type !== 'folder' && a.type !== 'project') return 1;
+          if (
+            (a.type === 'folder' || a.type === 'project') &&
+            b.type !== 'folder' &&
+            b.type !== 'project'
+          )
+            return -1;
+          if (
+            (b.type === 'folder' || b.type === 'project') &&
+            a.type !== 'folder' &&
+            a.type !== 'project'
+          )
+            return 1;
           return a.name.localeCompare(b.name);
         });
         node.children.forEach(sortChildren);
@@ -335,7 +402,9 @@ export class AssetsExplorerComponent implements AfterViewInit {
     return root;
   }
 
-  private mapAssetType(type: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene'): string {
+  private mapAssetType(
+    type: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene',
+  ): string {
     return type;
   }
 }

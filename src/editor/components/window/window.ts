@@ -6,7 +6,7 @@ import { Icon } from 'src/app/components/icon/icon';
 
 @Component({
   selector: 'editor-window',
-  imports: [MovableDirective, Icon,NgComponentOutlet],
+  imports: [MovableDirective, Icon, NgComponentOutlet],
   templateUrl: './window.html',
   styleUrl: './window.scss',
 })
@@ -14,14 +14,14 @@ export class AssetExplorerWindow {
   @Input() windowId!: string;
   @Input() windowtitle = '';
   @Input() windowIconName = '';
-  @Input() windowFooter = 'Footer text';
+  @Input() windowFooter = '';
   @Input() childComponentType!: Type<any>;
   @Input() childInputs?: Record<string, unknown>;
   @Input() isActive = false;
   @Input() isMaximized = false;
 
   constructor(private windowService: WindowService) {}
-  
+
   @HostListener('mousedown')
   onWindowClick() {
     this.windowService.focus(this.windowId);

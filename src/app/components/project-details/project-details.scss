@@ -10,6 +10,7 @@
   gap: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+  width: 100%;
 }
 
 .project-header {
@@ -128,9 +129,15 @@ textarea.form-input {
   color: #fff;
   background-color: #6c757d;
 
-  &.status-published { background-color: #28a745; }
-  &.status-draft { background-color: #007bff; }
-  &.status-archived { background-color: #6c757d; }
+  &.status-published {
+    background-color: #28a745;
+  }
+  &.status-draft {
+    background-color: #007bff;
+  }
+  &.status-archived {
+    background-color: #6c757d;
+  }
 }
 
 .btn {
@@ -146,8 +153,13 @@ textarea.form-input {
 .btn-primary {
   background-color: var(--editor-icon-button-selected-background);
   color: #fff;
-  &:hover { opacity: 0.9; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover {
+    opacity: 0.9;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .btn-secondary {
