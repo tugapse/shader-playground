@@ -1,1 +1,4 @@
-export DEMO_SONGS = 
+export class DemoSongs{
+
+    
+}

@@ -29,7 +29,13 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
   readonly snapResolution = 0.1; 
 
   tracks = Array.from({ length: this.numTracks }, (_, i) => ({ id: i }));
-
+readonly trackFrequencies = [
+  880.00, // Track 1: High Lead / Percussion Accent (A5)
+  440.00, // Track 2: Mid Melodic Pluck (A4)
+  220.00, // Track 3: Chord Root / Pad (A3)
+  110.00, // Track 4: Low Bass Engine (A2)
+  55.00   // Track 5: Deep Sub Growl (A1)
+];
   readonly presetColors = [
     'bg-rose-500 border-rose-400', 'bg-amber-500 border-amber-400', 'bg-sky-500 border-sky-400',
     'bg-indigo-500 border-indigo-400', 'bg-emerald-500 border-emerald-400', 'bg-purple-500 border-purple-400',
@@ -169,11 +175,17 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     const trackIndex = Math.max(0, Math.min(this.numTracks - 1, Math.floor((y - this.rulerHeight) / this.trackHeight)));
     const duration = this.dragPayload.data?.duration || 0.5;
 
+    // Map dynamic frequency based on tracked index
+    const targetedFreq = this.trackFrequencies[trackIndex];
+
     this.dragIndicator.set({
       left: (snappedTime * this.pixelsPerSecond()) + this.trackHeaderWidth,
       top: (trackIndex * this.trackHeight) + this.rulerHeight,
       width: duration * this.pixelsPerSecond()
     });
+
+    // Option: update your console log or pass text hints to see the frequency shift
+    console.log(`Targeting Track: ${trackIndex + 1} | Frequency: ${targetedFreq}Hz`);
   }
 
   onDragLeave() {
@@ -193,12 +205,29 @@ export class SoundMixerComponent implements AfterViewInit, OnDestroy {
     const snappedTime = Math.max(0, Math.round(rawTime / this.snapResolution) * this.snapResolution);
     const trackIndex = Math.max(0, Math.min(this.numTracks - 1, Math.floor((y - this.rulerHeight) / this.trackHeight)));
 
+    const targetFrequency = this.trackFrequencies[trackIndex];
+
     if (this.dragPayload.type === 'new') {
-      const newNote: SynthNote = { ...(this.dragPayload.data as SynthPreset), id: crypto.randomUUID(), startTime: snappedTime, trackIndex: trackIndex };
+      const dataPreset = this.dragPayload.data as SynthPreset;
+      const newNote: SynthNote = { 
+        ...dataPreset, 
+        id: crypto.randomUUID(), 
+        startTime: snappedTime, 
+        trackIndex: trackIndex,
+        // Keep original frequency if it's white noise, otherwise overwrite with track pitch
+        frequency: dataPreset.waveform === 'noise' ? dataPreset.frequency : targetFrequency
+      };
       this.playback.sequence.update(s => [...s, newNote]);
-    } else if (this.dragPayload.type === 'existing') {
+    } 
+    else if (this.dragPayload.type === 'existing') {
       const existingNote = this.dragPayload.data as SynthNote;
-      this.playback.sequence.update(s => s.map(n => n.id === existingNote.id ? { ...n, startTime: snappedTime, trackIndex: trackIndex } : n));
+      this.playback.sequence.update(s => s.map(n => n.id === existingNote.id ? { 
+        ...n, 
+        startTime: snappedTime, 
+        trackIndex: trackIndex,
+        frequency: n.waveform === 'noise' ? n.frequency : targetFrequency
+      } : n));
+      
       const el = document.querySelector(`[draggable="true"]`); 
       if (el) (el as HTMLElement).style.opacity = '1';
     }

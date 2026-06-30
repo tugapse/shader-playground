@@ -296,7 +296,7 @@ sortedSeq.forEach(note => {
     return new Blob([buffer], { type: "audio/wav" });
   }
 
- loadDemoSong(type: string, presets: SynthPreset[]) {
+loadDemoSong(type: string, presets: SynthPreset[]) {
     this.stopSequence();
     const kick = presets.find(p => p.name === 'Deep Kick')!;
     const snare = presets.find(p => p.name.includes('Snare'))!;
@@ -309,196 +309,202 @@ sortedSeq.forEach(note => {
     let idCounter = 0;
 
     if (type === 'techno') {
-      for (let i = 0; i < 16; i++) demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 0 });
-      for (let i = 0; i < 8; i++) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: i * 1.0 + 0.5, trackIndex: 1, pan: (i%2===0?-0.3:0.3) });
-      
-      const bassFreqs = [65.41, 65.41, 77.78, 87.31, 65.41, 65.41, 58.27, 49.00]; 
+      // Track 5 (55Hz): Driving Sub-Bass on off-beats
       for (let i = 0; i < 16; i++) {
-        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.5 + 0.25, frequency: bassFreqs[i % 8], duration: 0.2, trackIndex: 2 });
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: (i * 0.5) + 0.25, duration: 0.2, trackIndex: 4 });
       }
-      
-      [1.75, 3.75, 5.75, 7.25, 7.75].forEach((t, index) => {
-        demoSequence.push({ ...laser, id: `demo-${idCounter++}`, startTime: t, trackIndex: 4, pan: (index%2===0?-0.8:0.8) });
-      });
-    } 
-    else if (type === 'synthwave') {
-      const chords = [
-        [220.00, 261.63, 329.63, 440.00], [196.00, 246.94, 293.66, 392.00], 
-        [174.61, 220.00, 261.63, 349.23], [164.81, 196.00, 246.94, 329.63] 
-      ];
-
-      for (let bar = 0; bar < 4; bar++) {
-        const start = bar * 2.0; 
-        const chord = chords[bar];
-
-        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: start, frequency: chord[0] / 2, duration: 2.0, trackIndex: 4 });
-
-        for (let beat = 0; beat < 4; beat++) { 
-          const beatStart = start + beat * 0.5;
-          demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: beatStart, trackIndex: 0 });
-          if (beat % 2 !== 0) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: beatStart, trackIndex: 1 });
-          
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart + 0.25, frequency: chord[0] / 2, duration: 0.2, trackIndex: 2 });
-
-          for(let i = 0; i < 4; i++) {
-             demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: beatStart + i * 0.125, frequency: chord[i], duration: 0.1, trackIndex: 3, glideTime: 0.05 });
-          }
+      // Track 4 (110Hz): Mid-Bass rhythm matching the kick groove
+      for (let i = 0; i < 16; i += 2) {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.15, trackIndex: 3 });
+      }
+      // Track 3 (220Hz): Rhythmic Hypnotic Pluck on up-beats
+      for (let i = 0; i < 16; i++) {
+        if (i % 4 !== 0) {
+          demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: (i * 0.5) + 0.125, duration: 0.1, trackIndex: 2 });
         }
       }
+      // Track 2 (440Hz): Clean, snappy syncopated accents
+      [1.75, 3.75, 5.75, 7.75].forEach(t => {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: t, duration: 0.15, trackIndex: 1, delayMix: 0.5 });
+      });
+      // Track 1 (Noise/880Hz Bypass): White Noise Snare on beats 2 and 4
+      for (let i = 0; i < 8; i++) {
+        demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: (i * 1.0) + 0.5, trackIndex: 0 });
+      }
+    } 
+    else if (type === 'synthwave') {
+      // Track 5 (55Hz): Fast, driving 16th-note running bassline
+      for (let i = 0; i < 32; i++) {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.25, duration: 0.12, trackIndex: 4, distortionMix: 0.2 });
+      }
+      // Track 4 (110Hz): Octave mid-bass bounce
+      [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5].forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t + 0.125, duration: 0.1, trackIndex: 3 });
+      });
+      // Track 3 (220Hz): Sustained retro background pads
+      for (let bar = 0; bar < 4; bar++) {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 2.0, duration: 1.8, trackIndex: 2, chorusMix: 0.6 });
+      }
+      // Track 2 (440Hz): Fast, shimmering horizontal arpeggio pattern
+      for (let i = 0; i < 32; i += 2) {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: i * 0.25 + 0.125, duration: 0.1, trackIndex: 1, delayMix: 0.4 });
+      }
+      // Track 1 (880Hz): High-pitched retro laser effects to divide bars
+      [1.875, 3.875, 5.875, 7.875].forEach((t, idx) => {
+        demoSequence.push({ ...laser, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0, pan: idx % 2 === 0 ? -0.5 : 0.5 });
+      });
     }
     else if (type === 'ambient') {
-      const cMaj9 = [130.81, 196.00, 246.94, 293.66]; 
-      cMaj9.forEach(freq => demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: 0, frequency: freq, duration: 4.0, trackIndex: 4, pan: -0.5 }));
-      const fMaj7 = [87.31, 174.61, 220.00, 261.63]; 
-      fMaj7.forEach(freq => demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: 4.0, frequency: freq, duration: 4.0, trackIndex: 4, pan: 0.5 }));
-
-      [0, 0.4, 4.0, 4.4].forEach(t => demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, frequency: 40, duration: 0.6, trackIndex: 0 }));
-
-      const ambientPlucks = [ { t: 1.0, f: 523.25 }, { t: 2.5, f: 783.99 }, { t: 3.0, f: 987.77 }, { t: 5.0, f: 698.46 }, { t: 6.5, f: 1046.50 }, { t: 7.25, f: 880.00 } ];
-      ambientPlucks.forEach((p, index) => {
-        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: p.t, frequency: p.f, duration: 0.4, trackIndex: 3, delayMix: 0.7, reverbMix: 0.9, pan: index%2===0?-0.6:0.6 }); 
+      // Track 5 (55Hz): Generative, deep drones acting as slow root points
+      demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: 0.0, duration: 3.5, trackIndex: 4, reverbMix: 0.9 });
+      demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: 4.0, duration: 3.5, trackIndex: 4, reverbMix: 0.9, pan: -0.3 });
+      // Track 4 (110Hz): Counter-balancing low drone movement
+      demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: 2.0, duration: 4.0, trackIndex: 3, reverbMix: 0.8, pan: 0.3 });
+      // Track 3 (220Hz): Soft ambient chord pulse
+      [0.5, 2.5, 4.5, 6.5].forEach(t => {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: t, duration: 1.2, trackIndex: 2, chorusMix: 0.5 });
+      });
+      // Track 2 (440Hz): Sparse, echoed melodic pluck reflections
+      const reflectivePlucks = [1.0, 1.75, 3.25, 5.0, 5.75, 7.25];
+      reflectivePlucks.forEach((t, idx) => {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: t, duration: 0.4, trackIndex: 1, delayMix: 0.7, reverbMix: 0.8, pan: idx % 2 === 0 ? -0.6 : 0.6 });
+      });
+      // Track 1 (Noise/880Hz Bypass): Deep Kick filtered down to act as ambient pulses
+      [0.0, 3.0, 4.0, 7.0].forEach(t => {
+        demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, duration: 0.4, trackIndex: 0, cutoff: 400 });
       });
     }
     else if (type === 'house') {
-      for (let i = 0; i < 16; i++) demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 0 });
-      for (let i = 0; i < 8; i++) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: i * 1.0 + 0.5, trackIndex: 1, pan: 0.1 });
-
+      // Track 5 (55Hz): Sub thuds working with a classic 4-on-the-floor kick pattern
+      for (let i = 0; i < 16; i += 2) {
+        demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.3, trackIndex: 4 });
+      }
+      // Track 4 (110Hz): Bouncing Jack-style garage bass movement
+      [0.25, 0.75, 1.25, 2.25, 2.75, 3.25, 4.25, 5.25, 6.25, 6.75].forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t, duration: 0.15, trackIndex: 3, chorusMix: 0.3 });
+      });
+      // Track 3 (220Hz): Classic M1-style stab accents
+      [0.75, 1.75, 2.75, 3.75, 4.75, 5.75, 6.75, 7.75].forEach(t => {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: t, duration: 0.2, trackIndex: 2, reverbMix: 0.4 });
+      });
+      // Track 2 (440Hz): Swirling chord elements
       for (let bar = 0; bar < 4; bar++) {
-        const start = bar * 2.0;
-        const root = bar < 2 ? 82.41 : 110.00; 
-        
-        [0.25, 0.75, 1.25, 1.75].forEach(t => {
-           demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: start + t, frequency: root, duration: 0.15, trackIndex: 2 });
-        });
-        
-        const chord = bar < 2 ? [164.81, 196.00, 246.94, 293.66] : [220.00, 261.63, 329.63, 392.00]; 
-        
-        [0.5, 1.5].forEach(t => {
-           chord.forEach(freq => {
-              demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: start + t + 0.25, frequency: freq, duration: 0.2, trackIndex: 3, pan: bar%2===0?-0.4:0.4 });
-           });
-        });
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 2.0 + 0.5, duration: 1.0, trackIndex: 1, chorusMix: 0.5 });
+      }
+      // Track 1 (Noise/880Hz Bypass): Crisp open/closed hat layout replacements via short snared actions
+      for (let i = 0; i < 16; i++) {
+        if (i % 2 !== 0) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.08, trackIndex: 0, pan: 0.2 });
       }
     }
     else if (type === 'trance') {
-      const chords = [ 
-        [174.61, 207.65, 261.63, 349.23], 
-        [138.59, 174.61, 207.65, 277.18], 
-        [155.56, 196.00, 233.08, 311.13], 
-        [130.81, 155.56, 196.00, 261.63] 
-      ];
-
-      for (let bar = 0; bar < 4; bar++) {
-        const start = bar * 2.0;
-        const chord = chords[bar];
-        const root = chord[0] / 2; 
-
-        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: start, frequency: root, duration: 2.0, trackIndex: 4, reverbMix: 0.8 });
-        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: start, frequency: chord[1], duration: 2.0, trackIndex: 4, reverbMix: 0.8 });
-        
-        for (let beat = 0; beat < 4; beat++) {
-          const beatStart = start + beat * 0.5;
-          demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: beatStart, trackIndex: 0 });
-          
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart + 0.125, frequency: root, duration: 0.1, trackIndex: 2 });
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart + 0.250, frequency: root, duration: 0.1, trackIndex: 2 });
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart + 0.375, frequency: root, duration: 0.1, trackIndex: 2 });
-
-          const arpNotes = [chord[0], chord[2], chord[1], chord[3]];
-          for(let i = 0; i < 4; i++) {
-             demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: beatStart + i * 0.125, frequency: arpNotes[i], duration: 0.1, trackIndex: 3, delayMix: 0.6, glideTime: 0.05 });
-          }
-        }
+      // Track 5 (55Hz): Heavy driving sub foundation floor
+      for (let i = 0; i < 16; i++) {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.4, trackIndex: 4 });
       }
+      // Track 4 (110Hz): Rolling, driving 3-take bass triplets (Classic Trance Line)
+      for (let i = 0; i < 16; i++) {
+        const base = i * 0.5;
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: base + 0.125, duration: 0.1, trackIndex: 3 });
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: base + 0.250, duration: 0.1, trackIndex: 3 });
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: base + 0.375, duration: 0.1, trackIndex: 3 });
+      }
+      // Track 3 (220Hz): Epic background wall pads
+      for (let bar = 0; bar < 2; bar++) {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 4.0, duration: 3.8, trackIndex: 2, reverbMix: 0.8 });
+      }
+      // Track 2 (440Hz): Euphoric breakdown delay elements
+      for (let i = 0; i < 16; i++) {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.15, trackIndex: 1, delayMix: 0.6 });
+      }
+      // Track 1 (Noise/880Hz Bypass): Huge snare accents to build energy drops
+      [3.5, 3.75, 7.5, 7.75].forEach(t => {
+        demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: t, duration: 0.2, trackIndex: 0, reverbMix: 0.5 });
+      });
     }
     else if (type === 'dnb') {
-      const kickPositions = [0.0, 0.75, 2.0, 2.75, 4.0, 4.75, 6.0, 6.75];
-      const snarePositions = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5];
-      
-      kickPositions.forEach(t => demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0 }));
-      snarePositions.forEach(t => demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: t, trackIndex: 1 }));
-
-      const dnbBassNotes = [48.99, 48.99, 58.27, 58.27, 38.89, 38.89, 43.65, 43.65]; 
-      for (let i = 0; i < 8; i++) {
-        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 1.0, frequency: dnbBassNotes[i], duration: 0.9, trackIndex: 2, glideTime: 0.2, distortionMix: 0.2 });
-      }
-
-      const dnbPlucks = [392.00, 466.16, 587.33, 783.99, 587.33, 466.16, 440.00, 523.25]; 
-      for (let i = 0; i < 32; i++) {
-        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: i * 0.25, frequency: dnbPlucks[i % 8], duration: 0.15, trackIndex: 3, pan: (i % 2 === 0 ? -0.5 : 0.5), delayMix: 0.5 });
-      }
-    }
-    else if (type === 'lofi') {
-      const lofiKicks = [0.0, 1.2, 2.0, 3.2, 4.0, 5.2, 6.0, 7.2];
-      const lofiSnares = [1.0, 3.0, 5.0, 7.0];
-      
-      lofiKicks.forEach(t => demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, frequency: 45, trackIndex: 0 }));
-      lofiSnares.forEach(t => demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: t, trackIndex: 1, cutoff: 2500, reverbMix: 0.5 })); 
-
-      const chords = [
-        [130.81, 164.81, 196.00, 246.94], 
-        [130.81, 164.81, 196.00, 246.94],
-        [87.31, 130.81, 174.61, 220.00],  
-        [87.31, 130.81, 174.61, 220.00]
-      ];
-
-      for (let bar = 0; bar < 4; bar++) {
-        const start = bar * 2.0;
-        chords[bar].forEach((freq, index) => {
-          demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: start, frequency: freq, duration: 1.8, trackIndex: 4, reverbMix: 0.8, chorusMix: 0.6, pan: (index % 2 === 0 ? -0.3 : 0.3) });
-        });
-        
-        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: start + 0.2, frequency: chords[bar][0], duration: 1.4, trackIndex: 2, cutoff: 500, distortionMix: 0 });
-      }
-
-      const melody = [
-        { t: 0.5, f: 392.00 }, { t: 0.75, f: 440.00 }, { t: 1.5, f: 493.88 },
-        { t: 4.5, f: 523.25 }, { t: 4.75, f: 587.33 }, { t: 5.5, f: 659.25 }
-      ];
-      melody.forEach(m => {
-        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: m.t, frequency: m.f, duration: 0.3, trackIndex: 3, delayMix: 0.6, reverbMix: 0.7, pan: 0.2 });
+      // Track 5 (55Hz): Heavy, long sub-bass notes sliding under the fast breaks
+      [0.0, 1.5, 2.75, 4.0, 5.5, 6.75].forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t, duration: 0.8, trackIndex: 4, distortionMix: 0.3, glideTime: 0.15 });
       });
-    }
-    else if (type === 'synthpop') {
-      for (let i = 0; i < 16; i++) {
-        demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 0 });
-        if (i % 2 !== 0) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 1, reverbMix: 0.4 });
+      // Track 4 (110Hz): Fast rhythmic bass stabs emphasizing the complex syncopation
+      const bassStabs = [0.75, 1.25, 2.25, 3.5, 4.75, 5.25, 6.25, 7.5];
+      bassStabs.forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t, duration: 0.15, trackIndex: 3 });
+      });
+      // Track 3 (220Hz): Atmospheric mid-range pads providing space
+      for (let bar = 0; bar < 2; bar++) {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 4.0, duration: 3.5, trackIndex: 2, reverbMix: 0.6 });
       }
-
-      const baseRoots = [97.99, 87.31, 65.41, 58.27]; 
-      for (let bar = 0; bar < 4; bar++) {
-        const start = bar * 2.0;
-        const root = baseRoots[bar];
-        for (let beat = 0; beat < 4; beat++) {
-          const beatStart = start + beat * 0.5;
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart, frequency: root, duration: 0.2, trackIndex: 2, cutoff: 1200 });
-          demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: beatStart + 0.25, frequency: root * 2, duration: 0.2, trackIndex: 2, cutoff: 1200 });
+      // Track 2 (440Hz): Rapid, intricate Liquid-style arpeggiated rolls
+      for (let i = 0; i < 32; i++) {
+        if (i % 3 === 0 || i % 7 === 0) {
+          demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: i * 0.25, duration: 0.1, trackIndex: 1, delayMix: 0.4 });
         }
       }
-
-      const stringChords = [
-        [196.00, 246.94, 293.66], 
-        [174.61, 220.00, 261.63], 
-        [130.81, 164.81, 196.00], 
-        [116.54, 146.83, 174.61]  
-      ];
-      for (let bar = 0; bar < 4; bar++) {
-        stringChords[bar].forEach(freq => {
-          demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 2.0, frequency: freq, duration: 1.9, trackIndex: 4, chorusMix: 0.8, reverbMix: 0.5 });
-        });
-      }
-
-      const leadMelody = [
-        { t: 0.0, f: 587.33 }, { t: 0.5, f: 783.99 }, { t: 1.0, f: 739.99 }, { t: 1.5, f: 587.33 },
-        { t: 2.0, f: 659.25 }, { t: 2.5, f: 880.00 }, { t: 3.0, f: 783.99 }, { t: 3.5, f: 659.25 },
-        { t: 4.0, f: 523.25 }, { t: 4.5, f: 659.25 }, { t: 5.0, f: 587.33 }, { t: 5.5, f: 523.25 },
-        { t: 6.0, f: 466.16 }, { t: 6.5, f: 587.33 }, { t: 7.0, f: 523.25 }, { t: 7.5, f: 466.16 }
-      ];
-      leadMelody.forEach(note => {
-        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: note.t, frequency: note.f, duration: 0.45, trackIndex: 3, delayMix: 0.4, chorusMix: 0.7, pan: -0.2 });
+      // Track 1 (Noise/880Hz Bypass): High Speed Liquid Drum Break (Kick & Snare split)
+      const dnbKicks = [0.0, 0.75, 2.0, 2.5, 4.0, 4.75, 6.0, 6.5];
+      const dnbSnares = [0.5, 1.5, 2.25, 3.5, 4.5, 5.5, 6.25, 7.5];
+      
+      dnbKicks.forEach(t => demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0 }));
+      dnbSnares.forEach(t => demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0 }));
+    }
+    else if (type === 'lofi') {
+      // Track 5 (55Hz): Relaxed, warm electric sub groove nodes
+      [0.0, 1.0, 2.0, 3.5, 4.0, 5.0, 6.0, 7.5].forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t, duration: 0.4, trackIndex: 4, cutoff: 400 });
       });
+      // Track 4 (110Hz): Lazy walking counter-bass notes
+      [0.5, 1.5, 2.5, 4.5, 5.5, 6.5].forEach(t => {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: t + 0.25, duration: 0.2, trackIndex: 3 });
+      });
+      // Track 3 (220Hz): Dusty, highly filtered Rhodes-style backing chords
+      for (let bar = 0; bar < 4; bar++) {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 2.0, duration: 1.6, trackIndex: 2, chorusMix: 0.5, reverbMix: 0.6 });
+      }
+      // Track 2 (440Hz): Nostalgic, laidback melodic pluck motifs
+      const lofiMelody = [0.5, 1.25, 2.5, 3.0, 4.5, 5.25, 6.5, 7.0];
+      lofiMelody.forEach((t, i) => {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: t, duration: 0.3, trackIndex: 1, chorusMix: 0.4, pan: i % 2 === 0 ? -0.2 : 0.2 });
+      });
+      // Track 1 (Noise/880Hz Bypass): Unquantized lazy kick-snare patterns
+      [0.0, 1.2, 2.0, 3.2, 4.0, 5.2, 6.0, 7.2].forEach(t => demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0 }));
+      [1.0, 3.0, 5.0, 7.0].forEach(t => demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: t, trackIndex: 0, cutoff: 2000 }));
+    }
+    else if (type === 'synthpop') {
+      // Track 5 (55Hz): Pumping, straight eighth-note electro bassline drive
+      for (let i = 0; i < 16; i++) {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.5, duration: 0.25, trackIndex: 4, distortionMix: 0.15 });
+      }
+      // Track 4 (110Hz): Offbeat mid-frequency bass layers for standard pop energy
+      for (let i = 0; i < 16; i++) {
+        demoSequence.push({ ...bass, id: `demo-${idCounter++}`, startTime: i * 0.5 + 0.25, duration: 0.2, trackIndex: 3 });
+      }
+      // Track 3 (220Hz): Bright vintage chorus string pads
+      for (let bar = 0; bar < 2; bar++) {
+        demoSequence.push({ ...pad, id: `demo-${idCounter++}`, startTime: bar * 4.0, duration: 3.75, trackIndex: 2, chorusMix: 0.7 });
+      }
+      // Track 2 (440Hz): Catchy, syncopated lead hooks
+      const popMelody = [0.0, 0.75, 1.5, 2.0, 2.5, 3.25, 4.0, 4.75, 5.5, 6.0, 6.5, 7.25];
+      popMelody.forEach(t => {
+        demoSequence.push({ ...pluck, id: `demo-${idCounter++}`, startTime: t, duration: 0.22, trackIndex: 1, delayMix: 0.3 });
+      });
+      // Track 1 (Noise/880Hz Bypass): Consistent LINN-style 4/4 electronic drum mapping
+      for (let i = 0; i < 16; i++) {
+        if (i % 2 === 0) demoSequence.push({ ...kick, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 0 });
+        if (i % 4 === 2) demoSequence.push({ ...snare, id: `demo-${idCounter++}`, startTime: i * 0.5, trackIndex: 0, reverbMix: 0.4 });
+      }
     }
 
-    this.sequence.set(demoSequence);
+    // --- TRACK PITCH INTEGRATION MATRIX LAYER ---
+    const trackFrequencies = [880.00, 440.00, 220.00, 110.00, 55.00];
+    const fineTunedSequence = demoSequence.map(note => {
+      if (note.waveform === 'noise') return note;
+      return {
+        ...note,
+        frequency: trackFrequencies[note.trackIndex] ?? note.frequency
+      };
+    });
+
+    this.sequence.set(fineTunedSequence);
   }
 }
