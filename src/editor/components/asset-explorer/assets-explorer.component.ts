@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { signal, inject, ChangeDetectionStrategy, Component, effect, HostListener } from '@angular/core';
+import { signal, inject, ChangeDetectionStrategy, Component, effect, HostListener, AfterViewInit } from '@angular/core';
 import { EditorStateService } from '../../services/editor-state.service';
 import { IAsset } from '../../interfaces/asset.interface';
 import { AssetService } from '../../../app/api/services/asset.service';
@@ -14,7 +14,7 @@ import { AssetResponse } from '../../../app/api/models/omega-api.models';
   styleUrl: './assets-explorer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AssetsExplorerComponent {
+export class AssetsExplorerComponent implements AfterViewInit {
   private assetService = inject(AssetService);
   private editorState = inject(EditorStateService);
 
@@ -40,6 +40,11 @@ export class AssetsExplorerComponent {
         this.refreshTree();
       }
     });
+  }
+
+
+  ngAfterViewInit(): void {
+    this.refreshTree();
   }
 
   @HostListener('document:click')

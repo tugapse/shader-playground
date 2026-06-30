@@ -1,14 +1,14 @@
 <div class="mixer-layout">
   <aside class="mixer-sidebar">
     <div class="sidebar-brand">
-      <h1 class="brand-title">Omega <span class="brand-tag">Mixer</span></h1>
+      <h1 class="brand-title">Sound <span class="brand-tag">Mixer</span></h1>
       <p class="brand-subtitle">Drag sounds to the timeline</p>
     </div>
 
     <app-preset-list
       [presets]="presets()"
       (dragStart)="onDragStartPreset($event.event, $event.preset)"
-      (preview)="previewPreset($event)"
+      (preview)="playback.previewPreset($event)"
       (edit)="openDesigner($event)"
       (add)="openDesigner()"
     ></app-preset-list>
@@ -20,23 +20,26 @@
     <header class="workspace-toolbar">
       <div class="toolbar-group-left">
         <button
-          (click)="playSequence()"
+          (click)="triggerPlay()"
           class="btn-transport btn-play"
-          [class.active-ring]="isPlaying && !isPaused"
+          [class.active-ring]="playback.isPlaying() && !playback.isPaused()"
         >
           <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg> Play
         </button>
         <button
-          (click)="pauseSequence()"
+          (click)="playback.pauseSequence()"
           class="btn-transport btn-pause"
-          [class.active-ring]="isPaused"
+          [class.active-ring]="playback.isPaused()"
         >
           <svg viewBox="0 0 24 24">
             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
           </svg>
           Pause
         </button>
-        <button (click)="stopSequence()" class="btn-transport btn-stop">
+        <button
+          (click)="playback.stopSequence()"
+          class="btn-transport btn-stop"
+        >
           <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z" /></svg> Stop
         </button>
         <div class="toolbar-divider"></div>
@@ -54,11 +57,11 @@
 
       <div class="toolbar-group-right">
         <button
-          (click)="exportWav()"
-          [disabled]="isExporting()"
+          (click)="playback.exportWav()"
+          [disabled]="playback.isExporting()"
           class="btn-export"
         >
-          @if (isExporting()) {
+          @if (playback.isExporting()) {
             <span class="animate-pulse">Rendering...</span>
           } @else {
             <span>Export WAV</span>
@@ -77,7 +80,7 @@
             <option value="synthpop">Retro Synth-Pop</option>
           </select>
           <button
-            (click)="loadDemoSong(demoSelect.value)"
+            (click)="playback.loadDemoSong(demoSelect.value, presets())"
             class="btn-text-action sky"
           >
             Load
@@ -93,6 +96,7 @@
       #timelineContainer
       class="timeline-viewport"
       (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
       (drop)="onDrop($event)"
     >
       <div class="timeline-canvas-area" [style.width.px]="timelineWidth()">
@@ -134,7 +138,7 @@
           </div>
         }
 
-        @for (note of sequence(); track note.id) {
+        @for (note of playback.sequence(); track note.id) {
           <div
             draggable="true"
             (dragstart)="onDragStartExistingNote($event, note)"
@@ -152,28 +156,34 @@
           >
             <div class="note-header">
               <span class="note-title">{{ note.name }}</span>
-              <button
+
+              <app-icon
                 (click)="removeNote(note.id); $event.stopPropagation()"
                 class="btn-note-delete"
                 title="Delete Note"
               >
-                <svg
-                  class="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
+                    stroke-width="2.5"
                     d="M6 18L18 6M6 6l12 12"
                   ></path>
                 </svg>
-              </button>
+              </app-icon>
             </div>
             <div class="note-waveform-decorator"></div>
           </div>
+        }
+
+        @if (dragIndicator(); as indicator) {
+          <div
+            class="drag-drop-landing-indicator"
+            [style.left.px]="indicator.left"
+            [style.top.px]="indicator.top"
+            [style.width.px]="indicator.width"
+            [style.height.px]="trackHeight"
+          ></div>
         }
 
         <div #playhead class="playhead-line" [style.left.px]="trackHeaderWidth">
@@ -192,7 +202,7 @@
       [presetColors]="presetColors"
       (close)="closeDesigner()"
       (save)="savePreset($event)"
-      (preview)="previewPreset($event)"
+      (preview)="playback.previewPreset($event)"
     ></app-sound-designer>
   }
 </div>

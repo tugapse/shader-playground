@@ -1,5 +1,5 @@
 /**
- * Framework-agnostic Web Audio Engine Core for JARVIS AI.
+ * Web Audio Engine Core.
  * Handles the master graph, sub-mix routing, and global effects return buses.
  * Configured for early-load graph construction with deferred gesture activation.
  */
@@ -142,7 +142,7 @@ export class AudioEngine {
 
   /**
    * Generates a procedurally synthesized stereo impulse response buffer for the reverb unit.
-   * Eliminates the need to load large external impulse WAV files on startup.
+   * Note: Eliminates the need to load large external impulse WAV files on startup.
    */
   private generateSyntheticImpulseResponse(duration: number, decay: number): AudioBuffer {
     const sampleRate = this.ctx.sampleRate;

@@ -393,6 +393,45 @@ $track-header-width: 96px;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
     pointer-events: none;
   }
+  .btn-note-delete {
+    opacity: 0.5;
+    padding: 6px;
+    visibility: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    transition: opacity 0.15s ease, visibility 0.15s ease, background-color 0.1s ease, color 0.1s ease;
+
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    &:hover { 
+      background-color: #ef4444; // Bright Red highlight on close focus
+      color: #ffffff; 
+    }
+  }
+
+}
+
+.drag-drop-landing-indicator {
+  position: absolute;
+  pointer-events: none; /* <-- Verify this is exactly like this */
+  background-color: rgba(14, 165, 233, 0.25); /* Bumped opacity to see it better */
+  border: 2px dashed var(--editor-panel-H-color, #0ea5e9);
+  border-radius: 0.375rem;
+  z-index: 50; /* Raise it above the tracks and notes completely */
 }
 
 .playhead-line {
@@ -420,65 +459,33 @@ $track-header-width: 96px;
 }
 
 /* Rose */
-.bg-rose-500 {
-  background-color: #f43f5e;
-}
-.border-rose-400 {
-  border-color: #fb7185;
-}
+.bg-rose-500 { background-color: #f43f5e; }
+.border-rose-400 { border-color: #fb7185; }
 
 /* Amber */
-.bg-amber-500 {
-  background-color: #f59e0b;
-}
-.border-amber-400 {
-  border-color: #fbbf24;
-}
+.bg-amber-500 { background-color: #f59e0b; }
+.border-amber-400 { border-color: #fbbf24; }
 
 /* Sky */
-.bg-sky-500 {
-  background-color: #0ea5e9;
-}
-.border-sky-400 {
-  border-color: #38bdf8;
-}
+.bg-sky-500 { background-color: #0ea5e9; }
+.border-sky-400 { border-color: #38bdf8; }
 
 /* Indigo */
-.bg-indigo-500 {
-  background-color: #6366f1;
-}
-.border-indigo-400 {
-  border-color: #818cf8;
-}
+.bg-indigo-500 { background-color: #6366f1; }
+.border-indigo-400 { border-color: #818cf8; }
 
 /* Emerald */
-.bg-emerald-500 {
-  background-color: #10b981;
-}
-.border-emerald-400 {
-  border-color: #34d399;
-}
+.bg-emerald-500 { background-color: #10b981; }
+.border-emerald-400 { border-color: #34d399; }
 
 /* Purple */
-.bg-purple-500 {
-  background-color: #a855f7;
-}
-.border-purple-400 {
-  border-color: #c084fc;
-}
+.bg-purple-500 { background-color: #a855f7; }
+.border-purple-400 { border-color: #c084fc; }
 
 /* Fuchsia */
-.bg-fuchsia-500 {
-  background-color: #d946ef;
-}
-.border-fuchsia-400 {
-  border-color: #e879f9;
-}
+.bg-fuchsia-500 { background-color: #d946ef; }
+.border-fuchsia-400 { border-color: #e879f9; }
 
 /* Cyan */
-.bg-cyan-500 {
-  background-color: #06b6d4;
-}
-.border-cyan-400 {
-  border-color: #22d3ee;
-}
+.bg-cyan-500 { background-color: #06b6d4; }
+.border-cyan-400 { border-color: #22d3ee; }

@@ -1,8 +1,3 @@
-/**
- * Decoupled, Hybrid Synthesis and Sampler Voice Factory.
- * Instantiates low-latency, modular synth voices and pitch-shifted sampler voices.
- */
-
 import { AudioCache } from './audio-cache';
 
 export interface VoiceTriggerOptions {
@@ -22,6 +17,9 @@ export interface VoiceTriggerOptions {
 }
 
 export class VoiceFactory {
+  private noiseBuffer: AudioBuffer | null = null;
+  private distortionCurves = new Map<number, Float32Array>();
+
   constructor(
     private audioContext: AudioContext,
     private audioCache: AudioCache,
@@ -30,9 +28,6 @@ export class VoiceFactory {
     private delayBus?: AudioNode
   ) {}
 
-  /**
-   * Spawns a procedural synthesizer voice.
-   */
   public triggerSynthVoice(
     waveform: OscillatorType, 
     note: any, 
@@ -45,15 +40,13 @@ export class VoiceFactory {
     const osc = ctx.createOscillator();
     osc.type = waveform;
 
-    // Apply glide / portamento
-    if (note.glideTime > 0 && prevFrequency !== undefined) {
+    if (note.glideTime > 0 && prevFrequency !== undefined && prevFrequency > 0 && note.frequency > 0) {
       osc.frequency.setValueAtTime(prevFrequency, startTime);
       osc.frequency.exponentialRampToValueAtTime(note.frequency, startTime + note.glideTime);
     } else {
       osc.frequency.setValueAtTime(note.frequency, startTime);
     }
 
-    // Apply LFO modulation
     if (note.lfoDepth > 0) {
       const lfo = ctx.createOscillator();
       const lfoGain = ctx.createGain();
@@ -74,9 +67,6 @@ export class VoiceFactory {
     return osc;
   }
 
-  /**
-   * Spawns a noise voice for snare/percussion modeling.
-   */
   public triggerNoiseVoice(note: any, startTime: number): AudioBufferSourceNode {
     const ctx = this.audioContext;
     const dest = this.createSubGraph(note, startTime, note.duration, true);
@@ -92,15 +82,11 @@ export class VoiceFactory {
     return source;
   }
 
-  /**
-   * Spawns a pitch-shifted, cache-driven Sampler Voice.
-   * Formula: playbackRate = targetFrequency / rootFrequency
-   */
   public triggerSamplerVoice(
     sampleId: string, 
     note: any, 
     startTime: number, 
-    rootFrequency = 261.63 // Middle C default
+    rootFrequency = 261.63
   ): AudioBufferSourceNode {
     const ctx = this.audioContext;
     const sampleBuffer = this.audioCache.get(sampleId);
@@ -110,7 +96,6 @@ export class VoiceFactory {
     const source = ctx.createBufferSource();
     source.buffer = sampleBuffer;
 
-    // Pitch shift sample by adjusting playback speed relative to root pitch
     const targetPlaybackRate = note.frequency / rootFrequency;
     source.playbackRate.setValueAtTime(targetPlaybackRate, startTime);
 
@@ -121,9 +106,6 @@ export class VoiceFactory {
     return source;
   }
 
-  /**
-   * Builds the envelope, filtering, panning, and parallel effects send lines for a voice.
-   */
   private createSubGraph(
     note: any, 
     startTime: number, 
@@ -143,7 +125,6 @@ export class VoiceFactory {
 
     panner.pan.setValueAtTime(note.pan || 0, startTime);
 
-    // Apply ADSR Envelope
     const attack = isNoise ? 0.005 : 0.02;
     const release = 0.1;
     const peakVolume = note.volume !== undefined ? note.volume * 0.8 : 0.8;
@@ -153,12 +134,10 @@ export class VoiceFactory {
     envelopeGain.gain.setValueAtTime(peakVolume, Math.max(startTime + attack, noteEnd - release));
     envelopeGain.gain.linearRampToValueAtTime(0.001, noteEnd);
 
-    // Connect the local graph
     envelopeGain.connect(filter);
     filter.connect(panner);
     panner.connect(this.routingDestination);
 
-    // Parallel effects sends
     this.routeParallelSends(note, panner, startTime);
 
     return envelopeGain;
@@ -183,7 +162,7 @@ export class VoiceFactory {
 
     if (note.distortionMix > 0) {
       const shaper = ctx.createWaveShaper();
-      shaper.curve = this.makeDistortionCurve(note.distortionMix * 100);
+      shaper.curve = this.makeDistortionCurve(note.distortionMix);
       shaper.oversample = '4x';
       
       const distSend = ctx.createGain();
@@ -196,6 +175,8 @@ export class VoiceFactory {
   }
 
   private getWhiteNoiseBuffer(): AudioBuffer {
+    if (this.noiseBuffer) return this.noiseBuffer;
+
     const sampleRate = this.audioContext.sampleRate;
     const bufferSize = sampleRate * 2.0;
     const buffer = this.audioContext.createBuffer(1, bufferSize, sampleRate);
@@ -205,18 +186,26 @@ export class VoiceFactory {
       data[i] = Math.random() * 2 - 1;
     }
     
+    this.noiseBuffer = buffer;
     return buffer;
   }
 
   private makeDistortionCurve(amount: number): Float32Array<ArrayBuffer> {
-    const k = amount;
-    const n_samples = 44100;
+    if (this.distortionCurves.has(amount)) {
+      return this.distortionCurves.get(amount)! as Float32Array<ArrayBuffer>;
+    }
+
+    const k = amount * 100;
+    const n_samples = 2048; // Optimized resolution
     const curve = new Float32Array(n_samples);
     const deg = Math.PI / 180;
+    
     for (let i = 0; i < n_samples; ++i) {
-      const x = i * 2 / n_samples - 1;
-      curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+      const x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
     }
+    
+    this.distortionCurves.set(amount, curve);
     return curve;
   }
 }

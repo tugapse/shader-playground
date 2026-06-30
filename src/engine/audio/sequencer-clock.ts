@@ -1,34 +1,22 @@
-/**
- * Off-thread, High-Precision Web Audio Sequencer Clock.
- * Uses an inline Web Worker timer to bypass main thread browser throttling.
- */
-
 export interface ClockConfig {
   bpm: number;
-  ticksPerBeat: number; // Resolution (e.g., 4 for 16th notes per beat)
-  lookaheadMs: number;  // Distance into the future to schedule audio nodes (e.g., 75ms)
-  overlapMs: number;    // Internal timer polling interval (e.g., 25ms)
+  ticksPerBeat: number;
+  lookaheadMs: number;
+  overlapMs: number;
 }
 
 export class SequencerClock {
   private worker: Worker | null = null;
   private isRunning = false;
-  
-  // Timing Track Pointers
   private currentTick = 0;
-  private nextTickTime = 0; // Relative context timeline tracker
-
-  // Event Subscription Hook
+  private nextTickTime = 0;
   private onScheduleCallback: ((tick: number, time: number, stepDuration: number) => void) | null = null;
 
   constructor(
     private audioContext: AudioContext,
-    private config: ClockConfig = { bpm: 120, ticksPerBeat: 4, lookaheadMs: 75.0, overlapMs: 25.0 }
+    private config: ClockConfig = { bpm: 120, ticksPerBeat: 4, lookaheadMs: 150.0, overlapMs: 35.0 }
   ) {}
 
-  /**
-   * Initializes the high-precision background clock loop.
-   */
   public start(callback: (tick: number, time: number, stepDuration: number) => void): void {
     if (this.isRunning) return;
 
@@ -36,15 +24,13 @@ export class SequencerClock {
     this.isRunning = true;
     
     this.currentTick = 0;
-    this.nextTickTime = this.audioContext.currentTime;
+    // Safe timing offset to ensure first ticks don't schedule in the past
+    this.nextTickTime = this.audioContext.currentTime + 0.05;
 
     this.spawnWorker();
     this.worker?.postMessage('start');
   }
 
-  /**
-   * Halts the background scheduler.
-   */
   public stop(): void {
     if (!this.isRunning) return;
     
@@ -66,18 +52,11 @@ export class SequencerClock {
     return this.currentTick;
   }
 
-  /**
-   * Calculates the raw step time based on the active tempo coefficient.
-   */
   private getStepDuration(): number {
     const secondsPerBeat = 60.0 / this.config.bpm;
-    return secondsPerBeat / this.config.ticksPerBeat; // Length of a single division
+    return secondsPerBeat / this.config.ticksPerBeat;
   }
 
-  /**
-   * High-accuracy scheduler loop.
-   * Runs inside the background worker thread tick to evaluate if steps must be scheduled.
-   */
   private scheduleAhead(): void {
     const stepDuration = this.getStepDuration();
     const lookaheadSec = this.config.lookaheadMs / 1000.0;
@@ -95,10 +74,6 @@ export class SequencerClock {
     this.currentTick++;
   }
 
-  /**
-   * Spawns an inline, zero-latency Web Worker using a Blob URL wrapper.
-   * Keeps background performance completely decoupled from main thread rendering.
-   */
   private spawnWorker(): void {
     const workerCode = `
       let timerId = null;
@@ -126,6 +101,6 @@ export class SequencerClock {
       }
     };
 
-    URL.revokeObjectURL(url); // Clean browser pointer allocations
+    URL.revokeObjectURL(url);
   }
 }

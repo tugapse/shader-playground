@@ -49,7 +49,7 @@ export class AudioEngineDiagnostics {
     
     console.log(`✅ AudioContext active at sample rate: ${ctx.sampleRate}Hz`);
     
-    this.engine.setMasterVolume(0.5);
+    this.engine.setMasterVolume(0.9);
     console.log('✅ Master gain configured to 50%');
   }
 
@@ -79,7 +79,7 @@ export class AudioEngineDiagnostics {
     console.log('Testing procedural voice factory pathways...');
     const ctx = this.engine.getContext()!;
     const now = ctx.currentTime;
-
+ 
     // Trigger a clean dry note instantly
     this.factory.triggerSynthVoice('sine', {
       frequency: 440.00,
@@ -92,7 +92,7 @@ export class AudioEngineDiagnostics {
     // Trigger a wet delay note on the right channel 250ms later
     this.factory.triggerSynthVoice('sawtooth', {
       frequency: 220.00,
-      duration: 0.3,
+      duration: 0.5,
       volume: 0.3,
       cutoff: 800,
       pan: 0.5,

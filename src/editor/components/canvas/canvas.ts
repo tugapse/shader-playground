@@ -45,7 +45,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   private accumulatedBrowserTime = 0;
   private rafCount = 0;
   
-  private readonly targetFps = 144;
+  private readonly targetFps = 60;
   private readonly frameInterval = 1000 / this.targetFps;
   private destroy$ = new Subject<void>();
 
