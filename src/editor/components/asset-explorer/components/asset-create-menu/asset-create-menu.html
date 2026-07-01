@@ -1,0 +1,34 @@
+<ng-template #menuNodeTemplate let-items="items">
+  <ul class="create-menu-list">
+    @for (item of items; track item.label) {
+      <li
+        class="create-menu-item"
+        [class.has-children]="!!item.children"
+        (click)="handleAction($event, item.action)"
+      >
+        <span class="item-label">
+          <span class="icon-space">{{ item.icon || "" }}</span>
+          {{ item.label }}
+        </span>
+
+        @if (item.children) {
+          <span class="chevron">▶</span>
+          <div class="sub-menu">
+            <ng-container
+              *ngTemplateOutlet="
+                menuNodeTemplate;
+                context: { items: item.children }
+              "
+            ></ng-container>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+</ng-template>
+
+<div class="create-menu-dropdown">
+  <ng-container
+    *ngTemplateOutlet="menuNodeTemplate; context: { items: menuData }"
+  ></ng-container>
+</div>

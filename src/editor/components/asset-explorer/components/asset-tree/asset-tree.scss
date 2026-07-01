@@ -1,0 +1,49 @@
+.asset-tree-root {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-node-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: var(--editor-panel-background-50);
+  }
+
+  &.selected {
+    background-color: var(--editor-panel-background-10);
+    color: var(--editor-panel-header-title-color);
+  }
+
+  .tree-node-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+
+    i {
+      font-style: normal;
+    }
+  }
+
+  .tree-node-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.tree-node-children {
+  padding-left: 16px; /* Indentation for nested folders */
+}

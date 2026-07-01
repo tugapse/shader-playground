@@ -1,4 +1,19 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, NgZone, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  NgZone,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Renderer2,
+  AfterViewInit,
+} from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
 import { Camera, CanvasViewport, cleanLastFrame, Engine, Scene } from '@engine';
 import { Subject, fromEvent } from 'rxjs';
@@ -17,7 +32,7 @@ export interface EngineStats {
   imports: [],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   @Input() scene!: Scene;
@@ -26,7 +41,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   @Output() stats = new EventEmitter<EngineStats>();
 
   @ViewChild('glCanvas') private glCanvas!: ElementRef<HTMLCanvasElement>;
-  
+
   public gl!: WebGL2RenderingContext | null;
   public gameEngine: Engine;
 
@@ -36,7 +51,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   private lastFpsUpdateTime = 0;
   private frameCount = 0;
   private animationFrameId: number | null = null;
-  
+
   private accumulatedFrameTime = 0;
   private accumulatedUpdateTime = 0;
   private accumulatedRenderTime = 0;
@@ -44,29 +59,33 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   private lastRafEndTime = 0;
   private accumulatedBrowserTime = 0;
   private rafCount = 0;
-  
+
   private readonly targetFps = 60;
   private readonly frameInterval = 1000 / this.targetFps;
   private destroy$ = new Subject<void>();
 
   constructor(
-    private editorService: EditorService, 
-    private ngZone: NgZone, 
-    private renderer: Renderer2
+    private editorService: EditorService,
+    private ngZone: NgZone,
+    private renderer: Renderer2,
   ) {
     this.gameEngine = new Engine();
-    this.editorService.onCanvasRequestResize.pipe(takeUntil(this.destroy$)).subscribe(() => this.resizeCanvas(true));
-    this.editorService.onCanvasRequestReset.pipe(takeUntil(this.destroy$)).subscribe(() => { 
-      this.disposeWebGL(); 
-      this.initWebGL(); 
-    });
+    this.editorService.onCanvasRequestResize
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.resizeCanvas(true));
+    this.editorService.onCanvasRequestReset
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.disposeWebGL();
+        this.initWebGL();
+      });
   }
 
   ngAfterViewInit(): void {
     this.initWebGL();
     this.gameEngine.initialize(this.canvasElement);
     this.setupWindowEvents();
-    
+
     this.ngZone.runOutsideAngular(() => {
       this.animationFrameId = requestAnimationFrame(this.render.bind(this));
     });
@@ -76,8 +95,10 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['scene'].currentValue !== this.scene) {
       const newScene: Scene = changes['scene'].currentValue;
-      if (changes['scene'].previousValue) changes['scene'].previousValue.destroy();
-      if (this.gl && this.canvasElement) newScene.setGlRenderingContext(this.gl);
+      if (changes['scene'].previousValue)
+        changes['scene'].previousValue.destroy();
+      if (this.gl && this.canvasElement)
+        newScene.setGlRenderingContext(this.gl);
       this.resizeCanvas(true);
     }
   }
@@ -96,11 +117,10 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   }
 
   public render(timestamp: number): void {
-
     // Measure the gap since the end of the last render call
     const rafStart = performance.now();
     if (this.lastRafEndTime > 0) {
-      this.accumulatedBrowserTime += (rafStart - this.lastRafEndTime);
+      this.accumulatedBrowserTime += rafStart - this.lastRafEndTime;
     }
     this.rafCount++;
 
@@ -124,11 +144,10 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     const timeSinceLastDraw = timestamp - this.lastDrawTime;
     let currentRenderTime = 0;
     this.editorService.onUpdateFrame.next(delta);
-    
+
     if (timeSinceLastDraw >= this.frameInterval) {
       this.lastDrawTime = timestamp - (timeSinceLastDraw % this.frameInterval);
-      
-      
+
       if (this.gl && this.canvasElement) {
         const renderStart = performance.now();
         this.scene.draw();
@@ -137,7 +156,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
       }
       this.frameCount++;
 
-      this.accumulatedFrameTime += (currentUpdateTime + currentRenderTime);
+      this.accumulatedFrameTime += currentUpdateTime + currentRenderTime;
       this.accumulatedUpdateTime += currentUpdateTime;
       this.accumulatedRenderTime += currentRenderTime;
     }
@@ -149,35 +168,37 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
       const avgFrameTime = this.accumulatedFrameTime / this.frameCount;
       const avgUpdateTime = this.accumulatedUpdateTime / this.frameCount;
       const avgRenderTime = this.accumulatedRenderTime / this.frameCount;
-      
+
       // Calculate overhead average based on total rAF cycles, not just drawn frames
       const avgBrowserTime = this.accumulatedBrowserTime / this.rafCount;
 
-      this.ngZone.run(() => this.stats.emit({
-        fps: actualFps,
-        frameTimeMs: Number(avgFrameTime.toFixed(2)),
-        updateTimeMs: Number(avgUpdateTime.toFixed(2)),
-        renderTimeMs: Number(avgRenderTime.toFixed(2)),
-        browserTimeMs: Number(avgBrowserTime.toFixed(2))
-      }));
+      this.ngZone.run(() =>
+        this.stats.emit({
+          fps: actualFps,
+          frameTimeMs: Number(avgFrameTime.toFixed(2)),
+          updateTimeMs: Number(avgUpdateTime.toFixed(2)),
+          renderTimeMs: Number(avgRenderTime.toFixed(2)),
+          browserTimeMs: Number(avgBrowserTime.toFixed(2)),
+        }),
+      );
 
       // Reset counters
       this.frameCount = 0;
       this.accumulatedFrameTime = 0;
       this.accumulatedUpdateTime = 0;
       this.accumulatedRenderTime = 0;
-      
+
       this.rafCount = 0;
       this.accumulatedBrowserTime = 0;
-      
+
       this.lastFpsUpdateTime = timestamp;
     }
 
     this.cleanInput();
     this.animationFrameId = requestAnimationFrame(this.render.bind(this));
-    
+
     // Record the exact exit time of the execution context
-    this.lastRafEndTime = performance.now(); 
+    this.lastRafEndTime = performance.now();
   }
 
   private cleanInput(): void {
@@ -188,11 +209,11 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     this.ngZone.runOutsideAngular(() => {
       fromEvent(window, 'resize')
         .pipe(debounceTime(50), takeUntil(this.destroy$))
-        .subscribe(() => this.resizeCanvas());
+        .subscribe(() => this.resizeCanvas(true));
 
       fromEvent(this.glCanvas.nativeElement, 'contextmenu')
         .pipe(takeUntil(this.destroy$))
-        .subscribe(e => e.preventDefault());
+        .subscribe((e) => e.preventDefault());
     });
   }
 
@@ -215,13 +236,25 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
 
   private resizeCanvas(force = false): void {
     if (!this.glCanvas?.nativeElement) return;
-    
+
     const displayWidth = this.glCanvas.nativeElement.clientWidth;
     const displayHeight = this.glCanvas.nativeElement.clientHeight;
 
-    if (force || this.canvasElement.width !== displayWidth || this.canvasElement.height !== displayHeight) {
-      this.renderer.setAttribute(this.canvasElement, 'width', displayWidth.toString());
-      this.renderer.setAttribute(this.canvasElement, 'height', displayHeight.toString());
+    if (
+      force ||
+      this.canvasElement.width !== displayWidth ||
+      this.canvasElement.height !== displayHeight
+    ) {
+      this.renderer.setAttribute(
+        this.canvasElement,
+        'width',
+        displayWidth.toString(),
+      );
+      this.renderer.setAttribute(
+        this.canvasElement,
+        'height',
+        displayHeight.toString(),
+      );
       this.gl?.viewport(0, 0, displayWidth, displayHeight);
       CanvasViewport.rendererWidth = displayWidth;
       CanvasViewport.rendererHeight = displayHeight;
@@ -229,7 +262,10 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     }
   }
 
-  private updateCameraAspectRatio(displayWidth: number, displayHeight: number): void {
+  private updateCameraAspectRatio(
+    displayWidth: number,
+    displayHeight: number,
+  ): void {
     if (Camera.mainCamera) {
       Camera.mainCamera.aspectRatio = displayWidth / displayHeight;
       Camera.mainCamera.updateProjectionMatrix();

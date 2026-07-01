@@ -1,0 +1,32 @@
+.context-menu-wrapper {
+  position: absolute; /* Changed from fixed to bypass transform issues */
+  background-color: var(--editor-panel-background);
+  border: var(--editor-panel-border);
+  border-radius: 4px;
+  box-shadow: var(--editor-panel-box-shadow);
+  padding: 4px 0;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.context-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background-color: var(--editor-panel-background-10);
+    color: var(--editor-panel-header-title-color);
+  }
+
+  &.danger:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff4444;
+  }
+}

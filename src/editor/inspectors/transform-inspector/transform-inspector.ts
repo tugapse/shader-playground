@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { DragEventData, DragHandleDirective } from "@editor/directives/mouse-drag.directive";
-import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
+import {
+  DragEventData,
+  DragHandleDirective,
+} from '@editor/directives/mouse-drag.directive';
+import { InpectorTogglePanel } from '../../components/inpector-toggle-panel/inpector-toggle-panel';
 import { GlEntity, Transform } from '@engine';
 
 @Component({
   selector: 'editor-transform-inspector',
   imports: [CommonModule, InpectorTogglePanel, DragHandleDirective],
   templateUrl: './transform-inspector.html',
-  styleUrl: './transform-inspector.scss'
+  styleUrl: './transform-inspector.scss',
 })
 export class TransformInspector {
   scaleX = 1;
@@ -54,7 +57,7 @@ export class TransformInspector {
   @Input() set entity(value: GlEntity) {
     this.transform = value.transform;
     this.transform.setDirty(true);
-    this.transform.updateMatrices();  
+    this.transform.updateMatrices();
     this.scaleX = this.transform.localScale[0];
     this.scaleY = this.transform.localScale[1];
     this.scaleZ = this.transform.localScale[2];
@@ -77,6 +80,6 @@ export class TransformInspector {
   onScaleChanged(index: number, event: Event) {
     const value = this.transform.localScale;
     value[index] = +(event.target as any).value;
-      this.transform.setLocalScale(value[0], value[1], value[2]);
-}
+    this.transform.setLocalScale(value[0], value[1], value[2]);
+  }
 }

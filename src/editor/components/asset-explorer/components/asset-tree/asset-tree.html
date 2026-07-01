@@ -1,0 +1,41 @@
+<ng-template #treeNodeTemplate let-node>
+  <div class="tree-node-wrapper">
+    <div
+      class="tree-node"
+      [class.selected]="node.id === selectedNodeId()"
+      (click)="$event.stopPropagation(); nodeClick.emit(node)"
+      (contextmenu)="contextMenu.emit({ e: $event, node: node })"
+    >
+      <span class="tree-node-icon">
+        @if (node.type === "folder" || node.type === "project") {
+          <i class="icon-folder">{{ isExpanded(node) ? "📂" : "📁" }}</i>
+        } @else if (node.type === "scene") {
+          <i class="icon-scene">🎬</i>
+        } @else if (node.type === "code") {
+          <i class="icon-code">📜</i>
+        } @else {
+          <i class="icon-file">📄</i>
+        }
+      </span>
+      <span class="tree-node-name">{{ node.name }}</span>
+    </div>
+
+    @if (
+      (node.type === "folder" || node.type === "project") && isExpanded(node)
+    ) {
+      <div class="tree-node-children">
+        @for (child of node.children; track child.id) {
+          <ng-container
+            *ngTemplateOutlet="treeNodeTemplate; context: { $implicit: child }"
+          ></ng-container>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+<div class="asset-tree-root">
+  <ng-container
+    *ngTemplateOutlet="treeNodeTemplate; context: { $implicit: treeData() }"
+  ></ng-container>
+</div>

@@ -1,0 +1,10 @@
+<div
+  class="context-menu-wrapper"
+  [style.left.px]="config().x"
+  [style.top.px]="config().y"
+>
+  <ul class="context-menu-list">
+    <li class="context-menu-item" (click)="onRename()">Rename</li>
+    <li class="context-menu-item danger" (click)="onDelete()">Delete</li>
+  </ul>
+</div>

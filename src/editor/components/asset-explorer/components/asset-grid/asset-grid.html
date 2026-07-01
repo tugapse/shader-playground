@@ -1,0 +1,26 @@
+@if (activeFolder()) {
+  <div class="grid-container">
+    @for (item of activeFolder()?.children; track item.id) {
+      <div
+        class="grid-item"
+        [class.selected]="item.id === selectedNodeId()"
+        (click)="itemClick.emit(item)"
+        (dblclick)="itemDoubleClick.emit(item)"
+        (contextmenu)="contextMenu.emit({ e: $event, node: item })"
+      >
+        <div class="grid-item-icon">
+          @if (item.type === "folder" || item.type === "project") {
+            📁
+          } @else if (item.type === "scene") {
+            🎬
+          } @else if (item.type === "code") {
+            📜
+          } @else {
+            📄
+          }
+        </div>
+        <div class="grid-item-name" [title]="item.name">{{ item.name }}</div>
+      </div>
+    }
+  </div>
+}
