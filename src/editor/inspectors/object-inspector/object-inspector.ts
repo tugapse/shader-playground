@@ -19,7 +19,7 @@ import {
   UnlitShader,
   Vector2,
   Vector3,
-  Vector4
+  Vector4,
 } from '@engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { BooleanInspector } from '../../components/inspector-components/boolean-inspector/boolean-inspector';
@@ -51,8 +51,8 @@ export interface ITargetProperty extends ITargetObject {
     VectorInspector,
     BooleanInspector,
     EnumInspector,
-    NumberRangeInspector
-],
+    NumberRangeInspector,
+  ],
   templateUrl: './object-inspector.html',
   styleUrl: './object-inspector.scss',
 })
@@ -144,7 +144,6 @@ export class ObjectInspector {
 
   // Private and protected helpers
   private _onPropertyChanged(propertyKey: string, value: any): void {
-    
     if (!this._selectedObject?.property || value instanceof Event) return;
 
     this._selectedObject.property[propertyKey] = value;
@@ -165,10 +164,7 @@ export class ObjectInspector {
       .filter((p) => !!p.key);
   }
 
-  protected createPropertyViewModel(
-    key: string,
-    value: any,
-  ): ITargetProperty {
+  protected createPropertyViewModel(key: string, value: any): ITargetProperty {
     if (value === undefined || value === null) {
       return {} as ITargetProperty;
     }
@@ -182,8 +178,8 @@ export class ObjectInspector {
       type = this.getObjectType(value);
       name = (value as any).name || '';
     }
-    const property = this._enums[key] || {}
-    return { key, type, value, name , property};
+    const property = this._enums[key] || {};
+    return { key, type, value, name, property };
   }
 
   protected getObjectType(value: object): string {
@@ -253,7 +249,7 @@ export class ObjectInspector {
     this.editorService.requestCanvasResize();
   }
 
-  protected onRangeChange(item:ITargetProperty, $event:NumberRange){
-    this._selectedObject!.property[item.key] = $event
+  protected onRangeChange(item: ITargetProperty, $event: NumberRange) {
+    this._selectedObject!.property[item.key] = $event;
   }
 }

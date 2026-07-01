@@ -1,32 +1,27 @@
 @if (entity) {
-  <editor-inpector-toggle-panel
-    [title]="'Entity: ' + entity.name"
-    [collapsed]="true"
-  >
+  <editor-inpector-toggle-panel [title]="'Entity: ' + entity.name">
     @if (!_isScene) {
-      <section>
+      <section class="line-item">
         <span>Update in Editor</span
         ><app-toggle
           [active]="entity.updateInEditor"
           (change)="entity.updateInEditor = !entity.updateInEditor"
         ></app-toggle>
       </section>
-      <section>
-        <span>Name</span
-        ><input
-          class="text-input"
-          [value]="entity!.name"
-          (change)="onNameChanged($event)"
-        />
-      </section>
-      <section [ngClass]="{ tag: objectsToshow.length > 2 }">
-        <span>Tag</span
-        ><input
-          class="text-input"
-          [value]="entity!.tag"
-          (change)="onTagChanged($event)"
-        />
-      </section>
+
+      <editor-text-input-inspector
+        label="Name"
+        [isNumber]="false"
+        [value]="entity.name"
+        (change)="onNameChanged($event)"
+      ></editor-text-input-inspector>
+      <editor-text-input-inspector
+        label="Tag"
+        [ngClass]="{ tag: objectsToshow.length > 2 }"
+        [isNumber]="false"
+        [value]="entity.tag"
+        (change)="onTagChanged($event)"
+      ></editor-text-input-inspector>
     }
 
     @for (entityProperty of objectsToshow; track $index) {

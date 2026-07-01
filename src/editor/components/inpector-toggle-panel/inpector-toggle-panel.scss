@@ -10,12 +10,11 @@
     & > .title {
       font-weight: 600;
     }
-    &.expanded{
+    &.expanded {
       background-color: var(--editor-panel-background-50);
     }
-    &.child{
+    &.child {
     }
-
   }
 
   .header .title {
@@ -33,8 +32,8 @@
     border-bottom: var(--editor-panel-border);
 
     // background-color: #283549;
-    
-    &.child { 
+
+    &.child {
       display: flex;
       flex-direction: column;
       margin-bottom: 4px;

@@ -2,8 +2,9 @@
   position: sticky;
   padding: 6px;
   background-color: var(--editor-panel-background);
-  top:0;
-  
+  top: 0;
+  z-index: 1;
+
   .header {
     display: flex;
     justify-content: space-between;

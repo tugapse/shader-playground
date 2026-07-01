@@ -1,13 +1,12 @@
 import {
   Color,
-  EntityType,
   DirectionalLight,
   EntityBehaviour,
+  EntityType,
   GlEntity,
   JsonSerializedData,
   Light,
   ObjectInstanciator,
-  RendererBehaviour,
   SkyboxRenderer,
   SkyboxShader,
   Vector3,
@@ -145,21 +144,29 @@ export class SunBehaviour extends EntityBehaviour {
   override initialize(): boolean {
     if (!this.parent?.scene) return false;
     this._serializationIgnoreKeys.push('moonLight');
-    this._skyboxRenderer = this.parent.scene?.objects
-      .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
-      ?.getBehaviour(SkyboxRenderer);
+    this._skyboxRenderer = this.parent.getBehaviour(SkyboxRenderer);
+
+    if (!this._skyboxRenderer) {
+      this._skyboxRenderer = this.parent.scene?.objects
+        .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
+        ?.getBehaviour(SkyboxRenderer);
+    }
+
     this.update(0);
     return super.initialize();
   }
 
   public override update(elapsed: number): void {
     if (!this.parent?.scene) return;
+
     super.update(elapsed);
-
     this.updateTime(elapsed);
-    const light = this.parent as DirectionalLight;
 
-    if (!light || light.entityType !== EntityType.LIGHT_DIRECTIONAL) {
+    const light = this.parent.scene.lights.find(
+      (o) => o.entityType === EntityType.LIGHT_DIRECTIONAL,
+    ) as DirectionalLight;
+
+    if (!light) {
       return;
     }
     this.updateOrCreateMoonLinght();
@@ -185,8 +192,7 @@ export class SunBehaviour extends EntityBehaviour {
 
     // Manage moon light's existence and state based on editor settings.
     if (this.moon.useDirectionalLight) {
-      if(! this.parent.scene.isRunning)
-        return
+      if (!this.parent.scene.isRunning) return;
       if (!this.moonLight) {
         this.moonLight = this.creaMoonLight(this.moonLight); // Cache for next frame
       }
@@ -197,7 +203,6 @@ export class SunBehaviour extends EntityBehaviour {
       // If the option is disabled, ensure the light is inactive.
       this.moonLight.active = false;
     }
-
   }
 
   /**
@@ -560,8 +565,8 @@ export class SunBehaviour extends EntityBehaviour {
     );
     this.parent.scene.sceneFog.color = shader.material.horizonColor;
 
-    shader.sun.useSun = this.sun.show && !isSunDown ;
-    shader.moon.useMoon = this.moon.show && isSunDown ;
+    shader.sun.useSun = this.sun.show && !isSunDown;
+    shader.moon.useMoon = this.moon.show && isSunDown;
     shader.sun.sunSize = this.sun.sunSize.value;
     shader.sun.sunFalloff = this.sun.sunFalloff.value;
 

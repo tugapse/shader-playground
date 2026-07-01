@@ -1,11 +1,8 @@
 :host {
-
-
-
   section {
-  display: block;
-  margin: 4px;
-    &>.title {
+    display: block;
+    margin: 4px;
+    & > .title {
       font-size: 12px;
       font-weight: 500;
     }
@@ -19,8 +16,7 @@
     margin-bottom: 8px;
   }
 
-  .line-item>span {
-
+  .line-item > span {
     &:hover {
       cursor: col-resize;
     }
@@ -32,6 +28,6 @@
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
+    padding: 4px;
   }
-
 }

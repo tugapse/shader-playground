@@ -8,7 +8,7 @@ import {
   EntityBehaviour,
   GlEntity,
   NumberRange,
-  ObjectInstanciator
+  ObjectInstanciator,
 } from '@engine';
 import { ClassType } from '@engine/enums/class-type.enum';
 import { ClassMetadata } from '@engine/interfaces/class-metadata';
@@ -25,6 +25,7 @@ import {
   ObjectInspector,
 } from '../object-inspector/object-inspector';
 import { TransformInspector } from '../transform-inspector/transform-inspector';
+import { TextInputInspector } from '@editor/components/inspector-components/text-input-inspector/text-input-inspector';
 
 @Component({
   selector: 'editor-entity-inspector',
@@ -38,14 +39,15 @@ import { TransformInspector } from '../transform-inspector/transform-inspector';
     AddBehaviourMenuComponent,
     CommonModule,
     DefaultInspector,
+    TextInputInspector,
   ],
   templateUrl: './entity-inspector.html',
   styleUrl: './entity-inspector.scss',
 })
 export class EntityInspector extends ObjectInspector {
-onDefaultChange() {
-throw new Error('Method not implemented.');
-}
+  onDefaultChange() {
+    throw new Error('Method not implemented.');
+  }
   @Input() excludeProperties = [
     'name',
     'active',
@@ -84,17 +86,20 @@ throw new Error('Method not implemented.');
   constructor() {
     super();
     this._enums['cameraType'] = this.convertEnumToObject(CameraType);
+    // scene overrides
+    this.excludeProperties.push('isRunning', 'inEditMode', 'ellapsedTime');
   }
 
-  onNameChanged($event: any): void {
+  onNameChanged(value: any): void {
     if (!this.entity) return;
-    this.entity.name = $event.target.value;
+    if (value instanceof Event) return;
+    this.entity.name = value;
     this.updateScene();
   }
 
-  onTagChanged($event: any): void {
+  onTagChanged(value: any): void {
     if (!this.entity) return;
-    this.entity.tag = $event.target.value;
+    this.entity.tag = value;
   }
 
   override onValueChanged(
@@ -114,13 +119,18 @@ throw new Error('Method not implemented.');
     // entityProperty.property[entityProperty.key] = value;
   }
 
-  private mapProperty(entity: GlEntity, key: string) : ITargetProperty {
+  private mapProperty(entity: GlEntity, key: string): ITargetProperty {
     const isEnum = !!this._enums[key];
-    
+
     const type = isEnum ? 'enum' : this.getObjectType(entity[key]);
     const property = entity[key];
 
-    return { key, type, property:(isEnum ? this._enums[key] : property), value: property};
+    return {
+      key,
+      type,
+      property: isEnum ? this._enums[key] : property,
+      value: property,
+    };
   }
 
   protected override isPropertyValid(key: string): boolean {
@@ -164,12 +174,12 @@ throw new Error('Method not implemented.');
     this.editorService.requestCanvasResize();
   }
 
-    onDefaultChanged(
-      item: ITargetProperty,
-      value: string | number | boolean | NumberRange | Color,
-    ) {
-      if (value instanceof Event) return;
-      this.entity![item.key] = value;
-      this.editorService.requestCanvasResize();
-    }
+  onDefaultChanged(
+    item: ITargetProperty,
+    value: string | number | boolean | NumberRange | Color,
+  ) {
+    if (value instanceof Event) return;
+    this.entity![item.key] = value;
+    this.editorService.requestCanvasResize();
+  }
 }

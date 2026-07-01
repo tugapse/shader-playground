@@ -16,37 +16,64 @@
   }
 
   section .text-input {
-   width: 100%;
-    margin: 0 4px ;
+    width: 100%;
+    margin: 0 4px;
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
     padding: 4px;
     text-align: right;
   }
-  section.tag{
+  section.tag {
     padding-bottom: 8px;
     margin-bottom: 16px;
     border-bottom: var(--editor-panel-border);
   }
-
 
   .behaviours-header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin: 4px;
-    margin-top :24px;
-  }  
-  
-  .behaviours-header {
+    margin-top: 12px;
+    border-top: var(--editor-panel-border);
+  }
 
-    color:var(--editor-panel-text-input-color);
+  .behaviours-header {
+    color: var(--editor-panel-text-input-color);
     flex-grow: 1;
   }
-  
+
   .icon {
     cursor: pointer;
     color: var(--editor-panel-text-input-color);
+  }
+
+  .line-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+  }
+
+  .line-item > span {
+    min-width: 90px;
+    max-width: 150px;
+
+    &:hover {
+      cursor: col-resize;
+    }
+  }
+
+  .line-item .text-input {
+    width: 100%;
+    max-width: 50%;
+    margin: 0 4px;
+    background: transparent;
+    color: var(--editor-panel-text-input-color);
+    border: var(--editor-panel-text-input-border);
+    text-align: right;
+    padding: 4px;
   }
 }

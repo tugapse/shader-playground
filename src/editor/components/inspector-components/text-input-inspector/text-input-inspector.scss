@@ -1,5 +1,4 @@
 :host {
-
   .line-item {
     display: flex;
     justify-content: space-between;
@@ -8,7 +7,7 @@
     padding: 4px;
   }
 
-  .line-item>span {
+  .line-item > span {
     min-width: 90px;
     max-width: 150px;
 
@@ -20,12 +19,11 @@
   .line-item .text-input {
     width: 100%;
     max-width: 50%;
-    margin: 0 4px ;
+    margin: 0 4px;
     background: transparent;
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
     text-align: right;
-    margin-right: 12px;
+    padding: 4px;
   }
-
 }
