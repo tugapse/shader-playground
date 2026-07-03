@@ -1,2 +1,2 @@
-export * from './input-manager';
+export * from './engine-event-manager';
 export * from './dependency-manager';

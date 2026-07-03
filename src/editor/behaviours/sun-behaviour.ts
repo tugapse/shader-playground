@@ -385,7 +385,7 @@ export class SunBehaviour extends EntityBehaviour {
     }
     // Sun is down
     else if (time > sunset || time < sunrise - fadeDuration) {
-      sunAlpha = 0.0;
+      sunAlpha = 0.1;
     }
 
     if (moonLight) {
@@ -398,8 +398,8 @@ export class SunBehaviour extends EntityBehaviour {
       if (time >= sunrise && time < sunset) {
         // Daytime: Sun is controlled by sunAlpha, moon is off.
         light.color.a = sunAlpha;
-        moonLight.color.a = 0.0;
-      } else if (time >= sunset && time < night) {
+        moonLight.color.a = 0.05;
+      } else if (time >= sunset && time < night - fadeDuration) {
         // Sunset to Night: Fade out sun, fade in moon.
         light.color.a = sunAlpha;
         moonLight.color.a = transitionDelta * this.lighColor.nightColor.a;
@@ -565,8 +565,8 @@ export class SunBehaviour extends EntityBehaviour {
     );
     this.parent.scene.sceneFog.color = shader.material.horizonColor;
 
-    shader.sun.useSun = this.sun.show && !isSunDown;
-    shader.moon.useMoon = this.moon.show && isSunDown;
+    shader.sun.useSun = this.sun.show;
+    shader.moon.useMoon = this.moon.show;
     shader.sun.sunSize = this.sun.sunSize.value;
     shader.sun.sunFalloff = this.sun.sunFalloff.value;
 
