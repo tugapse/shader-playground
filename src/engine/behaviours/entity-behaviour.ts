@@ -1,9 +1,9 @@
-import { Transform } from "../core/transform";
-import { GlEntity } from "../entities/entity";
-import { JsonSerializable } from "../core/json-serializable";
-import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
+import { Transform } from '../core/transform';
+import { SceneEntity } from '../entities/entity';
+import { JsonSerializable } from '../core/json-serializable';
+import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { RenderLayer } from "../enums";
+import { RenderLayer } from '../enums';
 
 /**
  * Represents the base class for all components that define the behavior of an entity.
@@ -12,15 +12,15 @@ import { RenderLayer } from "../enums";
  * @augments {JsonSerializable}
  */
 export class EntityBehaviour extends JsonSerializable {
-
   /**
    * A static factory method to create an instance of the behaviour.
    * This method is intended to be overridden by subclasses to provide a way to create instances of the specific behaviour type.
    * @param {any} [args] - Optional arguments for instantiation.
    * @returns {EntityBehaviour}
    */
-  static instanciate(args?: any): EntityBehaviour { return new EntityBehaviour(); }
-
+  static instanciate(args?: any): EntityBehaviour {
+    return new EntityBehaviour();
+  }
 
   [key: string]: any;
   /**
@@ -35,12 +35,12 @@ export class EntityBehaviour extends JsonSerializable {
    * This is used to determine the rendering order of the entity.
    * @type {RenderLayer}
    */
-  public renderLayer : RenderLayer = RenderLayer.OPAQUE;
+  public renderLayer: RenderLayer = RenderLayer.OPAQUE;
   /**
    * The parent entity to which this behaviour is attached.
-   * @type {GlEntity}
+   * @type {SceneEntity}
    */
-  public parent!: GlEntity;
+  public parent!: SceneEntity;
   /**
    * A flag indicating if the behaviour has been initialized.
    * @protected
@@ -61,9 +61,13 @@ export class EntityBehaviour extends JsonSerializable {
    * Creates an instance of EntityBehaviour.
    */
   constructor() {
-    super("EntityBehaviour");
+    super('EntityBehaviour');
     this._uuid = uuidv4();
-    this._serializationIgnoreKeys.push('parent', '_initialized',"_serializationIgnoreKeys");
+    this._serializationIgnoreKeys.push(
+      'parent',
+      '_initialized',
+      '_serializationIgnoreKeys',
+    );
   }
 
   /**
@@ -80,26 +84,26 @@ export class EntityBehaviour extends JsonSerializable {
    * This method is called on every frame for active behaviours.
    * @param {number} elapsed - The time elapsed since the last frame in seconds.
    */
-  public update(elapsed: number): void { }
+  public update(elapsed: number): void {}
 
   /**
    * Updates the behaviour specifically for editor mode.
    * This method is called on every frame when the engine is in editor mode.
    * @param {number} elapsed - The time elapsed since the last frame in seconds.
    */
-  public updateEditor(elapsed: number): void { }
+  public updateEditor(elapsed: number): void {}
 
   /**
    * Draws any visual representation of the behaviour.
    * This is often used for debugging purposes, such as drawing bounding boxes or other gizmos.
    */
-  public draw(): void { }
+  public draw(): void {}
 
   /**
    * Cleans up resources used by the behaviour.
    * This method is called when the behaviour is about to be destroyed.
    */
-  public destroy(): void { }
+  public destroy(): void {}
 
   /**
    * Serializes the behaviour's state to a JSON object.
@@ -111,7 +115,7 @@ export class EntityBehaviour extends JsonSerializable {
     return {
       ...super.toJsonObject(),
       active: this.active,
-      uuid: this.uuid
+      uuid: this.uuid,
     };
   }
 
@@ -123,7 +127,7 @@ export class EntityBehaviour extends JsonSerializable {
    */
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.active = jsonObject["active"];
+    this.active = jsonObject['active'];
     this._uuid = jsonObject['uuid'];
   }
 

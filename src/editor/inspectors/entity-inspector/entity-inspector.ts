@@ -6,7 +6,7 @@ import {
   CameraType,
   Color,
   EntityBehaviour,
-  GlEntity,
+  SceneEntity,
   NumberRange,
   ObjectInstanciator,
 } from '@engine';
@@ -63,7 +63,7 @@ export class EntityInspector extends ObjectInspector {
   objectsToshow: ITargetProperty[] = [];
   _isScene = false;
 
-  private prepareProperties(entity: GlEntity) {
+  private prepareProperties(entity: SceneEntity) {
     if (entity) {
       this.objectsToshow = Object.keys(entity)
         .filter(this.isPropertyValid.bind(this))
@@ -71,13 +71,13 @@ export class EntityInspector extends ObjectInspector {
     }
   }
 
-  @Input() set targetEntity(entity: GlEntity) {
+  @Input() set targetEntity(entity: SceneEntity) {
     this._isScene = entity.className == 'Scene';
     this.prepareProperties(entity);
     this.entity = entity;
   }
 
-  entity?: GlEntity | null;
+  entity?: SceneEntity | null;
   isAddBehaviourMenuOpen = false;
   availableBehaviours: ClassMetadata[] = [];
   menuX = 0;
@@ -119,7 +119,7 @@ export class EntityInspector extends ObjectInspector {
     // entityProperty.property[entityProperty.key] = value;
   }
 
-  private mapProperty(entity: GlEntity, key: string): ITargetProperty {
+  private mapProperty(entity: SceneEntity, key: string): ITargetProperty {
     const isEnum = !!this._enums[key];
 
     const type = isEnum ? 'enum' : this.getObjectType(entity[key]);

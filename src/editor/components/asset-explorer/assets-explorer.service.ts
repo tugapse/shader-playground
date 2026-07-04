@@ -25,6 +25,7 @@ export class AssetsExplorerService {
         }),
       ),
       tap((tree) => {
+        debugger;
         this.treeData.set(tree);
         if (tree) {
           const currentPath = this.activeFolder()?.virtualPath;
@@ -216,11 +217,11 @@ export class AssetsExplorerService {
 
     assets.sort(
       (a, b) =>
-        a.virtual_path.split('/').length - b.virtual_path.split('/').length,
+        a.virtualPath.split('/').length - b.virtualPath.split('/').length,
     );
 
     assets.forEach((asset) => {
-      const pathParts = asset.virtual_path.split('/');
+      const pathParts = asset.virtualPath.split('/');
       let parent = root;
       let currentPath = '';
 
@@ -247,13 +248,13 @@ export class AssetsExplorerService {
       const fileNode: IAsset = {
         id: asset.id,
         name: asset.filename,
-        type: asset.asset_type,
-        virtualPath: asset.virtual_path,
+        type: asset.assetType,
+        virtualPath: asset.virtualPath,
         projectId: project.id,
       };
 
       parent.children!.push(fileNode);
-      nodeMap.set(asset.virtual_path, fileNode);
+      nodeMap.set(asset.virtualPath, fileNode);
     });
 
     const sortChildren = (node: IAsset) => {

@@ -1,4 +1,3 @@
-
 import {
   EntityBehaviour,
   MeshRendererBehaviour,
@@ -11,7 +10,7 @@ import { Color } from '../core/color';
 import { MeshData } from '../core/mesh';
 import { ObjectInstanciator } from '../core/object-instanciator';
 import { Camera } from '../entities/camera';
-import { GlEntity } from '../entities/entity';
+import { SceneEntity } from '../entities/entity';
 import {
   DirectionalLight,
   Light,
@@ -44,12 +43,12 @@ export class DependencyManager {
   public registerDependencies(): void {
     // Entities
     ObjectInstanciator.addDependency(
-      'GlEntity',
-      (name: string, transform?: Transform) => new GlEntity(name, transform),
+      'SceneEntity',
+      (name: string, transform?: Transform) => new SceneEntity(name, transform),
       {
-        name: 'GlEntity',
+        name: 'SceneEntity',
         type: ClassType.Entity,
-        path: 'Entities/GlEntity',
+        path: 'Entities',
         description: 'Base Entity for all entities in the scene.',
       },
     );
@@ -57,7 +56,7 @@ export class DependencyManager {
     ObjectInstanciator.addDependency('Camera', Camera.instanciate, {
       name: 'Camera',
       type: ClassType.Entity,
-      path: 'Entities/Camera',
+      path: 'Entities',
       description:
         'Represents a camera in the 3D scene, generating view and projection matrices.',
     });
@@ -102,7 +101,7 @@ export class DependencyManager {
     ObjectInstanciator.addDependency('Transform', () => new Transform(), {
       name: 'Transform',
       type: ClassType.Transform,
-      path: 'Core/Transform',
+      path: 'Core',
       description:
         'Represents the position, rotation, and scale of an object in 3D space.',
     });
@@ -111,7 +110,7 @@ export class DependencyManager {
     ObjectInstanciator.addDependency('MeshData', MeshData.instanciate, {
       name: 'MeshData',
       type: ClassType.Mesh,
-      path: 'Geometry/MeshData',
+      path: 'Geometry',
       description:
         'Base class for geometric mesh data holding vertices, normals, and UVs.',
     });
@@ -121,7 +120,7 @@ export class DependencyManager {
       {
         name: 'CubePrimitive',
         type: ClassType.Mesh,
-        path: 'Geometry/Primitives/Cube',
+        path: 'Geometry/Primitives',
         description: 'A primitive mesh representing a 3D cube.',
       },
     );
@@ -131,7 +130,7 @@ export class DependencyManager {
       {
         name: 'QuadPrimitive',
         type: ClassType.Mesh,
-        path: 'Geometry/Primitives/Quad',
+        path: 'Geometry/Primitives',
         description: 'A primitive mesh representing a 2D quad/plane.',
       },
     );
@@ -141,7 +140,7 @@ export class DependencyManager {
       {
         name: 'SpherePrimitive',
         type: ClassType.Mesh,
-        path: 'Geometry/Primitives/Sphere',
+        path: 'Geometry/Primitives',
         description: 'A primitive mesh representing a 3D sphere.',
       },
     );
@@ -151,7 +150,7 @@ export class DependencyManager {
       {
         name: 'SkyboxPrimitive',
         type: ClassType.Mesh,
-        path: 'Geometry/Primitives/Skybox',
+        path: 'Geometry/Primitives',
         description: 'A primitive mesh specifically structured for skyboxes.',
       },
     );
@@ -161,7 +160,7 @@ export class DependencyManager {
       {
         name: 'TrianglePrimitive',
         type: ClassType.Mesh,
-        path: 'Geometry/Primitives/Triangle',
+        path: 'Geometry/Primitives',
         description: 'A primitive mesh representing a simple 2D triangle.',
       },
     );
@@ -170,27 +169,27 @@ export class DependencyManager {
     ObjectInstanciator.addDependency('Shader', Shader.instanciate, {
       name: 'Shader',
       type: ClassType.Shader,
-      path: 'Shaders/Shader',
+      path: 'Shaders',
       description:
         'Base class managing the creation and compilation of WebGL shader programs.',
     });
     ObjectInstanciator.addDependency('SkyboxShader', SkyboxShader.instanciate, {
       name: 'SkyboxShader',
       type: ClassType.Shader,
-      path: 'Shaders/Skybox',
+      path: 'Shaders',
       description: 'A specialized shader for rendering cubemap skyboxes.',
     });
     ObjectInstanciator.addDependency('UnlitShader', UnlitShader.instanciate, {
       name: 'UnlitShader',
       type: ClassType.Shader,
-      path: 'Shaders/Unlit',
+      path: 'Shaders',
       description:
         'A shader for rendering unlit materials not affected by scene lights.',
     });
     ObjectInstanciator.addDependency('LitShader', LitShader.instanciate, {
       name: 'LitShader',
       type: ClassType.Shader,
-      path: 'Shaders/Lit',
+      path: 'Shaders',
       description:
         'A shader for rendering objects with lighting and normal mapping, implementing the Phong lighting model.',
     });
@@ -202,7 +201,7 @@ export class DependencyManager {
       {
         name: 'EntityBehaviour',
         type: ClassType.EntityBehaviour,
-        path: 'Behaviours/EntityBehaviour',
+        path: 'Behaviours',
         description: 'Base class for all entity behaviours.',
       },
     );
@@ -212,7 +211,7 @@ export class DependencyManager {
       {
         name: 'RendererBehaviour',
         type: ClassType.RenderBehaviour,
-        path: 'Behaviours/Renderers/RendererBehaviour',
+        path: 'Behaviours/Renderers',
         description: 'Base class for all rendering behaviours.',
       },
     );
@@ -222,7 +221,7 @@ export class DependencyManager {
       {
         name: 'MeshRendererBehaviour',
         type: ClassType.RenderBehaviour,
-        path: 'Behaviours/Renderers/MeshRendererBehaviour',
+        path: 'Behaviours/Renderers',
         description:
           'Renders 3D meshes using the assigned material and shader.',
       },
@@ -233,7 +232,7 @@ export class DependencyManager {
       {
         name: 'SkyboxRenderer',
         type: ClassType.RenderBehaviour,
-        path: 'Behaviours/Renderers/SkyboxRenderer',
+        path: 'Behaviours/Renderers',
         description: 'A specialized renderer for drawing a skybox background.',
       },
     );
@@ -245,7 +244,7 @@ export class DependencyManager {
       {
         name: 'ColorMaterial',
         type: ClassType.Material,
-        path: 'Materials/Color',
+        path: 'Materials',
         description: 'A basic material representing a solid color.',
       },
     );
@@ -255,7 +254,7 @@ export class DependencyManager {
       {
         name: 'UnlitMaterial',
         type: ClassType.Material,
-        path: 'Materials/Unlit',
+        path: 'Materials',
         description:
           'A material used for unlit shaders, ignoring scene lighting.',
       },
@@ -273,7 +272,7 @@ export class DependencyManager {
       {
         name: 'CubemapMaterial',
         type: ClassType.Material,
-        path: 'Materials/Cubemap',
+        path: 'Materials',
         description:
           'A material used specifically for skyboxes and reflections, mapping a cubemap texture.',
       },
@@ -284,7 +283,7 @@ export class DependencyManager {
       {
         name: 'SkyboxMaterial',
         type: ClassType.Material,
-        path: 'Materials/SkyboxMaterial',
+        path: 'Materials',
         description:
           'A specialized skybox material used specifically within the editor environment.',
       },
@@ -297,7 +296,7 @@ export class DependencyManager {
       {
         name: 'CameraFlyBehaviour',
         type: ClassType.EntityBehaviour,
-        path: 'Behaviours/CameraFlyBehaviour',
+        path: 'Behaviours/Camera',
         description:
           'A free-look camera controller allowing movement and rotation via keyboard and mouse.',
       },

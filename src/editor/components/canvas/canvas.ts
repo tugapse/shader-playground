@@ -34,9 +34,9 @@ export interface EngineStats {
 export class Canvas implements OnDestroy, AfterViewInit {
   @Input() set scene(scene: Scene) {
     if (!scene) return;
-    debugger;
-    this.gameEngine.loadScene(scene);
+    if (this.gameEngine) this.gameEngine.loadScene(scene);
   }
+  @Input() public gameEngine!: Engine;
 
   @Output() onGlContextCreated = new EventEmitter<WebGL2RenderingContext>();
   @Output() stats = new EventEmitter<EngineStats>();
@@ -44,7 +44,6 @@ export class Canvas implements OnDestroy, AfterViewInit {
   @ViewChild('glCanvas') private glCanvas!: ElementRef<HTMLCanvasElement>;
 
   public gl!: WebGL2RenderingContext | null;
-  public gameEngine: Engine;
 
   private canvasElement!: HTMLCanvasElement;
   private lastTime = 0;
@@ -70,7 +69,6 @@ export class Canvas implements OnDestroy, AfterViewInit {
     private ngZone: NgZone,
     private renderer: Renderer2,
   ) {
-    this.gameEngine = new Engine();
     this.editorService.onCanvasRequestResize
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.resizeCanvas(true));

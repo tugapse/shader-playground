@@ -25,7 +25,7 @@ export class AuthService {
 
   /**
    * Registers a new user.
-   * Corresponds to `POST /api/v1/auth/register`.
+   * Corresponds to `POST /api/auth/register`.
    * @param payload - The user registration data.
    */
   register(payload: AuthRegisterRequest): Observable<UserResponse> {
@@ -34,30 +34,30 @@ export class AuthService {
 
   /**
    * Logs in an existing user, storing the token upon success.
-   * Corresponds to `POST /api/v1/auth/login`.
+   * Corresponds to `POST /api/auth/login`.
    * @param payload - The user login credentials.
    */
   login(payload: AuthLoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.authUrl}/login`, payload).pipe(
-      tap(response => {
+      tap((response) => {
         // The API returns `access_token`. We'll use it as the standard JWT.
-        if (response.access_token && typeof localStorage !== 'undefined') {
-          localStorage.setItem(this.TOKEN_KEY, response.access_token);
+        if (response.accessToken && typeof localStorage !== 'undefined') {
+          localStorage.setItem(this.TOKEN_KEY, response.accessToken);
         }
-      })
+      }),
     );
   }
 
   /**
    * Logs out the current user and clears the local session.
-   * Corresponds to `POST /api/v1/auth/logout`.
+   * Corresponds to `POST /api/auth/logout`.
    * Note: This requires an Authorization header, which is handled by the AuthInterceptor.
    */
   logout(): Observable<{ message: string }> {
     // We tap into the observable to clear the session upon successful logout from the API.
-    return this.http.post<{ message: string }>(`${this.authUrl}/logout`, {}).pipe(
-      tap(() => this.clearLocalSession())
-    );
+    return this.http
+      .post<{ message: string }>(`${this.authUrl}/logout`, {})
+      .pipe(tap(() => this.clearLocalSession()));
   }
 
   /**

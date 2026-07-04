@@ -1,10 +1,9 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { vec3 } from 'gl-matrix';
 import {
   Camera,
   CameraFlyBehaviour,
-  CameraType,
   CanvasViewport,
+  Engine,
   Scene,
 } from '@engine';
 import { BehaviorSubject } from 'rxjs';
@@ -13,6 +12,8 @@ import { TransformSpace } from '../behaviours/scene-editor/transform-space.enum'
 
 @Injectable({ providedIn: 'root' })
 export class EditorService {
+  private _gameEngine!: Engine;
+
   public onSceneLoaded = new EventEmitter<Scene>();
   public onScenePlay = new EventEmitter<Scene>();
   public onScenePause = new EventEmitter<Scene>();
@@ -49,6 +50,14 @@ export class EditorService {
 
   public get gl(): WebGL2RenderingContext {
     return this._gl;
+  }
+
+  public get gameEngine(): Engine {
+    if (!this._gameEngine) {
+      this._gameEngine = new Engine();
+      this._gameEngine.registerDependencies();
+    }
+    return this._gameEngine;
   }
 
   private currentScene!: Scene;

@@ -9,7 +9,7 @@ import {
   CubePrimitive,
   DirectionalLight,
   EngineCache,
-  GlEntity,
+  SceneEntity,
   Light,
   LitMaterial,
   LitShader,
@@ -49,7 +49,7 @@ export class App implements OnDestroy {
   private gl!: WebGL2RenderingContext;
   private scene!: Scene;
   light!: DirectionalLight | SpotLight;
-  torus!: GlEntity;
+  torus!: SceneEntity;
   needToResetCamera: boolean = false;
   shadowMapTexture: any;
   sun!: DirectionalLight;
@@ -64,7 +64,6 @@ export class App implements OnDestroy {
     this.editorService.onSceneLoaded.subscribe(
       this.onEditorLoadScene.bind(this),
     );
-
   }
 
   onEditorLoadScene(scene: Scene): any {
@@ -104,7 +103,7 @@ export class App implements OnDestroy {
     this.scene = scene;
     this.scene.initialize();
     this.setupCamera();
-        const engine = new AudioEngine();
+    const engine = new AudioEngine();
     const cache = new AudioCache(engine.getContext() || new AudioContext());
     const clock = new SequencerClock(engine.getContext() || new AudioContext());
 
@@ -192,7 +191,7 @@ export class App implements OnDestroy {
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
 
-    const planeEntity = new GlEntity('Floor');
+    const planeEntity = new SceneEntity('Floor');
     planeEntity.transform.scale(10, 0.2, 10);
     planeEntity.transform.translate(0, -1, 0);
     planeEntity.addBehaviour(renderer);
@@ -251,8 +250,8 @@ export class App implements OnDestroy {
     meshRenderer: MeshRendererBehaviour,
     shader?: Shader,
     material?: LitMaterial,
-  ): Promise<GlEntity> {
-    const entity = new GlEntity(name);
+  ): Promise<SceneEntity> {
+    const entity = new SceneEntity(name);
     const mesh = new Mesh();
 
     mesh.meshData = meshData;
@@ -309,7 +308,7 @@ export class App implements OnDestroy {
     // material.mainTex = texture;
 
     material.mainTex = await EngineCache.getWhiteTextureCube(this.gl);
-    const skyboxEntity = new GlEntity('Skybox');
+    const skyboxEntity = new SceneEntity('Skybox');
 
     skyboxEntity.addBehaviour(renderer);
     scene.addEntity(skyboxEntity);

@@ -22,7 +22,7 @@ export class ProjectService {
 
   /**
    * Creates a new project.
-   * Corresponds to POST /api/v1/projects
+   * Corresponds to POST /api/projects
    * @param payload The data for the new project.
    * @returns An observable of the created project response.
    */
@@ -32,7 +32,7 @@ export class ProjectService {
 
   /**
    * Lists all projects owned by the user.
-   * Corresponds to GET /api/v1/projects
+   * Corresponds to GET /api/projects
    * @returns An observable array of project responses.
    */
   listProjects(): Observable<ProjectResponse[]> {
@@ -41,7 +41,7 @@ export class ProjectService {
 
   /**
    * Retrieves a specific project by its ID.
-   * Corresponds to GET /api/v1/projects/{project_id}
+   * Corresponds to GET /api/projects/{project_id}
    * @param projectId The UUID of the project.
    * @returns An observable of the project response.
    */
@@ -51,30 +51,32 @@ export class ProjectService {
 
   /**
    * Partially updates project metadata.
-   * Corresponds to PATCH /api/v1/projects/{project_id}
+   * Corresponds to PATCH /api/projects/{project_id}
    * @param projectId The UUID of the project.
    * @param payload The fields to update.
    * @returns An observable of the updated project response.
    */
   updateProject(
     projectId: string,
-    payload: UpdateProjectRequest
+    payload: UpdateProjectRequest,
   ): Observable<ProjectResponse> {
     return this.http.patch<ProjectResponse>(
       `${this.projectsUrl}/${projectId}`,
-      payload
+      payload,
     );
   }
 
   /**
    * Deletes a project and all associated assets.
-   * Corresponds to DELETE /api/v1/projects/{project_id}
+   * Corresponds to DELETE /api/projects/{project_id}
    * @param projectId The UUID of the project.
    * @returns An observable with the success message from the API.
    */
-  deleteProject(projectId: string): Observable<{ status: string; message: string }> {
+  deleteProject(
+    projectId: string,
+  ): Observable<{ status: string; message: string }> {
     return this.http.delete<{ status: string; message: string }>(
-      `${this.projectsUrl}/${projectId}`
+      `${this.projectsUrl}/${projectId}`,
     );
   }
 }

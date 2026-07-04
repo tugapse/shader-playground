@@ -1,6 +1,10 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+  HTTP_INTERCEPTORS,
+} from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { AuthInterceptor } from './api/auth.interceptor';
@@ -12,19 +16,17 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     // Required to enable class-based interceptors in Standalone apps
-    provideHttpClient(
-      withInterceptorsFromDi()
-    ),
+    provideHttpClient(withInterceptorsFromDi()),
     // Registering the AuthInterceptor
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi: true
+      multi: true,
     },
     // Provide the API_URL token from the environment
     {
       provide: API_URL,
-      useValue: environment.apiUrl+"/api/v1"
-    }
-  ]
+      useValue: environment.apiUrl + '/api',
+    },
+  ],
 };

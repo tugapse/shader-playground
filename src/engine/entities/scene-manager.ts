@@ -1,22 +1,18 @@
-import { EntityBehaviour } from "../behaviours";
-import { EngineCache } from "../core";
-import { MeshData } from "../core/mesh";
-import { ObjectInstanciator } from "../core/object-instanciator";
-import { Transform } from "../core/transform";
-import { JsonSerializable } from "../interfaces";
-import { JsonSerializedData } from "../interfaces/json-serialized-data.interface";
-import { CubemapTexture, Texture } from "../textures";
-import { GlEntity } from "./entity";
-import { Scene } from "./scene";
+import { EntityBehaviour } from '../behaviours';
+import { EngineCache } from '../core';
+import { MeshData } from '../core/mesh';
+import { ObjectInstanciator } from '../core/object-instanciator';
+import { Transform } from '../core/transform';
+import { JsonSerializable } from '../interfaces';
+import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
+import { CubemapTexture, Texture } from '../textures';
+import { SceneEntity } from './entity';
+import { Scene } from './scene';
 
 /**
   A static class responsible for managing the loading, instantiation, and serialization of scenes and their components.
  */
 export class SceneManager {
-
-
-
-
   /**
     Loads a scene from a JSON data object.
 
@@ -25,17 +21,26 @@ export class SceneManager {
    * @param {Scene} [scene] - An optional existing Scene instance to load into.
    * @returns {Scene} - The loaded or newly created Scene instance.
    */
-  public static async loadScene(gl: WebGL2RenderingContext, jsonData: JsonSerializedData, scene?: Scene): Promise<Scene> {
-
+  public static async loadScene(
+    gl: WebGL2RenderingContext,
+    jsonData: JsonSerializedData,
+    scene?: Scene,
+  ): Promise<Scene> {
     EngineCache.clear();
     scene = scene || new Scene();
     scene.setGlRenderingContext(gl);
 
     const { meshMaps, objects, textureMaps } = jsonData;
-    const meshes: { [key: string]: MeshData; } = SceneManager.instaciateSceneMeshes(meshMaps);
+    const meshes: { [key: string]: MeshData } =
+      SceneManager.instaciateSceneMeshes(meshMaps);
     await SceneManager.instaciateAndLoadSceneTextures(textureMaps, gl);
 
-    jsonData['objects'] = SceneManager.instaciateSceneObjects(scene, objects, meshes, gl);
+    jsonData['objects'] = SceneManager.instaciateSceneObjects(
+      scene,
+      objects,
+      meshes,
+      gl,
+    );
     scene.fromJson(jsonData);
 
     return scene;
@@ -48,20 +53,29 @@ export class SceneManager {
  * @param {any} meshMaps - The raw mesh data from the JSON.
  * @returns {{ [key: string]: MeshData }} - A map of mesh UUIDs to MeshData instances.
  */
-  private static async instaciateAndLoadSceneTextures(texturesMaps: any, gl: WebGL2RenderingContext): Promise<void> {
-      for (const textureJsonData of Object.values(texturesMaps) as any[]) {
-        if (textureJsonData.url) {
-          await EngineCache.getTexture2D(textureJsonData.url, gl);
-        } else if (textureJsonData.uris) {
-          const keys = textureJsonData.uris;
-          await EngineCache.getTextureCube({
-            right: keys[0], left: keys[1],
-            up: keys[2], bottom: keys[3],
-            front: keys[4], back: keys[5],
-          }, gl);
-        }
+  private static async instaciateAndLoadSceneTextures(
+    texturesMaps: any,
+    gl: WebGL2RenderingContext,
+  ): Promise<void> {
+    for (const textureJsonData of Object.values(texturesMaps) as any[]) {
+      if (textureJsonData.url) {
+        await EngineCache.getTexture2D(textureJsonData.url, gl);
+      } else if (textureJsonData.uris) {
+        const keys = textureJsonData.uris;
+        await EngineCache.getTextureCube(
+          {
+            right: keys[0],
+            left: keys[1],
+            up: keys[2],
+            bottom: keys[3],
+            front: keys[4],
+            back: keys[5],
+          },
+          gl,
+        );
       }
     }
+  }
   /**
     Instantiates mesh data objects from the scene JSON data.
    * @private
@@ -69,7 +83,9 @@ export class SceneManager {
    * @param {any} meshMaps - The raw mesh data from the JSON.
    * @returns {{ [key: string]: MeshData }} - A map of mesh UUIDs to MeshData instances.
    */
-  private static instaciateSceneMeshes(meshMaps: any): { [key: string]: MeshData } {
+  private static instaciateSceneMeshes(meshMaps: any): {
+    [key: string]: MeshData;
+  } {
     const meshes: { [key: string]: MeshData } = {};
 
     for (const data of Object.values(meshMaps) as any[]) {
@@ -90,15 +106,19 @@ export class SceneManager {
    * @param {WebGL2RenderingContext} gl - The WebGL2 rendering context.
    * @returns {any[]} - An array of instantiated entity objects.
    */
-  private static instaciateSceneObjects(scene: Scene, objects: JsonSerializable[], meshes: { [key: string]: MeshData }, gl: WebGL2RenderingContext): any[] {
+  private static instaciateSceneObjects(
+    scene: Scene,
+    objects: JsonSerializable[],
+    meshes: { [key: string]: MeshData },
+    gl: WebGL2RenderingContext,
+  ): any[] {
     const instanciatedTransforms: { [key: string]: Transform } = {};
 
     objects.forEach((ob: JsonSerializable) => {
       this.instanciateEntity(ob, instanciatedTransforms);
       this.instanciateBehaviours(ob, scene, meshes, gl);
-    }
-    );
-    
+    });
+
     return objects.map((e: any) => e.entity);
   }
 
@@ -109,7 +129,10 @@ export class SceneManager {
    * @param {any} entities - An array of raw entity data.
    * @returns {void}
    */
-  static prepareTransforms(transforms: { [key: string]: Transform }, entities: any): void {
+  static prepareTransforms(
+    transforms: { [key: string]: Transform },
+    entities: any,
+  ): void {
     for (const ent of entities) {
       if (ent.transform.parent) {
         ent.entity.transform.setParent(transforms[ent.transform.parent]);
@@ -127,39 +150,49 @@ export class SceneManager {
     return scene.toJsonObject();
   }
 
+  private static instanciateBehaviours(
+    jsonObject: JsonSerializedData,
+    scene: Scene,
+    meshes: { [key: string]: MeshData },
+    gl: WebGL2RenderingContext,
+  ) {
+    jsonObject['entity'].scene = scene;
+    jsonObject['entity'].behaviours = [];
 
-
-  private static instanciateBehaviours(jsonObject: JsonSerializedData, scene: Scene, meshes: { [key: string]: MeshData }, gl: WebGL2RenderingContext) {
-    
-    jsonObject["entity"].scene = scene;
-    jsonObject["entity"].behaviours = [];
-
-    
-    if( !jsonObject["behaviours"]){
-      jsonObject["behaviours"] = []
-      console.debug("No behaviours found in scene JSON data",jsonObject)
+    if (!jsonObject['behaviours']) {
+      jsonObject['behaviours'] = [];
+      console.debug('No behaviours found in scene JSON data', jsonObject);
       // throw new Error('No behaviours found in scene JSON data',jsonObject)
     }
-    
 
-    jsonObject["behaviours"].forEach((behaviourJsonData: any) => {
+    jsonObject['behaviours'].forEach((behaviourJsonData: any) => {
       if (behaviourJsonData.mesh) {
-        behaviourJsonData['meshData'] = meshes[behaviourJsonData.mesh.meshDataId];
+        behaviourJsonData['meshData'] =
+          meshes[behaviourJsonData.mesh.meshDataId];
       }
-      const newBehaviour = ObjectInstanciator.instanciateObjectFromJsonData<EntityBehaviour>(behaviourJsonData.className || behaviourJsonData.type, [gl]);
+      const newBehaviour =
+        ObjectInstanciator.instanciateObjectFromJsonData<EntityBehaviour>(
+          behaviourJsonData.className || behaviourJsonData.type,
+          [gl],
+        );
       if (newBehaviour) {
         // newBehaviour.parent = jsonObject["entity"];
         newBehaviour.fromJson(behaviourJsonData);
-        jsonObject["entity"].addBehaviour(newBehaviour);
+        jsonObject['entity'].addBehaviour(newBehaviour);
       }
     });
   }
 
-  private static instanciateEntity(jsonObject: JsonSerializedData, instanciatedTransforms: { [key: string]: Transform }): void {
-    const entity = ObjectInstanciator.instanciateObjectFromJsonData<GlEntity>(jsonObject["className"]) || new GlEntity(jsonObject["name"]);
+  private static instanciateEntity(
+    jsonObject: JsonSerializedData,
+    instanciatedTransforms: { [key: string]: Transform },
+  ): void {
+    const entity =
+      ObjectInstanciator.instanciateObjectFromJsonData<SceneEntity>(
+        jsonObject['className'],
+      ) || new SceneEntity(jsonObject['name']);
     entity.fromJson(jsonObject);
     instanciatedTransforms[entity.transform.uuid] = entity.transform;
     jsonObject['entity'] = entity;
-
   }
 }

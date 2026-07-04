@@ -17,6 +17,10 @@ export class Engine {
     return this.scene;
   }
 
+  constructor() {
+    this.dependencyManager = new DependencyManager();
+  }
+
   /**
     Initializes the engine by registering all core dependencies.
 
@@ -24,9 +28,11 @@ export class Engine {
    */
   public initialize(canvas: HTMLCanvasElement): void {
     this.eventManager = new EngineEventManager(this, canvas);
-    this.dependencyManager = new DependencyManager();
 
     this.eventManager.initialize();
+  }
+
+  public registerDependencies(): void {
     this.dependencyManager.registerDependencies();
   }
 

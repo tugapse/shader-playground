@@ -3,7 +3,7 @@ import {
   DirectionalLight,
   EntityBehaviour,
   EntityType,
-  GlEntity,
+  SceneEntity,
   JsonSerializedData,
   Light,
   ObjectInstanciator,
@@ -148,7 +148,7 @@ export class SunBehaviour extends EntityBehaviour {
 
     if (!this._skyboxRenderer) {
       this._skyboxRenderer = this.parent.scene?.objects
-        .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
+        .find((o: SceneEntity) => o.getBehaviour(SkyboxRenderer))
         ?.getBehaviour(SkyboxRenderer);
     }
 
@@ -523,7 +523,7 @@ export class SunBehaviour extends EntityBehaviour {
 
     if (!this._skyboxRenderer) {
       this._skyboxRenderer = scene.objects
-        .find((o: GlEntity) => o.getBehaviour(SkyboxRenderer))
+        .find((o: SceneEntity) => o.getBehaviour(SkyboxRenderer))
         ?.getBehaviour(SkyboxRenderer);
     }
 

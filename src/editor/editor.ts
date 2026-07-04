@@ -9,7 +9,8 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   Colors,
-  GlEntity,
+  Engine,
+  SceneEntity,
   JsonSerializedData,
   Scene,
   SceneManager,
@@ -23,7 +24,6 @@ import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
 import { AssetsExplorerComponent } from './components/asset-explorer/assets-explorer.component';
 import { Canvas, EngineStats } from './components/canvas/canvas';
 import { EngineStatsComponent } from './components/engine-stats/engine-stats';
-import { MenuItem, MenuItemComponent } from './components/menu-item/menu-item';
 import { SceneTree } from './components/scene-tree/scene-tree';
 import { TopBar } from './components/top-bar/top-bar';
 import { AssetExplorerWindow } from './components/window/window';
@@ -35,7 +35,6 @@ import { EditorService } from './services/editor.service';
 import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
-import { SoundMixerComponent } from './components/sound-mixer/sound-mixer';
 import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
 
 @Component({
@@ -50,7 +49,6 @@ import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
     EngineStatsComponent,
     AssetsExplorerComponent,
     WorkspaceComponent,
-    MenuItemComponent,
     EditorMainMenu,
   ],
   templateUrl: './editor.html',
@@ -58,7 +56,7 @@ import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
 })
 export class Editor implements OnDestroy, AfterViewInit {
   scene!: Scene;
-  inspectorSelectedEntity!: GlEntity;
+  inspectorSelectedEntity!: SceneEntity;
   isPaused = false;
   canvasVisible = true;
   fpsCounter: number = 0;
@@ -127,10 +125,12 @@ export class Editor implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.editorService.gameEngine.destroy();
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
+    this.editorService.gameEngine.initialize(gl.canvas as HTMLCanvasElement);
     this.editorService.onRenderingContextCreated.emit(this.gl);
     this.createEditorBehaviours();
   }
@@ -178,7 +178,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     }
   }
 
-  protected onSceneTreeEntitySelected(entity: GlEntity): void {
+  protected onSceneTreeEntitySelected(entity: SceneEntity): void {
     this.inspectorSelectedEntity = entity;
     this.gizmosBehaviour.setTargetEntity(entity);
   }

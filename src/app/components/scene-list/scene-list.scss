@@ -51,7 +51,7 @@
 
 .scene-item {
   display: flex;
-  flex-direction: column;
+  column-gap: 8px;
   border-radius: 4px;
   cursor: pointer;
   background-color: var(--editor-icon-button-background);
@@ -60,6 +60,7 @@
     border-color 0.2s ease;
   overflow: hidden; // To contain the border-radius on the image
   border: 1px solid transparent; // for selected state
+  padding: 6px 0;
 
   &:hover {
     background-color: var(--editor-icon-button-hover-background);
@@ -95,10 +96,7 @@
 }
 
 .scene-name {
-  font-size: 0.85rem;
   color: var(--editor-panel-color);
-  padding: 8px 12px;
-  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
