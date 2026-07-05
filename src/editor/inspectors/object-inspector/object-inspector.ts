@@ -20,7 +20,7 @@ import {
   Vector2,
   Vector3,
   Vector4,
-} from '@engine';
+} from 'omega-game-engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { BooleanInspector } from '../../components/inspector-components/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '../../components/inspector-components/text-input-inspector/text-input-inspector';

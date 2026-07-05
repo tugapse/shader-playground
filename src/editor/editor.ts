@@ -7,14 +7,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  Colors,
-  Engine,
-  SceneEntity,
-  JsonSerializedData,
-  Scene,
-  SceneManager,
-} from '@engine';
+
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AssetService } from 'src/app/api/services/asset.service';
@@ -37,6 +30,13 @@ import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
 import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
 import { OmegaCodeWorkspaceComponent } from './components/code-editor/editor/editor.component';
+import {
+  Scene,
+  SceneEntity,
+  JsonSerializedData,
+  SceneManager,
+  Colors,
+} from 'omega-game-engine';
 
 @Component({
   selector: 'app-editor',

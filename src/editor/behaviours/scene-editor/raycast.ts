@@ -1,9 +1,12 @@
-import { mat4, vec3, vec4 } from "gl-matrix";
-import { Camera, CanvasViewport, Mouse } from "@engine";
+import { mat4, vec3, vec4 } from 'gl-matrix';
+import { Camera, CanvasViewport, Mouse } from 'omega-game-engine';
 
 export class Raycast {
-
-  public static screenPointToRay(camera: Camera, game: { webgl: WebGL2RenderingContext }, position: { x: number, y: number } = Mouse.mousePosition): vec3 {
+  public static screenPointToRay(
+    camera: Camera,
+    game: { webgl: WebGL2RenderingContext },
+    position: { x: number; y: number } = Mouse.mousePosition,
+  ): vec3 {
     const canvas = game.webgl.canvas;
     const x = (position.x / CanvasViewport.rendererWidth) * 2 - 1;
     const y = 1 - (position.y / CanvasViewport.rendererHeight) * 2;
@@ -28,11 +31,25 @@ export class Raycast {
     return ray;
   }
 
-  public static intersectRayWithPlane(rayOrigin: vec3, rayDirection: vec3, planeOrigin: vec3, planeNormal: vec3): vec3 | null {
+  public static intersectRayWithPlane(
+    rayOrigin: vec3,
+    rayDirection: vec3,
+    planeOrigin: vec3,
+    planeNormal: vec3,
+  ): vec3 | null {
     const denominator = vec3.dot(rayDirection, planeNormal);
     if (Math.abs(denominator) > 0.0001) {
-      const t = vec3.dot(vec3.subtract(vec3.create(), planeOrigin, rayOrigin), planeNormal) / denominator;
-      const intersectionPoint = vec3.scaleAndAdd(vec3.create(), rayOrigin, rayDirection, t);
+      const t =
+        vec3.dot(
+          vec3.subtract(vec3.create(), planeOrigin, rayOrigin),
+          planeNormal,
+        ) / denominator;
+      const intersectionPoint = vec3.scaleAndAdd(
+        vec3.create(),
+        rayOrigin,
+        rayDirection,
+        t,
+      );
       return intersectionPoint;
     }
     return null;

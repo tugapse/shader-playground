@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MovableDirective } from '@editor/directives/moveable.directive';
 import { EditorService } from '@editor/services/editor.service';
-import { SceneEntity } from '@engine';
+import { SceneEntity } from 'omega-game-engine';
 import { Icon } from 'src/app/components/icon/icon';
 import { InspectorHeader } from '../../components/inspector-components/inspector-header/inspector-header';
 import { EntityInspector } from '../entity-inspector/entity-inspector';

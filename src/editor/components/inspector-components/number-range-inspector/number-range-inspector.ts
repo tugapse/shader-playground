@@ -1,15 +1,25 @@
-import { Component, EventEmitter, Input, Output, ViewChild, ElementRef, Renderer2, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
-import { NumberRange } from '@engine/core/range';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  ElementRef,
+  Renderer2,
+  OnDestroy,
+  NgZone,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { NumberRange } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-number-range-inspector',
   standalone: true,
   imports: [],
   templateUrl: './number-range-inspector.html',
-  styleUrl: './number-range-inspector.scss'
+  styleUrl: './number-range-inspector.scss',
 })
 export class NumberRangeInspector implements OnDestroy {
-
   @Input() label: string = '';
   @Input() range!: NumberRange;
   @Output() rangeChange = new EventEmitter<NumberRange>();
@@ -23,10 +33,10 @@ export class NumberRangeInspector implements OnDestroy {
   private originalCursor: string = '';
 
   constructor(
-    private renderer: Renderer2, 
+    private renderer: Renderer2,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   // --- Label Drag Logic (Virtual Slide Feature) ---
   startLabelDrag(event: MouseEvent): void {
@@ -40,8 +50,14 @@ export class NumberRangeInspector implements OnDestroy {
     this.renderer.setStyle(document.body, 'cursor', 'ew-resize', 1);
     this.renderer.addClass(document.body, 'no-select');
 
-    this.unlistenMouseMove = this.renderer.listen('window', 'mousemove', (e: MouseEvent) => this.handleLabelMove(e));
-    this.unlistenMouseUp = this.renderer.listen('window', 'mouseup', () => this.stopLabelDrag());
+    this.unlistenMouseMove = this.renderer.listen(
+      'window',
+      'mousemove',
+      (e: MouseEvent) => this.handleLabelMove(e),
+    );
+    this.unlistenMouseUp = this.renderer.listen('window', 'mouseup', () =>
+      this.stopLabelDrag(),
+    );
   }
 
   private handleLabelMove(event: MouseEvent): void {

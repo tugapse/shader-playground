@@ -7,7 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { ObjectInstanciator } from '@engine/core/object-instanciator';
+import { ObjectInstanciator } from 'omega-game-engine';
 import { AssetsExplorerService } from '../../assets-explorer.service';
 import { IAsset } from '@editor/interfaces/asset.interface';
 

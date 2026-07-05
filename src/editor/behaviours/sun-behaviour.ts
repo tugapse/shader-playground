@@ -1,19 +1,19 @@
-import {
-  Color,
-  DirectionalLight,
-  EntityBehaviour,
-  EntityType,
-  SceneEntity,
-  JsonSerializedData,
-  Light,
-  ObjectInstanciator,
-  SkyboxRenderer,
-  SkyboxShader,
-  Vector3,
-} from '@engine';
-import { NumberRange } from '@engine/core/range';
-import { ClassType } from '@engine/enums/class-type.enum';
 import { vec3 } from 'gl-matrix';
+import {
+  EntityBehaviour,
+  SkyboxRenderer,
+  DirectionalLight,
+  NumberRange,
+  Color,
+  SceneEntity,
+  EntityType,
+  Vector3,
+  SkyboxShader,
+  Light,
+  JsonSerializedData,
+  ObjectInstanciator,
+  ClassType,
+} from 'omega-game-engine';
 
 // Helper for smooth (ease-in, ease-out) interpolation
 const smoothstep = (t: number): number => {

@@ -1,17 +1,21 @@
 import { Component, Input } from '@angular/core';
 import { InpectorTogglePanel } from '@editor/components/inpector-toggle-panel/inpector-toggle-panel';
-import { ColorMaterial } from '@engine/materials/color-material';
 import { DefaultInspector } from '../default-inspector/default-inspector';
 import {
   ITargetProperty,
   ObjectInspector,
 } from '../object-inspector/object-inspector';
-import { Color, NumberRange } from '@engine';
-import { TextureInspector } from "../texture-inspector/texture-inspector";
+import { Color, ColorMaterial, NumberRange } from 'omega-game-engine';
+import { TextureInspector } from '../texture-inspector/texture-inspector';
 
 @Component({
   selector: 'editor-material-inspector',
-  imports: [DefaultInspector, InpectorTogglePanel, ObjectInspector, TextureInspector],
+  imports: [
+    DefaultInspector,
+    InpectorTogglePanel,
+    ObjectInspector,
+    TextureInspector,
+  ],
   templateUrl: './material-inspector.html',
   styleUrl: './material-inspector.scss',
 })
@@ -42,8 +46,6 @@ export class MaterialInspector extends ObjectInspector {
     const textures = properties.filter((p) => p.type === 'texture');
     const others = properties.filter((p) => p.type !== 'texture');
     this._properties = [...textures, ...others];
-
-      
   }
 
   onDefaultChanged(

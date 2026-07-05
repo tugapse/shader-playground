@@ -2,48 +2,48 @@ import { Component, OnDestroy } from '@angular/core';
 import { vec3 } from 'gl-matrix';
 
 import { EditorService } from '@editor/services/editor.service';
-import {
-  Camera,
-  CanvasViewport,
-  Colors,
-  CubePrimitive,
-  DirectionalLight,
-  EngineCache,
-  SceneEntity,
-  Light,
-  LitMaterial,
-  LitShader,
-  Mesh,
-  MeshData,
-  MeshRendererBehaviour,
-  PlanePrimitive,
-  PointLight,
-  Scene,
-  Shader,
-  SkyboxMaterial,
-  SkyboxRenderer,
-  SkyboxShader,
-  SpherePrimitive,
-  SpotLight,
-} from '@engine';
 
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
-import { AudioCache } from '@engine/audio/audio-cache';
-import { AudioEngineDiagnostics } from '@engine/audio/audio-dianostics';
-import { AudioEngine } from '@engine/audio/audio-engine';
-import { SequencerClock } from '@engine/audio/sequencer-clock';
-import { VoiceFactory } from '@engine/audio/voice-factory';
+import {
+  Scene,
+  DirectionalLight,
+  SpotLight,
+  SceneEntity,
+  Camera,
+  CanvasViewport,
+  EngineCache,
+  MeshRendererBehaviour,
+  CubePrimitive,
+  SpherePrimitive,
+  LitShader,
+  LitMaterial,
+  PlanePrimitive,
+  Colors,
+  PointLight,
+  Light,
+  MeshData,
+  Shader,
+  Mesh,
+  SkyboxRenderer,
+  SkyboxMaterial,
+  SkyboxShader,
+  AudioEngine,
+  AudioCache,
+  SequencerClock,
+  VoiceFactory,
+  AudioEngineDiagnostics,
+} from 'omega-game-engine';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
   standalone: true,
-  imports: [RouterModule, ConfirmationModalComponent, AssetsExplorerComponent],
+  imports: [RouterModule, ConfirmationModalComponent],
 })
 export class App implements OnDestroy {
   private gl!: WebGL2RenderingContext;

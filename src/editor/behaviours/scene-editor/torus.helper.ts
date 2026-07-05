@@ -1,4 +1,4 @@
-import { Shader, ShaderUniformsEnum } from "@engine";
+import { Shader, ShaderUniformsEnum } from 'omega-game-engine';
 
 export class TorusHelper {
   private gl: WebGL2RenderingContext;
@@ -6,12 +6,23 @@ export class TorusHelper {
   private indexBuffer: WebGLBuffer | null = null;
   private indexCount = 0;
 
-  constructor(gl: WebGL2RenderingContext, radius = 1.0, tubeRadius = 0.02, radialSegments = 64, tubularSegments = 16) {
+  constructor(
+    gl: WebGL2RenderingContext,
+    radius = 1.0,
+    tubeRadius = 0.02,
+    radialSegments = 64,
+    tubularSegments = 16,
+  ) {
     this.gl = gl;
     this.init(radius, tubeRadius, radialSegments, tubularSegments);
   }
 
-  private init(radius: number, tube: number, radialSegments: number, tubularSegments: number) {
+  private init(
+    radius: number,
+    tube: number,
+    radialSegments: number,
+    tubularSegments: number,
+  ) {
     const vertices = [];
     const indices = [];
 
@@ -46,16 +57,27 @@ export class TorusHelper {
 
     this.positionBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array(vertices),
+      this.gl.STATIC_DRAW,
+    );
 
     this.indexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indices),
+      this.gl.STATIC_DRAW,
+    );
   }
 
   public draw(shader: Shader) {
     if (!shader._shaderProgram) return;
-    const posLoc = this.gl.getAttribLocation(shader._shaderProgram, ShaderUniformsEnum.A_POSITION);
+    const posLoc = this.gl.getAttribLocation(
+      shader._shaderProgram,
+      ShaderUniformsEnum.A_POSITION,
+    );
     if (posLoc === -1) return;
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
@@ -63,7 +85,12 @@ export class TorusHelper {
     this.gl.enableVertexAttribArray(posLoc);
 
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    this.gl.drawElements(this.gl.TRIANGLES, this.indexCount, this.gl.UNSIGNED_SHORT, 0);
+    this.gl.drawElements(
+      this.gl.TRIANGLES,
+      this.indexCount,
+      this.gl.UNSIGNED_SHORT,
+      0,
+    );
 
     this.gl.disableVertexAttribArray(posLoc);
   }

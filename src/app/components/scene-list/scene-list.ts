@@ -1,9 +1,18 @@
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetService } from '../../api/services/asset.service';
-import { AssetResponse, ProjectResponse } from '../../api/models/omega-api.models';
-import { Scene } from '@engine/entities/scene';
+import {
+  AssetResponse,
+  ProjectResponse,
+} from '../../api/models/omega-api.models';
+import { Scene } from 'omega-game-engine';
 import { Router } from '@angular/router';
 
 @Component({
@@ -11,14 +20,14 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './scene-list.html',
-  styleUrl: './scene-list.scss'
+  styleUrl: './scene-list.scss',
 })
 export class SceneList implements OnChanges {
   private readonly assetService = inject(AssetService);
   private readonly router = inject(Router);
 
   @Input() project: ProjectResponse | null = null;
-  
+
   scenes: AssetResponse[] = [];
   isModalOpen = false;
   newSceneName = '';
@@ -41,7 +50,7 @@ export class SceneList implements OnChanges {
       error: (err: any) => {
         console.error('Failed to load scenes', err);
         this.scenes = [];
-      }
+      },
     });
   }
 
@@ -72,25 +81,28 @@ export class SceneList implements OnChanges {
     const sceneName = this.newSceneName.trim().endsWith('.scene')
       ? this.newSceneName.trim()
       : `${this.newSceneName.trim()}.scene`;
-      
+
     const sceneObject = new Scene();
     sceneObject.name = sceneName;
 
-    
     const virtualPath = `/Scenes/${sceneName}`;
     const sceneContent = JSON.stringify(sceneObject.toJsonObject());
-    const sceneFile = new File([sceneContent], sceneName, { type: 'application/json' });
-
-    this.assetService.uploadAsset(this.project.id, sceneFile, virtualPath, 'scene').subscribe({
-      next: () => {
-        console.log(`Scene '${sceneName}' created successfully.`);
-        this.closeModal();
-        this.loadScenes(); // Refresh the list
-      },
-      error: (err: any) => {
-        console.error('Failed to create scene', err);
-        // Optionally show an error in the modal
-      }
+    const sceneFile = new File([sceneContent], sceneName, {
+      type: 'application/json',
     });
+
+    this.assetService
+      .uploadAsset(this.project.id, sceneFile, virtualPath, 'scene')
+      .subscribe({
+        next: () => {
+          console.log(`Scene '${sceneName}' created successfully.`);
+          this.closeModal();
+          this.loadScenes(); // Refresh the list
+        },
+        error: (err: any) => {
+          console.error('Failed to create scene', err);
+          // Optionally show an error in the modal
+        },
+      });
   }
 }

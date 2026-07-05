@@ -2,7 +2,13 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BooleanInspector } from '@editor/components/inspector-components/boolean-inspector/boolean-inspector';
 import { TextInputInspector } from '@editor/components/inspector-components/text-input-inspector/text-input-inspector';
 import { VectorInspector } from '@editor/components/inspector-components/vector-inspector/vector-inspector';
-import { Color, NumberRange, Vector2, Vector3, Vector4 } from '@engine';
+import {
+  Color,
+  NumberRange,
+  Vector2,
+  Vector3,
+  Vector4,
+} from 'omega-game-engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { ColorInspector } from '../color-inspector/color-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
@@ -28,7 +34,7 @@ import {
 export class DefaultInspector {
   @Input() item!: ITargetProperty;
   @Output() change = new EventEmitter<
-    string | number | boolean | NumberRange | Color 
+    string | number | boolean | NumberRange | Color
   >();
 
   private _onPropertyChanged(propertyKey: string, value: any): void {
@@ -56,7 +62,7 @@ export class DefaultInspector {
   }
 
   protected onEnumChange(key: string, menuItem: DropdownItem) {
-   this._onPropertyChanged(key, menuItem.value);
+    this._onPropertyChanged(key, menuItem.value);
   }
 
   protected onRangeChange(item: ITargetProperty, $event: NumberRange) {

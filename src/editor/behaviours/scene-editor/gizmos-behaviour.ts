@@ -18,7 +18,7 @@ import {
   Texture,
   Transform,
   Vector3,
-} from '@engine';
+} from 'omega-game-engine';
 import { mat4, quat, vec3 } from 'gl-matrix';
 import { ConeHelper } from './cone.helper';
 import { CubeHelper } from './cube.helper';

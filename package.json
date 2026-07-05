@@ -31,6 +31,7 @@
     "@angular/router": "^20.1.0",
     "gl-matrix": "^3.4.4",
     "monaco-editor": "^0.55.1",
+    "omega-game-engine": "^3.0.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "uuid": "^11.1.0",

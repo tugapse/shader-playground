@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { SceneEntity } from '@engine';
+import { SceneEntity } from 'omega-game-engine';
 import { Icon } from 'src/app/components/icon/icon';
 import { TreeNode } from '../scene-node';
 

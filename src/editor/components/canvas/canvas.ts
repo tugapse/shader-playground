@@ -12,7 +12,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Camera, CanvasViewport, cleanLastFrame, Engine, Scene } from '@engine';
+import {
+  Camera,
+  CanvasViewport,
+  cleanLastFrame,
+  Engine,
+  Scene,
+} from 'omega-game-engine';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 

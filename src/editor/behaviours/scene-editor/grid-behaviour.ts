@@ -1,14 +1,20 @@
-
-import { vec3 } from "gl-matrix";
-import { Color, ColorMaterial, DephFunction, Mesh, MeshData, RendererBehaviour, RenderLayer, SceneEntityBehaviour, Shader, Vector3 } from "@engine";
-
+import { vec3 } from 'gl-matrix';
+import {
+  Color,
+  ColorMaterial,
+  DephFunction,
+  Mesh,
+  MeshData,
+  RendererBehaviour,
+  RenderLayer,
+  SceneEntityBehaviour,
+  Shader,
+  Vector3,
+} from 'omega-game-engine';
 
 export class EditorGridBehaviour extends RendererBehaviour {
-
   public gridColor: Color = new Color(0.31, 0.31, 0.48);
   public gridLineWidt = 1.0;
-
-
 
   constructor(gl: WebGL2RenderingContext) {
     super(gl);
@@ -20,7 +26,6 @@ export class EditorGridBehaviour extends RendererBehaviour {
     this.createMesh();
     this._gl.lineWidth(10.0);
     // this.active = false;
-
   }
 
   protected createMesh() {
@@ -33,7 +38,6 @@ export class EditorGridBehaviour extends RendererBehaviour {
     return vertices;
   }
 
-
   override draw(): void {
     if (!this.shader?._shaderProgram || !this.active) return;
     if (!this._initialized) {
@@ -41,14 +45,11 @@ export class EditorGridBehaviour extends RendererBehaviour {
     }
     const count = 10;
     this.shader.use();
-    this.shader.material.color.set(...this.gridColor.toVec4())
+    this.shader.material.color.set(...this.gridColor.toVec4());
     this.drawHorizontalLines(count);
     this.drawVerticalLines(count);
     this.shader.release();
-
   }
-
-
 
   protected drawVerticalLines(count: number = 10) {
     let fromV = new Vector3();
@@ -68,11 +69,6 @@ export class EditorGridBehaviour extends RendererBehaviour {
       fromH.set(-count, 0, z);
       toH.set(count, 0, z);
       this.drawLine(fromH, toH);
-
     }
-
-
-
   }
-
 }

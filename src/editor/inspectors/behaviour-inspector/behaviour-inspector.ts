@@ -10,7 +10,7 @@ import {
   FaceWinding,
   NumberRange,
   RenderLayer,
-} from '@engine';
+} from 'omega-game-engine';
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { Icon } from 'src/app/components/icon/icon';
 import { ConfirmationService } from 'src/app/services/confirmation.service';

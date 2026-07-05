@@ -5,7 +5,7 @@ import {
   CanvasViewport,
   Engine,
   Scene,
-} from '@engine';
+} from 'omega-game-engine';
 import { BehaviorSubject } from 'rxjs';
 import { GizmoMode } from '../behaviours/scene-editor/gizmo-mode.enum';
 import { TransformSpace } from '../behaviours/scene-editor/transform-space.enum';
