@@ -25,7 +25,6 @@ export class AssetsExplorerService {
         }),
       ),
       tap((tree) => {
-        debugger;
         this.treeData.set(tree);
         if (tree) {
           const currentPath = this.activeFolder()?.virtualPath;

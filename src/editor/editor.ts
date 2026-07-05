@@ -36,11 +36,11 @@ import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
 import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
+import { OmegaCodeWorkspaceComponent } from './components/code-editor/editor/editor.component';
 
 @Component({
   selector: 'app-editor',
   imports: [
-    Canvas,
     CommonModule,
     EditorInpector,
     TopBar,
@@ -50,6 +50,8 @@ import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
     AssetsExplorerComponent,
     WorkspaceComponent,
     EditorMainMenu,
+    OmegaCodeWorkspaceComponent,
+    Canvas,
   ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',

@@ -4,6 +4,7 @@ import { WindowService } from '@editor/services/window.service';
 import { SoundMixerComponent } from '../sound-mixer/sound-mixer';
 import { AssetsExplorerComponent } from '../asset-explorer/assets-explorer.component';
 import { EditorSettingsService } from '@editor/services/editor.settings';
+import { OmegaCodeWorkspaceComponent } from '../code-editor/editor/editor.component';
 
 @Component({
   selector: 'editor-main-menu',
@@ -35,8 +36,9 @@ export class EditorMainMenu {
           id: 'windows',
           label: 'Windows',
           items: [
+            { id: 'mixer', label: 'Sound Mixer' },
             { id: 'assetExplorer', label: 'Asset Explorer' },
-            { id: 'mixer', label: 'Sounds Mixer' },
+            { id: 'codeEditor', label: 'Code Editor' },
           ],
         },
         {
@@ -83,6 +85,14 @@ export class EditorMainMenu {
           component: AssetsExplorerComponent,
           title: 'Asset Explorer',
           iconName: 'fa-folder',
+          footer: '',
+        });
+        break;
+      case 'codeEditor':
+        this.windowService.open({
+          component: OmegaCodeWorkspaceComponent,
+          title: 'Code Editor',
+          iconName: 'fa-code',
           footer: '',
         });
         break;

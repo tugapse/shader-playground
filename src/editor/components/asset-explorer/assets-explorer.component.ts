@@ -72,7 +72,6 @@ export class AssetsExplorerComponent implements AfterViewInit {
     const project = this._projectId();
     const id = this.projectId || project?.id;
     if (!id) return;
-    debugger;
     this.explorerState.loadProjectAssets(id, project?.name).subscribe();
   }
 
