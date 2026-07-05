@@ -21,7 +21,7 @@ export class AssetService {
 
   /**
    * Get an index of the project's assets with aggregation.
-   * Corresponds to GET /api/v1/projects/{project_id}/assets
+   * Corresponds to GET /api/projects/{project_id}/assets
    * @param projectId The ID of the project.
    * @param type Optional filter by asset type.
    * @param dir Optional filter by virtual_path prefix.
@@ -29,7 +29,7 @@ export class AssetService {
   listAssets(
     projectId: string,
     type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene',
-    dir?: string
+    dir?: string,
   ): Observable<ProjectAssetIndexResponse> {
     let params = new HttpParams();
     if (type) {
@@ -44,7 +44,7 @@ export class AssetService {
 
   /**
    * Uploads a file to a project.
-   * Corresponds to POST /api/v1/projects/{project_id}/assets
+   * Corresponds to POST /api/projects/{project_id}/assets
    * @param projectId The ID of the project.
    * @param file The file to upload.
    * @param virtualPath The logical path for the asset.
@@ -54,7 +54,7 @@ export class AssetService {
     projectId: string,
     file: File,
     virtualPath?: string,
-    assetType?: string
+    assetType?: string,
   ): Observable<AssetResponse> {
     const formData = new FormData();
     formData.append('file', file, file.name);
@@ -70,7 +70,7 @@ export class AssetService {
 
   /**
    * Updates asset metadata or relocates the file.
-   * Corresponds to PATCH /api/v1/projects/{project_id}/assets/{asset_id}
+   * Corresponds to PATCH /api/projects/{project_id}/assets/{asset_id}
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    * @param payload The fields to update.
@@ -81,7 +81,7 @@ export class AssetService {
     payload: {
       virtual_path?: string;
       asset_type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene';
-    }
+    },
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
     return this.http.patch<AssetResponse>(url, payload, {
@@ -91,27 +91,24 @@ export class AssetService {
 
   /**
    * Deletes an asset from the DB and storage.
-   * Corresponds to DELETE /api/v1/projects/{project_id}/assets/{asset_id}
+   * Corresponds to DELETE /api/projects/{project_id}/assets/{asset_id}
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    */
   deleteAsset(
     projectId: string,
-    assetId: string
+    assetId: string,
   ): Observable<{ status: string; message: string }> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
     return this.http.delete<{ status: string; message: string }>(url);
   }
   /**
    * Streams the raw binary content of an asset.
-   * Corresponds to GET /api/v1/projects/{project_id}/assets/{asset_id}
+   * Corresponds to GET /api/projects/{project_id}/assets/{asset_id}
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    */
-  getRawAssetContent(
-    projectId: string,
-    assetId: string
-  ): Observable<Blob> {
+  getRawAssetContent(projectId: string, assetId: string): Observable<Blob> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
     return this.http.get(url, {
       responseType: 'blob',
@@ -119,21 +116,18 @@ export class AssetService {
   }
   /**
    * Streams the raw binary content of an asset.
-   * Corresponds to GET /api/v1/projects/{project_id}/assets/{asset_id}
+   * Corresponds to GET /api/projects/{project_id}/assets/{asset_id}
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    */
-  getTextAssetContent(
-    projectId: string,
-    assetId: string
-  ): Observable<string> {
+  getTextAssetContent(projectId: string, assetId: string): Observable<string> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
-    return this.http.get(url, { responseType: 'text' }); 
+    return this.http.get(url, { responseType: 'text' });
   }
 
   /**
    * Updates the text/code content of an asset.
-   * Corresponds to PUT /api/v1/projects/{project_id}/assets/{asset_id}/text
+   * Corresponds to PUT /api/projects/{project_id}/assets/{asset_id}/text
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    * @param content The new text content.
@@ -141,7 +135,7 @@ export class AssetService {
   updateRawAssetContent(
     projectId: string,
     assetId: string,
-    content: string
+    content: string,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
     return this.http.put<AssetResponse>(url, { text: content });
@@ -149,7 +143,7 @@ export class AssetService {
 
   /**
    * Replaces the binary content of an existing asset (images, audio, etc).
-   * Corresponds to PUT /api/v1/projects/{project_id}/assets/{asset_id}/raw
+   * Corresponds to PUT /api/projects/{project_id}/assets/{asset_id}/raw
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    * @param file The new file to upload.
@@ -157,7 +151,7 @@ export class AssetService {
   updateBinaryAssetContent(
     projectId: string,
     assetId: string,
-    file: File
+    file: File,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/raw`;
     const formData = new FormData();
@@ -167,7 +161,7 @@ export class AssetService {
 
   /**
    * Updates the raw JSON content of a scene asset.
-   * Corresponds to PUT /api/v1/projects/{project_id}/assets/{asset_id}/text
+   * Corresponds to PUT /api/projects/{project_id}/assets/{asset_id}/text
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    * @param sceneData The new scene data as a JSON object.
@@ -175,9 +169,11 @@ export class AssetService {
   saveSceneAsset(
     projectId: string,
     assetId: string,
-    sceneData: object
+    sceneData: object,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
-    return this.http.put<AssetResponse>(url, { text: JSON.stringify(sceneData, null, 2) });
+    return this.http.put<AssetResponse>(url, {
+      text: JSON.stringify(sceneData, null, 2),
+    });
   }
 }

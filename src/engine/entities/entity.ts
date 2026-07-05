@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EntityBehaviour } from "../behaviours/entity-behaviour";
-import { Transform } from "../core/transform";
+import { EntityBehaviour } from '../behaviours/entity-behaviour';
+import { Transform } from '../core/transform';
 import { EntityType } from '../enums/entity-type.enum';
 import { JsonSerializable } from '../core/json-serializable';
 import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
@@ -10,27 +10,32 @@ import { ObjectInstanciator } from '../core/object-instanciator';
   The base class for all entities within the engine. It manages a transform, a collection of behaviours, and the entity's state within a scene.
  * @augments {JsonSerializable}
  */
-export class GlEntity extends JsonSerializable {
-
-  public get type(): string { return this.constructor.name; }
-  public static get className() { return "GLEntity"; };
+export class SceneEntity extends JsonSerializable {
+  public get type(): string {
+    return this.constructor.name;
+  }
+  public static get className() {
+    return 'SceneEntity';
+  }
 
   /**
-    Creates a new GlEntity instance with a given name and an optional transform.
+    Creates a new SceneEntity instance with a given name and an optional transform.
 
    * @param {string} [name="Entity"] - The name of the new entity.
    * @param {Transform} [transform] - The transform for the entity. A new one is created if none is provided.
-   * @returns {GlEntity} - The newly created GlEntity instance.
+   * @returns {SceneEntity} - The newly created SceneEntity instance.
    */
-  public static instanciate(name: string = "Entity", transform?: Transform): GlEntity {
+  public static instanciate(
+    name: string = 'Entity',
+    transform?: Transform,
+  ): SceneEntity {
     if (!transform || transform instanceof Transform == false) {
       transform = new Transform();
     }
-    return new GlEntity(name, transform);
+    return new SceneEntity(name, transform);
   }
 
   [key: string]: any;
-
 
   /**
     A flag indicating if the entity has been destroyed.
@@ -42,7 +47,7 @@ export class GlEntity extends JsonSerializable {
     The scene to which this entity belongs.
    * @type {import("./scene").Scene}
    */
-  public scene!: import("./scene").Scene;
+  public scene!: import('./scene').Scene;
   /**
     A flag indicating if the entity is active and should be updated.
    * @type {boolean}
@@ -57,7 +62,7 @@ export class GlEntity extends JsonSerializable {
     A tag used for identifying or grouping entities.
    * @type {string}
    */
-  public tag: string = "Entity";
+  public tag: string = 'Entity';
   /**
     A flag to determine if the entity should update in the editor.
    * @type {boolean}
@@ -88,12 +93,12 @@ export class GlEntity extends JsonSerializable {
   public transform: Transform;
 
   /**
-    Creates an instance of GlEntity.
+    Creates an instance of SceneEntity.
    * @param {string} name - The name of the entity.
    * @param {Transform} [transform=new Transform()] - The transform component.
    */
   constructor(name: string, transform: Transform = new Transform()) {
-    super("GlEntity");
+    super('SceneEntity');
     this.name = name;
     this.transform = transform;
     this.transform.parentEntity = this;
@@ -119,7 +124,7 @@ export class GlEntity extends JsonSerializable {
   public update(ellapsed: number): void {
     if (!this.active) return;
     this.transform.updateMatrices();
-    for (const behaviour of this.behaviours.filter(b => b.active)) {
+    for (const behaviour of this.behaviours.filter((b) => b.active)) {
       behaviour.update(ellapsed);
     }
   }
@@ -130,7 +135,7 @@ export class GlEntity extends JsonSerializable {
    */
   public draw(): void {
     if (!this.active) return;
-    for (const behaviour of this.behaviours.filter(b => b.active)) {
+    for (const behaviour of this.behaviours.filter((b) => b.active)) {
       behaviour.draw();
     }
   }
@@ -176,7 +181,9 @@ export class GlEntity extends JsonSerializable {
    * @param {new (...args: any[]) => T} constructor - The constructor function of the type to filter by.
    * @returns {T[]} - An array of behaviours of the specified type.
    */
-  public getBehaviours<T extends EntityBehaviour>(constructor: new (...args: any[]) => T): T[] {
+  public getBehaviours<T extends EntityBehaviour>(
+    constructor: new (...args: any[]) => T,
+  ): T[] {
     return this.behaviours.filter((o): o is T => o instanceof constructor);
   }
 
@@ -186,10 +193,12 @@ export class GlEntity extends JsonSerializable {
    * @param {new (...args: any[]) => T} constructor - The constructor function of the type to filter by.
    * @returns {T | undefined} - The first behaviour found of the specified type, or undefined if none is found.
    */
-  public getBehaviour<T extends EntityBehaviour>(constructor: new (...args: any[]) => T): T | undefined {
+  public getBehaviour<T extends EntityBehaviour>(
+    constructor: new (...args: any[]) => T,
+  ): T | undefined {
     return this.behaviours.find((o): o is T => o instanceof constructor);
   }
-   
+
   /**
     Deserializes the entity's state from a JSON object.
    * @override
@@ -206,19 +215,19 @@ export class GlEntity extends JsonSerializable {
    * @override
    * @returns {JsonSerializedData} - The JSON object representation.
    */
-  public override toJsonObject(): JsonSerializedData {    
+  public override toJsonObject(): JsonSerializedData {
     const result = this.serializeAutomatically();
-    result['behaviours'] = this.behaviours.map(b => b.toJsonObject());
-    console.debug("Serialized behaviour", result)
-    return result;  
- }
+    result['behaviours'] = this.behaviours.map((b) => b.toJsonObject());
+    console.debug('Serialized behaviour', result);
+    return result;
+  }
 
   /**
-    Creates a deep copy of the current GlEntity instance.
-   * @returns {GlEntity} - A new GlEntity instance that is a clone of the original.
+    Creates a deep copy of the current SceneEntity instance.
+   * @returns {SceneEntity} - A new SceneEntity instance that is a clone of the original.
    */
-  public clone(): GlEntity {
-    const newEntity = GlEntity.instanciate(this.name, this.transform);
+  public clone(): SceneEntity {
+    const newEntity = SceneEntity.instanciate(this.name, this.transform);
     newEntity.fromJson(this.toJsonObject());
     return newEntity;
   }

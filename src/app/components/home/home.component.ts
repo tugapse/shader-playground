@@ -12,6 +12,7 @@ import {
   UpdateProjectRequest,
 } from '../../api/models/omega-api.models';
 import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
+import { EditorService } from '@editor/services/editor.service';
 
 @Component({
   selector: 'app-home',
@@ -37,6 +38,8 @@ export class HomeComponent implements AfterViewInit {
   isModalOpen = false;
   newProjectName = '';
 
+  constructor(private editorService: EditorService) {}
+
   ngAfterViewInit(): void {
     this.loadProjects();
   }
@@ -51,6 +54,7 @@ export class HomeComponent implements AfterViewInit {
   }
 
   selectProject(project: ProjectResponse): void {
+    this.editorService.gameEngine;
     this.selectedProject = project;
   }
 

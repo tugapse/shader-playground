@@ -7,7 +7,7 @@ import {
   Colors,
   CubePrimitive,
   DephFunction,
-  GlEntity,
+  SceneEntity,
   Keybord,
   MeshData,
   Mouse,
@@ -17,7 +17,7 @@ import {
   ShaderUniformsEnum,
   Texture,
   Transform,
-  Vector3
+  Vector3,
 } from '@engine';
 import { mat4, quat, vec3 } from 'gl-matrix';
 import { ConeHelper } from './cone.helper';
@@ -35,7 +35,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
   public selectedBoundingBoxColor: Color = Colors.gray;
   public selectedBoundingBoxLineWidth = 3.0;
   public selectedBoundingBox!: BoundingBox | null;
-  private selectedEntity!: GlEntity;
+  private selectedEntity!: SceneEntity;
 
   private gizmoMode: GizmoMode = GizmoMode.Translate;
   private transformSpace: TransformSpace = TransformSpace.Local;
@@ -90,8 +90,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
   public hoveredBoundingBoxColor: Color = Colors.grey;
   public hoveredBoundingBoxLineWidth = 1.0;
   public hoveredBoundingBox!: BoundingBox | null;
-  private hoveredEntity!: GlEntity;
-
+  private hoveredEntity!: SceneEntity;
 
   private readonly _origin = new Vector3(0, 0, 0);
   private readonly _gizmoTransform = mat4.create();
@@ -181,7 +180,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
 
   protected createMesh() {}
 
-  public setTargetEntity(entity: GlEntity | null) {
+  public setTargetEntity(entity: SceneEntity | null) {
     if (entity == null) {
       this.selectedBoundingBox = null;
       this.selectedEntity = null as any;
@@ -200,7 +199,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     this.selectedEntity = entity;
   }
 
-  public setHoveredEntity(entity: GlEntity | null) {
+  public setHoveredEntity(entity: SceneEntity | null) {
     if (entity == null) {
       this.hoveredBoundingBox = null;
       this.hoveredEntity = null as any;
@@ -1262,7 +1261,7 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     }
   }
 
- private dragScaleEntity() {
+  private dragScaleEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
     const camera = Camera.mainCamera;
@@ -1274,32 +1273,44 @@ export class GizmosBoxBehaviour extends RendererBehaviour {
     if (this.activeHandle === 'scaleZ') vec3.set(this._scaleAxis, 0, 0, 1);
 
     vec3.copy(this._planeNormal, camera.transform.forward);
-    const intersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, this.dragStartPoint, this._planeNormal);
+    const intersection = Raycast.intersectRayWithPlane(
+      camera.transform.worldPosition,
+      ray,
+      this.dragStartPoint,
+      this._planeNormal,
+    );
 
     if (intersection) {
       vec3.sub(this._moveVector, intersection, this.dragStartPoint);
       const dragAmount = vec3.dot(this._moveVector, this._scaleAxis);
-      
+
       // Prevent negative scaling or instant collapse to zero
-      const scaleFactor = Math.max(1.0 + dragAmount * 0.25, 0.001); 
+      const scaleFactor = Math.max(1.0 + dragAmount * 0.25, 0.001);
 
       vec3.copy(this._newScale, this.dragStartEntityScale);
-      
-      if (this.activeHandle === 'scaleX') this._newScale[0] = this.dragStartEntityScale[0] * scaleFactor;
-      if (this.activeHandle === 'scaleY') this._newScale[1] = this.dragStartEntityScale[1] * scaleFactor;
-      if (this.activeHandle === 'scaleZ') this._newScale[2] = this.dragStartEntityScale[2] * scaleFactor;
-      
-      this.selectedEntity.transform.setLocalScale(this._newScale[0], this._newScale[1], this._newScale[2]);
+
+      if (this.activeHandle === 'scaleX')
+        this._newScale[0] = this.dragStartEntityScale[0] * scaleFactor;
+      if (this.activeHandle === 'scaleY')
+        this._newScale[1] = this.dragStartEntityScale[1] * scaleFactor;
+      if (this.activeHandle === 'scaleZ')
+        this._newScale[2] = this.dragStartEntityScale[2] * scaleFactor;
+
+      this.selectedEntity.transform.setLocalScale(
+        this._newScale[0],
+        this._newScale[1],
+        this._newScale[2],
+      );
     }
   }
 
-private dragRotateEntity() {
+  private dragRotateEntity() {
     if (!this.activeHandle || !this.selectedEntity) return;
 
     const camera = Camera.mainCamera;
     const ray = Raycast.screenPointToRay(camera, { webgl: this._gl });
     const entityPosition = this.selectedEntity.transform.worldPosition;
-    
+
     // Unskewed local base unit vectors
     const localX = vec3.fromValues(1, 0, 0);
     const localY = vec3.fromValues(0, 1, 0);
@@ -1308,13 +1319,13 @@ private dragRotateEntity() {
     // 1. Determine rotation axis based on immutable unit vectors mapped to orientation space
     if (this.transformSpace === TransformSpace.World) {
       if (this.activeHandle === 'rotateX') {
-        vec3.set(this._planeNormal, 1, 0, 0); 
+        vec3.set(this._planeNormal, 1, 0, 0);
         vec3.set(this._rotationAxis, 1, 0, 0);
       } else if (this.activeHandle === 'rotateY') {
-        vec3.set(this._planeNormal, 0, 1, 0); 
+        vec3.set(this._planeNormal, 0, 1, 0);
         vec3.set(this._rotationAxis, 0, 1, 0);
       } else if (this.activeHandle === 'rotateZ') {
-        vec3.set(this._planeNormal, 0, 0, 1); 
+        vec3.set(this._planeNormal, 0, 0, 1);
         vec3.set(this._rotationAxis, 0, 0, 1);
       }
     } else {
@@ -1335,16 +1346,34 @@ private dragRotateEntity() {
     vec3.normalize(this._planeNormal, this._planeNormal);
     vec3.normalize(this._rotationAxis, this._rotationAxis);
 
-    const lastRay = Raycast.screenPointToRay(camera, { webgl: this._gl }, this.lastMousePosition);
-    
-    const lastIntersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, lastRay, entityPosition, this._planeNormal);
-    const currentIntersection = Raycast.intersectRayWithPlane(camera.transform.worldPosition, ray, entityPosition, this._planeNormal);
+    const lastRay = Raycast.screenPointToRay(
+      camera,
+      { webgl: this._gl },
+      this.lastMousePosition,
+    );
+
+    const lastIntersection = Raycast.intersectRayWithPlane(
+      camera.transform.worldPosition,
+      lastRay,
+      entityPosition,
+      this._planeNormal,
+    );
+    const currentIntersection = Raycast.intersectRayWithPlane(
+      camera.transform.worldPosition,
+      ray,
+      entityPosition,
+      this._planeNormal,
+    );
 
     if (currentIntersection && lastIntersection) {
       vec3.sub(this._lastVector, lastIntersection, entityPosition);
       vec3.sub(this._currentVector, currentIntersection, entityPosition);
 
-      if (vec3.length(this._lastVector) < 0.001 || vec3.length(this._currentVector) < 0.001) return;
+      if (
+        vec3.length(this._lastVector) < 0.001 ||
+        vec3.length(this._currentVector) < 0.001
+      )
+        return;
 
       vec3.normalize(this._lastVector, this._lastVector);
       vec3.normalize(this._currentVector, this._currentVector);
@@ -1369,7 +1398,7 @@ private dragRotateEntity() {
       quat.normalize(this._newRotation, this._newRotation);
 
       this.selectedEntity.transform.setLocalRotationQuat(this._newRotation);
-      this.selectedEntity.transform.updateMatrices(); 
+      this.selectedEntity.transform.updateMatrices();
     }
   }
   protected override setCameraMatrices(): void {}

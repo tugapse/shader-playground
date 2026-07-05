@@ -8,7 +8,7 @@
  * Corresponds to the `UserPreferences` schema.
  */
 export interface UserPreferences {
-  theme: "dark" | "light";
+  theme: 'dark' | 'light';
   notifications_enabled: boolean;
   editor_settings: Record<string, string>;
 }
@@ -17,7 +17,7 @@ export interface UserPreferences {
 
 /**
  * Represents the payload for a user registration request.
- * Corresponds to `POST /api/v1/auth/register`.
+ * Corresponds to `POST /api/auth/register`.
  */
 export interface AuthRegisterRequest {
   username: string;
@@ -27,7 +27,7 @@ export interface AuthRegisterRequest {
 
 /**
  * Represents the payload for a user login request.
- * Corresponds to `POST /api/v1/auth/login`.
+ * Corresponds to `POST /api/auth/login`.
  */
 export interface AuthLoginRequest {
   username: string;
@@ -36,7 +36,7 @@ export interface AuthLoginRequest {
 
 /**
  * Represents the payload for updating a user's profile.
- * Corresponds to `PATCH /api/v1/users/me`.
+ * Corresponds to `PATCH /api/users/me`.
  */
 export interface UpdateUserRequest {
   username?: string;
@@ -45,30 +45,29 @@ export interface UpdateUserRequest {
 
 /**
  * Represents the payload for creating a new project.
- * Corresponds to `POST /api/v1/projects`.
+ * Corresponds to `POST /api/projects`.
  */
 export interface CreateProjectRequest {
   name: string; // 1-100 chars
   description?: string; // Max 500 chars
   settings?: {
-    environment?: "development" | "staging" | "production";
+    environment?: 'development' | 'staging' | 'production';
     version?: string; // Regex ^\d+\.\d+\.\d+$
   };
 }
 
 /**
  * Represents the payload for updating an existing project.
- * Corresponds to `PATCH /api/v1/projects/{project_id}`.
+ * Corresponds to `PATCH /api/projects/{project_id}`.
  */
 export interface UpdateProjectRequest {
   name?: string;
   description?: string;
   settings?: {
-    environment?: "development" | "staging" | "production";
+    environment?: 'development' | 'staging' | 'production';
     version?: string;
   };
 }
-
 
 // --- Response Schemas ---
 
@@ -95,9 +94,9 @@ export interface ProjectResponse {
   owner_id: string; // UUID
   name: string;
   description: string | null;
-  status: "active" | "archived" | "maintenance";
+  status: 'active' | 'archived' | 'maintenance';
   settings: {
-    environment: "development" | "staging" | "production";
+    environment: 'development' | 'staging' | 'production';
     version: string;
   };
   created_at: string; // ISO-8601
@@ -111,14 +110,14 @@ export interface ProjectResponse {
 export interface AssetResponse {
   id: string; // UUID
   filename: string;
-  virtual_path: string;
-  asset_type: "code" | "image" | "audio" | "text" | "raw" | "scene";
-  mime_type: string;
-  size_bytes: number;
+  virtualPath: string;
+  assetType: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene';
+  mimeType: string;
+  sizeBytes: number;
   sha256: string;
-  preview_url?: string;
-  created_at: string; // ISO-8601
-  updated_at: string; // ISO-8601
+  previewUrl?: string;
+  createdAt: string; // ISO-8601
+  updatedAt: string; // ISO-8601
 }
 
 /**
@@ -136,7 +135,7 @@ export interface ProjectAssetIndexResponse {
  * Represents the response from a successful login request.
  */
 export interface LoginResponse {
-    token: string;
-    access_token: string;
-    token_type: "bearer";
+  token: string;
+  accessToken: string;
+  tokenType: 'bearer';
 }

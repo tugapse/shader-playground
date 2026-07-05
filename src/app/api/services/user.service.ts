@@ -22,7 +22,7 @@ export class UserService {
 
   /**
    * Retrieves the authenticated user's profile.
-   * Corresponds to `GET /api/v1/users/me`.
+   * Corresponds to `GET /api/users/me`.
    */
   getMe(): Observable<UserResponse> {
     return this.http.get<UserResponse>(this.userUrl);
@@ -30,7 +30,7 @@ export class UserService {
 
   /**
    * Partially updates the user's profile.
-   * Corresponds to `PATCH /api/v1/users/me`.
+   * Corresponds to `PATCH /api/users/me`.
    * @param payload - The fields to update.
    */
   updateMe(payload: UpdateUserRequest): Observable<UserResponse> {
@@ -39,7 +39,7 @@ export class UserService {
 
   /**
    * Retrieves the user's preferences.
-   * Corresponds to `GET /api/v1/users/me/preferences`.
+   * Corresponds to `GET /api/users/me/preferences`.
    */
   getPreferences(): Observable<UserPreferences> {
     return this.http.get<UserPreferences>(`${this.userUrl}/preferences`);
@@ -47,10 +47,13 @@ export class UserService {
 
   /**
    * Fully replaces the user's preferences.
-   * Corresponds to `PUT /api/v1/users/me/preferences`.
+   * Corresponds to `PUT /api/users/me/preferences`.
    * @param payload - The complete new preferences object.
    */
   updatePreferences(payload: UserPreferences): Observable<UserPreferences> {
-    return this.http.put<UserPreferences>(`${this.userUrl}/preferences`, payload);
+    return this.http.put<UserPreferences>(
+      `${this.userUrl}/preferences`,
+      payload,
+    );
   }
 }

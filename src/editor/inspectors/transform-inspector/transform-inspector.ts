@@ -5,7 +5,7 @@ import {
   DragHandleDirective,
 } from '@editor/directives/mouse-drag.directive';
 import { InpectorTogglePanel } from '../../components/inpector-toggle-panel/inpector-toggle-panel';
-import { GlEntity, Transform } from '@engine';
+import { SceneEntity, Transform } from '@engine';
 
 @Component({
   selector: 'editor-transform-inspector',
@@ -54,7 +54,7 @@ export class TransformInspector {
 
   transform!: Transform;
 
-  @Input() set entity(value: GlEntity) {
+  @Input() set entity(value: SceneEntity) {
     this.transform = value.transform;
     this.transform.setDirty(true);
     this.transform.updateMatrices();

@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 
 import { Icon } from '../../../app/components/icon/icon';
 import { SceneTreeService } from '../../services/scene-tree.service';
-import { GlEntity, EntityType, Scene, ObjectInstanciator } from '@engine';
+import { SceneEntity, EntityType, Scene, ObjectInstanciator } from '@engine';
 import { EditorService } from '@editor/services/editor.service';
 import { TreeNode } from './scene-node';
 import { TreeNodeComponent } from './tree-node/tree-node';
@@ -18,7 +18,6 @@ import { ClassMetadata } from '@engine/interfaces/class-metadata';
   styleUrl: './scene-tree.scss',
 })
 export class SceneTree {
-
   @Input() public set targetScene(scene: Scene) {
     if (!scene) return;
     this.scene = scene;
@@ -43,15 +42,14 @@ export class SceneTree {
     });
     this.editorService.onSceneUpdated.subscribe((scene) => {
       this.targetScene = scene;
-      ;
     });
   }
 
-  objectsToDraw: GlEntity[] = [];
+  objectsToDraw: SceneEntity[] = [];
   scene!: Scene;
   selectedUuid!: string;
   sceneTreeNodes!: TreeNode<string>[];
-  treeNodeMap: { [key: string]: GlEntity } = {};
+  treeNodeMap: { [key: string]: SceneEntity } = {};
 
   readonly iconNames: { [key: string]: string } = {
     [EntityType.STATIC]: 'fa-object-group',
@@ -63,12 +61,12 @@ export class SceneTree {
     [EntityType.SCENE]: 'fa-bank',
   };
 
-  toggleObj(obj: GlEntity, event: Event) {
+  toggleObj(obj: SceneEntity, event: Event) {
     event.preventDefault();
     obj.show = !obj.show;
   }
 
-  entitySelected(entity: GlEntity, event: MouseEvent) {
+  entitySelected(entity: SceneEntity, event: MouseEvent) {
     if (entity.uuid == (event.target! as any).id) {
       this.selectedUuid = entity.uuid;
       this.sceneTreeService.onEntitySelected.emit(entity);
@@ -89,13 +87,13 @@ export class SceneTree {
     const rootObjects = [
       ...sceneObjects.filter((e) => !e.transform.parent?.parentEntity),
     ];
-    const childObjects: { [key: string]: GlEntity[] } = {};
+    const childObjects: { [key: string]: SceneEntity[] } = {};
 
     sceneObjects.forEach((ob) => {
       if (ob.transform.parent) {
         if (ob.transform.parent.parentEntity) {
           const key = ob.transform.parent.parentEntity.uuid;
-          const parentList: GlEntity[] = (childObjects[key] =
+          const parentList: SceneEntity[] = (childObjects[key] =
             childObjects[key] || []);
           parentList.push(ob);
         }
@@ -107,8 +105,8 @@ export class SceneTree {
   }
 
   protected createNodeListFromObjectArray(
-    objs: GlEntity[],
-    childObjectsMap: { [key: string]: GlEntity[] },
+    objs: SceneEntity[],
+    childObjectsMap: { [key: string]: SceneEntity[] },
   ) {
     const result: TreeNode<string>[] = [];
 
@@ -208,7 +206,7 @@ export class SceneTree {
     }
   }
 
-  private deleteEntityAndChildren(entity: GlEntity) {
+  private deleteEntityAndChildren(entity: SceneEntity) {
     const children = this.scene.objects.filter(
       (e) => e.transform.parent?.parentEntity === entity,
     );
@@ -262,7 +260,7 @@ export class SceneTree {
     // Position slightly below the button
     this.menuY = rect.bottom + 5;
     this.menuX = rect.left;
-    const hiddenentities = ['GLEntity', 'Scene'];
+    const hiddenentities = ['SceneEntity', 'Scene'];
     this.availableEntities = ObjectInstanciator.getMetadata([
       ClassType.Entity,
       ClassType.Light,
@@ -277,13 +275,13 @@ export class SceneTree {
       ['New ' + entityMetadata.name],
     );
     if (instance) {
-      this.scene.addEntity(instance as GlEntity);
+      this.scene.addEntity(instance as SceneEntity);
       this.editorService.onSceneUpdated.emit(this.scene);
-      this.sceneTreeService.onEntitySelected.emit(instance as GlEntity);
+      this.sceneTreeService.onEntitySelected.emit(instance as SceneEntity);
     }
   }
 
   inspectScene(arg0: Scene) {
-        this.sceneTreeService.onEntitySelected.emit(this.scene as GlEntity);
+    this.sceneTreeService.onEntitySelected.emit(this.scene as SceneEntity);
   }
 }

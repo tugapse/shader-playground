@@ -4,7 +4,7 @@ import { Transform } from '../../core/transform';
 import { Vector3 } from '../../core/vector';
 import { EntityType } from '../../enums/entity-type.enum';
 import { JsonSerializedData } from '../../interfaces/json-serialized-data.interface';
-import { GlEntity } from '../entity';
+import { SceneEntity } from '../entity';
 import { JsonSerializable } from '@engine/interfaces';
 
 /**
@@ -54,8 +54,8 @@ export class LightConeAngles extends JsonSerializable {
    */
   public outer: number = 30.0; // Typical physical flashlight outer beam
 
-  constructor(){
-    super("LightConeAngles")
+  constructor() {
+    super('LightConeAngles');
   }
 
   public override toJsonObject(): JsonSerializedData {
@@ -69,9 +69,9 @@ export class LightConeAngles extends JsonSerializable {
 
 /**
   The base class for all light types in the engine.
- * @augments {GlEntity}
+ * @augments {SceneEntity}
  */
-export class Light extends GlEntity {
+export class Light extends SceneEntity {
   protected override _className = 'Light';
 
   /**
@@ -107,7 +107,6 @@ export class Light extends GlEntity {
   static override instanciate(name?: string, transform?: Transform): Light {
     return new Light(name || 'Light');
   }
-
 }
 
 /**
@@ -151,7 +150,6 @@ export class DirectionalLight extends Light {
     this.entityType = EntityType.LIGHT_DIRECTIONAL;
     this.color = new Color(1.0, 0.98, 0.95, 0.7);
   }
-
 
   /**
     Creates a new DirectionalLight instance.

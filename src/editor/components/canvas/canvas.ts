@@ -1,22 +1,19 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
   Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild,
   NgZone,
   OnDestroy,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
+  Output,
   Renderer2,
-  AfterViewInit,
+  ViewChild,
 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
 import { Camera, CanvasViewport, cleanLastFrame, Engine, Scene } from '@engine';
-import { Subject, fromEvent } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
 export interface EngineStats {
@@ -34,8 +31,12 @@ export interface EngineStats {
   styleUrl: './canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
-  @Input() scene!: Scene;
+export class Canvas implements OnDestroy, AfterViewInit {
+  @Input() set scene(scene: Scene) {
+    if (!scene) return;
+    if (this.gameEngine) this.gameEngine.loadScene(scene);
+  }
+  @Input() public gameEngine!: Engine;
 
   @Output() onGlContextCreated = new EventEmitter<WebGL2RenderingContext>();
   @Output() stats = new EventEmitter<EngineStats>();
@@ -43,7 +44,6 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
   @ViewChild('glCanvas') private glCanvas!: ElementRef<HTMLCanvasElement>;
 
   public gl!: WebGL2RenderingContext | null;
-  public gameEngine: Engine;
 
   private canvasElement!: HTMLCanvasElement;
   private lastTime = 0;
@@ -69,7 +69,6 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     private ngZone: NgZone,
     private renderer: Renderer2,
   ) {
-    this.gameEngine = new Engine();
     this.editorService.onCanvasRequestResize
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.resizeCanvas(true));
@@ -92,22 +91,12 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     this.resizeCanvas();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['scene'].currentValue !== this.scene) {
-      const newScene: Scene = changes['scene'].currentValue;
-      if (changes['scene'].previousValue)
-        changes['scene'].previousValue.destroy();
-      if (this.gl && this.canvasElement)
-        newScene.setGlRenderingContext(this.gl);
-      this.resizeCanvas(true);
-    }
-  }
-
   ngOnDestroy(): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    this.scene?.destroy();
+    this.gameEngine.destroy();
+    // this.scene?.destroy();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -130,7 +119,7 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     const delta = (timestamp - this.lastTime) / 1000;
     this.lastTime = timestamp;
 
-    if (!this.scene || !this.shouldRender()) {
+    if (!this.shouldRender()) {
       this.cleanInput();
       this.animationFrameId = requestAnimationFrame(this.render.bind(this));
       this.lastRafEndTime = performance.now();
@@ -138,7 +127,8 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
     }
 
     const updateStart = performance.now();
-    this.scene.update(delta);
+    this.gameEngine.update(delta);
+    // this.scene.update(delta);
     const currentUpdateTime = performance.now() - updateStart;
 
     const timeSinceLastDraw = timestamp - this.lastDrawTime;
@@ -150,7 +140,8 @@ export class Canvas implements OnChanges, OnDestroy, AfterViewInit {
 
       if (this.gl && this.canvasElement) {
         const renderStart = performance.now();
-        this.scene.draw();
+        this.gameEngine.render();
+        // this.scene.draw();
         currentRenderTime = performance.now() - renderStart;
         this.editorService.onRenderFrame.next(this.gl);
       }

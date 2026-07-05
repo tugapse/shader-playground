@@ -1,6 +1,6 @@
 import { mat4, quat, vec3 } from 'gl-matrix';
 import { v4 as uuidv4 } from 'uuid';
-import { GlEntity } from '../entities';
+import { SceneEntity } from '../entities';
 import { JsonSerializedData } from '../interfaces/json-serialized-data.interface';
 import { JsonSerializable } from './json-serializable';
 import { Vector3 } from './vector';
@@ -9,8 +9,13 @@ import { Vector3 } from './vector';
  * A helper function to convert a quaternion to Euler angles in radians.
  */
 function toEuler(out: vec3, q: quat): void {
-  const x = q[0], y = q[1], z = q[2], w = q[3];
-  const x2 = x * x, y2 = y * y, z2 = z * z;
+  const x = q[0],
+    y = q[1],
+    z = q[2],
+    w = q[3];
+  const x2 = x * x,
+    y2 = y * y,
+    z2 = z * z;
   const unit = x2 + y2 + z2 + w * w;
   const test = x * w - y * z;
 
@@ -30,7 +35,9 @@ function toEuler(out: vec3, q: quat): void {
 }
 
 export class Transform extends JsonSerializable {
-  public static get className() { return "Transform"; }
+  public static get className() {
+    return 'Transform';
+  }
 
   private _position: vec3;
   private _rotationInDegrees: vec3;
@@ -39,15 +46,15 @@ export class Transform extends JsonSerializable {
 
   private _modelMatrix: mat4;
   private _localMatrix: mat4;
-  
+
   private _parent: Transform | null = null;
   private _children: Transform[] = [];
   private _dirty: boolean = true;
 
-  public parentEntity: GlEntity | null = null;
+  public parentEntity: SceneEntity | null = null;
 
   constructor() {
-    super("Transform");
+    super('Transform');
     this._position = vec3.create();
     this._rotation = quat.create();
     this._rotationInDegrees = vec3.create();
@@ -58,13 +65,23 @@ export class Transform extends JsonSerializable {
     this._dirty = true;
   }
 
-  public get modelMatrix(): mat4 { return this._modelMatrix; }
+  public get modelMatrix(): mat4 {
+    return this._modelMatrix;
+  }
 
   // --- Local Space ---
-  public get localPosition(): vec3 { return this._position; }
-  public get localRotation(): vec3 { return this._rotationInDegrees; }
-  public get localRotationQuat(): quat { return this._rotation; }
-  public get localScale(): vec3 { return this._scale; }
+  public get localPosition(): vec3 {
+    return this._position;
+  }
+  public get localRotation(): vec3 {
+    return this._rotationInDegrees;
+  }
+  public get localRotationQuat(): quat {
+    return this._rotation;
+  }
+  public get localScale(): vec3 {
+    return this._scale;
+  }
 
   // --- World Space Getters/Setters ---
   public get worldPosition(): vec3 {
@@ -112,7 +129,12 @@ export class Transform extends JsonSerializable {
 
   public set worldRotation(newWorldRotation: vec3) {
     const q = quat.create();
-    quat.fromEuler(q, newWorldRotation[0], newWorldRotation[1], newWorldRotation[2]);
+    quat.fromEuler(
+      q,
+      newWorldRotation[0],
+      newWorldRotation[1],
+      newWorldRotation[2],
+    );
     this.worldRotationQuat = q;
   }
 
@@ -134,7 +156,9 @@ export class Transform extends JsonSerializable {
     this._dirty = true;
   }
 
-  public get parent(): Transform | null { return this._parent; }
+  public get parent(): Transform | null {
+    return this._parent;
+  }
 
   // --- Mutators ---
   public setLocalPosition(x = 0, y = 0, z = 0): void {
@@ -171,7 +195,11 @@ export class Transform extends JsonSerializable {
   }
 
   public rotate(xDegrees = 0, yDegrees = 0, zDegrees = 0): void {
-    vec3.add(this._rotationInDegrees, this._rotationInDegrees, vec3.fromValues(xDegrees, yDegrees, zDegrees));
+    vec3.add(
+      this._rotationInDegrees,
+      this._rotationInDegrees,
+      vec3.fromValues(xDegrees, yDegrees, zDegrees),
+    );
     const rotationToAdd = quat.create();
     quat.fromEuler(rotationToAdd, xDegrees, yDegrees, zDegrees);
     quat.multiply(this._rotation, this._rotation, rotationToAdd);
@@ -186,9 +214,18 @@ export class Transform extends JsonSerializable {
 
   public updateMatrices(): void {
     if (this._dirty) {
-      mat4.fromRotationTranslationScale(this._localMatrix, this._rotation, this._position, this._scale);
+      mat4.fromRotationTranslationScale(
+        this._localMatrix,
+        this._rotation,
+        this._position,
+        this._scale,
+      );
       if (this._parent) {
-        mat4.multiply(this._modelMatrix, this._parent.modelMatrix, this._localMatrix);
+        mat4.multiply(
+          this._modelMatrix,
+          this._parent.modelMatrix,
+          this._localMatrix,
+        );
       } else {
         mat4.copy(this._modelMatrix, this._localMatrix);
       }
@@ -211,19 +248,31 @@ export class Transform extends JsonSerializable {
   }
 
   public get right(): vec3 {
-    return vec3.fromValues(this._modelMatrix[0], this._modelMatrix[1], this._modelMatrix[2]);
+    return vec3.fromValues(
+      this._modelMatrix[0],
+      this._modelMatrix[1],
+      this._modelMatrix[2],
+    );
   }
   public get left(): vec3 {
     return vec3.negate(vec3.create(), this.right);
   }
   public get up(): vec3 {
-    return vec3.fromValues(this._modelMatrix[4], this._modelMatrix[5], this._modelMatrix[6]);
+    return vec3.fromValues(
+      this._modelMatrix[4],
+      this._modelMatrix[5],
+      this._modelMatrix[6],
+    );
   }
   public get down(): vec3 {
     return vec3.negate(vec3.create(), this.up);
   }
   public get forward(): vec3 {
-    return vec3.fromValues(this._modelMatrix[8], this._modelMatrix[9], this._modelMatrix[10]);
+    return vec3.fromValues(
+      this._modelMatrix[8],
+      this._modelMatrix[9],
+      this._modelMatrix[10],
+    );
   }
   public get back(): vec3 {
     return vec3.negate(vec3.create(), this.forward);
@@ -231,18 +280,39 @@ export class Transform extends JsonSerializable {
 
   public lookAt(target: vec3 | Vector3, worldUp?: vec3 | Vector3): void {
     const targetVec3 = target instanceof Vector3 ? target.vector : target;
-    const worldUpVec3 = worldUp instanceof Vector3 ? worldUp.vector : worldUp || vec3.fromValues(0, 1, 0);
+    const worldUpVec3 =
+      worldUp instanceof Vector3
+        ? worldUp.vector
+        : worldUp || vec3.fromValues(0, 1, 0);
     const position = this.worldPosition;
 
-    const zAxis = vec3.normalize(vec3.create(), vec3.sub(vec3.create(), targetVec3, position));
-    const xAxis = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), worldUpVec3, zAxis));
+    const zAxis = vec3.normalize(
+      vec3.create(),
+      vec3.sub(vec3.create(), targetVec3, position),
+    );
+    const xAxis = vec3.normalize(
+      vec3.create(),
+      vec3.cross(vec3.create(), worldUpVec3, zAxis),
+    );
     const yAxis = vec3.cross(vec3.create(), zAxis, xAxis);
 
     const lookAtMatrix = mat4.fromValues(
-      xAxis[0], xAxis[1], xAxis[2], 0,
-      yAxis[0], yAxis[1], yAxis[2], 0,
-      zAxis[0], zAxis[1], zAxis[2], 0,
-      position[0], position[1], position[2], 1
+      xAxis[0],
+      xAxis[1],
+      xAxis[2],
+      0,
+      yAxis[0],
+      yAxis[1],
+      yAxis[2],
+      0,
+      zAxis[0],
+      zAxis[1],
+      zAxis[2],
+      0,
+      position[0],
+      position[1],
+      position[2],
+      1,
     );
 
     const worldRotation = quat.create();
@@ -257,17 +327,37 @@ export class Transform extends JsonSerializable {
       ...super.toJsonObject(),
       uuid: this.uuid,
       parent: this.parent?.uuid,
-      position: [this.localPosition[0], this.localPosition[1], this.localPosition[2]],
-      rotation: [this.localRotation[0], this.localRotation[1], this.localRotation[2]],
+      position: [
+        this.localPosition[0],
+        this.localPosition[1],
+        this.localPosition[2],
+      ],
+      rotation: [
+        this.localRotation[0],
+        this.localRotation[1],
+        this.localRotation[2],
+      ],
       scale: [this.localScale[0], this.localScale[1], this.localScale[2]],
     };
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.setLocalPosition(jsonObject['position'][0], jsonObject['position'][1], jsonObject['position'][2]);
-    this.setLocalRotation(jsonObject['rotation'][0], jsonObject['rotation'][1], jsonObject['rotation'][2]);
-    this.setLocalScale(jsonObject['scale'][0], jsonObject['scale'][1], jsonObject['scale'][2]);
+    this.setLocalPosition(
+      jsonObject['position'][0],
+      jsonObject['position'][1],
+      jsonObject['position'][2],
+    );
+    this.setLocalRotation(
+      jsonObject['rotation'][0],
+      jsonObject['rotation'][1],
+      jsonObject['rotation'][2],
+    );
+    this.setLocalScale(
+      jsonObject['scale'][0],
+      jsonObject['scale'][1],
+      jsonObject['scale'][2],
+    );
     this._dirty = true;
   }
 
@@ -303,6 +393,18 @@ export class Transform extends JsonSerializable {
   }
 }
 
-Object.defineProperty(Transform.prototype, "position", { get: function() { return this.localPosition; } });
-Object.defineProperty(Transform.prototype, "rotation", { get: function() { return this.localRotation; } });
-Object.defineProperty(Transform.prototype, "rotationQuat", { get: function() { return this.localRotationQuat; } });
+Object.defineProperty(Transform.prototype, 'position', {
+  get: function () {
+    return this.localPosition;
+  },
+});
+Object.defineProperty(Transform.prototype, 'rotation', {
+  get: function () {
+    return this.localRotation;
+  },
+});
+Object.defineProperty(Transform.prototype, 'rotationQuat', {
+  get: function () {
+    return this.localRotationQuat;
+  },
+});

@@ -12,12 +12,12 @@ export interface MenuItem {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './menu-item.html',
-  styleUrls: ['./menu-item.scss']
+  styleUrls: ['./menu-item.scss'],
 })
 export class MenuItemComponent {
   @Input({ required: true }) item!: MenuItem;
   @Input() isRoot: boolean = false;
-  
+
   @Output() onItemClick = new EventEmitter<MenuItem>();
 
   isOpen: boolean = false;
@@ -31,9 +31,12 @@ export class MenuItemComponent {
   }
 
   onItemClickHandler(clickedItem: MenuItem) {
-    debugger
-    if (this.item.items && this.item.items.length > 0 && clickedItem.id === this.item.id) {
-       return; 
+    if (
+      this.item.items &&
+      this.item.items.length > 0 &&
+      clickedItem.id === this.item.id
+    ) {
+      return;
     }
 
     this.onItemClick.emit(clickedItem);

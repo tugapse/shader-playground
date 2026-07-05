@@ -8,7 +8,7 @@ import {
   ColorMaterial,
   EntityBehaviour,
   FogType,
-  GlEntity,
+  SceneEntity,
   LitMaterial,
   LitShader,
   NumberRange,
@@ -189,13 +189,13 @@ export class ObjectInspector {
       switch (className) {
         case 'Color':
           return 'color';
-        case 'GLEntity':
+        case 'SceneEntity':
           return 'entity';
       }
     }
 
     if (value instanceof Transform) return 'transform';
-    if (value instanceof GlEntity) return 'entity';
+    if (value instanceof SceneEntity) return 'entity';
     if (value instanceof EntityBehaviour) return 'entitybehaviour';
     if (value instanceof Shader) return 'shader';
     if (value instanceof Texture) return 'texture';
