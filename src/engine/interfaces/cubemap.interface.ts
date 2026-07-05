@@ -1,1 +1,0 @@
-export interface ICubemapSides { right: string, left: string, up: string, bottom: string, front: string, back: string }
