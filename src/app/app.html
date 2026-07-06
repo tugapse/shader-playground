@@ -1,2 +1,6 @@
 <router-outlet></router-outlet>
 <app-confirmation-modal></app-confirmation-modal>
+<app-loading
+  [visible]="loadingService.visible()"
+  [message]="loadingService.message()"
+></app-loading>

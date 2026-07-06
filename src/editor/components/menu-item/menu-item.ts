@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface MenuItem {
@@ -15,30 +15,39 @@ export interface MenuItem {
   styleUrls: ['./menu-item.scss'],
 })
 export class MenuItemComponent {
-  @Input({ required: true }) item!: MenuItem;
-  @Input() isRoot: boolean = false;
+  item = input.required<MenuItem>();
+  isRoot = input<boolean>(false);
+  onItemClick = output<MenuItem>();
 
-  @Output() onItemClick = new EventEmitter<MenuItem>();
-
-  isOpen: boolean = false;
+  isOpen = signal<boolean>(false);
+  private leaveTimeout: any = null;
+  private readonly _debounceTime = 250;
 
   onMouseEnter() {
-    this.isOpen = true;
+    if (this.leaveTimeout) {
+      clearTimeout(this.leaveTimeout);
+      this.leaveTimeout = null;
+    }
+    this.isOpen.set(true);
   }
 
   onMouseLeave() {
-    this.isOpen = false;
+    this.leaveTimeout = setTimeout(() => {
+      this.isOpen.set(false);
+    }, this._debounceTime);
   }
 
   onItemClickHandler(clickedItem: MenuItem) {
+    const currentItem = this.item();
+
     if (
-      this.item.items &&
-      this.item.items.length > 0 &&
-      clickedItem.id === this.item.id
+      currentItem.items &&
+      currentItem.items.length > 0 &&
+      clickedItem.id === currentItem.id
     ) {
       return;
     }
 
-    this.onItemClick.emit(clickedItem);
+    this.onItemClick.emit(clickedItem); // Cleanly close menu tree on final selection
   }
 }

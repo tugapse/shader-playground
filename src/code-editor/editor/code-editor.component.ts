@@ -8,8 +8,8 @@ import {
   effect,
   HostListener,
   signal,
-  NgZone,
-  ChangeDetectorRef, // 🎯 Phase 1: Injected to bring external scripts back into Angular's change lifecycle
+  ChangeDetectorRef,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Icon } from 'src/app/components/icon/icon';
@@ -19,7 +19,10 @@ import {
   FileContentResult,
 } from '../asset-code.service';
 import { EditorStateService } from '@editor/services/editor-state.service';
-import { Subscription } from 'rxjs'; // 🎯 Phase 2: Structural cleanup handle
+import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/services/loading.service';
+import { Router } from '@angular/router';
+import { MonacoService } from '../monaco.service';
 
 export interface EditorTab {
   file: FileContentResult;
@@ -41,17 +44,19 @@ export interface ToastMessage {
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
 })
-export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
+export class CodeWorkspaceComponent
+  implements AfterViewInit, OnInit, OnDestroy
+{
   @ViewChild('monacoContainer') monacoContainer!: ElementRef;
 
   private codeService = inject(AssetCodeService);
+  private monacoService = inject(MonacoService); // 🎯 Injected here
   private editorState = inject(EditorStateService);
   private cdr = inject(ChangeDetectorRef);
-  private ngZone = inject(NgZone); // 🎯 Phase 1: Track native browser async tasks
+  private loadingService = inject(LoadingService);
+  private router = inject(Router);
 
-  private editorInstance: any;
-  private subscriptions = new Subscription(); // 🎯 Phase 2: Unified observable tracking anchor
-
+  private subscriptions = new Subscription();
   public projectId!: string;
   public userUuid = 'test-user-uuid';
   public rootNode: WorkspaceNode | null = null;
@@ -95,7 +100,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       const project = this.editorState.activeProject();
       if (project?.id) {
         this.projectId = project.id;
-        if (this.editorInstance) {
+        if (this.monacoService.isEditorReady()) {
           this.closeAllTabsWithoutCheck();
           this.loadWorkspaceTree();
           this.loadIntelliSenseDefinitions();
@@ -104,15 +109,19 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
         this.projectId = '';
         this.rootNode = null;
         this.closeAllTabsWithoutCheck();
-        if (this.editorInstance) {
-          this.editorInstance.setModel(null);
-        }
+        this.monacoService.setModel(null);
       }
     });
   }
 
+  ngOnInit(): void {
+    this.loadingService.show();
+  }
+
   ngAfterViewInit(): void {
-    this.loadMonacoDependencies();
+    this.monacoService.loadDependencies(() => {
+      this.initMonacoInstance();
+    });
   }
 
   private showToast(
@@ -129,121 +138,19 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  private loadMonacoDependencies(): void {
-    if ((window as any).monaco) {
-      this.initMonacoInstance();
-      return;
-    }
-
-    const loaderScript = document.createElement('script');
-    loaderScript.type = 'text/javascript';
-    loaderScript.src = '/assets/monaco/vs/loader.js';
-    loaderScript.onload = () => {
-      (window as any).require.config({ paths: { vs: '/assets/monaco/vs' } });
-
-      // 🎯 Phase 1 Fix: Bring external module execution path explicitly back to Angular territory
-      this.ngZone.run(() => {
-        (window as any).require(['vs/editor/editor.main'], () => {
-          this.initMonacoInstance();
-        });
-      });
-    };
-    document.body.appendChild(loaderScript);
-  }
-
   private initMonacoInstance(): void {
-    const monaco = (window as any).monaco;
-
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      target: monaco.languages.typescript.ScriptTarget.ES2022,
-      module: monaco.languages.typescript.ModuleKind.ESNext,
-      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-      allowNonTsExtensions: true,
-      noEmit: true,
-      strict: true,
-      noImplicitAny: true,
-      allowJs: true,
-      checkJs: true,
-    });
-
-    const computedStyle = window.getComputedStyle(
+    this.monacoService.createEditor(
       this.monacoContainer.nativeElement,
-    );
-    const background =
-      computedStyle.getPropertyValue('--global-background-color').trim() ||
-      '#0f111a';
-    const foreground =
-      computedStyle.getPropertyValue('--editor-panel-color').trim() ||
-      '#a6accd';
-    const accent =
-      computedStyle.getPropertyValue('--editor-panel-H-color').trim() ||
-      '#82aaff';
-    const selection =
-      computedStyle
-        .getPropertyValue('--editor-icon-button-hover-background')
-        .trim() || '#292d39';
-
-    monaco.editor.defineTheme('omega-dynamic-theme', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { token: '', foreground: foreground.replace('#', '') },
-        {
-          token: 'keyword',
-          foreground: accent.replace('#', ''),
-          fontStyle: 'bold',
-        },
-        { token: 'identifier', foreground: foreground.replace('#', '') },
-      ],
-      colors: {
-        'editor.background': background,
-        'editor.foreground': foreground,
-        'editor.lineHighlightBackground': '#22242d',
-        'editorLineNumber.foreground': '#4e5579',
-        'editorLineNumber.activeForeground': accent,
-        'editor.selectionBackground': selection,
-        'editor.inactiveSelectionBackground': selection,
-        'scrollbarSlider.background': '#292d39',
-        'scrollbarSlider.hoverBackground': '#717cb4',
-        'scrollbarSlider.activeBackground': accent,
-      },
-    });
-
-    this.editorInstance = monaco.editor.create(
-      this.monacoContainer.nativeElement,
-      {
-        theme: 'omega-dynamic-theme',
-        automaticLayout: true,
-        minimap: { enabled: true },
-        fontSize: 14,
-        fontFamily: "'Fira Code', Consolas, Monaco, monospace",
-      },
-    );
-
-    this.editorInstance.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       () => {
         this.saveCurrentChanges();
       },
+      (errors, warnings) => {
+        this.errorCount = errors;
+        this.warningCount = warnings;
+        this.cdr.detectChanges();
+      },
     );
 
-    monaco.editor.onDidChangeMarkers(() => {
-      const currentModel = this.editorInstance.getModel();
-      if (!currentModel) return;
-
-      const markers = monaco.editor.getModelMarkers({
-        resource: currentModel.uri,
-      });
-      this.errorCount = markers.filter(
-        (m: any) => m.severity === monaco.MarkerSeverity.Error,
-      ).length;
-      this.warningCount = markers.filter(
-        (m: any) => m.severity === monaco.MarkerSeverity.Warning,
-      ).length;
-    });
-
-    // 🎯 Senior Guard: If the constructor effect already processed the projectId on boot,
-    // we must kickstart the workspace load now that the editor instance is fully painted!
     if (this.projectId) {
       this.loadWorkspaceTree();
       this.loadIntelliSenseDefinitions();
@@ -251,16 +158,15 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   public loadIntelliSenseDefinitions(): void {
-    const monaco = (window as any).monaco;
-    if (!monaco || !this.projectId) return;
+    if (!this.projectId) return;
 
     this.subscriptions.add(
       this.codeService.getEngineTypings(this.projectId).subscribe({
         next: (rawDeclarations) => {
           const wrappedEngineLib = `declare module 'omega-game-engine' {\n${rawDeclarations}\n}`;
-          monaco.languages.typescript.typescriptDefaults.addExtraLib(
-            wrappedEngineLib,
+          this.monacoService.updateIntelliSenseDefinitions(
             'file:///node_modules/@types/omega-game-engine/index.d.ts',
+            wrappedEngineLib,
           );
         },
         error: (err) =>
@@ -271,9 +177,9 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     this.subscriptions.add(
       this.codeService.getWorkspaceTypings(this.projectId).subscribe({
         next: (userDeclarations) => {
-          monaco.languages.typescript.typescriptDefaults.addExtraLib(
-            userDeclarations,
+          this.monacoService.updateIntelliSenseDefinitions(
             'file:///node_modules/@types/omega-user-project/index.d.ts',
+            userDeclarations,
           );
         },
         error: (err) =>
@@ -292,16 +198,21 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       this.codeService.getWorkspaceTree(this.projectId).subscribe({
         next: (tree) => {
           this.rootNode = tree;
-
-          // 🚀 Force Angular to instantly paint the tree nodes without needing a DOM click
           this.cdr.detectChanges();
 
           if (this.tabs.length === 0) {
             const firstFile = this.findFirstFile(tree);
             if (firstFile) {
               this.handleNodeClick(firstFile);
+            } else {
+              // 🎯 Senior Bugfix: If the workspace is empty, hide loading backdrop immediately
+              this.loadingService.hide();
             }
           }
+        },
+        error: (err) => {
+          this.loadingService.hide();
+          console.error(err);
         },
       }),
     );
@@ -315,7 +226,6 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     );
     if (existingTab) {
       this.selectTab(existingTab);
-      // 🚀 Force layout focus switch updates immediately
       this.cdr.detectChanges();
       return;
     }
@@ -326,32 +236,26 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
         .subscribe({
           next: (fileResult) => {
             this.createNewTab(fileResult);
-            // 🚀 Force the newly added tab header item onto the workspace layout array
             this.cdr.detectChanges();
+          },
+          // 🎯 Senior Bugfix: Anchor closing functions to complete block on workspace initial load
+          complete: () => {
+            this.loadingService.hide();
+          },
+          error: (err) => {
+            this.loadingService.hide();
+            console.error(err);
           },
         }),
     );
   }
 
   private createNewTab(fileResult: FileContentResult): void {
-    const monaco = (window as any).monaco;
-    if (!monaco || !this.editorInstance) return;
-
-    const fileUri = monaco.Uri.parse(`file:///${fileResult.path}`);
-    let targetModel = monaco.editor.getModel(fileUri);
-
-    if (!targetModel) {
-      const rawLang = fileResult.language?.toLowerCase();
-      const langMapping =
-        rawLang === 'ts' || rawLang === 'typescript' || !rawLang
-          ? 'typescript'
-          : 'javascript';
-      targetModel = monaco.editor.createModel(
-        fileResult.content,
-        langMapping,
-        fileUri,
-      );
-    }
+    const targetModel = this.monacoService.createOrGetModel(
+      fileResult.path,
+      fileResult.content,
+      fileResult.language,
+    );
 
     const newTab: EditorTab = {
       file: fileResult,
@@ -363,6 +267,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     newTab.listener = targetModel.onDidChangeContent(() => {
       if (!newTab.isDirty) {
         newTab.isDirty = true;
+        this.cdr.detectChanges();
       }
     });
 
@@ -372,7 +277,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   public selectTab(tab: EditorTab): void {
     this.activeTab = tab;
-    this.editorInstance.setModel(tab.model);
+    this.monacoService.setModel(tab.model);
   }
 
   public closeTab(event: MouseEvent, tabToClose: EditorTab): void {
@@ -393,7 +298,6 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       tabToClose.listener.dispose();
     }
 
-    // 🎯 Phase 2 Fix: Clear document completely out of Monaco text buffer pools to prevent memory bloat
     if (tabToClose.model) {
       tabToClose.model.dispose();
     }
@@ -407,7 +311,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
         this.selectTab(nextTab);
       } else {
         this.activeTab = null;
-        this.editorInstance.setModel(null);
+        this.monacoService.setModel(null);
       }
     }
   }
@@ -415,7 +319,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   private closeAllTabsWithoutCheck(): void {
     this.tabs.forEach((t) => {
       t.listener?.dispose();
-      t.model?.dispose(); // 🎯 Phase 2 Fix: Flush models on mass closures
+      t.model?.dispose();
     });
     this.tabs = [];
     this.activeTab = null;
@@ -433,6 +337,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       if (!leave) return;
     }
     this.editorState.centralView.set('canvas');
+    this.router.navigate(['/home', this.editorState.activeProject()?.id]);
   }
 
   public openContextMenu(event: MouseEvent, node: WorkspaceNode): void {
@@ -513,7 +418,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   public saveCurrentChanges(): void {
     if (
       !this.activeTab ||
-      !this.editorInstance ||
+      !this.monacoService.isEditorReady() ||
       !this.projectId ||
       this.isSaving
     )
@@ -522,7 +427,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     this.isSaving = true;
     this.compileStatus = 'idle';
     const targetTab = this.activeTab;
-    const currentText = this.editorInstance.getModel().getValue();
+    const currentText = this.monacoService.getModelValue();
 
     this.subscriptions.add(
       this.codeService
@@ -547,11 +452,9 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   private executeWorkspaceCompilation(): void {
-    const monaco = (window as any).monaco;
-    if (!this.editorInstance || !this.projectId) return;
+    if (!this.monacoService.isEditorReady() || !this.projectId) return;
 
     this.isCompiling = true;
-    const currentModel = this.editorInstance.getModel();
 
     this.subscriptions.add(
       this.codeService.compileWorkspace(this.projectId).subscribe({
@@ -563,7 +466,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
               '🚀 Production Build Compiled Successfully!',
               'success',
             );
-            monaco.editor.setModelMarkers(currentModel, 'compiler', []);
+            this.monacoService.clearAllModelMarkers('compiler');
             this.loadIntelliSenseDefinitions();
           } else {
             this.compileStatus = 'error';
@@ -586,7 +489,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
                 }
 
                 return {
-                  severity: monaco.MarkerSeverity.Error,
+                  severity: (window as any).monaco.MarkerSeverity.Error,
                   message: err.text,
                   startLineNumber,
                   startColumn,
@@ -594,13 +497,10 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
                   endColumn: 100,
                 };
               });
-              monaco.editor.setModelMarkers(
-                currentModel,
-                'compiler',
-                errorMarkers,
-              );
+              this.monacoService.setModelMarkers('compiler', errorMarkers);
             }
           }
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.isCompiling = false;
@@ -610,6 +510,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
             'error',
           );
           console.error(err);
+          this.cdr.detectChanges();
         },
       }),
     );
@@ -632,9 +533,7 @@ export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeAllTabsWithoutCheck();
-    this.subscriptions.unsubscribe(); // 🎯 Phase 2 Fix: Unsubscribe from all dangling backend data streams cleanly
-    if (this.editorInstance) {
-      this.editorInstance.dispose();
-    }
+    this.subscriptions.unsubscribe();
+    this.monacoService.disposeEditor(); // 🎯 Clean up memory structures completely
   }
 }

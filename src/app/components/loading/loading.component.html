@@ -1,0 +1,10 @@
+@if (visible()) {
+  <div class="loading-backdrop">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      @if (message()) {
+        <span class="loading-text">{{ message() }}</span>
+      }
+    </div>
+  </div>
+}

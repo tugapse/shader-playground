@@ -5,6 +5,7 @@ import {
   Component,
   HostListener,
   OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -38,6 +39,8 @@ import {
   Colors,
   Engine,
 } from 'omega-game-engine';
+import { LoadingOverlayComponent } from 'src/app/components/loading/loading.component';
+import { LoadingService } from 'src/app/services/loading.service';
 
 @Component({
   selector: 'app-editor',
@@ -53,11 +56,12 @@ import {
     EditorMainMenu,
     CodeWorkspaceComponent,
     Canvas,
+    LoadingOverlayComponent,
   ],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
 })
-export class Editor implements OnDestroy, AfterViewInit {
+export class Editor implements OnDestroy, AfterViewInit, OnInit {
   scene!: Scene;
   inspectorSelectedEntity!: SceneEntity;
   isPaused = false;
@@ -92,9 +96,14 @@ export class Editor implements OnDestroy, AfterViewInit {
     protected route: ActivatedRoute,
     protected router: Router,
     protected cdr: ChangeDetectorRef,
+    protected loadingservice: LoadingService,
   ) {
     this.subscribeEvents();
     (window as any)['omegaEditor'] = this;
+  }
+
+  ngOnInit(): void {
+    this.loadingservice.show();
   }
 
   ngAfterViewInit(): void {
@@ -164,6 +173,7 @@ export class Editor implements OnDestroy, AfterViewInit {
     this.scene.inEditMode = true;
     this.addEditorBehaviours();
     this.editorService.requestCanvasResize();
+    this.loadingservice.hide();
   }
 
   protected onScenePlay(scene: Scene): void {
@@ -185,6 +195,7 @@ export class Editor implements OnDestroy, AfterViewInit {
   }
 
   protected async onSceneStop(scene: Scene): Promise<void> {
+    this.loadingservice.show();
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;

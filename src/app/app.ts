@@ -1,51 +1,54 @@
-import { Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
 import { vec3 } from 'gl-matrix';
 
 import { EditorService } from '@editor/services/editor.service';
 
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import {
+  AudioCache,
+  AudioEngine,
+  AudioEngineDiagnostics,
+  Camera,
+  CanvasViewport,
+  Colors,
+  CubePrimitive,
+  DirectionalLight,
+  EngineCache,
+  Light,
+  LitMaterial,
+  LitShader,
+  Mesh,
+  MeshData,
+  MeshRendererBehaviour,
+  PlanePrimitive,
+  PointLight,
+  Scene,
+  SceneEntity,
+  SequencerClock,
+  Shader,
+  SkyboxMaterial,
+  SkyboxRenderer,
+  SkyboxShader,
+  SpherePrimitive,
+  SpotLight,
+  VoiceFactory,
+} from 'omega-game-engine';
 import { RotateBehaviour } from '../editor/behaviours/rotate';
 import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
-import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
-import {
-  Scene,
-  DirectionalLight,
-  SpotLight,
-  SceneEntity,
-  Camera,
-  CanvasViewport,
-  EngineCache,
-  MeshRendererBehaviour,
-  CubePrimitive,
-  SpherePrimitive,
-  LitShader,
-  LitMaterial,
-  PlanePrimitive,
-  Colors,
-  PointLight,
-  Light,
-  MeshData,
-  Shader,
-  Mesh,
-  SkyboxRenderer,
-  SkyboxMaterial,
-  SkyboxShader,
-  AudioEngine,
-  AudioCache,
-  SequencerClock,
-  VoiceFactory,
-  AudioEngineDiagnostics,
-} from 'omega-game-engine';
+import { LoadingOverlayComponent } from './components/loading/loading.component';
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
   standalone: true,
-  imports: [RouterModule, ConfirmationModalComponent],
+  imports: [RouterModule, ConfirmationModalComponent, LoadingOverlayComponent],
 })
-export class App implements OnDestroy {
+export class App implements OnDestroy, AfterViewInit {
+  protected loadingService = inject(LoadingService);
+
   private gl!: WebGL2RenderingContext;
   private scene!: Scene;
   light!: DirectionalLight | SpotLight;
@@ -73,6 +76,9 @@ export class App implements OnDestroy {
 
   ngOnDestroy(): void {
     this.scene?.destroy();
+  }
+  ngAfterViewInit(): void {
+    this.loadingService.hide();
   }
 
   private async onGlContextCreated(gl: WebGL2RenderingContext) {

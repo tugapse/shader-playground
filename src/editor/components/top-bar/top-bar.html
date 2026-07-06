@@ -11,7 +11,7 @@
     </div>
     <div class="center-menu">
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-play"
         (click)="onPlay()"
         [isButton]="true"
@@ -19,7 +19,7 @@
         title="Play Scene (Ctrl + P)"
       ></app-icon>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-pause"
         (click)="onPause()"
         [isButton]="true"
@@ -27,16 +27,18 @@
         title="Pause Scene (Ctrl + P)"
       ></app-icon>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-stop"
         (click)="onStop()"
         [isButton]="true"
         [isSelected]="scene && !scene.isRunning && !isEditorPaused"
         title="Stop Scene (Ctrl + O)"
       ></app-icon>
-
+      <span class="item separator"></span>
+      <span class="separator"></span>
+      <span class="separator"></span>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-code"
         (click)="onCodeEditor()"
         [isButton]="true"
@@ -51,7 +53,7 @@
         (click)="toggleFullscreen.emit()"
       ></app-icon>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-arrows-alt"
         (click)="setGizmoMode(GizmoMode.Translate)"
         [isButton]="true"
@@ -59,15 +61,15 @@
         title="Translate Gizmo (1)"
       ></app-icon>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-sync-alt"
         (click)="setGizmoMode(GizmoMode.Rotate)"
         [isButton]="true"
         [isSelected]="gizmoMode === GizmoMode.Rotate"
-        title="Rotate Gizmo (2)"
+        title="Rotate Gizmo ( 2)"
       ></app-icon>
       <app-icon
-        class="play-icon"
+        class="icon"
         iconName="fa-expand-arrows-alt"
         (click)="setGizmoMode(GizmoMode.Scale)"
         [isButton]="true"

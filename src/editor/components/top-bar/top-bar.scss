@@ -40,9 +40,9 @@
     justify-content: space-between;
     align-items: center;
 
-    .center-menu .play-icon.play {
+    .center-menu .icon.play {
       /* There is no green in the theme root, using the stats green for consistency */
-      color: #4ade80; 
+      color: #4ade80;
     }
 
     .left-menu {
@@ -50,7 +50,7 @@
       display: flex;
       gap: 8px;
       align-items: center;
-      flex-direction: row;;
+      flex-direction: row;
 
       .item {
         transition: all 0.3s;
@@ -76,6 +76,11 @@
     .center-menu {
       flex-grow: 1;
       text-align: center;
+
+      .separator {
+        content: " ";
+        margin: 0 8px;
+      }
     }
 
     .right-menu {

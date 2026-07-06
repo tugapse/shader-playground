@@ -1,6 +1,10 @@
 .menu-item-container {
   position: relative;
-  display: inline-block;
+  display: block;
+
+  &.is-root-container {
+    display: inline-block;
+  }
 }
 
 .menu-button {
@@ -17,6 +21,7 @@
   font-size: 13px;
   width: 100%;
   text-align: left;
+  box-sizing: border-box;
 
   &:hover,
   &.active {
@@ -30,7 +35,7 @@
   }
 
   &:not(.root-item) {
-    min-width: 160px; 
+    min-width: 180px;
   }
 }
 
@@ -45,10 +50,10 @@
   background-color: var(--editor-panel-background);
   border: var(--editor-panel-border);
   box-shadow: var(--editor-panel-box-shadow);
-  z-index: 100;
+  z-index: 200; // Raised to stay safely on top of Monaco editor stacks
   display: flex;
   flex-direction: column;
-  min-width: 160px;
+  min-width: 180px;
   padding: 4px 0;
 
   &.dropdown {
@@ -59,6 +64,6 @@
   &.flyout {
     top: 0;
     left: 100%;
-    margin-top: -4px; 
+    margin-top: -4px;
   }
 }

@@ -13,6 +13,7 @@ import {
 } from '../../api/models/omega-api.models';
 import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
 import { EditorService } from '@editor/services/editor.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -31,6 +32,7 @@ import { EditorService } from '@editor/services/editor.service';
 })
 export class HomeComponent implements AfterViewInit {
   private readonly projectService = inject(ProjectService);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   selectedProject: ProjectResponse | null = null;
   projects: ProjectResponse[] = [];
@@ -48,6 +50,10 @@ export class HomeComponent implements AfterViewInit {
     this.projectService.listProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
+        this.selectedProject =
+          this.projects.find(
+            (o) => o.id == this.activatedRoute.snapshot.paramMap.get('project'),
+          ) || null;
       },
       error: (err) => console.error('Failed to load projects', err),
     });
