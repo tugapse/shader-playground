@@ -12,7 +12,14 @@ import {
   ViewChild,
 } from '@angular/core';
 import { EditorService } from '@editor/services/editor.service';
-import { Camera, CanvasViewport, cleanLastFrame, Engine, Scene } from '@engine';
+import {
+  Camera,
+  CanvasViewport,
+  cleanLastFrame,
+  Colors,
+  Engine,
+  Scene,
+} from 'omega-game-engine';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
@@ -36,7 +43,7 @@ export class Canvas implements OnDestroy, AfterViewInit {
     if (!scene) return;
     if (this.gameEngine) this.gameEngine.loadScene(scene);
   }
-  @Input() public gameEngine!: Engine;
+  @Input() public gameEngine!: Engine | null;
 
   @Output() onGlContextCreated = new EventEmitter<WebGL2RenderingContext>();
   @Output() stats = new EventEmitter<EngineStats>();
@@ -82,7 +89,7 @@ export class Canvas implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initWebGL();
-    this.gameEngine.initialize(this.canvasElement);
+    this.gameEngine?.initialize(this.canvasElement);
     this.setupWindowEvents();
 
     this.ngZone.runOutsideAngular(() => {
@@ -95,16 +102,16 @@ export class Canvas implements OnDestroy, AfterViewInit {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    this.gameEngine.destroy();
+    this.gameEngine?.destroy();
     // this.scene?.destroy();
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   public shouldRender(): boolean {
-    return this.gameEngine.isTabActive && this.gameEngine.isWindowFocused;
+    return !!this.gameEngine?.isTabActive && !!this.gameEngine?.isWindowFocused;
   }
-
+  color = Colors.crimson;
   public render(timestamp: number): void {
     // Measure the gap since the end of the last render call
     const rafStart = performance.now();
@@ -127,7 +134,7 @@ export class Canvas implements OnDestroy, AfterViewInit {
     }
 
     const updateStart = performance.now();
-    this.gameEngine.update(delta);
+    this.gameEngine?.update(delta);
     // this.scene.update(delta);
     const currentUpdateTime = performance.now() - updateStart;
 
@@ -140,7 +147,9 @@ export class Canvas implements OnDestroy, AfterViewInit {
 
       if (this.gl && this.canvasElement) {
         const renderStart = performance.now();
-        this.gameEngine.render();
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+        this.gameEngine?.render();
         // this.scene.draw();
         currentRenderTime = performance.now() - renderStart;
         this.editorService.onRenderFrame.next(this.gl);

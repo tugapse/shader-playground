@@ -1,8 +1,7 @@
-import { Color } from "@engine";
+import { Color } from 'omega-game-engine';
 
 export interface IEditorSettings {
-
-    gridColor: Color,
-    selectedBoundingBoxColor: Color,
-    hoveredBoundingBoxColor: Color
+  gridColor: Color;
+  selectedBoundingBoxColor: Color;
+  hoveredBoundingBoxColor: Color;
 }

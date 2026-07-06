@@ -15,6 +15,7 @@ if (!String.prototype.capitalize) {
   };
 }
 
+import * as OmegaEngine from 'omega-game-engine';
+(window as any)['omega-game-engine'] = OmegaEngine;
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));

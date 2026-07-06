@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { AudioCache } from '@engine/audio/audio-cache';
-import { AudioEngine } from '@engine/audio/audio-engine';
-import { SequencerClock } from '@engine/audio/sequencer-clock';
-import { VoiceFactory } from '@engine/audio/voice-factory';
+import {
+  AudioEngine,
+  AudioCache,
+  SequencerClock,
+  VoiceFactory,
+} from 'omega-game-engine';
 
 @Injectable({
   providedIn: 'root',

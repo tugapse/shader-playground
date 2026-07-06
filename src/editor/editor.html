@@ -1,73 +1,78 @@
-<editor-top-bar
-  [scene]="scene"
-  [isEditorPaused]="isPaused"
-  (toggleFullscreen)="toggleFullscreen()"
->
-  <editor-main-menu></editor-main-menu>
-</editor-top-bar>
+@if (editorState.centralView() == "code") {
+  <app-omega-code-workspace></app-omega-code-workspace>
+} @else {
+  <editor-top-bar
+    [scene]="scene"
+    [isEditorPaused]="isPaused"
+    (toggleFullscreen)="toggleFullscreen()"
+    ><editor-main-menu></editor-main-menu>
+  </editor-top-bar>
 
-<workspace
-  [showLeft]="!isFullScreen && editorSettings.settings.workspace.showLeftpanel"
-  [showRight]="
-    !isFullScreen && editorSettings.settings.workspace.showRightpanel
-  "
-  [showFooter]="!isFullScreen && editorSettings.settings.workspace.showFooter"
->
-  <div leftSidebar>
-    <app-scene-tree [targetScene]="scene"></app-scene-tree>
-  </div>
+  <workspace
+    [showLeft]="
+      !isFullScreen && editorSettings.settings.workspace.showLeftpanel
+    "
+    [showRight]="
+      !isFullScreen && editorSettings.settings.workspace.showRightpanel
+    "
+    [showFooter]="!isFullScreen && editorSettings.settings.workspace.showFooter"
+  >
+    <div leftSidebar>
+      <app-scene-tree [targetScene]="scene"></app-scene-tree>
+    </div>
 
-  <div class="container" main>
-    @switch (editorState.centralView()) {
-      @case ("canvas") {
-        <editor-canvas
-          tabindex="0"
-          class="canvas"
-          [gameEngine]="editorService.gameEngine"
-          [scene]="scene"
-          (stats)="onFpsUpdated($event)"
-          (onGlContextCreated)="onGlContextCreated($event)"
-        ></editor-canvas>
+    <div class="container" main>
+      @switch (editorState.centralView()) {
+        @case ("canvas") {
+          <editor-canvas
+            tabindex="0"
+            class="canvas"
+            [gameEngine]="editorService.gameEngine"
+            [scene]="scene"
+            (stats)="onFpsUpdated($event)"
+            (onGlContextCreated)="onGlContextCreated($event)"
+          ></editor-canvas>
+        }
       }
+    </div>
+
+    <div rightSidebar></div>
+
+    <div footer>
+      <app-assets-explorer></app-assets-explorer>
+    </div>
+  </workspace>
+
+  @if (isEngineStatsVisible) {
+    <editor-engine-stats
+      class="canvas-info"
+      [stats]="stats"
+      (closeRequested)="isEngineStatsVisible = false"
+    ></editor-engine-stats>
+  }
+
+  <editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
+
+  @if (toastMessage) {
+    <div class="toast-notification">
+      {{ toastMessage }}
+    </div>
+  }
+
+  <div class="desktop-area">
+    @for (win of windowService.windows$ | async; track win.id) {
+      <editor-window
+        [windowId]="win.id"
+        [windowtitle]="win.title"
+        [windowIconName]="win.iconName"
+        [windowFooter]="win.footer"
+        [isMaximized]="!!win.isMaximized"
+        [childComponentType]="win.component"
+        [childInputs]="win.inputs"
+        [isActive]="win.id === (windowService.activeWindowId$ | async)"
+        [style.z-index]="win.zIndex"
+      >
+      </editor-window>
     }
   </div>
-
-  <div rightSidebar></div>
-
-  <div footer>
-    <app-assets-explorer></app-assets-explorer>
-  </div>
-</workspace>
-
-@if (isEngineStatsVisible) {
-  <editor-engine-stats
-    class="canvas-info"
-    [stats]="stats"
-    (closeRequested)="isEngineStatsVisible = false"
-  ></editor-engine-stats>
 }
-
-<editor-inpector [targetEntity]="inspectorSelectedEntity"></editor-inpector>
-
-@if (toastMessage) {
-  <div class="toast-notification">
-    {{ toastMessage }}
-  </div>
-}
-
-<div class="desktop-area">
-  @for (win of windowService.windows$ | async; track win.id) {
-    <editor-window
-      [windowId]="win.id"
-      [windowtitle]="win.title"
-      [windowIconName]="win.iconName"
-      [windowFooter]="win.footer"
-      [isMaximized]="!!win.isMaximized"
-      [childComponentType]="win.component"
-      [childInputs]="win.inputs"
-      [isActive]="win.id === (windowService.activeWindowId$ | async)"
-      [style.z-index]="win.zIndex"
-    >
-    </editor-window>
-  }
-</div>

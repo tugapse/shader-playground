@@ -16,16 +16,9 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@editor/*": [
-        "src/editor/*"
-      ],
-      "@engine": [
-        "src/engine",
-        "src/engine/index.ts"
-      ],
-      "@engine/*": [
-        "src/engine/*"
-      ]
+      "@editor/*": ["src/editor/*"],
+      "omega-game-engine": ["src/engine", "src/engine/index.ts"],
+      "omega-game-engine/*": ["src/engine/*"]
     }
   },
   "angularCompilerOptions": {

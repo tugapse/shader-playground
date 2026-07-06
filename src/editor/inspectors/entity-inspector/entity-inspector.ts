@@ -9,9 +9,10 @@ import {
   SceneEntity,
   NumberRange,
   ObjectInstanciator,
-} from '@engine';
-import { ClassType } from '@engine/enums/class-type.enum';
-import { ClassMetadata } from '@engine/interfaces/class-metadata';
+  ClassMetadata,
+  ClassType,
+} from 'omega-game-engine';
+
 import { DropdownItem } from 'src/app/components/dropdown/dropdown';
 import { Icon } from 'src/app/components/icon/icon';
 import { Toggle } from 'src/app/components/toggle/toggle';

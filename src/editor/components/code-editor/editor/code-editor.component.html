@@ -1,0 +1,172 @@
+<div class="workspace-root">
+  <div class="leftSidebar">
+    <div class="sidebar-header">
+      <button class="go-back-btn" title="Go Back" (click)="triggerGoBack()">
+        ← Go Back
+      </button>
+      <span>Workspace Scripts</span>
+    </div>
+
+    <div class="tree-toolbar">
+      <button
+        class="toolbar-btn"
+        title="Create File"
+        (click)="triggerCreateFileAtRoot()"
+      >
+        <app-icon iconName="fa-plus"></app-icon>
+      </button>
+      <button
+        class="toolbar-btn"
+        title="Refresh Tree"
+        (click)="loadWorkspaceTree()"
+      >
+        <app-icon iconName="fa-sync"></app-icon>
+      </button>
+    </div>
+
+    <div class="file-tree-container">
+      <ng-container
+        *ngTemplateOutlet="nodeTemplate; context: { $implicit: rootNode }"
+      ></ng-container>
+    </div>
+
+    <button
+      class="btn-compile-trigger"
+      [disabled]="!activeTab || isSaving || isCompiling"
+      (click)="saveCurrentChanges()"
+    >
+      @if (isSaving) {
+        🔄 Flushing Code...
+      } @else if (isCompiling) {
+        ⚡ Compiling Sandbox...
+      } @else {
+        💾 Save Changes
+      }
+    </button>
+  </div>
+
+  <ng-template #nodeTemplate let-node>
+    @if (node) {
+      <ul class="file-node-list">
+        @if (node.relativePath) {
+          <li
+            [class.active-file]="activeTab?.file?.path === node.relativePath"
+            [style.padding-left.px]="calculatePadding(node.relativePath)"
+            (click)="handleNodeClick(node)"
+            (contextmenu)="openContextMenu($event, node)"
+          >
+            <span class="file-icon">{{ node.isDirectory ? "📁" : "📄" }}</span>
+            <span class="node-name">{{ node.name }}</span>
+
+            <button
+              class="inline-delete-btn"
+              title="Delete"
+              (click)="triggerDeleteNode($event, node)"
+            >
+              <app-icon iconName="fa-trash"></app-icon>
+            </button>
+          </li>
+        }
+        @if (node.isDirectory && node.children) {
+          @for (child of node.children; track child.relativePath) {
+            <ng-container
+              *ngTemplateOutlet="nodeTemplate; context: { $implicit: child }"
+            ></ng-container>
+          }
+        }
+      </ul>
+    }
+  </ng-template>
+
+  @if (contextMenuVisible) {
+    <div
+      class="context-menu"
+      [style.top.px]="contextMenuY"
+      [style.left.px]="contextMenuX"
+    >
+      @if (selectedContextMenuNode?.isDirectory) {
+        <div class="context-item" (click)="triggerCreateFileInFolder()">
+          New File
+        </div>
+      }
+      <div class="context-item delete" (click)="triggerDeleteNodeFromMenu()">
+        Delete
+      </div>
+    </div>
+  }
+
+  <div class="mainViewContent">
+    @if (tabs.length > 0) {
+      <div class="editor-tabs-bar">
+        @for (tab of tabs; track tab.file.path) {
+          <div
+            class="tab-item"
+            [class.active]="tab === activeTab"
+            (click)="selectTab(tab)"
+          >
+            <span class="tab-name">{{ tab.file.path.split("/").pop() }}</span>
+            @if (tab.isDirty) {
+              <span class="dirty-dot" title="Unsaved changes">●</span>
+            }
+            <span class="close-tab-btn" (click)="closeTab($event, tab)">×</span>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="canvas-wrapper">
+      <div #monacoContainer class="monaco-mount-target"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="terminal-status">
+      <span
+        class="status-indicator"
+        [class.ready]="compileStatus === 'idle' || compileStatus === 'success'"
+        [class.compiling]="isCompiling || isSaving"
+        [class.fault]="compileStatus === 'error'"
+        >●</span
+      >
+      @if (isSaving) {
+        Synchronizing write allocations onto disk...
+      } @else if (isCompiling) {
+        Executing esbuild framework runtime compiler...
+      } @else if (compileStatus === "success") {
+        Production Bundle Built Successfully
+      } @else if (compileStatus === "error") {
+        Build pipeline aborted due to layout errors
+      } @else {
+        Omega Editor Connected
+      }
+    </div>
+
+    <div class="diagnostic-badges">
+      @if (errorCount > 0) {
+        <span class="badge error-badge">✗ {{ errorCount }}</span>
+      }
+      @if (warningCount > 0) {
+        <span class="badge warning-badge">⚠ {{ warningCount }}</span>
+      }
+    </div>
+  </div>
+</div>
+
+@if (toasts().length > 0) {
+  <div class="toast-portal-layer">
+    @for (t of toasts(); track t.id) {
+      <div class="toast-card" [class]="t.type">
+        <span class="toast-icon">
+          @if (t.type === "success") {
+            ✓
+          } @else if (t.type === "error") {
+            ✗
+          } @else {
+            ℹ
+          }
+        </span>
+        <span class="toast-message">{{ t.message }}</span>
+      </div>
+    }
+  </div>
+}

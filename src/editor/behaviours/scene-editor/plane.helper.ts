@@ -1,4 +1,4 @@
-import { Shader, ShaderUniformsEnum } from "@engine";
+import { Shader, ShaderUniformsEnum } from 'omega-game-engine';
 
 export class PlaneHelper {
   private gl: WebGL2RenderingContext;
@@ -43,21 +43,36 @@ export class PlaneHelper {
 
     this.positionBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(verts), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array(verts),
+      this.gl.STATIC_DRAW,
+    );
 
     this.indexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indices),
+      this.gl.STATIC_DRAW,
+    );
 
     this.lineIndexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.lineIndexBuffer);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineIndices), this.gl.STATIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(lineIndices),
+      this.gl.STATIC_DRAW,
+    );
   }
 
   // Draws the fully highlighted plane
   public drawSolid(shader: Shader) {
     if (!shader._shaderProgram) return;
-    const posLoc = this.gl.getAttribLocation(shader._shaderProgram, ShaderUniformsEnum.A_POSITION);
+    const posLoc = this.gl.getAttribLocation(
+      shader._shaderProgram,
+      ShaderUniformsEnum.A_POSITION,
+    );
     if (posLoc === -1) return;
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
@@ -73,7 +88,10 @@ export class PlaneHelper {
   // Draws the internal structure
   public drawLines(shader: Shader) {
     if (!shader._shaderProgram) return;
-    const posLoc = this.gl.getAttribLocation(shader._shaderProgram, ShaderUniformsEnum.A_POSITION);
+    const posLoc = this.gl.getAttribLocation(
+      shader._shaderProgram,
+      ShaderUniformsEnum.A_POSITION,
+    );
     if (posLoc === -1) return;
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);

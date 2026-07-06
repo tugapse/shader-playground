@@ -5,10 +5,11 @@ import { Component, Input } from '@angular/core';
   selector: 'app-icon',
   imports: [CommonModule],
   templateUrl: './icon.html',
-  styleUrl: './icon.scss'
+  styleUrl: './icon.scss',
+  standalone: true,
 })
 export class Icon {
-  @Input() iconName: string = "fa-file-invoice-dollar"
+  @Input() iconName: string = 'fa-file-invoice-dollar';
   @Input() iconSize: number = 12;
   @Input() isButton = false;
   @Input() isSelected = false;

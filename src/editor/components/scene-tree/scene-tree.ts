@@ -3,13 +3,18 @@ import { Component, Input } from '@angular/core';
 
 import { Icon } from '../../../app/components/icon/icon';
 import { SceneTreeService } from '../../services/scene-tree.service';
-import { SceneEntity, EntityType, Scene, ObjectInstanciator } from '@engine';
+import {
+  SceneEntity,
+  EntityType,
+  Scene,
+  ObjectInstanciator,
+  ClassMetadata,
+  ClassType,
+} from 'omega-game-engine';
 import { EditorService } from '@editor/services/editor.service';
 import { TreeNode } from './scene-node';
 import { TreeNodeComponent } from './tree-node/tree-node';
 import { AddBehaviourMenuComponent } from '../../components/add-behaviour-menu/add-behaviour-menu';
-import { ClassType } from '@engine/enums/class-type.enum';
-import { ClassMetadata } from '@engine/interfaces/class-metadata';
 
 @Component({
   selector: 'app-scene-tree',

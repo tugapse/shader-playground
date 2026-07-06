@@ -1,5 +1,10 @@
-import { EntityBehaviour, JsonSerializedData, ObjectInstanciator, Vector3 } from '@engine';
-import { ClassType } from '@engine/enums/class-type.enum';
+import {
+  EntityBehaviour,
+  Vector3,
+  JsonSerializedData,
+  ObjectInstanciator,
+  ClassType,
+} from 'omega-game-engine';
 
 export class RotateBehaviour extends EntityBehaviour {
   static override instanciate(): RotateBehaviour {
@@ -11,21 +16,21 @@ export class RotateBehaviour extends EntityBehaviour {
   speed = 0.005;
 
   public override update(ellapsed: number): void {
-    const velocity = this.speed * ellapsed
+    const velocity = this.speed * ellapsed;
     this.transform.rotate(
-      this.rotationAngle.x * velocity, 
+      this.rotationAngle.x * velocity,
       this.rotationAngle.y * velocity,
       this.rotationAngle.z * velocity,
     );
   }
 
   public override toJsonObject(): JsonSerializedData {
-    return this.serializeAutomatically()
+    return this.serializeAutomatically();
   }
 
   public override fromJson(jsonObject: JsonSerializedData): void {
     super.fromJson(jsonObject);
-    this.deserializeAutomatically(jsonObject);  
+    this.deserializeAutomatically(jsonObject);
   }
 }
 

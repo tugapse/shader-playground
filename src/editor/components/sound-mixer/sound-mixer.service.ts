@@ -1,10 +1,12 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
-import { AudioCache } from '@engine/audio/audio-cache';
-import { AudioEngine } from '@engine/audio/audio-engine';
-import { SequencerClock } from '@engine/audio/sequencer-clock';
-import { VoiceFactory } from '@engine/audio/voice-factory';
 import { SynthNote, SynthPreset } from '@editor/models/synth.types';
 import { AudioService } from '@editor/services/audio.service';
+import {
+  AudioEngine,
+  AudioCache,
+  SequencerClock,
+  VoiceFactory,
+} from 'omega-game-engine';
 
 @Injectable()
 export class SoundMixerPlaybackService {

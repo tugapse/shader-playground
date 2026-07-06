@@ -6,7 +6,7 @@ import {
   NumberRange,
   Shader,
   ShaderSources,
-} from '@engine';
+} from 'omega-game-engine';
 import { DefaultInspector } from '../default-inspector/default-inspector';
 import { MaterialInspector } from '../material-inspector/material-inspector';
 import {
@@ -112,7 +112,7 @@ export class ShaderInspector extends ObjectInspector {
   onShaderSelected(shaderIndex: number, $event: DropdownItem) {
     const shaderKey = ['fragUri', 'vertexUri'][shaderIndex];
     this._shader[shaderKey] = $event.value;
-    
+
     this._shader.recompile();
   }
 }

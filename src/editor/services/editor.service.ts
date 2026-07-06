@@ -1,18 +1,22 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable } from '@angular/core';
 import {
   Camera,
   CameraFlyBehaviour,
   CanvasViewport,
   Engine,
   Scene,
-} from '@engine';
+} from 'omega-game-engine';
 import { BehaviorSubject } from 'rxjs';
 import { GizmoMode } from '../behaviours/scene-editor/gizmo-mode.enum';
 import { TransformSpace } from '../behaviours/scene-editor/transform-space.enum';
+import { EditorStateService } from './editor-state.service';
+import { API_URL } from 'src/app/api/api-url.token';
 
 @Injectable({ providedIn: 'root' })
 export class EditorService {
-  private _gameEngine!: Engine;
+  private _gameEngine!: Engine | null;
+  private editorStateService: EditorStateService = inject(EditorStateService);
+  apiUrl = inject(API_URL);
 
   public onSceneLoaded = new EventEmitter<Scene>();
   public onScenePlay = new EventEmitter<Scene>();
@@ -38,6 +42,11 @@ export class EditorService {
   public transformSpace = new BehaviorSubject<TransformSpace>(
     TransformSpace.Local,
   );
+  private _canvas!: HTMLCanvasElement | null;
+  public setCanvas(canvas: HTMLCanvasElement) {
+    this._canvas = canvas;
+  }
+
   private _gl!: WebGL2RenderingContext;
 
   public get scene(): Scene {
@@ -52,10 +61,9 @@ export class EditorService {
     return this._gl;
   }
 
-  public get gameEngine(): Engine {
+  public get gameEngine(): Engine | null {
     if (!this._gameEngine) {
       this._gameEngine = new Engine();
-      this._gameEngine.registerDependencies();
     }
     return this._gameEngine;
   }
@@ -121,5 +129,57 @@ export class EditorService {
     this._camera.addBehaviour(new CameraFlyBehaviour());
     Camera.setMainCamera(this._camera);
     this._camera.updateInEditor = true;
+  }
+
+  public async reloadEngineRuntime(): Promise<Engine | null> {
+    const project = this.editorStateService.activeProject();
+    if (!project?.id) {
+      if (this._gameEngine) {
+        this._gameEngine.destroy();
+        this._gameEngine = null;
+      }
+      return null;
+    }
+
+    if (this._gameEngine) {
+      this._gameEngine.destroy();
+      this._gameEngine = null;
+    }
+
+    const baseGateway = this.apiUrl.endsWith('/api')
+      ? this.apiUrl
+      : `${this.apiUrl}/api`;
+    const bundleUrl = `${baseGateway}/projects/${project.id}/code/bundle?t=${new Date().getTime()}`;
+
+    try {
+      const gameModule = await import(/* @vite-ignore */ bundleUrl);
+
+      if (!gameModule.Game) {
+        console.error(
+          "Linker error: The module loaded, but failed to locate an exported 'Game' class.",
+        );
+        return null;
+      }
+      debugger;
+      this._gameEngine = new gameModule.Game();
+      if (this._gameEngine && this._gameEngine instanceof Engine) {
+        this._gameEngine.registerDependencies();
+        console.log(
+          `🚀 Successfully loaded and booted engine instance for project: ${project.id}`,
+        );
+        return this._gameEngine;
+      } else {
+        console.error(
+          `Linker error: The module loaded, but the exported 'Game' class is not an instance of Engine.`,
+        );
+        return null;
+      }
+    } catch (error) {
+      console.error(
+        `CRITICAL: Dynamic runtime execution injection fault for project ${project.id}:`,
+        error,
+      );
+      return null;
+    }
   }
 }

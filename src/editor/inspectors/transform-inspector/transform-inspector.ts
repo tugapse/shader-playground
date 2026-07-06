@@ -5,7 +5,7 @@ import {
   DragHandleDirective,
 } from '@editor/directives/mouse-drag.directive';
 import { InpectorTogglePanel } from '../../components/inpector-toggle-panel/inpector-toggle-panel';
-import { SceneEntity, Transform } from '@engine';
+import { SceneEntity, Transform } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-transform-inspector',

@@ -1,6 +1,5 @@
-
-
-:root { /* It's good practice to define global variables in :root */
+:root {
+  /* It's good practice to define global variables in :root */
   /* global */
   --global-background-color: #0f111a;
 
@@ -11,7 +10,7 @@
   --editor-panel-color: #a6accd;
   --editor-panel-header-title-color: #ffffff;
   --editor-panel-section-header: #6082a7;
-  --editor-panel-H-color: #82aaff; 
+  --editor-panel-H-color: #82aaff;
   --editor-panel-chevron-color: #717cb4;
   --editor-panel-border: 1px solid #292d39;
   --editor-panel-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
@@ -25,8 +24,8 @@
   --editor-icon-button-background: transparent;
   --editor-icon-button-color: #717cb4;
   --editor-icon-button-hover-background: rgba(130, 170, 255, 0.1);
-  --editor-icon-button-hover-color: #82aaff; 
-  --editor-icon-button-selected-background: #82aaff; 
+  --editor-icon-button-hover-color: #82aaff;
+  --editor-icon-button-selected-background: #82aaff;
   --editor-icon-button-selected-color: #0f111a;
   --editor-placeholder-icon-color: #4e5579;
 
@@ -38,18 +37,15 @@
   --editor-modal-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
 
   /* states & feedback */
-  --editor-error-color: #f07178; 
-  --editor-focus-shadow: 0 0 0 2px rgba(130, 170, 255, 0.3); 
-
+  --editor-error-color: #f07178;
+  --editor-focus-shadow: 0 0 0 2px rgba(130, 170, 255, 0.3);
 
   /* --- New Scrollbar Variables --- */
-  --scrollbar-track-background: var(--editor-panel-background); 
-  --scrollbar-thumb-background: #292d39; 
-  --scrollbar-thumb-border-color: #1a1c23; 
-  --scrollbar-thumb-hover-background: #717cb4; 
+  --scrollbar-track-background: var(--editor-panel-background);
+  --scrollbar-thumb-background: #292d39;
+  --scrollbar-thumb-border-color: #1a1c23;
+  --scrollbar-thumb-hover-background: #717cb4;
 }
-
-
 
 /* For WebKit browsers (Chrome, Safari, Edge, Opera) */
 ::-webkit-scrollbar {

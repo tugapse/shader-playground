@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ColorPickerComponent } from 'src/app/components/color-picker/color-picker';
 import { InpectorTogglePanel } from '../../components/inpector-toggle-panel/inpector-toggle-panel';
-import { Color } from '@engine';
+import { Color } from 'omega-game-engine';
 
 @Component({
   selector: 'editor-color-inspector',

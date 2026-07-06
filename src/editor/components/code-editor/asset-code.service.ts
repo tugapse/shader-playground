@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_URL } from 'src/app/api/api-url.token';
 
 export interface WorkspaceNode {
   name: string;
@@ -15,9 +16,15 @@ export interface FileContentResult {
   language: string;
 }
 
-export interface TextChangeDelta {
-  range: { startLine: number; endLine: number };
+export interface CompileError {
   text: string;
+}
+
+export interface CompileResult {
+  success: boolean;
+  message: string;
+  code: string | null;
+  errors: CompileError[] | null;
 }
 
 @Injectable({
@@ -25,8 +32,14 @@ export interface TextChangeDelta {
 })
 export class AssetCodeService {
   private http = inject(HttpClient);
-  // 📁 Shifted from '/api/assets' to '/api/projects' to target the file system workspace directly
-  private baseUrl = '/api/projects';
+  private apiUrl = inject(API_URL);
+
+  private get baseUrl(): string {
+    if (this.apiUrl.endsWith('/api')) {
+      return `${this.apiUrl}/projects`;
+    }
+    return `${this.apiUrl}/api/projects`;
+  }
 
   getWorkspaceTree(projectId: string): Observable<WorkspaceNode> {
     return this.http.get<WorkspaceNode>(
@@ -46,7 +59,7 @@ export class AssetCodeService {
   createFile(
     projectId: string,
     path: string,
-    template?: string,
+    template: string = 'behavior',
   ): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${projectId}/code/files`, {
       path,
@@ -54,20 +67,41 @@ export class AssetCodeService {
     });
   }
 
-  updateFileDelta(
+  // 🎯 Upgraded from PATCH delta arrays to atomic PUT content updates
+  updateFileContent(
     projectId: string,
     path: string,
-    changes: TextChangeDelta[],
+    content: string,
   ): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${projectId}/code/files`, {
+    return this.http.put<void>(`${this.baseUrl}/${projectId}/code/files`, {
       path,
-      changes,
+      content,
     });
   }
 
   deleteFile(projectId: string, path: string): Observable<void> {
     return this.http.delete<void>(
       `${this.baseUrl}/${projectId}/code/files?path=${encodeURIComponent(path)}`,
+    );
+  }
+
+  getEngineTypings(projectId: string): Observable<string> {
+    return this.http.get(`${this.baseUrl}/${projectId}/code/engine-typings`, {
+      responseType: 'text',
+    });
+  }
+
+  getWorkspaceTypings(projectId: string): Observable<string> {
+    return this.http.get(
+      `${this.baseUrl}/${projectId}/code/workspace-typings`,
+      { responseType: 'text' },
+    );
+  }
+
+  compileWorkspace(projectId: string): Observable<CompileResult> {
+    return this.http.post<CompileResult>(
+      `${this.baseUrl}/${projectId}/code/compile`,
+      {},
     );
   }
 }
