@@ -41,6 +41,7 @@ export class AssetCodeService {
     return `${this.apiUrl}/api/projects`;
   }
 
+  // 🎯 Reverted: frontend doesn't pass userUuid anymore
   getWorkspaceTree(projectId: string): Observable<WorkspaceNode> {
     return this.http.get<WorkspaceNode>(
       `${this.baseUrl}/${projectId}/code/tree`,
@@ -67,7 +68,6 @@ export class AssetCodeService {
     });
   }
 
-  // 🎯 Upgraded from PATCH delta arrays to atomic PUT content updates
   updateFileContent(
     projectId: string,
     path: string,
@@ -94,7 +94,9 @@ export class AssetCodeService {
   getWorkspaceTypings(projectId: string): Observable<string> {
     return this.http.get(
       `${this.baseUrl}/${projectId}/code/workspace-typings`,
-      { responseType: 'text' },
+      {
+        responseType: 'text',
+      },
     );
   }
 

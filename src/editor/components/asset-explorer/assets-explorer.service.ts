@@ -67,7 +67,6 @@ export class AssetsExplorerService {
     });
   }
 
-  // Update this method inside assets-explorer.service.ts
   createAsset(projectId: string, actionType: string, name: string) {
     const targetFolder = this.activeFolder();
     const basePath = targetFolder?.virtualPath
@@ -78,7 +77,7 @@ export class AssetsExplorerService {
     let fileName = name;
     let content = '';
     let mimeType = 'text/plain';
-    let assetType = 'raw'; // Default fallback
+    let assetType = 'raw';
 
     switch (actionType) {
       case 'scene':
@@ -87,13 +86,15 @@ export class AssetsExplorerService {
         mimeType = 'application/json';
         assetType = 'scene';
         break;
+
       case 'code':
-        fileName = name.endsWith('.py') ? name : `${name}.py`;
-        content = '# Sentinel Script\n';
+        // 🎯 Fixed: Aligned configuration to use valid engine TypeScript templates
+        fileName = name.endsWith('.ts') ? name : `${name}.ts`;
+        content = `import { EngineBehavior } from 'omega-game-engine';\n\nexport class CustomBehavior extends EngineBehavior {\n    start() {}\n    update(dt: number) {}\n}\n`;
+        mimeType = 'text/plain';
         assetType = 'code';
         break;
 
-      // --- MATERIALS ---
       case 'material/color':
       case 'material/unlit':
       case 'material/standard':
@@ -110,7 +111,6 @@ export class AssetsExplorerService {
         mimeType = 'application/json';
         break;
 
-      // --- TEXTURES ---
       case 'texture/2d':
       case 'texture/shadowmap':
         fileName = name.endsWith('.tex') ? name : `${name}.tex`;
@@ -126,7 +126,6 @@ export class AssetsExplorerService {
         mimeType = 'application/json';
         break;
 
-      // --- ENTITIES ---
       case 'entity/empty':
       case 'entity/skybox':
         fileName = name.endsWith('.ent') ? name : `${name}.ent`;

@@ -29,13 +29,14 @@ import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
 import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
-import { OmegaCodeWorkspaceComponent } from './components/code-editor/editor/code-editor.component';
+import { CodeWorkspaceComponent } from '../code-editor/editor/code-editor.component';
 import {
   Scene,
   SceneEntity,
   JsonSerializedData,
   SceneManager,
   Colors,
+  Engine,
 } from 'omega-game-engine';
 
 @Component({
@@ -50,7 +51,7 @@ import {
     AssetsExplorerComponent,
     WorkspaceComponent,
     EditorMainMenu,
-    OmegaCodeWorkspaceComponent,
+    CodeWorkspaceComponent,
     Canvas,
   ],
   templateUrl: './editor.html',
@@ -106,25 +107,37 @@ export class Editor implements OnDestroy, AfterViewInit {
         scene: sceneId,
         config: {},
       });
-      this.editorService.reloadEngineRuntime().then((engine) => {
-        if (!this.route.snapshot.queryParamMap.get('write-scene')) {
-          this.assetService
-            .getTextAssetContent(projectId, sceneId)
-            .subscribe((textContent) => {
-              try {
-                const sceneData = JSON.parse(textContent) as JsonSerializedData;
-                SceneManager.loadScene(this.gl, sceneData).then((scene) => {
-                  this.editorService.loadScene(scene);
-                  this.editorService.requestCanvasResize();
-                });
-              } catch (error) {
-                console.error('Error', error);
-              }
-            });
-        }
-      });
+
+      this.editorService
+        .reloadEngineRuntime()
+        .then((engine) =>
+          this.handleEngineReloaded(projectId, sceneId, engine),
+        );
     } else {
       this.router.navigate(['/invalid-project']);
+    }
+  }
+
+  handleEngineReloaded(
+    projectId: string,
+    sceneId: string,
+    engine: Engine | null,
+  ) {
+    if (!this.route.snapshot.queryParamMap.get('write-scene')) {
+      this.assetService
+        .getTextAssetContent(projectId, sceneId)
+        .subscribe((textContent) => {
+          try {
+            const sceneData = JSON.parse(textContent) as JsonSerializedData;
+            SceneManager.loadScene(this.gl, sceneData).then((scene) => {
+              engine?.loadScene(scene);
+              this.editorService.loadScene(scene);
+              this.editorService.requestCanvasResize();
+            });
+          } catch (error) {
+            console.error('Error', error);
+          }
+        });
     }
   }
 

@@ -9,7 +9,7 @@ export interface ConfirmationRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ConfirmationService {
   private confirmationRequestSubject = new Subject<ConfirmationRequest>();
@@ -22,12 +22,12 @@ export class ConfirmationService {
       this.currentResultSubject.complete();
     }
     this.currentResultSubject = new Subject<boolean>();
-    
+
     this.confirmationRequestSubject.next({
       title: request.title,
       message: request.message,
       confirmText: request.confirmText || 'Confirm',
-      cancelText: request.cancelText || 'Cancel'
+      cancelText: request.cancelText || 'Cancel',
     });
     return this.currentResultSubject.asObservable();
   }

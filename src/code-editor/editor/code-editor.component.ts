@@ -8,6 +8,8 @@ import {
   effect,
   HostListener,
   signal,
+  NgZone,
+  ChangeDetectorRef, // 🎯 Phase 1: Injected to bring external scripts back into Angular's change lifecycle
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Icon } from 'src/app/components/icon/icon';
@@ -17,6 +19,7 @@ import {
   FileContentResult,
 } from '../asset-code.service';
 import { EditorStateService } from '@editor/services/editor-state.service';
+import { Subscription } from 'rxjs'; // 🎯 Phase 2: Structural cleanup handle
 
 export interface EditorTab {
   file: FileContentResult;
@@ -38,14 +41,19 @@ export interface ToastMessage {
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
 })
-export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
+export class CodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('monacoContainer') monacoContainer!: ElementRef;
 
   private codeService = inject(AssetCodeService);
   private editorState = inject(EditorStateService);
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone); // 🎯 Phase 1: Track native browser async tasks
+
   private editorInstance: any;
+  private subscriptions = new Subscription(); // 🎯 Phase 2: Unified observable tracking anchor
 
   public projectId!: string;
+  public userUuid = 'test-user-uuid';
   public rootNode: WorkspaceNode | null = null;
 
   public tabs: EditorTab[] = [];
@@ -57,7 +65,6 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   public toasts = signal<ToastMessage[]>([]);
   private nextToastId = 0;
 
-  // 📊 Live Monaco Marker Counter States
   public errorCount = 0;
   public warningCount = 0;
 
@@ -133,8 +140,12 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     loaderScript.src = '/assets/monaco/vs/loader.js';
     loaderScript.onload = () => {
       (window as any).require.config({ paths: { vs: '/assets/monaco/vs' } });
-      (window as any).require(['vs/editor/editor.main'], () => {
-        this.initMonacoInstance();
+
+      // 🎯 Phase 1 Fix: Bring external module execution path explicitly back to Angular territory
+      this.ngZone.run(() => {
+        (window as any).require(['vs/editor/editor.main'], () => {
+          this.initMonacoInstance();
+        });
       });
     };
     document.body.appendChild(loaderScript);
@@ -231,6 +242,8 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       ).length;
     });
 
+    // 🎯 Senior Guard: If the constructor effect already processed the projectId on boot,
+    // we must kickstart the workspace load now that the editor instance is fully painted!
     if (this.projectId) {
       this.loadWorkspaceTree();
       this.loadIntelliSenseDefinitions();
@@ -241,51 +254,57 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     const monaco = (window as any).monaco;
     if (!monaco || !this.projectId) return;
 
-    this.codeService.getEngineTypings(this.projectId).subscribe({
-      next: (rawDeclarations) => {
-        const wrappedEngineLib = `
-          declare module 'omega-game-engine' {
-            ${rawDeclarations}
-          }
-        `;
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(
-          wrappedEngineLib,
-          'file:///node_modules/@types/omega-game-engine/index.d.ts',
-        );
-      },
-      error: (err) =>
-        console.error('Failed to update SDK library declarations:', err),
-    });
+    this.subscriptions.add(
+      this.codeService.getEngineTypings(this.projectId).subscribe({
+        next: (rawDeclarations) => {
+          const wrappedEngineLib = `declare module 'omega-game-engine' {\n${rawDeclarations}\n}`;
+          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            wrappedEngineLib,
+            'file:///node_modules/@types/omega-game-engine/index.d.ts',
+          );
+        },
+        error: (err) =>
+          console.error('Failed to update SDK library declarations:', err),
+      }),
+    );
 
-    this.codeService.getWorkspaceTypings(this.projectId).subscribe({
-      next: (userDeclarations) => {
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(
-          userDeclarations,
-          'file:///node_modules/@types/omega-user-project/index.d.ts',
-        );
-      },
-      error: (err) =>
-        console.error(
-          'Failed to update workspace behavior metadata profile:',
-          err,
-        ),
-    });
+    this.subscriptions.add(
+      this.codeService.getWorkspaceTypings(this.projectId).subscribe({
+        next: (userDeclarations) => {
+          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+            userDeclarations,
+            'file:///node_modules/@types/omega-user-project/index.d.ts',
+          );
+        },
+        error: (err) =>
+          console.error(
+            'Failed to update workspace behavior metadata profile:',
+            err,
+          ),
+      }),
+    );
   }
 
   public loadWorkspaceTree(): void {
     if (!this.projectId) return;
 
-    this.codeService.getWorkspaceTree(this.projectId).subscribe({
-      next: (tree) => {
-        this.rootNode = tree;
-        if (this.tabs.length === 0) {
-          const firstFile = this.findFirstFile(tree);
-          if (firstFile) {
-            this.handleNodeClick(firstFile);
+    this.subscriptions.add(
+      this.codeService.getWorkspaceTree(this.projectId).subscribe({
+        next: (tree) => {
+          this.rootNode = tree;
+
+          // 🚀 Force Angular to instantly paint the tree nodes without needing a DOM click
+          this.cdr.detectChanges();
+
+          if (this.tabs.length === 0) {
+            const firstFile = this.findFirstFile(tree);
+            if (firstFile) {
+              this.handleNodeClick(firstFile);
+            }
           }
-        }
-      },
-    });
+        },
+      }),
+    );
   }
 
   public handleNodeClick(node: WorkspaceNode): void {
@@ -296,16 +315,22 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     );
     if (existingTab) {
       this.selectTab(existingTab);
+      // 🚀 Force layout focus switch updates immediately
+      this.cdr.detectChanges();
       return;
     }
 
-    this.codeService
-      .getFileContent(this.projectId, node.relativePath)
-      .subscribe({
-        next: (fileResult) => {
-          this.createNewTab(fileResult);
-        },
-      });
+    this.subscriptions.add(
+      this.codeService
+        .getFileContent(this.projectId, node.relativePath)
+        .subscribe({
+          next: (fileResult) => {
+            this.createNewTab(fileResult);
+            // 🚀 Force the newly added tab header item onto the workspace layout array
+            this.cdr.detectChanges();
+          },
+        }),
+    );
   }
 
   private createNewTab(fileResult: FileContentResult): void {
@@ -368,6 +393,11 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       tabToClose.listener.dispose();
     }
 
+    // 🎯 Phase 2 Fix: Clear document completely out of Monaco text buffer pools to prevent memory bloat
+    if (tabToClose.model) {
+      tabToClose.model.dispose();
+    }
+
     const index = this.tabs.indexOf(tabToClose);
     this.tabs = this.tabs.filter((t) => t !== tabToClose);
 
@@ -383,7 +413,10 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   private closeAllTabsWithoutCheck(): void {
-    this.tabs.forEach((t) => t.listener?.dispose());
+    this.tabs.forEach((t) => {
+      t.listener?.dispose();
+      t.model?.dispose(); // 🎯 Phase 2 Fix: Flush models on mass closures
+    });
     this.tabs = [];
     this.activeTab = null;
   }
@@ -420,9 +453,11 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     );
     if (!fileName) return;
 
-    this.codeService.createFile(this.projectId, fileName).subscribe({
-      next: () => this.loadWorkspaceTree(),
-    });
+    this.subscriptions.add(
+      this.codeService.createFile(this.projectId, fileName).subscribe({
+        next: () => this.loadWorkspaceTree(),
+      }),
+    );
   }
 
   public triggerCreateFileInFolder(): void {
@@ -431,9 +466,11 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     if (!fileName) return;
 
     const fullRelativePath = `${this.selectedContextMenuNode.relativePath}/${fileName}`;
-    this.codeService.createFile(this.projectId, fullRelativePath).subscribe({
-      next: () => this.loadWorkspaceTree(),
-    });
+    this.subscriptions.add(
+      this.codeService.createFile(this.projectId, fullRelativePath).subscribe({
+        next: () => this.loadWorkspaceTree(),
+      }),
+    );
   }
 
   public triggerDeleteNode(
@@ -452,17 +489,19 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     );
     if (!confirmed) return;
 
-    this.codeService.deleteFile(this.projectId, node.relativePath).subscribe({
-      next: () => {
-        const deadTab = this.tabs.find(
-          (t) => t.file.path === node.relativePath,
-        );
-        if (deadTab) {
-          this.forceCloseTab(deadTab);
-        }
-        this.loadWorkspaceTree();
-      },
-    });
+    this.subscriptions.add(
+      this.codeService.deleteFile(this.projectId, node.relativePath).subscribe({
+        next: () => {
+          const deadTab = this.tabs.find(
+            (t) => t.file.path === node.relativePath,
+          );
+          if (deadTab) {
+            this.forceCloseTab(deadTab);
+          }
+          this.loadWorkspaceTree();
+        },
+      }),
+    );
   }
 
   public triggerDeleteNodeFromMenu(): void {
@@ -485,24 +524,26 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     const targetTab = this.activeTab;
     const currentText = this.editorInstance.getModel().getValue();
 
-    this.codeService
-      .updateFileContent(this.projectId, targetTab.file.path, currentText)
-      .subscribe({
-        next: () => {
-          targetTab.isDirty = false;
-          targetTab.file.content = currentText;
-          this.isSaving = false;
-          this.executeWorkspaceCompilation();
-        },
-        error: (err) => {
-          this.isSaving = false;
-          this.showToast(
-            `Disk Sync Failed: Unable to flush changes to ${targetTab.file.path}`,
-            'error',
-          );
-          console.error(err);
-        },
-      });
+    this.subscriptions.add(
+      this.codeService
+        .updateFileContent(this.projectId, targetTab.file.path, currentText)
+        .subscribe({
+          next: () => {
+            targetTab.isDirty = false;
+            targetTab.file.content = currentText;
+            this.isSaving = false;
+            this.executeWorkspaceCompilation();
+          },
+          error: (err) => {
+            this.isSaving = false;
+            this.showToast(
+              `Disk Sync Failed: Unable to flush changes to ${targetTab.file.path}`,
+              'error',
+            );
+            console.error(err);
+          },
+        }),
+    );
   }
 
   private executeWorkspaceCompilation(): void {
@@ -512,64 +553,66 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     this.isCompiling = true;
     const currentModel = this.editorInstance.getModel();
 
-    this.codeService.compileWorkspace(this.projectId).subscribe({
-      next: (result) => {
-        this.isCompiling = false;
-        if (result.success) {
-          this.compileStatus = 'success';
-          this.showToast(
-            '🚀 Production Build Compiled Successfully!',
-            'success',
-          );
-          monaco.editor.setModelMarkers(currentModel, 'compiler', []);
-          this.loadIntelliSenseDefinitions();
-        } else {
+    this.subscriptions.add(
+      this.codeService.compileWorkspace(this.projectId).subscribe({
+        next: (result) => {
+          this.isCompiling = false;
+          if (result.success) {
+            this.compileStatus = 'success';
+            this.showToast(
+              '🚀 Production Build Compiled Successfully!',
+              'success',
+            );
+            monaco.editor.setModelMarkers(currentModel, 'compiler', []);
+            this.loadIntelliSenseDefinitions();
+          } else {
+            this.compileStatus = 'error';
+            this.showToast(
+              '⚠️ Compilation failed. Check red indicators on lines.',
+              'error',
+            );
+
+            if (result.errors) {
+              const errorMarkers = result.errors.map((err) => {
+                const lineRegex = /\((\d+),(\d+)\):/;
+                const match = lineRegex.exec(err.text);
+
+                let startLineNumber = 1;
+                let startColumn = 1;
+
+                if (match) {
+                  startLineNumber = parseInt(match[1], 10);
+                  startColumn = parseInt(match[2], 10);
+                }
+
+                return {
+                  severity: monaco.MarkerSeverity.Error,
+                  message: err.text,
+                  startLineNumber,
+                  startColumn,
+                  endLineNumber: startLineNumber,
+                  endColumn: 100,
+                };
+              });
+              monaco.editor.setModelMarkers(
+                currentModel,
+                'compiler',
+                errorMarkers,
+              );
+            }
+          }
+        },
+        error: (err) => {
+          this.isCompiling = false;
           this.compileStatus = 'error';
           this.showToast(
-            '⚠️ Compilation failed. Check red indicators on lines.',
+            'CRITICAL: Headless compile service communication fault.',
             'error',
           );
-
-          if (result.errors) {
-            const errorMarkers = result.errors.map((err) => {
-              const lineRegex = /\((\d+),(\d+)\):/;
-              const match = lineRegex.exec(err.text);
-
-              let startLineNumber = 1;
-              let startColumn = 1;
-
-              if (match) {
-                startLineNumber = parseInt(match[1], 10);
-                startColumn = parseInt(match[2], 10);
-              }
-
-              return {
-                severity: monaco.MarkerSeverity.Error,
-                message: err.text,
-                startLineNumber,
-                startColumn,
-                endLineNumber: startLineNumber,
-                endColumn: 100,
-              };
-            });
-            monaco.editor.setModelMarkers(
-              currentModel,
-              'compiler',
-              errorMarkers,
-            );
-          }
-        }
-      },
-      error: (err) => {
-        this.isCompiling = false;
-        this.compileStatus = 'error';
-        this.showToast(
-          'CRITICAL: Headless compile service communication fault.',
-          'error',
-        );
-        console.error(err);
-      },
-    });
+          console.error(err);
+        },
+      }),
+    );
   }
 
   public calculatePadding(path: string): number {
@@ -589,6 +632,7 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeAllTabsWithoutCheck();
+    this.subscriptions.unsubscribe(); // 🎯 Phase 2 Fix: Unsubscribe from all dangling backend data streams cleanly
     if (this.editorInstance) {
       this.editorInstance.dispose();
     }

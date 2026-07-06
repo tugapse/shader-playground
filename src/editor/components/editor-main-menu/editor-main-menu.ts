@@ -4,7 +4,7 @@ import { WindowService } from '@editor/services/window.service';
 import { SoundMixerComponent } from '../sound-mixer/sound-mixer';
 import { AssetsExplorerComponent } from '../asset-explorer/assets-explorer.component';
 import { EditorSettingsService } from '@editor/services/editor.settings';
-import { OmegaCodeWorkspaceComponent } from '../code-editor/editor/code-editor.component';
+import { CodeWorkspaceComponent } from '../../../code-editor/editor/code-editor.component';
 import { EditorStateService } from '@editor/services/editor-state.service';
 
 @Component({

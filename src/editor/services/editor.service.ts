@@ -149,7 +149,16 @@ export class EditorService {
     const baseGateway = this.apiUrl.endsWith('/api')
       ? this.apiUrl
       : `${this.apiUrl}/api`;
-    const bundleUrl = `${baseGateway}/projects/${project.id}/code/bundle?t=${new Date().getTime()}`;
+
+    // 🎯 Extract token from storage (Adjust keys depending on where your AuthService writes it)
+    const authToken =
+      localStorage.getItem('omega-auth-token') ||
+      sessionStorage.getItem('token') ||
+      '';
+    debugger;
+
+    // 🎯 Append token directly into query segment so browser import shares it with backend
+    const bundleUrl = `${baseGateway}/projects/${project.id}/code/bundle?token=${encodeURIComponent(authToken)}&t=${new Date().getTime()}`;
 
     try {
       const gameModule = await import(/* @vite-ignore */ bundleUrl);
@@ -160,7 +169,7 @@ export class EditorService {
         );
         return null;
       }
-      debugger;
+
       this._gameEngine = new gameModule.Game();
       if (this._gameEngine && this._gameEngine instanceof Engine) {
         this._gameEngine.registerDependencies();

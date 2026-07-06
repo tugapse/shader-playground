@@ -4,7 +4,6 @@
       <button class="go-back-btn" title="Go Back" (click)="triggerGoBack()">
         ← Go Back
       </button>
-      <span>Workspace Scripts</span>
     </div>
 
     <div class="tree-toolbar">
@@ -36,11 +35,11 @@
       (click)="saveCurrentChanges()"
     >
       @if (isSaving) {
-        🔄 Flushing Code...
+        Flushing Code...
       } @else if (isCompiling) {
-        ⚡ Compiling Sandbox...
+        Compiling Sandbox...
       } @else {
-        💾 Save Changes
+        Save Changes
       }
     </button>
   </div>
