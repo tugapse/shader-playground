@@ -17,7 +17,6 @@ import { ConfirmationService } from 'src/app/services/confirmation.service';
 import { DefaultInspector } from '../default-inspector/default-inspector';
 import { EnumInspector } from '../enum-inspector/enum-inspector';
 import {
-  ITargetObject,
   ITargetProperty,
   ObjectInspector,
 } from '../object-inspector/object-inspector';

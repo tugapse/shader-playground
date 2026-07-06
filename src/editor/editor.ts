@@ -106,19 +106,23 @@ export class Editor implements OnDestroy, AfterViewInit {
         scene: sceneId,
         config: {},
       });
-
-      if (!this.route.snapshot.queryParamMap.get('write-scene')) {
-        this.assetService
-          .getTextAssetContent(projectId, sceneId)
-          .subscribe((textContent) => {
-            const sceneData = JSON.parse(textContent) as JsonSerializedData;
-
-            SceneManager.loadScene(this.gl, sceneData).then((scene) => {
-              this.editorService.loadScene(scene);
-              this.editorService.requestCanvasResize();
+      this.editorService.reloadEngineRuntime().then((engine) => {
+        if (!this.route.snapshot.queryParamMap.get('write-scene')) {
+          this.assetService
+            .getTextAssetContent(projectId, sceneId)
+            .subscribe((textContent) => {
+              try {
+                const sceneData = JSON.parse(textContent) as JsonSerializedData;
+                SceneManager.loadScene(this.gl, sceneData).then((scene) => {
+                  this.editorService.loadScene(scene);
+                  this.editorService.requestCanvasResize();
+                });
+              } catch (error) {
+                console.error('Error', error);
+              }
             });
-          });
-      }
+        }
+      });
     } else {
       this.router.navigate(['/invalid-project']);
     }
@@ -127,12 +131,12 @@ export class Editor implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    this.editorService.gameEngine.destroy();
+    this.editorService.gameEngine?.destroy();
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext): void {
     this.gl = gl;
-    this.editorService.gameEngine.initialize(gl.canvas as HTMLCanvasElement);
+    this.editorService.gameEngine?.initialize(gl.canvas as HTMLCanvasElement);
     this.editorService.onRenderingContextCreated.emit(this.gl);
     this.createEditorBehaviours();
   }

@@ -91,7 +91,7 @@ export class TopBar implements OnInit {
   }
 
   onCodeEditor() {
-    this.editorState.setCentralView('code-editor');
+    this.editorState.setCentralView('code');
   }
 
   isLoggedIn(): boolean {

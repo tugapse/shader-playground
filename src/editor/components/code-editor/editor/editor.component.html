@@ -1,43 +1,94 @@
+<div class="workspace-root">
+  <div class="leftSidebar">
+    <div class="sidebar-header">Workspace Scripts</div>
 
-
-<div class="code-editor-container">
-  @if (activeAsset()) {
-    <!-- Barra de Ferramentas do Editor -->
-    <div class="editor-header">
-      <div class="file-info">
-        <span class="file-icon">JS</span>
-        <span class="file-name">{{ activeAsset()?.name }}</span>
-        @if (isDirty()) { <span class="dirty-indicator">●</span> }
-      </div>
-      <div class="editor-actions">
-        <button (click)="saveContent()" [disabled]="!isDirty()" class="save-btn">
-          Guardar (Ctrl+S)
-        </button>
-      </div>
+    <div class="tree-toolbar">
+      <button
+        class="toolbar-btn"
+        title="Create File"
+        (click)="triggerCreateFileAtRoot()"
+      >
+        <app-icon iconName="fa-plus"></app-icon>
+      </button>
+      <button
+        class="toolbar-btn"
+        title="Refresh Tree"
+        (click)="loadWorkspaceTree()"
+      >
+        <app-icon iconName="fa-sync"></app-icon>
+      </button>
     </div>
 
-    <!-- Área do Editor (Placeholder para Monaco/CodeMirror) -->
-    <div class="editor-viewport" #editorHost>
-      @if (isLoading()) {
-        <div class="loading-overlay">
-          <div class="spinner"></div>
-          <span>A carregar script...</span>
+    <div class="file-tree-container">
+      <ng-container
+        *ngTemplateOutlet="nodeTemplate; context: { $implicit: rootNode }"
+      ></ng-container>
+    </div>
+
+    <button class="btn-compile-trigger" (click)="saveCurrentChanges()">
+      💾 Save Changes
+    </button>
+  </div>
+
+  <ng-template #nodeTemplate let-node>
+    @if (node) {
+      <ul class="file-node-list">
+        @if (node.relativePath) {
+          <li
+            [class.active-file]="activeFileResult?.path === node.relativePath"
+            [style.padding-left.px]="calculatePadding(node.relativePath)"
+            (click)="handleNodeClick(node)"
+            (contextmenu)="openContextMenu($event, node)"
+          >
+            <span class="file-icon">{{ node.isDirectory ? "📁" : "📄" }}</span>
+            <span class="node-name">{{ node.name }}</span>
+
+            <button
+              class="inline-delete-btn"
+              title="Delete"
+              (click)="triggerDeleteNode($event, node)"
+            >
+              <app-icon iconName="fa-trash"></app-icon>
+            </button>
+          </li>
+        }
+        @if (node.isDirectory && node.children) {
+          @for (child of node.children; track child.relativePath) {
+            <ng-container
+              *ngTemplateOutlet="nodeTemplate; context: { $implicit: child }"
+            ></ng-container>
+          }
+        }
+      </ul>
+    }
+  </ng-template>
+
+  @if (contextMenuVisible) {
+    <div
+      class="context-menu"
+      [style.top.px]="contextMenuY"
+      [style.left.px]="contextMenuX"
+    >
+      @if (selectedContextMenuNode?.isDirectory) {
+        <div class="context-item" (click)="triggerCreateFileInFolder()">
+          New File
         </div>
       }
-    </div>
-
-    <!-- Barra de Status -->
-    <div class="editor-footer">
-      <span>JavaScript</span>
-      <span>UTF-8</span>
-    </div>
-  } @else {
-    <div class="empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.2">
-        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>
-      <p>Seleciona um script no explorador para editar</p>
+      <div class="context-item delete" (click)="triggerDeleteNodeFromMenu()">
+        Delete
+      </div>
     </div>
   }
+
+  <div class="mainViewContent">
+    <div class="canvas-wrapper">
+      <div #monacoContainer class="monaco-mount-target"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="terminal-status">
+      <span class="status-indicator ready">●</span> Omega Editor Connected
+    </div>
+  </div>
 </div>

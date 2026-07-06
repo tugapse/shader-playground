@@ -5,6 +5,7 @@ import { SoundMixerComponent } from '../sound-mixer/sound-mixer';
 import { AssetsExplorerComponent } from '../asset-explorer/assets-explorer.component';
 import { EditorSettingsService } from '@editor/services/editor.settings';
 import { OmegaCodeWorkspaceComponent } from '../code-editor/editor/editor.component';
+import { EditorStateService } from '@editor/services/editor-state.service';
 
 @Component({
   selector: 'editor-main-menu',
@@ -22,6 +23,7 @@ export class EditorMainMenu {
   constructor(
     private readonly windowService: WindowService,
     private editorSettings: EditorSettingsService,
+    private editorStateService: EditorStateService,
   ) {
     this.createMenuItems();
   }
@@ -89,12 +91,7 @@ export class EditorMainMenu {
         });
         break;
       case 'codeEditor':
-        this.windowService.open({
-          component: OmegaCodeWorkspaceComponent,
-          title: 'Code Editor',
-          iconName: 'fa-code',
-          footer: '',
-        });
+        this.editorStateService.centralView.set('code');
         break;
 
       default:

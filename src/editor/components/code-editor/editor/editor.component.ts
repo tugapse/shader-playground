@@ -21,337 +21,8 @@ import { EditorStateService } from '@editor/services/editor-state.service';
   selector: 'app-omega-code-workspace',
   standalone: true,
   imports: [CommonModule, Icon],
-  template: `
-    <div class="workspace-root">
-      <div class="leftSidebar">
-        <div class="sidebar-header">Workspace Scripts</div>
-
-        <div class="tree-toolbar">
-          <button
-            class="toolbar-btn"
-            title="Create File"
-            (click)="triggerCreateFileAtRoot()"
-          >
-            <app-icon iconName="fa-plus"></app-icon>
-          </button>
-          <button
-            class="toolbar-btn"
-            title="Refresh Tree"
-            (click)="loadWorkspaceTree()"
-          >
-            <app-icon iconName="fa-sync"></app-icon>
-          </button>
-        </div>
-
-        <div class="file-tree-container">
-          <ng-container
-            *ngTemplateOutlet="nodeTemplate; context: { $implicit: rootNode }"
-          ></ng-container>
-        </div>
-
-        <button class="btn-compile-trigger" (click)="saveCurrentChanges()">
-          💾 Save Changes
-        </button>
-      </div>
-
-      <ng-template #nodeTemplate let-node>
-        @if (node) {
-          <ul class="file-node-list">
-            @if (node.relativePath) {
-              <li
-                [class.active-file]="
-                  activeFileResult?.path === node.relativePath
-                "
-                [style.padding-left.px]="calculatePadding(node.relativePath)"
-                (click)="handleNodeClick(node)"
-                (contextmenu)="openContextMenu($event, node)"
-              >
-                <span class="file-icon">{{
-                  node.isDirectory ? '📁' : '📄'
-                }}</span>
-                <span class="node-name">{{ node.name }}</span>
-
-                <button
-                  class="inline-delete-btn"
-                  title="Delete"
-                  (click)="triggerDeleteNode($event, node)"
-                >
-                  <app-icon iconName="fa-trash"></app-icon>
-                </button>
-              </li>
-            }
-            @if (node.isDirectory && node.children) {
-              @for (child of node.children; track child.relativePath) {
-                <ng-container
-                  *ngTemplateOutlet="
-                    nodeTemplate;
-                    context: { $implicit: child }
-                  "
-                ></ng-container>
-              }
-            }
-          </ul>
-        }
-      </ng-template>
-
-      @if (contextMenuVisible) {
-        <div
-          class="context-menu"
-          [style.top.px]="contextMenuY"
-          [style.left.px]="contextMenuX"
-        >
-          @if (selectedContextMenuNode?.isDirectory) {
-            <div class="context-item" (click)="triggerCreateFileInFolder()">
-              New File
-            </div>
-          }
-          <div
-            class="context-item delete"
-            (click)="triggerDeleteNodeFromMenu()"
-          >
-            Delete
-          </div>
-        </div>
-      }
-
-      <div class="mainViewContent">
-        <div class="canvas-wrapper">
-          <div #monacoContainer class="monaco-mount-target"></div>
-        </div>
-      </div>
-
-      <div class="rightSidebar">
-        <div class="sidebar-header">Inspector</div>
-        <div class="inspector-placeholder">
-          <p>No entity selected</p>
-        </div>
-      </div>
-
-      <div class="footer">
-        <div class="terminal-status">
-          <span class="status-indicator ready">●</span> Omega Editor Connected
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .workspace-root {
-        display: grid;
-        grid-template-columns: 240px 1fr 280px;
-        grid-template-rows: 1fr 30px;
-        width: 100vw;
-        height: 100vh;
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .sidebar-header {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #717171;
-        font-weight: bold;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #2d2d2d;
-        margin-bottom: 0px;
-      }
-
-      .tree-toolbar {
-        display: flex;
-        gap: 4px;
-        background-color: #2d2d2d;
-        padding: 4px 8px;
-        border-bottom: 1px solid #3c3c3c;
-        margin-bottom: 8px;
-      }
-
-      .toolbar-btn {
-        background: transparent;
-        border: none;
-        color: #cccccc;
-        cursor: pointer;
-        padding: 4px 6px;
-        border-radius: 3px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .toolbar-btn:hover {
-        background-color: #3c3c3c;
-        color: #ffffff;
-      }
-
-      .leftSidebar {
-        grid-column: 1;
-        grid-row: 1;
-        background-color: #252526;
-        border-right: 1px solid #3c3c3c;
-        padding: 12px 0 12px 0;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .sidebar-header,
-      .file-tree-container,
-      .btn-compile-trigger {
-        margin-left: 12px;
-        margin-right: 12px;
-      }
-
-      .file-tree-container {
-        flex: 1;
-        overflow-y: auto;
-      }
-
-      .file-node-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .file-node-list li {
-        padding: 6px 12px;
-        font-size: 13px;
-        cursor: pointer;
-        color: #cccccc;
-        border-radius: 4px;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        user-select: none;
-        position: relative;
-      }
-      .file-node-list li:hover {
-        background-color: #2a2d2e;
-        color: #fff;
-      }
-      .file-node-list li.active-file {
-        background-color: #37373d;
-        color: #fff;
-        font-weight: 500;
-      }
-      .node-name {
-        flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .file-icon {
-        margin-right: 6px;
-      }
-
-      .inline-delete-btn {
-        background: transparent;
-        border: none;
-        color: #717171;
-        cursor: pointer;
-        display: none;
-        padding: 2px 4px;
-        border-radius: 3px;
-      }
-      .file-node-list li:hover .inline-delete-btn {
-        display: block;
-      }
-      .inline-delete-btn:hover {
-        color: #f85149;
-        background-color: #3c3c3c;
-      }
-
-      .context-menu {
-        position: absolute;
-        z-index: 1000;
-        background-color: #1c1c1c;
-        border: 1px solid #454545;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        border-radius: 4px;
-        padding: 4px 0;
-        min-width: 130px;
-      }
-
-      .context-item {
-        padding: 6px 14px;
-        font-size: 12px;
-        cursor: pointer;
-        color: #cccccc;
-      }
-      .context-item:hover {
-        background-color: #007acc;
-        color: white;
-      }
-      .context-item.delete:hover {
-        background-color: #a61c1c;
-      }
-
-      .btn-compile-trigger {
-        background-color: #0e639c;
-        color: white;
-        border: none;
-        padding: 10px;
-        font-size: 12px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: auto;
-      }
-      .btn-compile-trigger:hover {
-        background-color: #1177bb;
-      }
-
-      .mainViewContent {
-        grid-column: 2;
-        background-color: #1e1e1e;
-        position: relative;
-      }
-      .canvas-wrapper {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
-      .monaco-mount-target {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100% !important;
-        height: 100% !important;
-      }
-      .rightSidebar {
-        grid-column: 3;
-        background-color: #252526;
-        border-left: 1px solid #3c3c3c;
-        padding: 12px;
-      }
-      .inspector-placeholder {
-        font-size: 13px;
-        color: #858585;
-        text-align: center;
-        margin-top: 40px;
-      }
-      .footer {
-        grid-column: 1 / span 3;
-        grid-row: 2;
-        background-color: #007acc;
-        color: white;
-        display: flex;
-        align-items: center;
-        padding: 0 12px;
-        font-size: 12px;
-      }
-      .terminal-status {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .status-indicator.ready {
-        color: #89d185;
-      }
-    `,
-  ],
+  templateUrl: './editor.component.html',
+  styleUrls: ['./editor.component.scss'],
 })
 export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('monacoContainer') monacoContainer!: ElementRef;
@@ -380,13 +51,13 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor() {
-    // Listens reactively to the core engine editor project selection state updates
     effect(() => {
       const project = this.editorState.activeProject();
       if (project?.id) {
         this.projectId = project.id;
         if (this.editorInstance) {
           this.loadWorkspaceTree();
+          this.loadIntelliSenseDefinitions();
         }
       } else {
         this.projectId = '';
@@ -424,6 +95,18 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   private initMonacoInstance(): void {
     const monaco = (window as any).monaco;
 
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ES2022,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      allowNonTsExtensions: true,
+      noEmit: true,
+      strict: true,
+      noImplicitAny: true,
+      allowJs: true,
+      checkJs: true,
+    });
+
     this.editorInstance = monaco.editor.create(
       this.monacoContainer.nativeElement,
       {
@@ -435,9 +118,52 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       },
     );
 
+    this.editorInstance.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      () => {
+        this.saveCurrentChanges();
+      },
+    );
+
     if (this.projectId) {
       this.loadWorkspaceTree();
+      this.loadIntelliSenseDefinitions();
     }
+  }
+
+  public loadIntelliSenseDefinitions(): void {
+    const monaco = (window as any).monaco;
+    if (!monaco || !this.projectId) return;
+
+    this.codeService.getEngineTypings(this.projectId).subscribe({
+      next: (rawDeclarations) => {
+        const wrappedEngineLib = `
+          declare module 'omega-game-engine' {
+            ${rawDeclarations}
+          }
+        `;
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(
+          wrappedEngineLib,
+          'file:///node_modules/@types/omega-game-engine/index.d.ts',
+        );
+      },
+      error: (err) =>
+        console.error('Failed to update SDK library declarations:', err),
+    });
+
+    this.codeService.getWorkspaceTypings(this.projectId).subscribe({
+      next: (userDeclarations) => {
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(
+          userDeclarations,
+          'file:///node_modules/@types/omega-user-project/index.d.ts',
+        );
+      },
+      error: (err) =>
+        console.error(
+          'Failed to update workspace behavior metadata profile:',
+          err,
+        ),
+    });
   }
 
   public loadWorkspaceTree(): void {
@@ -481,8 +207,12 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
     let targetModel = monaco.editor.getModel(fileUri);
     if (!targetModel) {
+      const rawLang = fileResult.language?.toLowerCase();
       const langMapping =
-        fileResult.language === 'ts' ? 'typescript' : 'javascript';
+        rawLang === 'ts' || rawLang === 'typescript' || !rawLang
+          ? 'typescript'
+          : 'javascript';
+
       targetModel = monaco.editor.createModel(
         fileResult.content,
         langMapping,
@@ -508,7 +238,9 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   public triggerCreateFileAtRoot(): void {
     if (!this.projectId) return;
 
-    const fileName = prompt('Enter name of the new file at workspace root:');
+    const fileName = prompt(
+      'Enter name of the new file at workspace root (e.g., Player.ts):',
+    );
     if (!fileName) return;
 
     this.codeService.createFile(this.projectId, fileName).subscribe({
@@ -518,7 +250,7 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   public triggerCreateFileInFolder(): void {
     if (!this.selectedContextMenuNode || !this.projectId) return;
-    const fileName = prompt('Enter name of the new file:');
+    const fileName = prompt('Enter name of the new file (e.g., Component.ts):');
     if (!fileName) return;
 
     const fullRelativePath = `${this.selectedContextMenuNode.relativePath}/${fileName}`;
@@ -565,25 +297,78 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       return;
 
     const currentText = this.editorInstance.getModel().getValue();
-    const deltaPayload = [
-      {
-        range: {
-          startLine: 1,
-          endLine: this.editorInstance.getModel().getLineCount(),
-        },
-        text: currentText,
-      },
-    ];
 
+    // 🎯 Swapped out delta patches for direct, full atomic content overwrites
     this.codeService
-      .updateFileDelta(this.projectId, this.activeFileResult.path, deltaPayload)
+      .updateFileContent(
+        this.projectId,
+        this.activeFileResult.path,
+        currentText,
+      )
       .subscribe({
         next: () => {
           console.log(
-            `Changes saved successfully for: ${this.activeFileResult?.path}`,
+            `Changes flushed safely for: ${this.activeFileResult?.path}`,
           );
+          this.executeWorkspaceCompilation();
         },
       });
+  }
+
+  private executeWorkspaceCompilation(): void {
+    const monaco = (window as any).monaco;
+    if (!this.editorInstance || !this.projectId) return;
+
+    const currentModel = this.editorInstance.getModel();
+
+    this.codeService.compileWorkspace(this.projectId).subscribe({
+      next: (result) => {
+        if (result.success) {
+          console.log(
+            '🚀 Compilation successful! Staging promoted onto stable production.',
+          );
+          monaco.editor.setModelMarkers(currentModel, 'compiler', []);
+          this.loadIntelliSenseDefinitions();
+        } else {
+          console.warn(
+            '⚠️ Compilation validation errors intercepted:',
+            result.errors,
+          );
+
+          if (result.errors) {
+            const errorMarkers = result.errors.map((err) => {
+              const lineRegex = /\((\d+),(\d+)\):/;
+              const match = lineRegex.exec(err.text);
+
+              let startLineNumber = 1;
+              let startColumn = 1;
+
+              if (match) {
+                startLineNumber = parseInt(match[1], 10);
+                startColumn = parseInt(match[2], 10);
+              }
+
+              return {
+                severity: monaco.MarkerSeverity.Error,
+                message: err.text,
+                startLineNumber,
+                startColumn,
+                endLineNumber: startLineNumber,
+                endColumn: 100,
+              };
+            });
+
+            monaco.editor.setModelMarkers(
+              currentModel,
+              'compiler',
+              errorMarkers,
+            );
+          }
+        }
+      },
+      error: (err) =>
+        console.error('Microservice compile communications failure:', err),
+    });
   }
 
   public calculatePadding(path: string): number {

@@ -121,6 +121,7 @@ export class AssetService {
    * @param assetId The ID of the asset.
    */
   getTextAssetContent(projectId: string, assetId: string): Observable<string> {
+    debugger;
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
     return this.http.get(url, { responseType: 'text' });
   }
