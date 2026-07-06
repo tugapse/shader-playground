@@ -29,7 +29,7 @@ import { EditorSettingsService } from './services/editor.settings';
 import { SceneTreeService } from './services/scene-tree.service';
 import { WindowService } from './services/window.service';
 import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
-import { OmegaCodeWorkspaceComponent } from './components/code-editor/editor/editor.component';
+import { OmegaCodeWorkspaceComponent } from './components/code-editor/editor/code-editor.component';
 import {
   Scene,
   SceneEntity,

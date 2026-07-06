@@ -7,6 +7,7 @@ import {
   inject,
   effect,
   HostListener,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Icon } from 'src/app/components/icon/icon';
@@ -17,12 +18,25 @@ import {
 } from '../asset-code.service';
 import { EditorStateService } from '@editor/services/editor-state.service';
 
+export interface EditorTab {
+  file: FileContentResult;
+  isDirty: boolean;
+  model: any;
+  listener: any;
+}
+
+export interface ToastMessage {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 @Component({
   selector: 'app-omega-code-workspace',
   standalone: true,
   imports: [CommonModule, Icon],
-  templateUrl: './editor.component.html',
-  styleUrls: ['./editor.component.scss'],
+  templateUrl: './code-editor.component.html',
+  styleUrls: ['./code-editor.component.scss'],
 })
 export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   @ViewChild('monacoContainer') monacoContainer!: ElementRef;
@@ -33,7 +47,19 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   public projectId!: string;
   public rootNode: WorkspaceNode | null = null;
-  public activeFileResult: FileContentResult | null = null;
+
+  public tabs: EditorTab[] = [];
+  public activeTab: EditorTab | null = null;
+
+  public isSaving = false;
+  public isCompiling = false;
+  public compileStatus: 'idle' | 'success' | 'error' = 'idle';
+  public toasts = signal<ToastMessage[]>([]);
+  private nextToastId = 0;
+
+  // 📊 Live Monaco Marker Counter States
+  public errorCount = 0;
+  public warningCount = 0;
 
   public contextMenuVisible = false;
   public contextMenuX = 0;
@@ -50,19 +76,27 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     this.contextMenuVisible = false;
   }
 
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault();
+    }
+  }
+
   constructor() {
     effect(() => {
       const project = this.editorState.activeProject();
       if (project?.id) {
         this.projectId = project.id;
         if (this.editorInstance) {
+          this.closeAllTabsWithoutCheck();
           this.loadWorkspaceTree();
           this.loadIntelliSenseDefinitions();
         }
       } else {
         this.projectId = '';
         this.rootNode = null;
-        this.activeFileResult = null;
+        this.closeAllTabsWithoutCheck();
         if (this.editorInstance) {
           this.editorInstance.setModel(null);
         }
@@ -72,6 +106,20 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.loadMonacoDependencies();
+  }
+
+  private showToast(
+    message: string,
+    type: 'success' | 'error' | 'info' = 'info',
+  ): void {
+    const id = this.nextToastId++;
+    this.toasts.update((current) => [...current, { id, message, type }]);
+    setTimeout(
+      () => {
+        this.toasts.update((current) => current.filter((t) => t.id !== id));
+      },
+      type === 'error' ? 6000 : 4000,
+    );
   }
 
   private loadMonacoDependencies(): void {
@@ -107,10 +155,53 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
       checkJs: true,
     });
 
+    const computedStyle = window.getComputedStyle(
+      this.monacoContainer.nativeElement,
+    );
+    const background =
+      computedStyle.getPropertyValue('--global-background-color').trim() ||
+      '#0f111a';
+    const foreground =
+      computedStyle.getPropertyValue('--editor-panel-color').trim() ||
+      '#a6accd';
+    const accent =
+      computedStyle.getPropertyValue('--editor-panel-H-color').trim() ||
+      '#82aaff';
+    const selection =
+      computedStyle
+        .getPropertyValue('--editor-icon-button-hover-background')
+        .trim() || '#292d39';
+
+    monaco.editor.defineTheme('omega-dynamic-theme', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: '', foreground: foreground.replace('#', '') },
+        {
+          token: 'keyword',
+          foreground: accent.replace('#', ''),
+          fontStyle: 'bold',
+        },
+        { token: 'identifier', foreground: foreground.replace('#', '') },
+      ],
+      colors: {
+        'editor.background': background,
+        'editor.foreground': foreground,
+        'editor.lineHighlightBackground': '#22242d',
+        'editorLineNumber.foreground': '#4e5579',
+        'editorLineNumber.activeForeground': accent,
+        'editor.selectionBackground': selection,
+        'editor.inactiveSelectionBackground': selection,
+        'scrollbarSlider.background': '#292d39',
+        'scrollbarSlider.hoverBackground': '#717cb4',
+        'scrollbarSlider.activeBackground': accent,
+      },
+    });
+
     this.editorInstance = monaco.editor.create(
       this.monacoContainer.nativeElement,
       {
-        theme: 'vs-dark',
+        theme: 'omega-dynamic-theme',
         automaticLayout: true,
         minimap: { enabled: true },
         fontSize: 14,
@@ -124,6 +215,21 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
         this.saveCurrentChanges();
       },
     );
+
+    monaco.editor.onDidChangeMarkers(() => {
+      const currentModel = this.editorInstance.getModel();
+      if (!currentModel) return;
+
+      const markers = monaco.editor.getModelMarkers({
+        resource: currentModel.uri,
+      });
+      this.errorCount = markers.filter(
+        (m: any) => m.severity === monaco.MarkerSeverity.Error,
+      ).length;
+      this.warningCount = markers.filter(
+        (m: any) => m.severity === monaco.MarkerSeverity.Warning,
+      ).length;
+    });
 
     if (this.projectId) {
       this.loadWorkspaceTree();
@@ -172,7 +278,7 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     this.codeService.getWorkspaceTree(this.projectId).subscribe({
       next: (tree) => {
         this.rootNode = tree;
-        if (!this.activeFileResult) {
+        if (this.tabs.length === 0) {
           const firstFile = this.findFirstFile(tree);
           if (firstFile) {
             this.handleNodeClick(firstFile);
@@ -185,44 +291,115 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   public handleNodeClick(node: WorkspaceNode): void {
     if (node.isDirectory || !this.projectId) return;
 
+    const existingTab = this.tabs.find(
+      (t) => t.file.path === node.relativePath,
+    );
+    if (existingTab) {
+      this.selectTab(existingTab);
+      return;
+    }
+
     this.codeService
       .getFileContent(this.projectId, node.relativePath)
       .subscribe({
         next: (fileResult) => {
-          this.mountFileInMonaco(fileResult);
+          this.createNewTab(fileResult);
         },
       });
   }
 
-  private mountFileInMonaco(fileResult: FileContentResult): void {
+  private createNewTab(fileResult: FileContentResult): void {
     const monaco = (window as any).monaco;
     if (!monaco || !this.editorInstance) return;
 
-    if (this.activeFileResult) {
-      this.activeFileResult.content = this.editorInstance.getModel().getValue();
-    }
-
-    this.activeFileResult = fileResult;
     const fileUri = monaco.Uri.parse(`file:///${fileResult.path}`);
-
     let targetModel = monaco.editor.getModel(fileUri);
+
     if (!targetModel) {
       const rawLang = fileResult.language?.toLowerCase();
       const langMapping =
         rawLang === 'ts' || rawLang === 'typescript' || !rawLang
           ? 'typescript'
           : 'javascript';
-
       targetModel = monaco.editor.createModel(
         fileResult.content,
         langMapping,
         fileUri,
       );
-    } else {
-      targetModel.setValue(fileResult.content);
     }
 
-    this.editorInstance.setModel(targetModel);
+    const newTab: EditorTab = {
+      file: fileResult,
+      isDirty: false,
+      model: targetModel,
+      listener: null,
+    };
+
+    newTab.listener = targetModel.onDidChangeContent(() => {
+      if (!newTab.isDirty) {
+        newTab.isDirty = true;
+      }
+    });
+
+    this.tabs.push(newTab);
+    this.selectTab(newTab);
+  }
+
+  public selectTab(tab: EditorTab): void {
+    this.activeTab = tab;
+    this.editorInstance.setModel(tab.model);
+  }
+
+  public closeTab(event: MouseEvent, tabToClose: EditorTab): void {
+    event.stopPropagation();
+
+    if (tabToClose.isDirty) {
+      const confirmClose = confirm(
+        `"${tabToClose.file.path}" has unsaved work. Discard changes?`,
+      );
+      if (!confirmClose) return;
+    }
+
+    this.forceCloseTab(tabToClose);
+  }
+
+  private forceCloseTab(tabToClose: EditorTab): void {
+    if (tabToClose.listener) {
+      tabToClose.listener.dispose();
+    }
+
+    const index = this.tabs.indexOf(tabToClose);
+    this.tabs = this.tabs.filter((t) => t !== tabToClose);
+
+    if (this.activeTab === tabToClose) {
+      if (this.tabs.length > 0) {
+        const nextTab = this.tabs[Math.min(index, this.tabs.length - 1)];
+        this.selectTab(nextTab);
+      } else {
+        this.activeTab = null;
+        this.editorInstance.setModel(null);
+      }
+    }
+  }
+
+  private closeAllTabsWithoutCheck(): void {
+    this.tabs.forEach((t) => t.listener?.dispose());
+    this.tabs = [];
+    this.activeTab = null;
+  }
+
+  public hasUnsavedChanges(): boolean {
+    return this.tabs.some((t) => t.isDirty);
+  }
+
+  public triggerGoBack(): void {
+    if (this.hasUnsavedChanges()) {
+      const leave = confirm(
+        'You have unsaved workspace files open. Are you sure you want to go back?',
+      );
+      if (!leave) return;
+    }
+    this.editorState.centralView.set('canvas');
   }
 
   public openContextMenu(event: MouseEvent, node: WorkspaceNode): void {
@@ -277,9 +454,11 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
 
     this.codeService.deleteFile(this.projectId, node.relativePath).subscribe({
       next: () => {
-        if (this.activeFileResult?.path === node.relativePath) {
-          this.activeFileResult = null;
-          this.editorInstance.setModel(null);
+        const deadTab = this.tabs.find(
+          (t) => t.file.path === node.relativePath,
+        );
+        if (deadTab) {
+          this.forceCloseTab(deadTab);
         }
         this.loadWorkspaceTree();
       },
@@ -293,24 +472,35 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   public saveCurrentChanges(): void {
-    if (!this.activeFileResult || !this.editorInstance || !this.projectId)
+    if (
+      !this.activeTab ||
+      !this.editorInstance ||
+      !this.projectId ||
+      this.isSaving
+    )
       return;
 
+    this.isSaving = true;
+    this.compileStatus = 'idle';
+    const targetTab = this.activeTab;
     const currentText = this.editorInstance.getModel().getValue();
 
-    // 🎯 Swapped out delta patches for direct, full atomic content overwrites
     this.codeService
-      .updateFileContent(
-        this.projectId,
-        this.activeFileResult.path,
-        currentText,
-      )
+      .updateFileContent(this.projectId, targetTab.file.path, currentText)
       .subscribe({
         next: () => {
-          console.log(
-            `Changes flushed safely for: ${this.activeFileResult?.path}`,
-          );
+          targetTab.isDirty = false;
+          targetTab.file.content = currentText;
+          this.isSaving = false;
           this.executeWorkspaceCompilation();
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.showToast(
+            `Disk Sync Failed: Unable to flush changes to ${targetTab.file.path}`,
+            'error',
+          );
+          console.error(err);
         },
       });
   }
@@ -319,20 +509,25 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
     const monaco = (window as any).monaco;
     if (!this.editorInstance || !this.projectId) return;
 
+    this.isCompiling = true;
     const currentModel = this.editorInstance.getModel();
 
     this.codeService.compileWorkspace(this.projectId).subscribe({
       next: (result) => {
+        this.isCompiling = false;
         if (result.success) {
-          console.log(
-            '🚀 Compilation successful! Staging promoted onto stable production.',
+          this.compileStatus = 'success';
+          this.showToast(
+            '🚀 Production Build Compiled Successfully!',
+            'success',
           );
           monaco.editor.setModelMarkers(currentModel, 'compiler', []);
           this.loadIntelliSenseDefinitions();
         } else {
-          console.warn(
-            '⚠️ Compilation validation errors intercepted:',
-            result.errors,
+          this.compileStatus = 'error';
+          this.showToast(
+            '⚠️ Compilation failed. Check red indicators on lines.',
+            'error',
           );
 
           if (result.errors) {
@@ -357,7 +552,6 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
                 endColumn: 100,
               };
             });
-
             monaco.editor.setModelMarkers(
               currentModel,
               'compiler',
@@ -366,8 +560,15 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
           }
         }
       },
-      error: (err) =>
-        console.error('Microservice compile communications failure:', err),
+      error: (err) => {
+        this.isCompiling = false;
+        this.compileStatus = 'error';
+        this.showToast(
+          'CRITICAL: Headless compile service communication fault.',
+          'error',
+        );
+        console.error(err);
+      },
     });
   }
 
@@ -387,6 +588,7 @@ export class OmegaCodeWorkspaceComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.closeAllTabsWithoutCheck();
     if (this.editorInstance) {
       this.editorInstance.dispose();
     }
