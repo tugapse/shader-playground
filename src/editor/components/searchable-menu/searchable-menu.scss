@@ -26,10 +26,13 @@
     padding: 6px 8px;
     background-color: var(--editor-panel-text-input-background);
     color: var(--editor-panel-text-input-color);
-    border: var(--editor-panel-text-input-border, 1px solid rgba(105, 108, 112, 0.5));
+    border: var(
+      --editor-panel-text-input-border,
+      1px solid rgba(105, 108, 112, 0.5)
+    );
     border-radius: 4px;
     box-sizing: border-box;
-    font-size: 0.95em;
+    // font-size: 0.95em;
 
     &:focus {
       outline: none;
@@ -68,11 +71,11 @@
 .menu-item-name {
   font-weight: bold;
   color: var(--editor-panel-header-title-color);
-  font-size: 1.05em;
+  // font-size: 1.05em;
 }
 
 .menu-item-type {
-  font-size: 0.8em;
+  // font-size: 0.8em;
   color: var(--editor-icon-button-color);
   background-color: var(--editor-icon-button-background);
   padding: 2px 6px;
@@ -80,14 +83,14 @@
 }
 
 .menu-item-path {
-  font-size: 0.8em;
+  // font-size: 0.8em;
   color: var(--editor-icon-button-hover-color);
   margin-bottom: 4px;
   font-family: monospace;
 }
 
 .menu-item-description {
-  font-size: 0.9em;
+  // font-size: 0.9em;
   color: var(--editor-panel-color);
   line-height: 1.4;
   display: -webkit-box;
@@ -101,7 +104,7 @@
   padding: 16px;
   text-align: center;
   color: var(--editor-placeholder-icon-color);
-  font-size: 0.95em;
+  // font-size: 0.95em;
 }
 
 /* Custom Scrollbar specifically for the menu */

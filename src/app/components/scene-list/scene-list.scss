@@ -19,7 +19,7 @@
 
   h3 {
     margin: 0;
-    font-size: 1rem;
+    // font-size: 1rem;
     font-weight: 600;
     color: var(--editor-panel-H-color);
   }
@@ -29,7 +29,7 @@
   background-color: transparent;
   border: none;
   color: var(--editor-panel-color);
-  font-size: 1.5rem;
+  // font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   padding: 4px;
@@ -90,7 +90,7 @@
 }
 
 .scene-preview-placeholder {
-  font-size: 2rem;
+  // font-size: 2rem;
   color: var(--editor-placeholder-icon-color);
   opacity: 0.5;
 }
@@ -107,7 +107,7 @@
   padding: 32px;
   text-align: center;
   color: var(--editor-panel-color);
-  font-size: 0.9rem;
+  // font-size: 0.9rem;
 }
 
 /* ==========================================================================
@@ -152,7 +152,7 @@
 
   h2 {
     margin: 0;
-    font-size: 1.2rem;
+    // font-size: 1.2rem;
     font-weight: 600;
     color: var(--editor-panel-H-color);
   }
@@ -173,7 +173,7 @@
 }
 
 .modal-body label {
-  font-size: 0.85rem;
+  // font-size: 0.85rem;
   font-weight: 500;
   color: var(--editor-panel-color);
   opacity: 0.8;
@@ -186,7 +186,7 @@
   border: var(--editor-panel-text-input-border);
   border-radius: 4px;
   color: var(--editor-panel-text-input-color);
-  font-size: 1rem;
+  // font-size: 1rem;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -199,7 +199,7 @@
 
 .error-text {
   color: var(--editor-error-color);
-  font-size: 0.8rem;
+  // font-size: 0.8rem;
   margin-top: 4px;
 }
 
@@ -215,7 +215,7 @@
   padding: 8px 16px;
   border-radius: 4px;
   font-weight: 600;
-  font-size: 0.9rem;
+  // font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;

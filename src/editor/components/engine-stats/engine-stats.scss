@@ -1,30 +1,33 @@
 .engine-stats-panel {
   position: absolute;
-  left:0;
-  top:30px;
+  left: 0;
+  top: 30px;
   transform: translateX(calc(50vw - 140px));
   opacity: 0.5;
   &:hover {
     opacity: 1;
   }
-  
+
   /* Using your theme variables */
   background-color: var(--editor-panel-background-10);
   border: var(--editor-panel-border);
   box-shadow: var(--editor-panel-box-shadow);
   color: var(--editor-panel-color);
-  
+
   padding: 8px 12px;
   border-radius: 4px;
   min-width: 140px;
   z-index: 10;
 
-  
   /* Use a monospaced font or tabular numbers so the width doesn't jitter */
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  backdrop-filter: blur(4px); /* Optional: Gives it a nice modern IDE feel over the canvas */
+  // font-size: 12px;
+  backdrop-filter: blur(
+    4px
+  ); /* Optional: Gives it a nice modern IDE feel over the canvas */
 
   .stat-row {
     display: flex;
@@ -40,17 +43,17 @@
       margin-bottom: 8px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--editor-panel-background-50);
-      
+
       .label {
         color: var(--editor-panel-header-title-color);
         font-weight: 600;
       }
-      
+
       .value {
         color: var(--editor-panel-header-title-color);
         font-weight: 600;
-        font-size: 14px;
-        
+        // font-size: 14px;
+
         &.warning {
           color: var(--editor-error-color);
         }

@@ -37,7 +37,7 @@
 }
 
 .designer-title {
-  font-size: 1.125rem;
+  // font-size: 1.125rem;
   font-weight: 700;
   color: var(--editor-panel-header-title-color);
   margin: 0;
@@ -81,7 +81,7 @@
 }
 
 .section-title {
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -105,13 +105,13 @@
 }
 
 .form-label {
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   font-weight: 600;
   color: var(--editor-panel-color);
   text-transform: uppercase;
 
   &.small {
-    font-size: 10px;
+    // font-size: 10px;
   }
 }
 
@@ -121,7 +121,7 @@
   border: var(--editor-panel-text-input-border);
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  // font-size: 0.875rem;
   color: var(--editor-panel-text-input-color);
   outline: none;
 
@@ -144,7 +144,7 @@
   text-transform: capitalize;
   padding: 0.375rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   border: none;
   background: transparent;
   color: var(--editor-placeholder-icon-color);
@@ -170,7 +170,7 @@
 }
 
 .value-display {
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   font-family: monospace;
 
   &.accent-sky {
@@ -258,7 +258,7 @@
   padding: 0.5rem 2rem;
   background-color: var(--editor-panel-H-color);
   color: var(--global-background-color);
-  font-size: 0.875rem;
+  // font-size: 0.875rem;
   font-weight: 700;
   border: none;
   border-radius: 4px;
@@ -275,7 +275,7 @@
   padding: 0.5rem 1.5rem;
   background-color: var(--editor-panel-background-10);
   color: var(--editor-panel-header-title-color);
-  font-size: 0.875rem;
+  // font-size: 0.875rem;
   font-medium: 500;
   border: none;
   border-radius: 4px;
@@ -292,7 +292,7 @@
   background: transparent;
   border: none;
   color: var(--editor-panel-color);
-  font-size: 0.875rem;
+  // font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.2s ease;

@@ -16,7 +16,7 @@
     background: var(--scrollbar-thumb-background);
     border: 2px solid var(--scrollbar-thumb-border-color);
     border-radius: 4px;
-    
+
     &:hover {
       background: var(--scrollbar-thumb-hover-background);
     }
@@ -31,7 +31,7 @@
 }
 
 .preset-list-title {
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   font-weight: 700;
   color: var(--editor-panel-section-header);
   text-transform: uppercase;
@@ -40,14 +40,16 @@
 }
 
 .btn-add {
-  font-size: 0.75rem;
+  // font-size: 0.75rem;
   background-color: var(--editor-icon-button-hover-background);
   color: var(--editor-icon-button-hover-color);
   border: none;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     background-color: rgba(130, 170, 255, 0.25);
@@ -99,14 +101,14 @@
 }
 
 .preset-name {
-  font-size: 0.875rem;
+  // font-size: 0.875rem;
   font-weight: 600;
   color: var(--editor-panel-color);
   transition: color 0.2s ease;
 }
 
 .preset-meta {
-  font-size: 10px;
+  // font-size: 10px;
   color: var(--editor-placeholder-icon-color);
   font-family: monospace;
 }
@@ -129,7 +131,9 @@
   justify-content: center;
   color: var(--editor-icon-button-color);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     background-color: var(--editor-icon-button-hover-background);

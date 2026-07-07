@@ -30,14 +30,14 @@
   .modal-title {
     margin: 0;
     color: var(--editor-panel-header-title-color);
-    font-size: 1.1em;
+    // font-size: 1.1em;
     font-weight: 500;
   }
 }
 
 .modal-body {
   padding: 16px;
-  font-size: 0.95em;
+  // font-size: 0.95em;
   line-height: 1.5;
 
   p {
@@ -58,10 +58,10 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9em;
+  // font-size: 0.9em;
   font-weight: 500;
   transition: background-color 0.2s;
-  
+
   &:focus {
     outline: none;
     box-shadow: var(--editor-focus-shadow);

@@ -38,6 +38,7 @@ import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { LoadingOverlayComponent } from './components/loading/loading.component';
 import { LoadingService } from './services/loading.service';
+import { AssetsUploadTriggerService } from '@editor/components/asset-explorer/omega-upload-triger.service';
 
 @Component({
   selector: 'app-root',
@@ -318,5 +319,19 @@ export class App implements OnDestroy, AfterViewInit {
 
     skyboxEntity.addBehaviour(renderer);
     scene.addEntity(skyboxEntity);
+  }
+
+  private uploadTrigger = inject(AssetsUploadTriggerService);
+
+  testOpenModal() {
+    // Fire it with a dummy path to see it in action
+    this.uploadTrigger.openUploadDialog('/root/test-sandbox').subscribe({
+      next: (stagedFiles) => {
+        console.log('Test Success! You staged these files:', stagedFiles);
+      },
+      complete: () => {
+        console.log('Modal closed or workflow finished.');
+      },
+    });
   }
 }
