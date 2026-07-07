@@ -1,9 +1,12 @@
 <div class="scene-list-container">
   <div class="scene-list-header">
     <h3>Scenes</h3>
-    <button class="btn-icon" title="New Scene" (click)="openNewSceneModal()">
-      +
-    </button>
+    <app-icon
+      class="icon-button"
+      iconName="fa-plus"
+      [isButton]="true"
+      (click)="openNewSceneModal()"
+    ></app-icon>
   </div>
 
   @if (scenes.length > 0) {

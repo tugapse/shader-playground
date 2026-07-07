@@ -47,7 +47,7 @@
     <div class="sidebar-header">
       <h2>Projects</h2>
       <button
-        class="btn-icon"
+        class="btn-icon icon-button"
         title="New Project"
         (click)="openNewProjectModal()"
       >
@@ -70,7 +70,8 @@
   </aside>
 
   <main class="main-content">
-    <app-user-bar></app-user-bar>
+    <app-user-bar class="user-bar"></app-user-bar>
+
     @if (selectedProject) {
       <div class="top">
         <app-project-details
@@ -79,52 +80,13 @@
         ></app-project-details>
         <app-scene-list [project]="selectedProject"></app-scene-list>
       </div>
-      <app-assets-explorer
+
+      <!-- <app-assets-explorer
         class="assets-explorer"
         [projectId]="selectedProject.id"
-      ></app-assets-explorer>
+      ></app-assets-explorer> -->
     } @else {
-      <div class="dashboard-welcome">
-        <div class="top-content">
-          <div class="hero-section">
-            <h1>Welcome to Omega Editor</h1>
-            <p>
-              Select a project from the sidebar to start building, or choose an
-              action below.
-            </p>
-          </div>
-
-          <div class="quick-actions-grid">
-            <div class="action-card" (click)="openNewProjectModal()">
-              <div class="card-icon"></div>
-              <h3>Create New Project</h3>
-              <p>
-                Start a fresh game template with initialized physics and core
-                loops.
-              </p>
-            </div>
-
-            <div class="action-card">
-              <div class="card-icon"></div>
-              <h3>Import Project</h3>
-              <p>
-                Load an existing project directory or compile from a source
-                bundle.
-              </p>
-            </div>
-
-            <div class="action-card">
-              <div class="card-icon"></div>
-              <h3>Documentation</h3>
-              <p>
-                Explore API references, custom script logic, and engine
-                components.
-              </p>
-            </div>
-          </div>
-        </div>
-        <app-background-visualization></app-background-visualization>
-      </div>
+      <app-dashboard-welcome></app-dashboard-welcome>
     }
   </main>
 </div>

@@ -4,16 +4,27 @@ import {
   AudioCache,
   SequencerClock,
   VoiceFactory,
+  ClockConfig,
 } from 'omega-game-engine';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AudioService {
+  private clockConfig: ClockConfig = {
+    bpm: 120,
+    ticksPerBeat: 4,
+    lookaheadMs: 500.0,
+    overlapMs: 100.0,
+  };
   // Instantiates the pure TypeScript modules
   public readonly engine = new AudioEngine();
+
   public readonly cache = new AudioCache(this.engine.getContext());
-  public readonly clock = new SequencerClock(this.engine.getContext());
+  public readonly clock = new SequencerClock(
+    this.engine.getContext(),
+    this.clockConfig,
+  );
   public readonly factory = new VoiceFactory(
     this.engine.getContext(),
     this.cache,

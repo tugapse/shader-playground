@@ -14,11 +14,12 @@ import {
 } from '../../api/models/omega-api.models';
 import { Scene } from 'omega-game-engine';
 import { Router } from '@angular/router';
+import { Icon } from '../icon/icon';
 
 @Component({
   selector: 'app-scene-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Icon],
   templateUrl: './scene-list.html',
   styleUrl: './scene-list.scss',
 })

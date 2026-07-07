@@ -14,6 +14,8 @@ import {
 import { AssetsExplorerComponent } from '@editor/components/asset-explorer/assets-explorer.component';
 import { EditorService } from '@editor/services/editor.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingService } from 'src/app/services/loading.service';
+import { DashboardWelcome } from './components/dashboard-welcome/dashboard-welcome';
 
 @Component({
   selector: 'app-home',
@@ -26,13 +28,15 @@ import { ActivatedRoute } from '@angular/router';
     ProjectDetails,
     SceneList,
     AssetsExplorerComponent,
+    DashboardWelcome,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent implements AfterViewInit, OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly loadingService = inject(LoadingService);
 
   selectedProject: ProjectResponse | null = null;
   projects: ProjectResponse[] = [];
@@ -41,6 +45,10 @@ export class HomeComponent implements AfterViewInit {
   newProjectName = '';
 
   constructor(private editorService: EditorService) {}
+
+  ngOnInit(): void {
+    this.loadingService.show();
+  }
 
   ngAfterViewInit(): void {
     this.loadProjects();
@@ -54,6 +62,7 @@ export class HomeComponent implements AfterViewInit {
           this.projects.find(
             (o) => o.id == this.activatedRoute.snapshot.paramMap.get('project'),
           ) || null;
+        this.loadingService.hide();
       },
       error: (err) => console.error('Failed to load projects', err),
     });

@@ -22,6 +22,10 @@ body {
 * {
   box-sizing: border-box;
 }
+.icon-button {
+  font-size: 2rem;
+  cursor: pointer;
+}
 
 .no-select {
   user-select: none;
