@@ -7,7 +7,7 @@
     height: 100vh;
     background-color: var(--global-background-color);
     color: var(--editor-panel-color);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    // font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
     position: relative;
   }
@@ -29,7 +29,7 @@
       border: var(--editor-panel-text-input-border);
       color: var(--editor-panel-color);
       padding: 4px 8px;
-      border-radius: 4px;
+      // border-radius: 4px;
       cursor: pointer;
       // font-size: 11px;
       font-weight: normal;
@@ -59,7 +59,7 @@
     color: var(--editor-icon-button-color);
     cursor: pointer;
     padding: 4px 6px;
-    border-radius: 3px;
+    // border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,7 +104,7 @@
     // font-size: 13px;
     cursor: pointer;
     color: var(--editor-panel-color);
-    border-radius: 4px;
+    // border-radius: 4px;
     white-space: nowrap;
     display: flex;
     align-items: center;
@@ -141,7 +141,7 @@
     cursor: pointer;
     display: none;
     padding: 2px 4px;
-    border-radius: 3px;
+    // border-radius: 3px;
 
     &:hover {
       color: var(--editor-error-color);
@@ -159,7 +159,7 @@
     background-color: var(--editor-panel-background);
     border: var(--editor-panel-border);
     box-shadow: var(--editor-panel-box-shadow);
-    border-radius: 4px;
+    // border-radius: 4px;
     padding: 4px 0;
     min-width: 130px;
   }
@@ -188,7 +188,7 @@
     padding: 10px;
     // font-size: 12px;
     font-weight: bold;
-    border-radius: 4px;
+    // border-radius: 4px;
     cursor: pointer;
     margin-top: auto;
     transition: all 0.2s ease;
@@ -264,7 +264,7 @@
 
       .close-tab-btn {
         padding: 2px 4px;
-        border-radius: 3px;
+        // border-radius: 3px;
         // font-size: 13px;
         display: flex;
         align-items: center;
@@ -314,7 +314,7 @@
 
       .badge {
         padding: 2px 6px;
-        border-radius: 3px;
+        // border-radius: 3px;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -369,7 +369,7 @@
       border: var(--editor-panel-border);
       box-shadow: var(--editor-panel-box-shadow);
       color: var(--editor-panel-header-title-color);
-      border-radius: 6px;
+      // border-radius: 6px;
       // font-size: 13px;
       pointer-events: auto;
       animation: slideIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -427,12 +427,12 @@
 
 ::-webkit-scrollbar-track {
   background: var(--scrollbar-track-background);
-  border-radius: 5px;
+  // border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb-background);
-  border-radius: 5px;
+  // border-radius: 5px;
   border: 1px solid var(--scrollbar-thumb-border-color);
 }
 

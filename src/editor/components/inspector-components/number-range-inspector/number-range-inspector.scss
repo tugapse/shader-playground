@@ -48,7 +48,7 @@
         &::-webkit-slider-runnable-track {
           width: 100%;
           height: 6px;
-          border-radius: 3px;
+          // border-radius: 3px;
           /* Colors up to the dynamic variable line, then uses input background for the empty track */
           background: linear-gradient(
             to right, 
@@ -64,7 +64,7 @@
           appearance: none;
           height: 14px;
           width: 14px;
-          border-radius: 50%;
+          // border-radius: 50%;
           background: var(--editor-icon-button-hover-color); 
           cursor: pointer;
           margin-top: -4px; /* Perfectly centers the dot on our 6px track height */
@@ -82,20 +82,20 @@
           width: 100%;
           height: 6px;
           background: var(--editor-panel-text-input-background);
-          border-radius: 3px;
+          // border-radius: 3px;
         }
 
         &::-moz-range-progress {
           height: 6px;
           background: var(--editor-icon-button-hover-color);
-          border-radius: 3px 0 0 3px;
+          // border-radius: 3px 0 0 3px;
         }
 
         &::-moz-range-thumb {
           height: 14px;
           width: 14px;
           border: none;
-          border-radius: 50%;
+          // border-radius: 50%;
           background: var(--editor-icon-button-hover-color);
           cursor: pointer;
           transition: background-color 0.1s ease, transform 0.1s ease;
@@ -116,8 +116,8 @@
         border: var(--editor-panel-text-input-border);
         f// ont-size: 12px;
         padding: 4px 6px;
-        border-radius: 3px;
-        font-family: inherit;
+        // border-radius: 3px;
+        // font-family: inherit;
 
         &:focus {
           outline: none;

@@ -13,7 +13,7 @@
 .register-form {
   background: var(--editor-panel-background);
   padding: 40px;
-  border-radius: 8px;
+  // border-radius: 8px;
   box-shadow: var(--editor-panel-box-shadow);
   width: 320px;
   border: var(--editor-panel-border);
@@ -40,7 +40,7 @@
     background: var(--editor-panel-text-input-background);
     color: var(--editor-panel-text-input-color);
     border: var(--editor-panel-text-input-border);
-    border-radius: 4px;
+    // border-radius: 4px;
   }
 }
 
@@ -48,7 +48,7 @@ button {
   width: 100%;
   padding: 10px;
   border: none;
-  border-radius: 4px;
+  // border-radius: 4px;
   background-color: var(--editor-icon-button-selected-background);
   color: white;
   // font-size: 16px;

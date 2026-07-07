@@ -22,7 +22,6 @@
   background-color: var(--editor-panel-background);
   border: var(--editor-panel-border);
   box-shadow: var(--editor-modal-shadow);
-  border-radius: 4px;
 }
 
 .spinner {
@@ -37,7 +36,7 @@
 .loading-text {
   color: var(--editor-panel-color);
   // font-size: 13px;
-  font-family: inherit;
+  // font-family: inherit;
   letter-spacing: 0.5px;
 }
 

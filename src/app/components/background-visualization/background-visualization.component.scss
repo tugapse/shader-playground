@@ -44,7 +44,7 @@
 }
 
 .engine-status-text {
-  font-family: monospace;
+  // font-family: monospace;
   // font-size: 0.72rem;
   color: var(--editor-icon-button-color);
   letter-spacing: 0.3rem;
@@ -54,7 +54,6 @@
   animation: textGlitch 6s linear infinite;
   background-color: #141920;
   padding: 4px 12px;
-  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 

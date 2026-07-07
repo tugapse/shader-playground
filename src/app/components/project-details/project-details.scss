@@ -3,7 +3,7 @@
 .project-details {
   background-color: var(--editor-panel-background);
   border: 1px solid var(--editor-panel-border);
-  border-radius: 8px;
+  // border-radius: 8px;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -88,10 +88,10 @@ label {
   padding: 10px 12px;
   background-color: var(--editor-panel-text-input-background);
   border: 1px solid var(--editor-panel-text-input-border);
-  border-radius: 4px;
+  // border-radius: 4px;
   color: var(--editor-panel-text-input-color);
   // font-size: 1rem;
-  font-family: inherit;
+  // font-family: inherit;
   line-height: 1.4;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -125,7 +125,7 @@ textarea.form-input {
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: 0.25rem;
+  // border-radius: 0.25rem;
   color: #fff;
   background-color: #6c757d;
 
@@ -142,7 +142,7 @@ textarea.form-input {
 
 .btn {
   padding: 8px 16px;
-  border-radius: 4px;
+  // border-radius: 4px;
   font-weight: 600;
   // font-size: 0.9rem;
   cursor: pointer;

@@ -10,7 +10,7 @@
   height: 100vh;
   background-color: #141920;
   color: var(--editor-panel-color);
-  font-family:
+  // font-family:
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -112,7 +112,7 @@
 }
 
 .engine-status-text {
-  font-family: monospace;
+  // font-family: monospace;
   // font-size: 0.72rem;
   color: var(--editor-icon-button-color);
   letter-spacing: 0.3rem;

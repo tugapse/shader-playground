@@ -7,7 +7,7 @@
   height: 100vh;
   background-color: #141920;
   color: var(--editor-panel-color);
-  font-family:
+  // font-family:
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -32,8 +32,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 40px;
-  border-radius: 12px;
-  width: 380px;
+    width: 380px;
 
   /* Dual Neon Border & Outer Energy Pulse Glow */
   border: 1px solid rgba(62, 142, 255, 0.25);
@@ -74,8 +73,7 @@
     background: rgba(0, 0, 0, 0.4);
     color: var(--editor-panel-text-input-color);
     border: 1px solid rgba(62, 142, 255, 0.2);
-    border-radius: 6px;
-    font-family: inherit;
+      // font-family: inherit;
     transition: all 0.25s ease;
 
     &:focus {
@@ -97,8 +95,7 @@ button[type="submit"] {
   width: 100%;
   padding: 12px;
   border: 1px solid rgba(62, 142, 255, 0.4);
-  border-radius: 6px;
-  background-color: rgba(44, 112, 207, 0.2);
+    background-color: rgba(44, 112, 207, 0.2);
   color: #ffffff;
   // font-size: 1rem;
   font-weight: 600;
@@ -131,8 +128,7 @@ button[type="submit"] {
   margin-top: 16px;
   background-color: rgba(255, 77, 77, 0.1);
   padding: 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 77, 77, 0.3);
+    border: 1px solid rgba(255, 77, 77, 0.3);
 }
 
 .register-link {

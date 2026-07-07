@@ -33,7 +33,7 @@
   line-height: 1;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
+  // border-radius: 4px;
 
   &:hover {
     background-color: var(--editor-icon-button-hover-background);
@@ -52,13 +52,13 @@
 .scene-item {
   display: flex;
   column-gap: 8px;
-  border-radius: 4px;
+  // border-radius: 4px;
   cursor: pointer;
   background-color: var(--editor-icon-button-background);
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease;
-  overflow: hidden; // To contain the border-radius on the image
+  // overflow: hidden; // To contain the border-radius on the image
   border: 1px solid transparent; // for selected state
   padding: 6px 0;
 
@@ -130,7 +130,7 @@
 .modal-content {
   background-color: var(--editor-panel-background);
   border: var(--editor-panel-border);
-  border-radius: 8px;
+  // border-radius: 8px;
   box-shadow: var(--editor-modal-shadow);
   width: 100%;
   max-width: 450px;
@@ -184,7 +184,7 @@
   padding: 10px 12px;
   background-color: var(--editor-panel-text-input-background);
   border: var(--editor-panel-text-input-border);
-  border-radius: 4px;
+  // border-radius: 4px;
   color: var(--editor-panel-text-input-color);
   // font-size: 1rem;
   transition: all 0.2s ease;
@@ -213,7 +213,7 @@
 
 .btn {
   padding: 8px 16px;
-  border-radius: 4px;
+  // border-radius: 4px;
   font-weight: 600;
   // font-size: 0.9rem;
   cursor: pointer;

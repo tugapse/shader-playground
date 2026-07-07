@@ -150,17 +150,17 @@ interface LocalStagedItem {
     .modal-window {
       background-color: var(--editor-panel-background);
       border: var(--editor-panel-border);
-      border-radius: 6px;
+      //border-radius: 6px;
       width: 680px; /* Slightly wider layout to ensure input text is readable */
       max-width: 90vw;
       box-shadow: var(--editor-modal-shadow);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      font-family:
-        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-        sans-serif;
-      -webkit-font-smoothing: antialiased;
+      // font-family:
+      //   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+      //   sans-serif;
+      // -webkit-font-smoothing: antialiased;
     }
 
     /* Header Section */
@@ -185,10 +185,10 @@ interface LocalStagedItem {
         color: var(
           --editor-panel-H-color
         ); /* Changed from dark blue to high-contrast blue */
-        font-family: monospace;
+        // font-family: monospace;
         background-color: var(--editor-panel-text-input-background);
         padding: 2px 8px;
-        border-radius: 3px;
+        //border-radius: 3px;
         border: 1px solid var(--editor-panel-text-input-border);
       }
     }
@@ -242,7 +242,7 @@ interface LocalStagedItem {
       background-color: var(
         --editor-panel-text-input-background
       ); /* Darker list background for depth contrast */
-      border-radius: 4px;
+      //border-radius: 4px;
       padding: 6px;
 
       &::-webkit-scrollbar {
@@ -254,7 +254,7 @@ interface LocalStagedItem {
       }
       &::-webkit-scrollbar-thumb {
         background: var(--scrollbar-thumb-background);
-        border-radius: 3px;
+        //border-radius: 3px;
       }
       &::-webkit-scrollbar-thumb:hover {
         background: var(--scrollbar-thumb-hover-background);
@@ -269,7 +269,7 @@ interface LocalStagedItem {
       background-color: var(--editor-panel-background-50);
       border: var(--editor-panel-border);
       padding: 8px 12px;
-      border-radius: 4px;
+      //border-radius: 4px;
       margin-bottom: 6px;
       transition: border-color 0.15s ease;
 
@@ -286,7 +286,7 @@ interface LocalStagedItem {
       width: 28px;
       height: 28px;
       background-color: var(--editor-panel-background-10);
-      border-radius: 4px;
+      //border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -313,7 +313,7 @@ interface LocalStagedItem {
       background-color: var(--editor-panel-text-input-background);
       color: var(--editor-panel-text-input-color);
       border: var(--editor-panel-text-input-border);
-      border-radius: 3px;
+      //border-radius: 3px;
       padding: 6px 10px;
       // font-size: 0.85rem;
       outline: none;
@@ -341,7 +341,7 @@ interface LocalStagedItem {
       cursor: pointer;
       // font-size: 0.8rem;
       padding: 6px;
-      border-radius: 4px;
+      //border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -358,7 +358,7 @@ interface LocalStagedItem {
       text-align: center;
       border: 1px dashed var(--editor-panel-text-input-border);
       background-color: var(--editor-panel-background-50);
-      border-radius: 4px;
+      //border-radius: 4px;
       color: var(
         --editor-panel-color
       ); /* Changed from dark blue-gray to clear readable font color */
@@ -381,7 +381,7 @@ interface LocalStagedItem {
       padding: 6px 16px;
       // font-size: 0.85rem;
       font-weight: 500;
-      border-radius: 4px;
+      //border-radius: 4px;
       cursor: pointer;
       border: none;
       outline: none;
