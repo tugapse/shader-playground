@@ -2,30 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from 'src/app/api/api-url.token';
-
-export interface WorkspaceNode {
-  name: string;
-  relativePath: string;
-  isDirectory: boolean;
-  children?: WorkspaceNode[];
-}
-
-export interface FileContentResult {
-  path: string;
-  content: string;
-  language: string;
-}
-
-export interface CompileError {
-  text: string;
-}
-
-export interface CompileResult {
-  success: boolean;
-  message: string;
-  code: string | null;
-  errors: CompileError[] | null;
-}
+import {
+  CompileResult,
+  CreateFileRequest,
+  FileContentResult,
+  UpdateFileContentRequest,
+  WorkspaceNode,
+} from './asset-code.models';
 
 @Injectable({
   providedIn: 'root',
@@ -59,24 +42,22 @@ export class AssetCodeService {
 
   createFile(
     projectId: string,
-    path: string,
-    template: string = 'behavior',
+    payload: CreateFileRequest,
   ): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${projectId}/code/files`, {
-      path,
-      template,
-    });
+    return this.http.post<void>(
+      `${this.baseUrl}/${projectId}/code/files`,
+      payload,
+    );
   }
 
   updateFileContent(
     projectId: string,
-    path: string,
-    content: string,
+    payload: UpdateFileContentRequest,
   ): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${projectId}/code/files`, {
-      path,
-      content,
-    });
+    return this.http.put<void>(
+      `${this.baseUrl}/${projectId}/code/files`,
+      payload,
+    );
   }
 
   deleteFile(projectId: string, path: string): Observable<void> {

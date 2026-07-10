@@ -35,6 +35,13 @@ export interface AuthLoginRequest {
 }
 
 /**
+ * Represents the payload for a user logout request.
+ * Corresponds to `POST /api/auth/logout`.
+ * This is currently an empty object but is defined for type safety and future extension.
+ */
+export interface AuthLogoutRequest {}
+
+/**
  * Represents the payload for updating a user's profile.
  * Corresponds to `PATCH /api/users/me`.
  */
@@ -68,6 +75,29 @@ export interface UpdateProjectRequest {
     version?: string;
   };
 }
+
+/**
+ * Represents the payload for updating an asset's metadata.
+ * Corresponds to `PATCH /api/projects/{project_id}/assets/{asset_id}`.
+ */
+export interface UpdateAssetRequest {
+  virtual_path?: string;
+  asset_type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene';
+}
+
+/**
+ * Represents the payload for updating the text content of an asset.
+ * Corresponds to `PUT /api/projects/{project_id}/assets/{asset_id}/text`.
+ */
+export interface UpdateAssetTextRequest {
+  text: string;
+}
+
+/**
+ * Represents the structured JSON data for a scene asset.
+ * While it can contain any properties, this provides a specific type for clarity.
+ */
+export interface SceneData extends Record<string, any> {}
 
 // --- Response Schemas ---
 
@@ -138,4 +168,20 @@ export interface LoginResponse {
   token: string;
   accessToken: string;
   tokenType: 'bearer';
+}
+
+/**
+ * Represents the health status of the system.
+ * Corresponds to `GET /health`.
+ */
+export interface HealthStatusResponse {
+  status: string;
+}
+
+/**
+ * Represents a generic success message response from the API.
+ * Corresponds to `POST /api/auth/logout` and other actions.
+ */
+export interface MessageResponse {
+  message: string;
 }

@@ -13,11 +13,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Icon } from 'src/app/components/icon/icon';
+import { AssetCodeService } from '../asset-code.service';
 import {
-  AssetCodeService,
   WorkspaceNode,
   FileContentResult,
-} from '../asset-code.service';
+  CreateFileRequest,
+} from '../asset-code.models';
 import { EditorStateService } from '@editor/services/editor-state.service';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/services/loading.service';
@@ -359,9 +360,11 @@ export class CodeWorkspaceComponent
     if (!fileName) return;
 
     this.subscriptions.add(
-      this.codeService.createFile(this.projectId, fileName).subscribe({
-        next: () => this.loadWorkspaceTree(),
-      }),
+      this.codeService
+        .createFile(this.projectId, { path: fileName, template: '' })
+        .subscribe({
+          next: () => this.loadWorkspaceTree(),
+        }),
     );
   }
 
@@ -372,9 +375,11 @@ export class CodeWorkspaceComponent
 
     const fullRelativePath = `${this.selectedContextMenuNode.relativePath}/${fileName}`;
     this.subscriptions.add(
-      this.codeService.createFile(this.projectId, fullRelativePath).subscribe({
-        next: () => this.loadWorkspaceTree(),
-      }),
+      this.codeService
+        .createFile(this.projectId, { path: fullRelativePath, template: '' })
+        .subscribe({
+          next: () => this.loadWorkspaceTree(),
+        }),
     );
   }
 
@@ -431,7 +436,10 @@ export class CodeWorkspaceComponent
 
     this.subscriptions.add(
       this.codeService
-        .updateFileContent(this.projectId, targetTab.file.path, currentText)
+        .updateFileContent(this.projectId, {
+          path: targetTab.file.path,
+          content: currentText,
+        })
         .subscribe({
           next: () => {
             targetTab.isDirty = false;
@@ -476,7 +484,7 @@ export class CodeWorkspaceComponent
             );
 
             if (result.errors) {
-              const errorMarkers = result.errors.map((err) => {
+              const errorMarkers = result.errors.map((err: any) => {
                 const lineRegex = /\((\d+),(\d+)\):/;
                 const match = lineRegex.exec(err.text);
 

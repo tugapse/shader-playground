@@ -4,7 +4,11 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api-url.token';
 import {
   AssetResponse,
+  MessageResponse,
   ProjectAssetIndexResponse,
+  SceneData,
+  UpdateAssetRequest,
+  UpdateAssetTextRequest,
 } from '../models/omega-api.models';
 
 /**
@@ -78,10 +82,7 @@ export class AssetService {
   updateAsset(
     projectId: string,
     assetId: string,
-    payload: {
-      virtual_path?: string;
-      asset_type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene';
-    },
+    payload: UpdateAssetRequest,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
     return this.http.patch<AssetResponse>(url, payload, {
@@ -98,9 +99,9 @@ export class AssetService {
   deleteAsset(
     projectId: string,
     assetId: string,
-  ): Observable<{ status: string; message: string }> {
+  ): Observable<MessageResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
-    return this.http.delete<{ status: string; message: string }>(url);
+    return this.http.delete<MessageResponse>(url);
   }
   /**
    * Streams the raw binary content of an asset.
@@ -121,7 +122,6 @@ export class AssetService {
    * @param assetId The ID of the asset.
    */
   getTextAssetContent(projectId: string, assetId: string): Observable<string> {
-    debugger;
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
     return this.http.get(url, { responseType: 'text' });
   }
@@ -131,15 +131,15 @@ export class AssetService {
    * Corresponds to PUT /api/projects/{project_id}/assets/{asset_id}/text
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
-   * @param content The new text content.
+   * @param payload The new text content.
    */
   updateRawAssetContent(
     projectId: string,
     assetId: string,
-    content: string,
+    payload: UpdateAssetTextRequest,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
-    return this.http.put<AssetResponse>(url, { text: content });
+    return this.http.put<AssetResponse>(url, payload);
   }
 
   /**
@@ -170,11 +170,12 @@ export class AssetService {
   saveSceneAsset(
     projectId: string,
     assetId: string,
-    sceneData: object,
+    sceneData: SceneData,
   ): Observable<AssetResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}/text`;
-    return this.http.put<AssetResponse>(url, {
+    const payload: UpdateAssetTextRequest = {
       text: JSON.stringify(sceneData, null, 2),
-    });
+    };
+    return this.http.put<AssetResponse>(url, payload);
   }
 }

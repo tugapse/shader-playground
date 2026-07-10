@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api-url.token';
 import {
   CreateProjectRequest,
-  UpdateProjectRequest,
+  MessageResponse,
+  ProjectAssetIndexResponse,
   ProjectResponse,
+  UpdateProjectRequest,
 } from '../models/omega-api.models';
 
 /**
@@ -50,6 +52,16 @@ export class ProjectService {
   }
 
   /**
+   * Retrieves the asset index for a specific project.
+   * Corresponds to GET /api/projects/{project_id}/assets
+   * @param projectId The UUID of the project.
+   * @returns An observable of the project's asset index.
+   */
+  getProjectAssets(projectId: string): Observable<ProjectAssetIndexResponse> {
+    return this.http.get<ProjectAssetIndexResponse>(`${this.projectsUrl}/${projectId}/assets`);
+  }
+
+  /**
    * Partially updates project metadata.
    * Corresponds to PATCH /api/projects/{project_id}
    * @param projectId The UUID of the project.
@@ -72,11 +84,7 @@ export class ProjectService {
    * @param projectId The UUID of the project.
    * @returns An observable with the success message from the API.
    */
-  deleteProject(
-    projectId: string,
-  ): Observable<{ status: string; message: string }> {
-    return this.http.delete<{ status: string; message: string }>(
-      `${this.projectsUrl}/${projectId}`,
-    );
+  deleteProject(projectId: string): Observable<MessageResponse> {
+    return this.http.delete<MessageResponse>(`${this.projectsUrl}/${projectId}`);
   }
 }

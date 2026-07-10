@@ -1,10 +1,10 @@
 :host {
-
   .button {
     cursor: pointer;
     padding: 4px;
     background-color: var(--editor-icon-button-background);
     color: var(--editor-icon-button-color);
+    box-sizing: content-box;
 
     &:hover {
       background-color: var(--editor-icon-button-hover-background);

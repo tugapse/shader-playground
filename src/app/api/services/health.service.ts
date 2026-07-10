@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_URL } from '../api-url.token';
+import { HealthStatusResponse } from '../models/omega-api.models';
 
 /**
  * Service for handling system health checks.
@@ -26,8 +27,8 @@ export class HealthService {
    * Note: This endpoint does not use the standard /api/v1 prefix.
    * @returns An observable with the health status.
    */
-  checkHealth(): Observable<{ status: string }> {
+  checkHealth(): Observable<HealthStatusResponse> {
     const healthUrl = `${this.baseUrl}/health`;
-    return this.http.get<{ status: string }>(healthUrl);
+    return this.http.get<HealthStatusResponse>(healthUrl);
   }
 }

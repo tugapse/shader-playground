@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import {
   AuthLoginRequest,
+  AuthLogoutRequest,
   AuthRegisterRequest,
   LoginResponse,
+  MessageResponse,
   UserResponse,
 } from '../models/omega-api.models';
 import { API_URL } from '../api-url.token';
@@ -52,11 +54,12 @@ export class AuthService {
    * Logs out the current user and clears the local session.
    * Corresponds to `POST /api/auth/logout`.
    * Note: This requires an Authorization header, which is handled by the AuthInterceptor.
+   * @param payload - Optional payload to send with the logout request.
    */
-  logout(): Observable<{ message: string }> {
+  logout(payload: AuthLogoutRequest = {}): Observable<MessageResponse> {
     // We tap into the observable to clear the session upon successful logout from the API.
     return this.http
-      .post<{ message: string }>(`${this.authUrl}/logout`, {})
+      .post<MessageResponse>(`${this.authUrl}/logout`, payload)
       .pipe(tap(() => this.clearLocalSession()));
   }
 
