@@ -41,6 +41,8 @@ import {
 } from "omega-game-engine";
 import { LoadingOverlayComponent } from "src/app/components/loading/loading.component";
 import { LoadingService } from "src/app/services/loading.service";
+import { EngineLogger } from "src/engine/logger";
+import { OmegaLoggerPanelComponent } from "./components/problems-panel/problems-panel";
 
 @Component({
   selector: "app-editor",
@@ -56,6 +58,7 @@ import { LoadingService } from "src/app/services/loading.service";
     EditorMainMenu,
     CodeWorkspaceComponent,
     Canvas,
+    OmegaLoggerPanelComponent,
   ],
   templateUrl: "./editor.html",
   styleUrl: "./editor.scss",
@@ -82,7 +85,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
 
   isLeftVisible: boolean = true;
   isRightVisible: boolean = false;
-  isFooterVisible: boolean = false;
+  isFooterVisible: boolean = true;
   isEngineStatsVisible: boolean = false;
 
   constructor(
@@ -137,12 +140,20 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
         .subscribe((textContent) => {
           try {
             const sceneData = JSON.parse(textContent) as JsonSerializedData;
-            SceneManager.loadScene(this.gl, sceneData).then((scene) => {
-              this.editorService.loadScene(scene);
-              this.editorService.requestCanvasResize();
-            });
+
+            SceneManager.loadScene(this.gl, sceneData)
+              .then((scene) => {
+                this.editorService.loadScene(scene);
+                this.editorService.requestCanvasResize();
+              })
+              .catch((error) => {
+                debugger;
+                EngineLogger.error("Error loading the Scene", error);
+                this.loadingservice.hide();
+              });
           } catch (error) {
-            console.error("Error", error);
+            EngineLogger.error("Error", error);
+            this.loadingservice.hide();
           }
         });
     }

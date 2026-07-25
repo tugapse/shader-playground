@@ -10,20 +10,21 @@ import {
   signal,
   ChangeDetectorRef,
   OnInit,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Icon } from 'src/app/components/icon/icon';
-import { AssetCodeService } from '../asset-code.service';
+} from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Icon } from "src/app/components/icon/icon";
+import { AssetCodeService } from "../asset-code.service";
 import {
   WorkspaceNode,
   FileContentResult,
   CreateFileRequest,
-} from '../asset-code.models';
-import { EditorStateService } from '@editor/services/editor-state.service';
-import { Subscription } from 'rxjs';
-import { LoadingService } from 'src/app/services/loading.service';
-import { Router } from '@angular/router';
-import { MonacoService } from '../monaco.service';
+} from "../asset-code.models";
+import { EditorStateService } from "@editor/services/editor-state.service";
+import { Subscription } from "rxjs";
+import { LoadingService } from "src/app/services/loading.service";
+import { Router } from "@angular/router";
+import { MonacoService } from "../monaco.service";
+import { WorkspaceComponent } from "@editor/components/workspace/workspace";
 
 export interface EditorTab {
   file: FileContentResult;
@@ -35,20 +36,20 @@ export interface EditorTab {
 export interface ToastMessage {
   id: number;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: "success" | "error" | "info";
 }
 
 @Component({
-  selector: 'app-omega-code-workspace',
+  selector: "app-omega-code-workspace",
   standalone: true,
   imports: [CommonModule, Icon],
-  templateUrl: './code-editor.component.html',
-  styleUrls: ['./code-editor.component.scss'],
+  templateUrl: "./code-editor.component.html",
+  styleUrls: ["./code-editor.component.scss"],
 })
 export class CodeWorkspaceComponent
   implements AfterViewInit, OnInit, OnDestroy
 {
-  @ViewChild('monacoContainer') monacoContainer!: ElementRef;
+  @ViewChild("monacoContainer") monacoContainer!: ElementRef;
 
   private codeService = inject(AssetCodeService);
   private monacoService = inject(MonacoService); // 🎯 Injected here
@@ -59,7 +60,7 @@ export class CodeWorkspaceComponent
 
   private subscriptions = new Subscription();
   public projectId!: string;
-  public userUuid = 'test-user-uuid';
+  public userUuid = "test-user-uuid";
   public rootNode: WorkspaceNode | null = null;
 
   public tabs: EditorTab[] = [];
@@ -67,7 +68,7 @@ export class CodeWorkspaceComponent
 
   public isSaving = false;
   public isCompiling = false;
-  public compileStatus: 'idle' | 'success' | 'error' = 'idle';
+  public compileStatus: "idle" | "success" | "error" = "idle";
   public toasts = signal<ToastMessage[]>([]);
   private nextToastId = 0;
 
@@ -79,17 +80,17 @@ export class CodeWorkspaceComponent
   public contextMenuY = 0;
   public selectedContextMenuNode: WorkspaceNode | null = null;
 
-  @HostListener('contextmenu', ['$event'])
+  @HostListener("contextmenu", ["$event"])
   onGlobalContextMenu(event: MouseEvent): void {
     event.preventDefault();
   }
 
-  @HostListener('document:click')
+  @HostListener("document:click")
   closeContextMenu(): void {
     this.contextMenuVisible = false;
   }
 
-  @HostListener('window:beforeunload', ['$event'])
+  @HostListener("window:beforeunload", ["$event"])
   unloadNotification(event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges()) {
       event.preventDefault();
@@ -107,7 +108,7 @@ export class CodeWorkspaceComponent
           this.loadIntelliSenseDefinitions();
         }
       } else {
-        this.projectId = '';
+        this.projectId = "";
         this.rootNode = null;
         this.closeAllTabsWithoutCheck();
         this.monacoService.setModel(null);
@@ -127,7 +128,7 @@ export class CodeWorkspaceComponent
 
   private showToast(
     message: string,
-    type: 'success' | 'error' | 'info' = 'info',
+    type: "success" | "error" | "info" = "info",
   ): void {
     const id = this.nextToastId++;
     this.toasts.update((current) => [...current, { id, message, type }]);
@@ -135,7 +136,7 @@ export class CodeWorkspaceComponent
       () => {
         this.toasts.update((current) => current.filter((t) => t.id !== id));
       },
-      type === 'error' ? 6000 : 4000,
+      type === "error" ? 6000 : 4000,
     );
   }
 
@@ -166,12 +167,12 @@ export class CodeWorkspaceComponent
         next: (rawDeclarations) => {
           const wrappedEngineLib = `declare module 'omega-game-engine' {\n${rawDeclarations}\n}`;
           this.monacoService.updateIntelliSenseDefinitions(
-            'file:///node_modules/@types/omega-game-engine/index.d.ts',
+            "file:///node_modules/@types/omega-game-engine/index.d.ts",
             wrappedEngineLib,
           );
         },
         error: (err) =>
-          console.error('Failed to update SDK library declarations:', err),
+          console.error("Failed to update SDK library declarations:", err),
       }),
     );
 
@@ -179,13 +180,13 @@ export class CodeWorkspaceComponent
       this.codeService.getWorkspaceTypings(this.projectId).subscribe({
         next: (userDeclarations) => {
           this.monacoService.updateIntelliSenseDefinitions(
-            'file:///node_modules/@types/omega-user-project/index.d.ts',
+            "file:///node_modules/@types/omega-user-project/index.d.ts",
             userDeclarations,
           );
         },
         error: (err) =>
           console.error(
-            'Failed to update workspace behavior metadata profile:',
+            "Failed to update workspace behavior metadata profile:",
             err,
           ),
       }),
@@ -333,12 +334,12 @@ export class CodeWorkspaceComponent
   public triggerGoBack(): void {
     if (this.hasUnsavedChanges()) {
       const leave = confirm(
-        'You have unsaved workspace files open. Are you sure you want to go back?',
+        "You have unsaved workspace files open. Are you sure you want to go back?",
       );
       if (!leave) return;
     }
-    this.editorState.centralView.set('canvas');
-    this.router.navigate(['/home', this.editorState.activeProject()?.id]);
+    this.editorState.centralView.set("canvas");
+    this.router.navigate(["/home", this.editorState.activeProject()?.id]);
   }
 
   public openContextMenu(event: MouseEvent, node: WorkspaceNode): void {
@@ -355,13 +356,13 @@ export class CodeWorkspaceComponent
     if (!this.projectId) return;
 
     const fileName = prompt(
-      'Enter name of the new file at workspace root (e.g., Player.ts):',
+      "Enter name of the new file at workspace root (e.g., Player.ts):",
     );
     if (!fileName) return;
 
     this.subscriptions.add(
       this.codeService
-        .createFile(this.projectId, { path: fileName, template: '' })
+        .createFile(this.projectId, { path: fileName, template: "" })
         .subscribe({
           next: () => this.loadWorkspaceTree(),
         }),
@@ -370,13 +371,13 @@ export class CodeWorkspaceComponent
 
   public triggerCreateFileInFolder(): void {
     if (!this.selectedContextMenuNode || !this.projectId) return;
-    const fileName = prompt('Enter name of the new file (e.g., Component.ts):');
+    const fileName = prompt("Enter name of the new file (e.g., Component.ts):");
     if (!fileName) return;
 
     const fullRelativePath = `${this.selectedContextMenuNode.relativePath}/${fileName}`;
     this.subscriptions.add(
       this.codeService
-        .createFile(this.projectId, { path: fullRelativePath, template: '' })
+        .createFile(this.projectId, { path: fullRelativePath, template: "" })
         .subscribe({
           next: () => this.loadWorkspaceTree(),
         }),
@@ -430,7 +431,7 @@ export class CodeWorkspaceComponent
       return;
 
     this.isSaving = true;
-    this.compileStatus = 'idle';
+    this.compileStatus = "idle";
     const targetTab = this.activeTab;
     const currentText = this.monacoService.getModelValue();
 
@@ -451,7 +452,7 @@ export class CodeWorkspaceComponent
             this.isSaving = false;
             this.showToast(
               `Disk Sync Failed: Unable to flush changes to ${targetTab.file.path}`,
-              'error',
+              "error",
             );
             console.error(err);
           },
@@ -469,18 +470,18 @@ export class CodeWorkspaceComponent
         next: (result) => {
           this.isCompiling = false;
           if (result.success) {
-            this.compileStatus = 'success';
+            this.compileStatus = "success";
             this.showToast(
-              '🚀 Production Build Compiled Successfully!',
-              'success',
+              "🚀 Production Build Compiled Successfully!",
+              "success",
             );
-            this.monacoService.clearAllModelMarkers('compiler');
+            this.monacoService.clearAllModelMarkers("compiler");
             this.loadIntelliSenseDefinitions();
           } else {
-            this.compileStatus = 'error';
+            this.compileStatus = "error";
             this.showToast(
-              '⚠️ Compilation failed. Check red indicators on lines.',
-              'error',
+              "⚠️ Compilation failed. Check red indicators on lines.",
+              "error",
             );
 
             if (result.errors) {
@@ -505,17 +506,17 @@ export class CodeWorkspaceComponent
                   endColumn: 100,
                 };
               });
-              this.monacoService.setModelMarkers('compiler', errorMarkers);
+              this.monacoService.setModelMarkers("compiler", errorMarkers);
             }
           }
           this.cdr.detectChanges();
         },
         error: (err) => {
           this.isCompiling = false;
-          this.compileStatus = 'error';
+          this.compileStatus = "error";
           this.showToast(
-            'CRITICAL: Headless compile service communication fault.',
-            'error',
+            "CRITICAL: Headless compile service communication fault.",
+            "error",
           );
           console.error(err);
           this.cdr.detectChanges();
@@ -525,7 +526,7 @@ export class CodeWorkspaceComponent
   }
 
   public calculatePadding(path: string): number {
-    return path.split('/').length * 12;
+    return path.split("/").length * 12;
   }
 
   private findFirstFile(node: WorkspaceNode): WorkspaceNode | null {

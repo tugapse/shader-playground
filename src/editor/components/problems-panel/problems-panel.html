@@ -1,0 +1,72 @@
+<div class="logger-panel">
+  <!-- Toolbar -->
+  <div class="logger-toolbar">
+    <div class="tabs">
+      <button
+        [class.active]="selectedLevel === 'all'"
+        (click)="selectedLevel = 'all'"
+      >
+        All ({{ logs.length }})
+      </button>
+      <button
+        [class.active]="selectedLevel === 'log'"
+        (click)="selectedLevel = 'log'"
+      >
+        Logs
+      </button>
+      <button
+        [class.active]="selectedLevel === 'debug'"
+        (click)="selectedLevel = 'debug'"
+      >
+        Debug
+      </button>
+      <button
+        [class.active]="selectedLevel === 'error'"
+        (click)="selectedLevel = 'error'"
+      >
+        Errors
+      </button>
+    </div>
+    <div class="actions">
+      <button class="action-btn" (click)="clearLogs()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Log List -->
+  <div class="logger-content" #scrollContainer>
+    <div
+      *ngFor="let log of filteredLogs; let i = index"
+      class="log-row-container"
+      [ngClass]="'level-' + log.level"
+    >
+      <div class="log-row" (click)="toggleExpand(i)">
+        <span class="timestamp">{{
+          log.timestamp | date: "HH:mm:ss.SSS"
+        }}</span>
+        <span class="badge" [ngClass]="log.level">{{
+          log.level.toUpperCase()
+        }}</span>
+
+        <!-- Main Message / Summary Line -->
+        <span class="message">{{ getLogSummary(log.message) }}</span>
+
+        <!-- Toggle Arrow if stack trace exists -->
+        <span *ngIf="hasStackTrace(log.message)" class="expand-indicator">
+          {{ expandedIndices.has(i) ? "▼" : "▶" }}
+        </span>
+      </div>
+
+      <!-- Expandable Stack Trace Block -->
+      <div
+        *ngIf="hasStackTrace(log.message) && expandedIndices.has(i)"
+        class="stack-trace-block"
+      >
+        <pre>{{ getStackTrace(log.message) }}</pre>
+      </div>
+    </div>
+
+    <div *ngIf="filteredLogs.length === 0" class="empty-state">
+      No logs to display
+    </div>
+  </div>
+</div>

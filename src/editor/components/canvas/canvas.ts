@@ -91,7 +91,11 @@ export class Canvas implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initWebGL();
-    this.editorService.gameEngine?.initialize(this.canvasElement);
+    try {
+      this.editorService.gameEngine?.initialize(this.canvasElement);
+    } catch (error) {
+      console.error("Error initializing engine:", error);
+    }
     this.setupWindowEvents();
 
     this.ngZone.runOutsideAngular(() => {
@@ -110,10 +114,6 @@ export class Canvas implements OnDestroy, AfterViewInit {
   }
 
   public shouldRender(): boolean {
-    console.log(
-      this.editorService.gameEngine?.isTabActive,
-      this.editorService.gameEngine?.isWindowFocused,
-    );
     return (
       !!this.editorService.gameEngine?.isTabActive &&
       !!this.editorService.gameEngine?.isWindowFocused
@@ -135,7 +135,11 @@ export class Canvas implements OnDestroy, AfterViewInit {
     }
 
     const updateStart = performance.now();
-    this.editorService.gameEngine?.update(delta);
+    try {
+      this.editorService.gameEngine?.update(delta);
+    } catch (error) {
+      console.error("Error on User code", error);
+    }
     const currentUpdateTime = performance.now() - updateStart;
 
     const timeSinceLastDraw = timestamp - this.lastDrawTime;
@@ -175,7 +179,11 @@ export class Canvas implements OnDestroy, AfterViewInit {
         this.defaultClearColor;
       this.gl.clearColor(color.r, color.g, color.b, color.a);
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-      this.editorService.gameEngine?.render();
+      try {
+        this.editorService.gameEngine?.render();
+      } catch (error) {
+        console.log("Error on User code", error);
+      }
 
       renderTime = performance.now() - renderStart;
       this.editorService.onRenderFrame.next(this.gl);

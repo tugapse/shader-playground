@@ -47,12 +47,12 @@ export class PhysicsBehavior {
    * Registers this entity into the active simulation world
    */
   public enableSimulation(): void {
-    this.physicsWorld.registerEntity(
-      this.entityId,
-      this.rigidbody,
-      this.collider,
-      currentTransform,
-    );
+    // this.physicsWorld.registerEntity(
+    //   this.entityId,
+    //   this.rigidbody,
+    //   this.collider,
+    //   currentTransform,
+    // );
   }
 
   /**
