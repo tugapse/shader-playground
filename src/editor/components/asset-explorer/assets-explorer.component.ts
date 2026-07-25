@@ -16,6 +16,10 @@ import { AssetContextMenuComponent } from './components/asset-context-menu/asset
 import { AssetCreateMenuComponent } from './components/asset-create-menu/asset-create-menu';
 import { AssetGridComponent } from './components/asset-grid/asset-grid';
 import { AssetTreeComponent } from './components/asset-tree/asset-tree';
+import { AssetsUploadTriggerService } from './assets-upload-triger.service';
+import { LoadingService } from 'src/app/services/loading.service';
+import { AssetService } from 'src/app/api/services/asset.service';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-assets-explorer',
@@ -38,6 +42,9 @@ export class AssetsExplorerComponent implements AfterViewInit {
 
   // Public service injection so the template can bind to its signals directly
   public explorerState = inject(AssetsExplorerService);
+  private loadingService: LoadingService = inject(LoadingService);
+  private assetsUploadTrigger = inject(AssetsUploadTriggerService);
+  private apiAssetService = inject(AssetService);
 
   private _projectId = this.editorState.activeProject;
 
@@ -109,8 +116,31 @@ export class AssetsExplorerComponent implements AfterViewInit {
 
   toggleCreateMenu(event: MouseEvent) {
     event.stopPropagation();
-    this.createMenuOpen.update((v) => !v);
-    this.closeContextMenu();
+    this.assetsUploadTrigger
+      .openUploadDialog(this.explorerState.activeFolder()?.virtualPath!)
+      .subscribe((data) => {
+        console.log(data);
+        this.loadingService.show('Uploading assets...');
+        const combined = [];
+        for (const item of data) {
+          combined.push(
+            this.apiAssetService.uploadAsset(
+              this._projectId()!.id,
+              item.file,
+              '/' + item.assetType.capitalize() + '/' + item.customName,
+              item.assetType,
+            ),
+          );
+        }
+
+        combineLatest(combined).subscribe(() => {
+          this.loadingService.hide();
+          this.refreshTree();
+        });
+        // this.refreshTree()
+      });
+    // this.createMenuOpen.update((v) => !v);
+    // this.closeContextMenu();
   }
 
   handleCreateAsset(actionType: string) {

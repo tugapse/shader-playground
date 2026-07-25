@@ -27,8 +27,6 @@
           <editor-canvas
             tabindex="0"
             class="canvas"
-            [gameEngine]="editorService.gameEngine"
-            [scene]="scene"
             (stats)="onFpsUpdated($event)"
             (onGlContextCreated)="onGlContextCreated($event)"
           ></editor-canvas>

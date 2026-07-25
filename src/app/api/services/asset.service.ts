@@ -10,6 +10,7 @@ import {
   UpdateAssetRequest,
   UpdateAssetTextRequest,
 } from '../models/omega-api.models';
+import { EngineAssetType } from '@editor/models/asset-types';
 
 /**
  * Service for handling all asset-related API interactions within a project.
@@ -32,7 +33,7 @@ export class AssetService {
    */
   listAssets(
     projectId: string,
-    type?: 'code' | 'image' | 'audio' | 'text' | 'raw' | 'scene',
+    type?: EngineAssetType,
     dir?: string,
   ): Observable<ProjectAssetIndexResponse> {
     let params = new HttpParams();
@@ -42,6 +43,7 @@ export class AssetService {
     if (dir) {
       params = params.set('dir', dir);
     }
+    debugger;
     const url = `${this.baseUrl}/${projectId}/assets`;
     return this.http.get<ProjectAssetIndexResponse>(url, { params });
   }
@@ -96,10 +98,7 @@ export class AssetService {
    * @param projectId The ID of the project.
    * @param assetId The ID of the asset.
    */
-  deleteAsset(
-    projectId: string,
-    assetId: string,
-  ): Observable<MessageResponse> {
+  deleteAsset(projectId: string, assetId: string): Observable<MessageResponse> {
     const url = `${this.baseUrl}/${projectId}/assets/${assetId}`;
     return this.http.delete<MessageResponse>(url);
   }

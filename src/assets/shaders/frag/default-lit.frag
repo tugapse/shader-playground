@@ -27,20 +27,19 @@ void main() {
     vec2 uv = (v_uv * u_uvScale) + u_uvOffset;
     vec4 sampledTexColor = texture(u_mainTex, uv);
     
-    // 1. Convert inputs from sRGB to Linear space BEFORE lighting
     // We add a tiny offset (0.0001) to avoid pow(0, ...) undefined behavior in some older drivers
     vec3 linearTexColor = pow(sampledTexColor.rgb + 0.0001, vec3(2.2));
     vec3 linearMatColor = pow(u_matColor.rgb + 0.0001, vec3(2.2)); 
     
     vec4 baseColor = vec4(linearTexColor * linearMatColor, (u_matColor.a * sampledTexColor.a));
 
-    // 2. Lighting calculation (math is now accurately happening in linear space)
+    // Lighting calculation (math is now accurately happening in linear space)
     vec3 totalLitColorRGB = calculateTotalLitColor(baseColor.rgb, uv);
 
     vec4 finalColor = vec4(clamp(totalLitColorRGB, 0.0, 1.0), baseColor.a);
     vec3 foggedRGB = finalColor.rgb;
 
-    // 3. Fog application (fog math also blends much better in linear space)
+    // Fog application (fog math also blends much better in linear space)
     if (u_fogEnabled == 1) {
         vec3 mainLightDir = u_numDirectionalLights > 0 ? u_directionalLightDirections[0] : vec3(0.0);
         vec3 mainLightCol = u_numDirectionalLights > 0 ? u_directionalLightColors[0] : vec3(0.0);

@@ -88,6 +88,8 @@ interface LocalStagedItem {
                           <option value="audio">Audio Track</option>
                           <option value="code">Script / Shader</option>
                           <option value="scene">Scene JSON</option>
+                          <option value="material">Material</option>
+                          <option value="meshdata">Mesh Data</option>
                         </select>
                       </div>
                     </div>
@@ -470,6 +472,9 @@ export class OmegaUploadModalComponent {
     if (['wav', 'mp3', 'ogg'].includes(ext)) return 'audio';
     if (['ts', 'glsl', 'wgsl'].includes(ext)) return 'code';
     if (['scene', 'mat', 'json'].includes(ext)) return 'scene';
+    if (['mtl'].includes(ext)) return 'material';
+    if (['obj', 'blend'].includes(ext)) return 'meshdata';
+
     return 'raw';
   }
 

@@ -7,15 +7,7 @@
       (contextmenu)="contextMenu.emit({ e: $event, node: node })"
     >
       <span class="tree-node-icon">
-        @if (node.type === "folder" || node.type === "project") {
-          <i class="icon-folder">{{ isExpanded(node) ? "📂" : "📁" }}</i>
-        } @else if (node.type === "scene") {
-          <i class="icon-scene">🎬</i>
-        } @else if (node.type === "code") {
-          <i class="icon-code">📜</i>
-        } @else {
-          <i class="icon-file">📄</i>
-        }
+        <app-icon [iconName]="icons[node.type]" [isButton]="false"></app-icon>
       </span>
       <span class="tree-node-name">{{ node.name }}</span>
     </div>

@@ -16,6 +16,7 @@ import { EditorService } from '@editor/services/editor.service';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingService } from 'src/app/services/loading.service';
 import { DashboardWelcome } from './components/dashboard-welcome/dashboard-welcome';
+import { Icon } from '../icon/icon';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +30,7 @@ import { DashboardWelcome } from './components/dashboard-welcome/dashboard-welco
     SceneList,
     AssetsExplorerComponent,
     DashboardWelcome,
+    Icon,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],

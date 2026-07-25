@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule } from "@angular/common";
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -6,31 +6,31 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
-} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+} from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { AssetService } from 'src/app/api/services/asset.service';
-import { EntityPicker as EditorEntityPicker } from './behaviours/scene-editor/entitypick.behaviour';
-import { GizmosBoxBehaviour } from './behaviours/scene-editor/gizmos-behaviour';
-import { EditorGridBehaviour } from './behaviours/scene-editor/grid-behaviour';
-import { AssetsExplorerComponent } from './components/asset-explorer/assets-explorer.component';
-import { Canvas, EngineStats } from './components/canvas/canvas';
-import { EngineStatsComponent } from './components/engine-stats/engine-stats';
-import { SceneTree } from './components/scene-tree/scene-tree';
-import { TopBar } from './components/top-bar/top-bar';
-import { AssetExplorerWindow } from './components/window/window';
-import { WorkspaceComponent } from './components/workspace/workspace';
-import { EditorInpector } from './inspectors/inpector-window/inpector';
-import { IEditorSettings } from './interfaces/editor-settings';
-import { EditorStateService } from './services/editor-state.service';
-import { EditorService } from './services/editor.service';
-import { EditorSettingsService } from './services/editor.settings';
-import { SceneTreeService } from './services/scene-tree.service';
-import { WindowService } from './services/window.service';
-import { EditorMainMenu } from './components/editor-main-menu/editor-main-menu';
-import { CodeWorkspaceComponent } from '../code-editor/editor/code-editor.component';
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { AssetService } from "src/app/api/services/asset.service";
+import { EntityPicker as EditorEntityPicker } from "./behaviours/scene-editor/entitypick.behaviour";
+import { GizmosBoxBehaviour } from "./behaviours/scene-editor/gizmos-behaviour";
+import { EditorGridBehaviour } from "./behaviours/scene-editor/grid-behaviour";
+import { AssetsExplorerComponent } from "./components/asset-explorer/assets-explorer.component";
+import { Canvas, EngineStats } from "./components/canvas/canvas";
+import { EngineStatsComponent } from "./components/engine-stats/engine-stats";
+import { SceneTree } from "./components/scene-tree/scene-tree";
+import { TopBar } from "./components/top-bar/top-bar";
+import { AssetExplorerWindow } from "./components/window/window";
+import { WorkspaceComponent } from "./components/workspace/workspace";
+import { EditorInpector } from "./inspectors/inpector-window/inpector";
+import { IEditorSettings } from "./interfaces/editor-settings";
+import { EditorStateService } from "./services/editor-state.service";
+import { EditorService } from "./services/editor.service";
+import { EditorSettingsService } from "./services/editor.settings";
+import { SceneTreeService } from "./services/scene-tree.service";
+import { WindowService } from "./services/window.service";
+import { EditorMainMenu } from "./components/editor-main-menu/editor-main-menu";
+import { CodeWorkspaceComponent } from "../code-editor/editor/code-editor.component";
 import {
   Scene,
   SceneEntity,
@@ -38,12 +38,12 @@ import {
   SceneManager,
   Colors,
   Engine,
-} from 'omega-game-engine';
-import { LoadingOverlayComponent } from 'src/app/components/loading/loading.component';
-import { LoadingService } from 'src/app/services/loading.service';
+} from "omega-game-engine";
+import { LoadingOverlayComponent } from "src/app/components/loading/loading.component";
+import { LoadingService } from "src/app/services/loading.service";
 
 @Component({
-  selector: 'app-editor',
+  selector: "app-editor",
   imports: [
     CommonModule,
     EditorInpector,
@@ -56,10 +56,9 @@ import { LoadingService } from 'src/app/services/loading.service';
     EditorMainMenu,
     CodeWorkspaceComponent,
     Canvas,
-    LoadingOverlayComponent,
   ],
-  templateUrl: './editor.html',
-  styleUrl: './editor.scss',
+  templateUrl: "./editor.html",
+  styleUrl: "./editor.scss",
 })
 export class Editor implements OnDestroy, AfterViewInit, OnInit {
   scene!: Scene;
@@ -99,7 +98,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
     protected loadingservice: LoadingService,
   ) {
     this.subscribeEvents();
-    (window as any)['omegaEditor'] = this;
+    (window as any)["omegaEditor"] = this;
   }
 
   ngOnInit(): void {
@@ -107,8 +106,8 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
   }
 
   ngAfterViewInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('project');
-    const sceneId = this.route.snapshot.paramMap.get('scene');
+    const projectId = this.route.snapshot.paramMap.get("project");
+    const sceneId = this.route.snapshot.paramMap.get("scene");
 
     if (projectId && sceneId) {
       this.editorState.setActiveProject({
@@ -123,7 +122,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
           this.handleEngineReloaded(projectId, sceneId, engine),
         );
     } else {
-      this.router.navigate(['/invalid-project']);
+      this.router.navigate(["/invalid-project"]);
     }
   }
 
@@ -132,19 +131,18 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
     sceneId: string,
     engine: Engine | null,
   ) {
-    if (!this.route.snapshot.queryParamMap.get('write-scene')) {
+    if (!this.route.snapshot.queryParamMap.get("write-scene")) {
       this.assetService
         .getTextAssetContent(projectId, sceneId)
         .subscribe((textContent) => {
           try {
             const sceneData = JSON.parse(textContent) as JsonSerializedData;
             SceneManager.loadScene(this.gl, sceneData).then((scene) => {
-              engine?.loadScene(scene);
               this.editorService.loadScene(scene);
               this.editorService.requestCanvasResize();
             });
           } catch (error) {
-            console.error('Error', error);
+            console.error("Error", error);
           }
         });
     }
@@ -173,7 +171,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
     this.scene.inEditMode = true;
     this.addEditorBehaviours();
     this.editorService.requestCanvasResize();
-    this.loadingservice.hide();
+    setTimeout(() => this.loadingservice.hide(), 1000);
   }
 
   protected onScenePlay(scene: Scene): void {
@@ -195,7 +193,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
   }
 
   protected async onSceneStop(scene: Scene): Promise<void> {
-    this.loadingservice.show();
+    this.loadingservice.show("Reloading scene...");
     if (scene.isRunning == false && this.isPaused == false) return;
     scene.isRunning = false;
     this.isPaused = false;
@@ -274,11 +272,11 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
       scene: this.scene.toJsonObject(),
     };
     const jsonString = JSON.stringify(data);
-    sessionStorage.setItem('omg_scene', jsonString);
+    sessionStorage.setItem("omg_scene", jsonString);
   }
 
   loadFromStorage(): void {
-    const sceneDataString = sessionStorage.getItem('omg_scene');
+    const sceneDataString = sessionStorage.getItem("omg_scene");
     if (sceneDataString) {
       this.sceneState = JSON.parse(sceneDataString);
       this.clearStorage();
@@ -286,7 +284,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
   }
 
   clearStorage(): void {
-    sessionStorage.removeItem('omg_scene');
+    sessionStorage.removeItem("omg_scene");
   }
 
   createEditorBehaviours(): void {
@@ -328,7 +326,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
     this.stats = stats;
   }
 
-  @HostListener('document:keydown.control.s', ['$event'])
+  @HostListener("document:keydown.control.s", ["$event"])
   onKeydownHandler(event: Event): void {
     event.preventDefault();
     this.saveSceneToApi();
@@ -337,16 +335,16 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
   saveSceneToApi(): void {
     const project = this.editorState.activeProject();
     if (!project || !project.id || !project.scene) {
-      console.error('No active project or scene to save.');
+      console.error("No active project or scene to save.");
       return;
     }
 
     if (!this.scene) {
-      console.error('Scene is not loaded, cannot save.');
+      console.error("Scene is not loaded, cannot save.");
       return;
     }
 
-    this.toastMessage = 'Saving scene...';
+    this.toastMessage = "Saving scene...";
     this.cdr.detectChanges();
 
     const sceneData = this.scene.toJsonObject();
@@ -355,12 +353,12 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
       .saveSceneAsset(project.id, project.scene, sceneData)
       .subscribe({
         next: (response) => {
-          console.log('Scene saved successfully', response);
-          this.showToast('Scene saved successfully!');
+          console.log("Scene saved successfully", response);
+          this.showToast("Scene saved successfully!");
         },
         error: (err) => {
-          console.error('Failed to save scene', err);
-          this.showToast('Failed to save scene!');
+          console.error("Failed to save scene", err);
+          this.showToast("Failed to save scene!");
         },
       });
   }
