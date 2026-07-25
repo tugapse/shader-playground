@@ -1,0 +1,46 @@
+body.theme-arctic-light {
+  /* global */
+  --global-background-color: #eceff4;
+
+  --editor-panel-outer-padding: 4px;
+  --editor-panel-background: #e5e9f0;
+  --editor-panel-background-50: #d8dee9;
+  --editor-panel-background-10: #c2cbdc;
+  --editor-panel-color: #3b4252;
+  --editor-panel-header-title-color: #2e3440;
+  --editor-panel-H-color: #5e81ac;
+  --editor-panel-chevron-color: #4c566a;
+  --editor-panel-border: 1px solid #d8dee9;
+  --editor-panel-box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+
+  /* inputs */
+  --editor-panel-text-input-background: #ffffff;
+  --editor-panel-text-input-color: #2e3440;
+  --editor-panel-text-input-border: 1px solid #d8dee9;
+
+  /* icons */
+  --editor-icon-button-background: transparent;
+  --editor-icon-button-color: #4c566a;
+  --editor-icon-button-hover-background: #d8dee9;
+  --editor-icon-button-hover-color: #5e81ac;
+  --editor-icon-button-selected-background: #5e81ac;
+  --editor-icon-button-selected-color: #ffffff;
+  --editor-placeholder-icon-color: #98a6bd;
+
+  /* buttons */
+  --editor-primary-button-text-color: #ffffff;
+
+  /* modal */
+  --editor-modal-backdrop-background: rgba(236, 239, 244, 0.85);
+  --editor-modal-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* states & feedback */
+  --editor-error-color: #bf616a;
+  --editor-focus-shadow: 0 0 0 2px rgba(94, 129, 172, 0.35);
+
+  /* --- New Scrollbar Variables --- */
+  --scrollbar-track-background: var(--editor-panel-background);
+  --scrollbar-thumb-background: #c2cbdc;
+  --scrollbar-thumb-border-color: #e5e9f0;
+  --scrollbar-thumb-hover-background: #5e81ac;
+}

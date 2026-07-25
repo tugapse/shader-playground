@@ -17,7 +17,7 @@ export class ThemeSelector {
     {
       code: '',
       title: 'Default',
-      descri:    'The default theme.',
+      descri: 'The default theme.',
     },
     {
       code: 'theme-dark-classic',
@@ -30,6 +30,11 @@ export class ThemeSelector {
       title: 'Arctic Night',
       descri:
         'A cool, easy-on-the-eyes dark theme with frosty blue accents, inspired by the Nord palette.',
+    },
+    {
+      code: 'theme-arctic-light',
+      title: 'Arctic Light',
+      descri: 'fesfsdf',
     },
     {
       code: 'theme-twilight-coral',
@@ -58,13 +63,13 @@ export class ThemeSelector {
   onItemSetected($event: DropdownItem) {
     this.setTheme($event.value.toString());
     this.selectedItem = $event;
-    localStorage.setItem("omg_theme",this.selectedItem.value.toString())
+    localStorage.setItem('omg_theme', this.selectedItem.value.toString());
   }
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.items = this.data.map((a) => ({ key: a.title, value: a.code }));
-    const savedTheme = localStorage.getItem("omg_theme") || ""
-    this.selectedItem = this.items.find(i=>i.value == savedTheme)!
-    this.setTheme(this.selectedItem.value.toString())
+    const savedTheme = localStorage.getItem('omg_theme') || '';
+    this.selectedItem = this.items.find((i) => i.value == savedTheme)!;
+    this.setTheme(this.selectedItem.value.toString());
   }
 }

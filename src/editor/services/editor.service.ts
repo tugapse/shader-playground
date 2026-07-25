@@ -155,7 +155,6 @@ export class EditorService {
       localStorage.getItem('omega-auth-token') ||
       sessionStorage.getItem('token') ||
       '';
-    debugger;
 
     // 🎯 Append token directly into query segment so browser import shares it with backend
     const bundleUrl = `${baseGateway}/projects/${project.id}/code/bundle?token=${encodeURIComponent(authToken)}&t=${new Date().getTime()}`;

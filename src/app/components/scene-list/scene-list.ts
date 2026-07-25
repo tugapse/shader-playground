@@ -46,6 +46,7 @@ export class SceneList implements OnChanges {
     }
     this.assetService.listAssets(this.project.id, 'scene').subscribe({
       next: (response) => {
+        debugger;
         this.scenes = response.assets ?? [];
       },
       error: (err: any) => {
