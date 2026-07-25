@@ -29,6 +29,7 @@
     "@angular/forms": "^20.1.0",
     "@angular/platform-browser": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "cannon-es": "^0.20.0",
     "gl-matrix": "^3.4.4",
     "monaco-editor": "^0.55.1",
     "omega-game-engine": "^3.0.3",

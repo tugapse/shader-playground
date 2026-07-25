@@ -1,20 +1,22 @@
-import { Injectable } from '@angular/core';
-import { IEditorSettings } from '@editor/interfaces/editor-settings';
+import { Injectable } from "@angular/core";
+import { IEditorSettings } from "@editor/interfaces/editor-settings";
 import {
   Color,
   Colors,
   JsonSerializable,
   JsonSerializedData,
-} from 'omega-game-engine';
-import { BehaviorSubject } from 'rxjs';
+} from "omega-game-engine";
+import { BehaviorSubject } from "rxjs";
 
 export class EditorSettings
   extends JsonSerializable
   implements IEditorSettings
 {
+  public viewportClearColor: Color;
   public gridColor: Color;
   public selectedBoundingBoxColor: Color;
   public hoveredBoundingBoxColor: Color;
+
   public workspace = {
     showLeftpanel: true,
     showRightpanel: false,
@@ -22,10 +24,11 @@ export class EditorSettings
   };
 
   constructor() {
-    super('EditorSettings');
+    super("EditorSettings");
     this.gridColor = Colors.black;
     this.selectedBoundingBoxColor = Colors.aliceBlue;
     this.hoveredBoundingBoxColor = Colors.aliceBlue;
+    this.viewportClearColor = Colors.dimGray;
   }
 
   override toJsonObject(): JsonSerializedData {
@@ -38,9 +41,9 @@ export class EditorSettings
   }
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class EditorSettingsService {
-  readonly storageKey = 'omg_settings';
+  readonly storageKey = "omg_settings";
 
   private _settings: EditorSettings = new EditorSettings();
 

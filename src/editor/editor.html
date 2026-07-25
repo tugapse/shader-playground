@@ -22,24 +22,18 @@
     </div>
 
     <div class="container" main>
-      @switch (editorState.centralView()) {
-        @case ("canvas") {
-          <editor-canvas
-            tabindex="0"
-            class="canvas"
-            [gameEngine]="editorService.gameEngine"
-            [scene]="scene"
-            (stats)="onFpsUpdated($event)"
-            (onGlContextCreated)="onGlContextCreated($event)"
-          ></editor-canvas>
-        }
-      }
+      <editor-canvas
+        tabindex="0"
+        class="canvas"
+        (stats)="onFpsUpdated($event)"
+        (onGlContextCreated)="onGlContextCreated($event)"
+      ></editor-canvas>
     </div>
 
     <div rightSidebar></div>
 
     <div footer>
-      <app-assets-explorer></app-assets-explorer>
+      <editor-problems-panel></editor-problems-panel>
     </div>
   </workspace>
 

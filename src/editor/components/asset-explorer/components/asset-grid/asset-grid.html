@@ -9,15 +9,11 @@
         (contextmenu)="contextMenu.emit({ e: $event, node: item })"
       >
         <div class="grid-item-icon">
-          @if (item.type === "folder" || item.type === "project") {
-            📁
-          } @else if (item.type === "scene") {
-            🎬
-          } @else if (item.type === "code") {
-            📜
-          } @else {
-            📄
-          }
+          <app-icon
+            [iconName]="icons[item.type]"
+            [iconSize]="32"
+            [isButton]="false"
+          ></app-icon>
         </div>
         <div class="grid-item-name" [title]="item.name">{{ item.name }}</div>
       </div>

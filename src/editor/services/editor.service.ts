@@ -1,18 +1,18 @@
-import { EventEmitter, inject, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable } from "@angular/core";
 import {
   Camera,
   CameraFlyBehaviour,
   CanvasViewport,
   Engine,
   Scene,
-} from 'omega-game-engine';
-import { BehaviorSubject } from 'rxjs';
-import { GizmoMode } from '../behaviours/scene-editor/gizmo-mode.enum';
-import { TransformSpace } from '../behaviours/scene-editor/transform-space.enum';
-import { EditorStateService } from './editor-state.service';
-import { API_URL } from 'src/app/api/api-url.token';
+} from "omega-game-engine";
+import { BehaviorSubject } from "rxjs";
+import { GizmoMode } from "../behaviours/scene-editor/gizmo-mode.enum";
+import { TransformSpace } from "../behaviours/scene-editor/transform-space.enum";
+import { EditorStateService } from "./editor-state.service";
+import { API_URL } from "src/app/api/api-url.token";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class EditorService {
   private _gameEngine!: Engine | null;
   private editorStateService: EditorStateService = inject(EditorStateService);
@@ -78,12 +78,13 @@ export class EditorService {
   }
 
   onGlContextCreated(gl: WebGL2RenderingContext) {
-    console.log('onGlContextCreated');
+    console.log("onGlContextCreated");
     this._gl = gl;
   }
 
   loadScene(scene: Scene) {
     this.currentScene = scene;
+    this.gameEngine?.loadScene(scene);
     this.onSceneLoaded.emit(scene);
   }
 
@@ -115,13 +116,13 @@ export class EditorService {
   }
 
   public setToggleWorkspacePanel(
-    panel: 'left' | 'right' | 'footer',
+    panel: "left" | "right" | "footer",
     visible: boolean,
   ) {}
 
   protected initializeEditorCamera() {
     this._camera = new Camera();
-    this._camera.name = 'Editor Camera';
+    this._camera.name = "Editor Camera";
     this._camera.fieldOfView = 65;
     this._camera.transform.translate(2, 3, 10);
     this._camera.transform.rotate(0, 180, 0);
@@ -146,17 +147,14 @@ export class EditorService {
       this._gameEngine = null;
     }
 
-    const baseGateway = this.apiUrl.endsWith('/api')
+    const baseGateway = this.apiUrl.endsWith("/api")
       ? this.apiUrl
       : `${this.apiUrl}/api`;
 
-    // 🎯 Extract token from storage (Adjust keys depending on where your AuthService writes it)
     const authToken =
-      localStorage.getItem('omega-auth-token') ||
-      sessionStorage.getItem('token') ||
-      '';
-
-    // 🎯 Append token directly into query segment so browser import shares it with backend
+      localStorage.getItem("omega-auth-token") ||
+      sessionStorage.getItem("token") ||
+      "";
     const bundleUrl = `${baseGateway}/projects/${project.id}/code/bundle?token=${encodeURIComponent(authToken)}&t=${new Date().getTime()}`;
 
     try {

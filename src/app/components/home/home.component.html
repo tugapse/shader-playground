@@ -46,13 +46,13 @@
   <aside class="project-list">
     <div class="sidebar-header">
       <h2>Projects</h2>
-      <button
-        class="btn-icon icon-button"
-        title="New Project"
+      <app-icon
+        class="icon-button"
+        iconName="fa-plus"
+        [isButton]="true"
         (click)="openNewProjectModal()"
-      >
-        +
-      </button>
+        title="Create New Project"
+      ></app-icon>
     </div>
 
     <ul class="list-wrapper">
@@ -74,11 +74,11 @@
 
     @if (selectedProject) {
       <div class="top">
+        <app-scene-list [project]="selectedProject"></app-scene-list>
         <app-project-details
           [project]="selectedProject"
           (save)="handleProjectUpdate($event)"
         ></app-project-details>
-        <app-scene-list [project]="selectedProject"></app-scene-list>
       </div>
 
       <!-- <app-assets-explorer
@@ -88,5 +88,6 @@
     } @else {
       <app-dashboard-welcome></app-dashboard-welcome>
     }
+    <app-background-visualization></app-background-visualization>
   </main>
 </div>

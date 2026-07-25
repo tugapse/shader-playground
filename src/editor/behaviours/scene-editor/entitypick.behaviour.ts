@@ -1,4 +1,4 @@
-import { SceneTreeService } from '@editor/services/scene-tree.service';
+import { SceneTreeService } from "@editor/services/scene-tree.service";
 import {
   RendererBehaviour,
   Texture,
@@ -12,8 +12,8 @@ import {
   ShaderUniformsEnum,
   CanvasViewport,
   Transform,
-} from 'omega-game-engine';
-import { GizmosBoxBehaviour } from './gizmos-behaviour';
+} from "omega-game-engine";
+import { GizmosBoxBehaviour } from "./gizmos-behaviour";
 
 export class EntityPicker extends RendererBehaviour {
   renderTexture: Texture;
@@ -62,7 +62,7 @@ export class EntityPicker extends RendererBehaviour {
 
   private canSelectEntity(): boolean {
     return (
-      (this.dontNeedControlToSelect || Keybord.keyDown['control']) &&
+      (this.dontNeedControlToSelect || Keybord.keyDown["control"]) &&
       !!this.sceneTreeService &&
       this.selectedEntityId !== this.lastClickedId
     );
@@ -78,7 +78,9 @@ export class EntityPicker extends RendererBehaviour {
     this._gl.clearColor(0, 0, 0, 0);
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
 
-    const obs = (this.parent as Scene).objects;
+    const obs = (this.parent as Scene)?.objects;
+
+    if (!obs) return;
 
     let count = 0;
     this.shader.use();
@@ -112,7 +114,7 @@ export class EntityPicker extends RendererBehaviour {
           );
         }
 
-        this.shader.setFloat('u_entity_id', count);
+        this.shader.setFloat("u_entity_id", count);
         this.setMatrices(ob.transform);
         this._gl.drawElements(
           this._gl.TRIANGLES,
@@ -127,7 +129,7 @@ export class EntityPicker extends RendererBehaviour {
       }
     }
 
-    this.shader.setFloat('u_entity_id', 0);
+    this.shader.setFloat("u_entity_id", 0);
 
     // Read the exact pixel
     this._gl.readPixels(
@@ -174,7 +176,7 @@ export class EntityPicker extends RendererBehaviour {
         ShaderUniformsEnum.U_MODEL_MATRIX,
         transform.modelMatrix,
       );
-      this.shader.setMat4('u_worldMatrix', transform.modelMatrix);
+      this.shader.setMat4("u_worldMatrix", transform.modelMatrix);
     }
   }
 }
