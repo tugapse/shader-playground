@@ -11,11 +11,10 @@ import {
   Renderer2,
   ViewChild,
 } from "@angular/core";
+import { GizmoMode } from "@editor/behaviours/scene-editor/gizmo-mode.enum";
+import { TransformSpace } from "@editor/behaviours/scene-editor/transform-space.enum";
 import { EditorService } from "@editor/services/editor.service";
-import {
-  EditorSettings,
-  EditorSettingsService,
-} from "@editor/services/editor.settings";
+import { EditorSettingsService } from "@editor/services/editor.settings";
 import {
   Camera,
   CanvasViewport,
@@ -26,6 +25,7 @@ import {
 } from "omega-game-engine";
 import { fromEvent, Subject } from "rxjs";
 import { debounceTime, takeUntil } from "rxjs/operators";
+import { Icon } from "src/app/components/icon/icon";
 
 export interface EngineStats {
   fps: number;
@@ -37,7 +37,7 @@ export interface EngineStats {
 
 @Component({
   selector: "editor-canvas",
-  imports: [],
+  imports: [Icon],
   templateUrl: "./canvas.html",
   styleUrl: "./canvas.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,6 +69,13 @@ export class Canvas implements OnDestroy, AfterViewInit {
   private readonly frameInterval = 1000 / this.targetFps;
   private destroy$ = new Subject<void>();
   private defaultClearColor = Colors.brown;
+
+  public gizmoMode: GizmoMode = GizmoMode.Translate;
+  public GizmoMode = GizmoMode;
+
+  public transformSpace: TransformSpace = TransformSpace.Local;
+  public TransformSpace = TransformSpace;
+
   constructor(
     private editorService: EditorService,
     private editorSettings: EditorSettingsService,
@@ -86,7 +93,13 @@ export class Canvas implements OnDestroy, AfterViewInit {
         this.initWebGL();
       });
 
-    this.editorService.onUpdateFrame;
+    this.editorService.gizmoMode.subscribe((mode) => {
+      this.gizmoMode = mode;
+    });
+
+    this.editorService.transformSpace.subscribe((space) => {
+      this.transformSpace = space;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -293,5 +306,17 @@ export class Canvas implements OnDestroy, AfterViewInit {
       Camera.mainCamera.aspectRatio = displayWidth / displayHeight;
       Camera.mainCamera.updateProjectionMatrix();
     }
+  }
+
+  setGizmoMode(mode: GizmoMode) {
+    this.editorService.setGizmoMode(mode);
+  }
+
+  toggleTransformSpace() {
+    const newSpace =
+      this.transformSpace === TransformSpace.World
+        ? TransformSpace.Local
+        : TransformSpace.World;
+    this.editorService.setTransformSpace(newSpace);
   }
 }

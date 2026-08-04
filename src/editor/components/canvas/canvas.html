@@ -1,1 +1,38 @@
-<canvas  #glCanvas></canvas>
+<canvas #glCanvas></canvas>
+
+<div class="top-bar">
+  <app-icon
+    class="icon"
+    iconName="fa-arrows-alt"
+    [iconSize]="14"
+    (click)="setGizmoMode(GizmoMode.Translate)"
+    [isButton]="true"
+    [isSelected]="gizmoMode === GizmoMode.Translate"
+    title="Translate Gizmo (1)"
+  ></app-icon>
+  <app-icon
+    class="icon"
+    iconName="fa-sync-alt"
+    [iconSize]="14"
+    (click)="setGizmoMode(GizmoMode.Rotate)"
+    [isButton]="true"
+    [isSelected]="gizmoMode === GizmoMode.Rotate"
+    title="Rotate Gizmo ( 2)"
+  ></app-icon>
+  <app-icon
+    class="icon"
+    iconName="fa-expand-arrows-alt"
+    [iconSize]="14"
+    (click)="setGizmoMode(GizmoMode.Scale)"
+    [isButton]="true"
+    [isSelected]="gizmoMode === GizmoMode.Scale"
+    title="Scale Gizmo (3)"
+  ></app-icon>
+
+  <span
+    class="item"
+    (click)="toggleTransformSpace()"
+    title="Toggle Transform Space (4)"
+    >{{ transformSpace }}</span
+  >
+</div>

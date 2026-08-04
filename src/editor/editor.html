@@ -9,13 +9,9 @@
   </editor-top-bar>
 
   <workspace
-    [showLeft]="
-      !isFullScreen && editorSettings.settings.workspace.showLeftpanel
-    "
-    [showRight]="
-      !isFullScreen && editorSettings.settings.workspace.showRightpanel
-    "
-    [showFooter]="!isFullScreen && editorSettings.settings.workspace.showFooter"
+    [showLeft]="!isFullScreen && isLeftVisible"
+    [showRight]="!isFullScreen && isRightVisible"
+    [showFooter]="!isFullScreen && isFooterVisible"
   >
     <div leftSidebar>
       <app-scene-tree [targetScene]="scene"></app-scene-tree>

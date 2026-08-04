@@ -23,7 +23,6 @@ import { TopBar } from "./components/top-bar/top-bar";
 import { AssetExplorerWindow } from "./components/window/window";
 import { WorkspaceComponent } from "./components/workspace/workspace";
 import { EditorInpector } from "./inspectors/inpector-window/inpector";
-import { IEditorSettings } from "./interfaces/editor-settings";
 import { EditorStateService } from "./services/editor-state.service";
 import { EditorService } from "./services/editor.service";
 import { EditorSettingsService } from "./services/editor.settings";
@@ -43,6 +42,7 @@ import { LoadingOverlayComponent } from "src/app/components/loading/loading.comp
 import { LoadingService } from "src/app/services/loading.service";
 import { EngineLogger } from "src/engine/logger";
 import { OmegaLoggerPanelComponent } from "./components/problems-panel/problems-panel";
+import { EditorSettings } from "./interfaces/editor-settings";
 
 @Component({
   selector: "app-editor",
@@ -80,13 +80,25 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
   protected editorPickerBehaviour!: EditorEntityPicker;
 
   private toastTimeout: any;
-  private settings!: IEditorSettings;
+  private settings!: EditorSettings;
   private destroy$ = new Subject<void>();
 
-  isLeftVisible: boolean = true;
-  isRightVisible: boolean = false;
-  isFooterVisible: boolean = true;
-  isEngineStatsVisible: boolean = false;
+  public get isLeftVisible() {
+    return this.editorSettings.settings.workspace.showLeftpanel;
+  }
+  public get isRightVisible() {
+    return this.editorSettings.settings.workspace.showLeftpanel;
+  }
+  public get isFooterVisible() {
+    return this.editorSettings.settings.workspace.showLeftpanel;
+  }
+
+  public get isEngineStatsVisible() {
+    return this.editorSettings.settings.viewport.isEngineStatsVisible;
+  }
+  public set isEngineStatsVisible(value: boolean) {
+    this.editorSettings.settings.viewport.isEngineStatsVisible = value;
+  }
 
   constructor(
     protected editorService: EditorService,
@@ -318,7 +330,7 @@ export class Editor implements OnDestroy, AfterViewInit, OnInit {
     this.editorPickerBehaviour.parent = this.scene;
   }
 
-  private updateEditorSettings(newSettings: IEditorSettings): void {
+  private updateEditorSettings(newSettings: EditorSettings): void {
     if (!newSettings) return;
 
     this.settings = newSettings;

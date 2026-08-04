@@ -1,9 +1,9 @@
-import { EventEmitter, inject, Injectable } from '@angular/core';
-import { Engine } from 'omega-game-engine';
-import { API_URL } from '../api/api-url.token';
+import { EventEmitter, inject, Injectable } from "@angular/core";
+import { Engine } from "omega-game-engine";
+import { API_URL } from "../api/api-url.token";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OmegaEngineService {
   private _isReloadingEngine = false;
@@ -25,15 +25,15 @@ export class OmegaEngineService {
     this.reloadEngineRequested.emit();
     this._isReloadingEngine = true;
 
-    if (!projectId) throw new Error('No project id provided.');
+    if (!projectId) throw new Error("No project id provided.");
 
-    const baseGateway = this.apiUrl.endsWith('/api')
+    const baseGateway = this.apiUrl.endsWith("/api")
       ? this.apiUrl
       : `${this.apiUrl}/api`;
 
     // FIXME:Fetch from auth Service and use a cookie service instead
-    const authToken = localStorage.getItem('omega-auth-token');
-    if (!authToken) throw new Error('No auth token found.');
+    const authToken = localStorage.getItem("omega-auth-token");
+    if (!authToken) throw new Error("No auth token found.");
 
     const bundleUrl = `${baseGateway}/projects/${projectId}/code/bundle?token=${encodeURIComponent(authToken)}&t=${new Date().getTime()}`;
 

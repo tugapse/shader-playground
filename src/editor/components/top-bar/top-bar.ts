@@ -1,35 +1,29 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { EditorService } from '@editor/services/editor.service';
-import { Scene } from 'omega-game-engine';
-import { Icon } from 'src/app/components/icon/icon';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { EditorService } from "@editor/services/editor.service";
+import { Scene } from "omega-game-engine";
+import { Icon } from "src/app/components/icon/icon";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
 
-import { GizmoMode } from '@editor/behaviours/scene-editor/gizmo-mode.enum';
-import { TransformSpace } from '@editor/behaviours/scene-editor/transform-space.enum';
-import { EditorStateService } from '@editor/services/editor-state.service';
-import { AuthService } from '../../../app/api/services/auth.service';
-import { UserService } from '../../../app/api/services/user.service';
-import { UserResponse } from '../../../app/api/models/omega-api.models';
-import { SceneTreeService } from '@editor/services/scene-tree.service';
-import { ThemeSelector } from '../theme-selector/theme-selector';
+import { GizmoMode } from "@editor/behaviours/scene-editor/gizmo-mode.enum";
+import { TransformSpace } from "@editor/behaviours/scene-editor/transform-space.enum";
+import { EditorStateService } from "@editor/services/editor-state.service";
+import { AuthService } from "../../../app/api/services/auth.service";
+import { UserService } from "../../../app/api/services/user.service";
+import { UserResponse } from "../../../app/api/models/omega-api.models";
+import { SceneTreeService } from "@editor/services/scene-tree.service";
+import { ThemeSelector } from "../theme-selector/theme-selector";
 
 @Component({
-  selector: 'editor-top-bar',
+  selector: "editor-top-bar",
   imports: [Icon, CommonModule, ThemeSelector],
-  templateUrl: './top-bar.html',
-  styleUrl: './top-bar.scss',
+  templateUrl: "./top-bar.html",
+  styleUrl: "./top-bar.scss",
 })
 export class TopBar implements OnInit {
   @Input() scene!: Scene;
   @Input() isEditorPaused!: boolean;
   @Output() toggleFullscreen = new EventEmitter();
-
-  public gizmoMode: GizmoMode = GizmoMode.Translate;
-  public GizmoMode = GizmoMode;
-
-  public transformSpace: TransformSpace = TransformSpace.Local;
-  public TransformSpace = TransformSpace;
 
   public user: UserResponse | undefined;
 
@@ -40,15 +34,7 @@ export class TopBar implements OnInit {
     private userService: UserService,
     private sceneTreeService: SceneTreeService,
     private router: Router,
-  ) {
-    this.editorService.gizmoMode.subscribe((mode) => {
-      this.gizmoMode = mode;
-    });
-
-    this.editorService.transformSpace.subscribe((space) => {
-      this.transformSpace = space;
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     if (this.isLoggedIn()) {
@@ -59,11 +45,11 @@ export class TopBar implements OnInit {
   }
 
   showAssets() {
-    this.editorState.setCentralView('assets');
+    this.editorState.setCentralView("assets");
   }
 
   isAssetsActive() {
-    return this.editorState.centralView() === 'assets';
+    return this.editorState.centralView() === "assets";
   }
 
   onPlay() {
@@ -78,20 +64,8 @@ export class TopBar implements OnInit {
     this.editorService.requestSceneStop(this.scene);
   }
 
-  setGizmoMode(mode: GizmoMode) {
-    this.editorService.setGizmoMode(mode);
-  }
-
-  toggleTransformSpace() {
-    const newSpace =
-      this.transformSpace === TransformSpace.World
-        ? TransformSpace.Local
-        : TransformSpace.World;
-    this.editorService.setTransformSpace(newSpace);
-  }
-
   onCodeEditor() {
-    this.editorState.setCentralView('code');
+    this.editorState.setCentralView("code");
   }
 
   isLoggedIn(): boolean {
@@ -101,7 +75,7 @@ export class TopBar implements OnInit {
   onLogout() {
     this.authService.logout().subscribe(() => {
       this.user = undefined;
-      this.router.navigate(['/login']);
+      this.router.navigate(["/login"]);
     });
   }
 
@@ -110,6 +84,6 @@ export class TopBar implements OnInit {
   }
 
   goHome() {
-    this.router.navigate(['/home']);
+    this.router.navigate(["/home"]);
   }
 }

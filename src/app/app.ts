@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, inject, OnDestroy } from '@angular/core';
-import { vec3 } from 'gl-matrix';
+import { AfterViewInit, Component, inject, OnDestroy } from "@angular/core";
+import { vec3 } from "gl-matrix";
 
-import { EditorService } from '@editor/services/editor.service';
+import { EditorService } from "@editor/services/editor.service";
 
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from "@angular/router";
 import {
   AudioCache,
   AudioEngine,
@@ -32,17 +32,18 @@ import {
   SpherePrimitive,
   SpotLight,
   VoiceFactory,
-} from 'omega-game-engine';
-import { RotateBehaviour } from '../editor/behaviours/rotate';
-import { SunBehaviour } from '../editor/behaviours/sun-behaviour';
-import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
-import { LoadingOverlayComponent } from './components/loading/loading.component';
-import { LoadingService } from './services/loading.service';
+} from "omega-game-engine";
+import { RotateBehaviour } from "../editor/behaviours/rotate";
+import { SunBehaviour } from "../editor/behaviours/sun-behaviour";
+import { ConfirmationModalComponent } from "./components/confirmation-modal/confirmation-modal.component";
+import { LoadingOverlayComponent } from "./components/loading/loading.component";
+import { LoadingService } from "./services/loading.service";
+import { OmegaCoreBridgeService } from "./services/omega-core-bridge.service";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrls: ['./app.scss'],
+  selector: "app-root",
+  templateUrl: "./app.html",
+  styleUrls: ["./app.scss"],
   standalone: true,
   imports: [RouterModule, ConfirmationModalComponent, LoadingOverlayComponent],
 })
@@ -60,7 +61,10 @@ export class App implements OnDestroy, AfterViewInit {
   constructor(
     private editorService: EditorService,
     private route: ActivatedRoute,
+    private omegaCoreBridge: OmegaCoreBridgeService,
   ) {
+    this.omegaCoreBridge.runTestCalculation();
+
     this.editorService.onRenderingContextCreated.subscribe(
       this.onGlContextCreated.bind(this),
     );
@@ -83,15 +87,15 @@ export class App implements OnDestroy, AfterViewInit {
 
   private async onGlContextCreated(gl: WebGL2RenderingContext) {
     this.gl = gl;
-    const writeScene = this.route.snapshot.queryParamMap.get('write-scene');
-    if (writeScene === 'true' && !this.scene) {
+    const writeScene = this.route.snapshot.queryParamMap.get("write-scene");
+    if (writeScene === "true" && !this.scene) {
       await this.createNewScene();
     }
   }
 
   async createNewScene() {
     const scene = new Scene();
-    scene.name = 'Main Scene';
+    scene.name = "Main Scene";
     await this.loadAssets(scene);
     this.needToResetCamera = true;
     this.editorService.loadScene(scene);
@@ -137,10 +141,10 @@ export class App implements OnDestroy, AfterViewInit {
 
   private async otherObjetcs(scene: Scene) {
     const torusPrimitive = await EngineCache.getMeshDataFromObj(
-      'assets/primitives/torus.obj',
+      "assets/primitives/torus.obj",
     );
     const torus = await this.createEntity(
-      'torus',
+      "torus",
       torusPrimitive,
       new MeshRendererBehaviour(this.gl),
     );
@@ -150,7 +154,7 @@ export class App implements OnDestroy, AfterViewInit {
     scene.addEntity(torus);
 
     const cube = await this.createEntity(
-      'cube',
+      "cube",
       new CubePrimitive(),
       new MeshRendererBehaviour(this.gl),
     );
@@ -162,7 +166,7 @@ export class App implements OnDestroy, AfterViewInit {
 
     const primitive = new SpherePrimitive();
     const sphere = await this.createEntity(
-      'sphere',
+      "sphere",
       primitive,
       new MeshRendererBehaviour(this.gl),
       new LitShader(this.gl, new LitMaterial()),
@@ -185,11 +189,11 @@ export class App implements OnDestroy, AfterViewInit {
     renderer.castShadows = false;
 
     material.mainTex = await EngineCache.getTexture2D(
-      'assets/images/wood-texture.jpg',
+      "assets/images/wood-texture.jpg",
       this.gl,
     );
     material.normalTex = await EngineCache.getTexture2D(
-      'assets/images/wood-normal1.jpg',
+      "assets/images/wood-normal1.jpg",
       this.gl,
     );
 
@@ -197,7 +201,7 @@ export class App implements OnDestroy, AfterViewInit {
     renderer.shader = shader;
     renderer.mesh.meshData = primitive;
 
-    const planeEntity = new SceneEntity('Floor');
+    const planeEntity = new SceneEntity("Floor");
     planeEntity.transform.scale(10, 0.2, 10);
     planeEntity.transform.translate(0, -1, 0);
     planeEntity.addBehaviour(renderer);
@@ -206,19 +210,19 @@ export class App implements OnDestroy, AfterViewInit {
   }
 
   private async createLights(scene: Scene) {
-    const dlight = new DirectionalLight('Directional light');
+    const dlight = new DirectionalLight("Directional light");
     dlight.color = Colors.white;
     dlight.addBehaviour(new SunBehaviour());
     dlight.updateInEditor = true;
     this.sun = dlight;
 
-    const plight = new PointLight('Point light');
+    const plight = new PointLight("Point light");
     plight.color = Colors.red;
 
-    const spotLight = new SpotLight('Spot light 1');
+    const spotLight = new SpotLight("Spot light 1");
     spotLight.color = Colors.azure;
 
-    scene.addEntity(new Light('Ambient light'));
+    scene.addEntity(new Light("Ambient light"));
     // scene.addEntity(plight);
     // scene.addEntity(spotLight);
     scene.addEntity(dlight);
@@ -228,10 +232,10 @@ export class App implements OnDestroy, AfterViewInit {
 
   private async addMonkeyObj(scene: Scene) {
     const monkeyObj = await EngineCache.getMeshDataFromObj(
-      'assets/objs/monkey.obj',
+      "assets/objs/monkey.obj",
     );
     const monkeyEntity = await this.createEntity(
-      'Monkey',
+      "Monkey",
       monkeyObj,
       new MeshRendererBehaviour(this.gl),
       new LitShader(this.gl, new LitMaterial()),
@@ -241,7 +245,7 @@ export class App implements OnDestroy, AfterViewInit {
     scene.addEntity(monkeyEntity);
 
     const movingMokeyEntity = await this.createEntity(
-      'MovingMonkey',
+      "MovingMonkey",
       monkeyObj,
       new MeshRendererBehaviour(this.gl),
     );
@@ -268,11 +272,11 @@ export class App implements OnDestroy, AfterViewInit {
 
     if (material) {
       const wallstoneTexture = await EngineCache.getTexture2D(
-        'assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg',
+        "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_albedo.jpeg",
         this.gl,
       );
       const wallNormalTexture = await EngineCache.getTexture2D(
-        'assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg',
+        "assets/images/brick-wall/TCom_Wall_Stone3_2x2_512_normal.jpeg",
         this.gl,
       );
 
@@ -314,7 +318,7 @@ export class App implements OnDestroy, AfterViewInit {
     // material.mainTex = texture;
 
     material.mainTex = await EngineCache.getWhiteTextureCube(this.gl);
-    const skyboxEntity = new SceneEntity('Skybox');
+    const skyboxEntity = new SceneEntity("Skybox");
 
     skyboxEntity.addBehaviour(renderer);
     scene.addEntity(skyboxEntity);

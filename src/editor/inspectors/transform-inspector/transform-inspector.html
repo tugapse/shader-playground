@@ -3,6 +3,10 @@
   [collapsed]="collapsed"
   [isChild]="true"
 >
+  <div class="header-content" header-content>
+    <app-icon class="icon" iconName="fa-trash" (click)="onReset()"></app-icon>
+  </div>
+
   @if (transform) {
     <section>
       <span class="title">Position</span>

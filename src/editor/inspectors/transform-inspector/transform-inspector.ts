@@ -1,17 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { Component, inject, Input } from "@angular/core";
 import {
   DragEventData,
   DragHandleDirective,
-} from '@editor/directives/mouse-drag.directive';
-import { InpectorTogglePanel } from '../../components/inpector-toggle-panel/inpector-toggle-panel';
-import { SceneEntity, Transform } from 'omega-game-engine';
+} from "@editor/directives/mouse-drag.directive";
+import { InpectorTogglePanel } from "../../components/inpector-toggle-panel/inpector-toggle-panel";
+import { SceneEntity, Transform } from "omega-game-engine";
+import { EngineLogger } from "src/engine/logger";
+import { Icon } from "src/app/components/icon/icon";
+import { ConfirmationService } from "src/app/services/confirmation.service";
 
 @Component({
-  selector: 'editor-transform-inspector',
-  imports: [CommonModule, InpectorTogglePanel, DragHandleDirective],
-  templateUrl: './transform-inspector.html',
-  styleUrl: './transform-inspector.scss',
+  selector: "editor-transform-inspector",
+  imports: [CommonModule, InpectorTogglePanel, DragHandleDirective, Icon],
+  templateUrl: "./transform-inspector.html",
+  styleUrl: "./transform-inspector.scss",
 })
 export class TransformInspector {
   scaleX = 1;
@@ -19,6 +22,8 @@ export class TransformInspector {
   scaleZ = 1;
 
   private valueScale = 0.1;
+  private confirmService = inject(ConfirmationService);
+
   onSpanDrag(side: number, index: number, $event: DragEventData) {
     const amount = $event.deltaX * this.valueScale;
     switch (side) {
@@ -81,5 +86,22 @@ export class TransformInspector {
     const value = this.transform.localScale;
     value[index] = +(event.target as any).value;
     this.transform.setLocalScale(value[0], value[1], value[2]);
+  }
+
+  onReset() {
+    this.confirmService
+      .confirm({
+        title: "Reset entity transform ?",
+        message: `Are you sure you want to reset entity transform?`,
+        confirmText: "Reset",
+        cancelText: "Cancel",
+      })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.transform.setLocalPosition(0, 0, 0);
+          this.transform.setLocalRotation(0, 0, 0);
+          this.transform.setLocalScale(1, 1, 1);
+        }
+      });
   }
 }
